@@ -1,6 +1,8 @@
+mod node;
+mod nodes;
+use nodes::ROOT;
 use crate::elements::{ WHITESPACE, ENDLINE };
 use crate::element::Element;
-use crate::nodes::ROOT;
 use crate::token::Token;
 
 pub fn lex<'a>(string: &'a str) -> Vec<Token<'a>> {

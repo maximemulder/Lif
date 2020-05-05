@@ -1,5 +1,4 @@
-use std::cmp::PartialEq;
-
+#[derive(PartialEq, Eq)]
 pub struct Element {
 	pub name: &'static str,
 }
@@ -9,11 +8,5 @@ impl Element {
 		return Self {
 			name,
 		};
-	}
-}
-
-impl PartialEq for Element {
-	fn eq(&self, other: &Element) -> bool {
-		return self.name == other.name;
 	}
 }

@@ -85,3 +85,7 @@ pub const SYMBOL_INTERROGATION:    Element = Element::new("INTERROGATION");
 pub const SYMBOL_COLON:            Element = Element::new("COLON");
 pub const SYMBOL_SEMICOLON:        Element = Element::new("SEMICOLON");
 pub const SYMBOL_BACKSLASH:        Element = Element::new("BACKSLASH");
+
+pub const PRODUCTION_ROOT:       Element = Element::new("ROOT");
+pub const PRODUCTION_STATEMENTS: Element = Element::new("STATEMENTS");
+pub const PRODUCTION_STATEMENT:  Element = Element::new("STATEMENT");

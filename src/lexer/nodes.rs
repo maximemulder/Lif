@@ -1,4 +1,4 @@
-use crate::node::Node;
+use crate::lexer::node::Node;
 use crate::elements;
 
 pub const ROOT: Node = Node::new_null(&|character| {
@@ -464,32 +464,32 @@ const KEYWORD_PR: Node = Node::new(&elements::IDENTIFIER, &|character| {
 });
 
 const KEYWORD_PRI: Node = Node::new(&elements::IDENTIFIER, &|character| {
-	return Some(if character == 'b' {
-		&KEYWORD_PUB
+	return Some(if character == 'v' {
+		&KEYWORD_PRIV
 	} else {
 		&IDENTIFIER
 	});
 });
 
 const KEYWORD_PRIV: Node = Node::new(&elements::IDENTIFIER, &|character| {
-	return Some(if character == 'b' {
-		&KEYWORD_PUB
+	return Some(if character == 'a' {
+		&KEYWORD_PRIVA
 	} else {
 		&IDENTIFIER
 	});
 });
 
 const KEYWORD_PRIVA: Node = Node::new(&elements::IDENTIFIER, &|character| {
-	return Some(if character == 'b' {
-		&KEYWORD_PUB
+	return Some(if character == 't' {
+		&KEYWORD_PRIVAT
 	} else {
 		&IDENTIFIER
 	});
 });
 
 const KEYWORD_PRIVAT: Node = Node::new(&elements::IDENTIFIER, &|character| {
-	return Some(if character == 'b' {
-		&KEYWORD_PUB
+	return Some(if character == 'e' {
+		&KEYWORD_PRIVATE
 	} else {
 		&IDENTIFIER
 	});

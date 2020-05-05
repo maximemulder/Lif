@@ -4,10 +4,9 @@
 mod element;
 mod elements;
 mod lexer;
-mod node;
-mod nodes;
 mod parser;
 mod token;
+mod tree;
 
 use std::env;
 use std::fs;
