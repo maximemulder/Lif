@@ -5,23 +5,12 @@ mod element;
 mod elements;
 mod lexer;
 mod parser;
+mod printer;
 mod token;
 mod tree;
 
-use tree::{ Child, Tree };
 use std::env;
 use std::fs;
-
-fn print_tree(mut shift: usize, tree: Tree) {
-    shift += 1;
-    println!("{}{}", " ".repeat(shift * 4), tree.element.name);
-    for child in tree.children {
-        match child {
-            Child::Token(token) => println!("{}{}", " ".repeat((shift + 1) * 4), token.element.name),
-            Child::Tree(tree) => print_tree(shift, tree),
-        };
-    }
-}
 
 fn main() {
     println!("Leaf compiler.");
@@ -33,20 +22,12 @@ fn main() {
     }
 
     let text = fs::read_to_string(&args[1]).expect("");
-
     let tokens = lexer::lex(&text);
-    for token in tokens.iter() {
-        println!("{} {:?}", token.element.name, token.string);
-    }
+    printer::tokens(&tokens);
 
     println!("=====");
 
-    let mut tokens2 = Vec::new();
-    for token in tokens.iter() {
-        tokens2.push(token);
-    }
-
-    if let Some(tree) = parser::run(&mut tokens2) {
-        print_tree(0, tree);
+    if let Some(tree) = parser::run(&tokens) {
+        printer::tree(&tree);
     }
 }
