@@ -14,8 +14,8 @@ pub struct Parser<'a, 'b, 'c> {
 }
 
 pub enum Next<'a, 'b, 'c, 'd> {
-	Token(&'a Element),
-	Production(&'d dyn Fn(&mut Parser<'a, 'b, 'c>) -> Option<Node<'a, 'b>>),
+	Element(&'a Element),
+	Function(&'d dyn Fn(&mut Parser<'a, 'b, 'c>) -> Option<Node<'a, 'b>>),
 }
 
 impl<'a, 'b, 'c> Parser<'a, 'b, 'c> {
@@ -34,7 +34,7 @@ impl<'a, 'b, 'c> Parser<'a, 'b, 'c> {
 
 	fn next(&mut self, next: &Next<'a, 'b, 'c, '_>) -> Option<Node<'a, 'b>> {
 		match next {
-			Next::Token(element) => {
+			Next::Element(element) => {
 				if let Some(token) = self.tokens.get(self.cursor) {
 					if &token.element == element {
 						self.cursor += 1;
@@ -44,7 +44,7 @@ impl<'a, 'b, 'c> Parser<'a, 'b, 'c> {
 
 				return None;
 			},
-			Next::Production(function) => {
+			Next::Function(function) => {
 				return function(self);
 			},
 		}

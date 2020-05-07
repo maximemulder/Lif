@@ -8,9 +8,9 @@ use super::operator_binary_1::operator_binary_1;
 
 pub fn operation_binary_1<'a, 'b>(parser: &mut Parser<'a, 'b, '_>) -> Option<Node<'a, 'b>> {
 	if let Some(children) = parser.commit(vec![
-		&Next::Production(&expression_1),
-		&Next::Production(&operator_binary_1),
-		&Next::Production(&expression_2),
+		&Next::Function(&expression_1),
+		&Next::Function(&operator_binary_1),
+		&Next::Function(&expression_2),
 	]) {
 		return Some(Node::new_production(&elements::PRODUCTION_OPERATION, children));
 	}

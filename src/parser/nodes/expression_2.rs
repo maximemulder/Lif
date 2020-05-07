@@ -6,7 +6,7 @@ use super::expression_1::expression_1;
 use super::operation_binary_1::operation_binary_1;
 
 pub fn expression_2<'a, 'b>(parser: &mut Parser<'a, 'b, '_>) -> Option<Node<'a, 'b>> {
-	if let Some(children) = parser.commit(vec![&Next::Production(&operation_binary_1)]) {
+	if let Some(children) = parser.commit(vec![&Next::Function(&operation_binary_1)]) {
 		return Some(Node::new_production(&elements::PRODUCTION_EXPRESSION, children));
 	}
 
