@@ -1,30 +1,31 @@
 use crate::element::Element;
-use crate::token::Token;
-use crate::tree::{ Child, Tree };
+use crate::node::{ Content, Node };
 
-pub fn tokens(tokens: &Vec<Token>) {
-    for token in tokens {
-        println!("{} {:?}", token.element.name, token.string);
+pub fn tokens(nodes: &Vec<Node>) {
+    for node in nodes {
+        match &node.content {
+            Content::Token(string) => println!("{} {:?}", node.element.name, string),
+            Content::Production(children) => tokens(children),
+        }
     }
 }
 
-pub fn tree(tree: &Tree) {
+pub fn tree(tree: &Node) {
 	node(tree, String::from(""), String::from(""));
 }
 
-fn node(tree: &Tree, prefix: String, infix: String) {
+fn node(tree: &Node, prefix: String, infix: String) {
     element(&prefix, tree.element);
-    for i in 0..tree.children.len() {
-        let (next_prefix, next_suffix) = if i == tree.children.len() - 1 {
-            (format!("{}{}", infix, "└─"), format!("{}{}", infix, "  "))
-        } else {
-            (format!("{}{}", infix, "├─"), format!("{}{}", infix, "│ "))
-        };
+    if let Content::Production(children) = &tree.content {
+        for i in 0..children.len() {
+            let (next_prefix, next_suffix) = if i == children.len() - 1 {
+                (format!("{}{}", infix, "└─"), format!("{}{}", infix, "  "))
+            } else {
+                (format!("{}{}", infix, "├─"), format!("{}{}", infix, "│ "))
+            };
 
-        match &tree.children[i] {
-            Child::Token(token) => element(&next_prefix, token.element),
-            Child::Tree(tree) => node(tree, next_prefix, next_suffix),
-        };
+            node(&children[i], next_prefix, next_suffix);
+        }
     }
 }
 

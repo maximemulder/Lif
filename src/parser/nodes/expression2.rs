@@ -1,16 +1,16 @@
 use crate::elements;
-use crate::parser::{ Content, Parser };
-use crate::tree::Tree;
+use crate::node::Node;
+use crate::parser::{ Next, Parser };
 
 use super::expression1::expression1;
 
-pub fn expression2<'a, 'b>(parser: &mut Parser<'a, 'b>) -> Option<Tree<'a, 'b>> {
+pub fn expression2<'a, 'b>(parser: &mut Parser<'a, 'b, '_>) -> Option<Node<'a, 'b>> {
 	if let Some(children) = parser.commit(vec![
-		&Content::Production(&expression1),
-		&Content::Token(&elements::SYMBOL_PLUS),
-		&Content::Production(&expression2),
+		&Next::Production(&expression1),
+		&Next::Token(&elements::SYMBOL_PLUS),
+		&Next::Production(&expression2),
 	]) {
-		return Some(Tree::new(&elements::PRODUCTION_EXPRESSION, children));
+		return Some(Node::new_production(&elements::PRODUCTION_EXPRESSION, children));
 	}
 
 	return expression1(parser);

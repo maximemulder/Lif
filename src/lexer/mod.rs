@@ -3,14 +3,14 @@ mod nodes;
 use nodes::ROOT;
 use crate::elements::{ WHITESPACE, ENDLINE };
 use crate::element::Element;
-use crate::token::Token;
+use crate::node::Node;
 
-pub fn lex<'a>(string: &'a str) -> Vec<Token<'a>> {
+pub fn lex<'a>(string: &'a str) -> Vec<Node<'static, 'a>> {
 	let mut tokens = Vec::new();
 	let mut shift = 0;
 	while let Some((element, length)) = automaton(&string[shift ..]) {
 		if element != &WHITESPACE && element != &ENDLINE {
-			tokens.push(Token::new(element, &string[shift .. shift + length]));
+			tokens.push(Node::new_token(element, &string[shift .. shift + length]));
 		}
 
 		shift += length;

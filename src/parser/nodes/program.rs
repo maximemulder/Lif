@@ -1,12 +1,12 @@
 use crate::elements;
-use crate::parser::{ Content, Parser };
-use crate::tree::Tree;
+use crate::node::Node;
+use crate::parser::{ Next, Parser };
 
 use super::statements::statements;
 
-pub fn program<'a, 'b>(parser: &mut Parser<'a, 'b>) -> Option<Tree<'a, 'b>> {
-	if let Some(children) = parser.commit(vec![&Content::Production(&statements)]) {
-		return Some(Tree::new(&elements::PRODUCTION_PROGRAM, children));
+pub fn program<'a, 'b>(parser: &mut Parser<'a, 'b, '_>) -> Option<Node<'a, 'b>> {
+	if let Some(children) = parser.commit(vec![&Next::Production(&statements)]) {
+		return Some(Node::new_production(&elements::PRODUCTION_PROGRAM, children));
 	}
 
 	return None;

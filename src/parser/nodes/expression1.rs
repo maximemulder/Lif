@@ -1,18 +1,18 @@
 use crate::elements;
-use crate::parser::{ Content, Parser };
-use crate::tree::Tree;
+use crate::node::Node;
+use crate::parser::{ Next, Parser };
 
-pub fn expression1<'a, 'b>(parser: &mut Parser<'a, 'b>) -> Option<Tree<'a, 'b>> {
-	if let Some(children) = parser.commit(vec![&Content::Token(&elements::STRING)]) {
-		return Some(Tree::new(&elements::PRODUCTION_EXPRESSION, children));
+pub fn expression1<'a, 'b>(parser: &mut Parser<'a, 'b, '_>) -> Option<Node<'a, 'b>> {
+	if let Some(children) = parser.commit(vec![&Next::Token(&elements::STRING)]) {
+		return Some(Node::new_production(&elements::PRODUCTION_EXPRESSION, children));
 	}
 
-	if let Some(children) = parser.commit(vec![&Content::Token(&elements::NUMBER)]) {
-		return Some(Tree::new(&elements::PRODUCTION_EXPRESSION, children));
+	if let Some(children) = parser.commit(vec![&Next::Token(&elements::NUMBER)]) {
+		return Some(Node::new_production(&elements::PRODUCTION_EXPRESSION, children));
 	}
 
-	if let Some(children) = parser.commit(vec![&Content::Token(&elements::IDENTIFIER)]) {
-		return Some(Tree::new(&elements::PRODUCTION_EXPRESSION, children));
+	if let Some(children) = parser.commit(vec![&Next::Token(&elements::IDENTIFIER)]) {
+		return Some(Node::new_production(&elements::PRODUCTION_EXPRESSION, children));
 	}
 
 	return None;

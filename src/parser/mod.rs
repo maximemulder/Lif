@@ -1,62 +1,59 @@
 mod nodes;
 
 use crate::element::Element;
-use crate::token::Token;
-use crate::tree::{ Child, Tree };
+use crate::node::Node;
 use nodes::program::program;
 
-pub fn run<'a, 'b>(tokens: &'a Vec<Token<'b>>) -> Option<Tree<'a, 'b>> {
+pub fn run<'a, 'b, 'c>(tokens: &'c Vec<Node<'a, 'b>>) -> Option<Node<'a, 'b>> {
 	return program(&mut Parser::new(tokens));
 }
 
-pub struct Parser<'a, 'b> {
-	tokens: &'a Vec<Token<'b>>,
+pub struct Parser<'a, 'b, 'c> {
+	tokens: &'c Vec<Node<'a, 'b>>,
 	cursor: usize,
 }
 
-pub enum Content<'a, 'b, 'c> {
-	Token(&'c Element),
-	Production(&'c dyn Fn(&mut Parser<'a, 'b>) -> Option<Tree<'a, 'b>>),
+pub enum Next<'a, 'b, 'c, 'd> {
+	Token(&'a Element),
+	Production(&'d dyn Fn(&mut Parser<'a, 'b, 'c>) -> Option<Node<'a, 'b>>),
 }
 
-impl<'a, 'b> Parser<'a, 'b> {
-	pub fn new(tokens: &'a Vec<Token<'b>>) -> Self {
+impl<'a, 'b, 'c> Parser<'a, 'b, 'c> {
+	pub fn new(tokens: &'c Vec<Node<'a, 'b>>) -> Self {
 		return Self {
 			tokens,
 			cursor: 0,
 		};
 	}
 
-	fn rollback(&mut self, children: Vec<Child<'a, 'b>>) {
+	fn rollback(&mut self, children: Vec<Node<'a, 'b>>) {
 		for child in children {
 			self.cursor -= child.length();
 		}
 	}
 
-	fn next<'c>(&mut self, content: &'c Content<'a, 'b, 'c>) -> Option<Child<'a, 'b>> {
-		match content {
-			Content::Token(element) => {
+	fn next(&mut self, next: &Next<'a, 'b, 'c, '_>) -> Option<Node<'a, 'b>> {
+		match next {
+			Next::Token(element) => {
 				if let Some(token) = self.tokens.get(self.cursor) {
 					if &token.element == element {
 						self.cursor += 1;
-						return Some(Child::Token(token));
+						return Some(token.clone());
 					}
 				}
+
+				return None;
 			},
-			Content::Production(function) => {
-				if let Some(tree) = function(self) {
-					return Some(Child::Tree(tree));
-				}
+			Next::Production(function) => {
+				return function(self);
 			},
 		}
-
-		return None;
 	}
 
-	fn commit<'c>(&mut self, contents: Vec<&'c Content<'a, 'b, 'c>>) -> Option<Vec<Child<'a, 'b>>> {
+	fn commit(&mut self, nexts: Vec<&Next<'a, 'b, 'c, '_>>) -> Option<Vec<Node<'a, 'b>>> {
 		let mut children = Vec::new();
-		for content in contents {
-			if let Some(child) = self.next(&content) {
+		for next in nexts {
+			if let Some(child) = self.next(&next) {
 				children.push(child);
 			} else {
 				self.rollback(children);
@@ -67,9 +64,9 @@ impl<'a, 'b> Parser<'a, 'b> {
 		return Some(children);
 	}
 
-	fn commit_list<'c>(&mut self, content: &'c Content<'a, 'b, 'c>) -> Vec<Child<'a, 'b>> {
+	fn commit_list(&mut self, next: &Next<'a, 'b, 'c, '_>) -> Vec<Node<'a, 'b>> {
 		let mut children = Vec::new();
-		while let Some(child) = self.next(content) {
+		while let Some(child) = self.next(next) {
 			children.push(child);
 		}
 
