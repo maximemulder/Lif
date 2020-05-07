@@ -9,20 +9,25 @@ pub fn tokens(tokens: &Vec<Token>) {
 }
 
 pub fn tree(tree: &Tree) {
-	node(0, tree);
+	node(tree, String::from(""), String::from(""));
 }
 
-fn node(mut shift: usize, tree: &Tree) {
-	element(shift, tree.element);
-	shift += 1;
-	for child in tree.children.iter() {
-        match child {
-            Child::Token(token) => element(shift, token.element),
-            Child::Tree(tree) => node(shift, tree),
-		};
+fn node(tree: &Tree, prefix: String, infix: String) {
+    element(&prefix, tree.element);
+    for i in 0..tree.children.len() {
+        let (next_prefix, next_suffix) = if i == tree.children.len() - 1 {
+            (format!("{}{}", infix, "└─"), format!("{}{}", infix, "  "))
+        } else {
+            (format!("{}{}", infix, "├─"), format!("{}{}", infix, "│ "))
+        };
+
+        match &tree.children[i] {
+            Child::Token(token) => element(&next_prefix, token.element),
+            Child::Tree(tree) => node(tree, next_prefix, next_suffix),
+        };
     }
 }
 
-fn element(shift: usize, element: &Element) {
-    println!("{}{}", " ".repeat(shift * 4), element.name);
+fn element(prefix: &String, element: &Element) {
+    println!("{}{}", prefix, element.name);
 }

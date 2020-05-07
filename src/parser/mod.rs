@@ -69,12 +69,8 @@ impl<'a, 'b> Parser<'a, 'b> {
 
 	fn commit_list<'c>(&mut self, content: &'c Content<'a, 'b, 'c>) -> Vec<Child<'a, 'b>> {
 		let mut children = Vec::new();
-		loop {
-			if let Some(child) = self.next(content) {
-				children.push(child);
-			} else {
-				break;
-			}
+		while let Some(child) = self.next(content) {
+			children.push(child);
 		}
 
 		return children;
