@@ -10,7 +10,8 @@ pub fn run<'a, 'b>(tokens: &'a Vec<Token<'b>>) -> Option<Tree<'a, 'b>> {
 }
 
 pub struct Parser<'a, 'b> {
-	tokens: Vec<&'a Token<'b>>,
+	tokens: &'a Vec<Token<'b>>,
+	cursor: usize,
 }
 
 pub enum Content<'a, 'b, 'c> {
@@ -20,44 +21,36 @@ pub enum Content<'a, 'b, 'c> {
 
 impl<'a, 'b> Parser<'a, 'b> {
 	pub fn new(tokens: &'a Vec<Token<'b>>) -> Self {
-		let mut references = Vec::new();
-		for token in tokens.iter() {
-			references.push(token);
-		}
-
 		return Self {
-			tokens: references,
+			tokens,
+			cursor: 0,
 		};
 	}
 
 	fn rollback(&mut self, children: Vec<Child<'a, 'b>>) {
 		for child in children {
-			match child {
-				Child::Token(token) => {self.tokens.insert(0, token);},
-				Child::Tree(tree) => {self.tokens.splice(..0, tree.tokens());},
-			}
+			self.cursor -= child.length();
 		}
 	}
 
 	fn next<'c>(&mut self, content: &'c Content<'a, 'b, 'c>) -> Option<Child<'a, 'b>> {
 		match content {
 			Content::Token(element) => {
-				let token = self.tokens.first();
-				if token.is_none() || &token.unwrap().element != element {
-					return None;
+				if let Some(token) = self.tokens.get(self.cursor) {
+					if &token.element == element {
+						self.cursor += 1;
+						return Some(Child::Token(token));
+					}
 				}
-
-				return Some(Child::Token(self.tokens.remove(0)));
 			},
 			Content::Production(function) => {
-				let tree = function(self);
-				if tree.is_none() {
-					return None;
+				if let Some(tree) = function(self) {
+					return Some(Child::Tree(tree));
 				}
-
-				return Some(Child::Tree(tree.unwrap()));
 			},
 		}
+
+		return None;
 	}
 
 	fn commit<'c>(&mut self, contents: Vec<&'c Content<'a, 'b, 'c>>) -> Option<Vec<Child<'a, 'b>>> {

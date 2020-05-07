@@ -6,6 +6,15 @@ pub enum Child<'a, 'b> {
 	Token(&'a Token<'b>),
 }
 
+impl Child<'_, '_> {
+	pub fn length(&self) -> usize {
+		return match self {
+			Child::Token(_) => 1,
+			Child::Tree(tree) => tree.length(),
+		}
+	}
+}
+
 pub struct Tree<'a, 'b> {
 	pub element: &'static Element,
 	pub children: Vec<Child<'a, 'b>>,
@@ -29,5 +38,14 @@ impl<'a, 'b> Tree<'a, 'b> {
 		}
 
 		return tokens;
+	}
+
+	pub fn length(&self) -> usize {
+		let mut length = 0;
+		for child in self.children.iter() {
+			length += child.length();
+		}
+
+		return length;
 	}
 }
