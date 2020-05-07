@@ -1,8 +1,11 @@
-pub mod expression_literal;
-pub mod expression_operation_binary1;
-pub mod expression_operation_binary2;
-pub mod operator_binary1;
-pub mod operator_binary2;
+pub mod expression_1;
+pub mod expression_2;
+pub mod expression_3;
+pub mod literal;
+pub mod operation_binary_1;
+pub mod operation_binary_2;
+pub mod operator_binary_1;
+pub mod operator_binary_2;
 pub mod program;
 pub mod statements;
 pub mod statement;

@@ -90,3 +90,5 @@ pub const PRODUCTION_PROGRAM:    Element = Element::new("PROGRAM");
 pub const PRODUCTION_STATEMENTS: Element = Element::new("STATEMENTS");
 pub const PRODUCTION_STATEMENT:  Element = Element::new("STATEMENT");
 pub const PRODUCTION_EXPRESSION: Element = Element::new("EXPRESSION");
+pub const PRODUCTION_LITERAL:    Element = Element::new("LITERAL");
+pub const PRODUCTION_OPERATION:  Element = Element::new("OPERATION");
