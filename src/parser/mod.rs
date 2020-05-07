@@ -33,24 +33,24 @@ impl<'a, 'b, 'c> Parser<'a, 'b, 'c> {
 	}
 
 	fn next(&mut self, next: &Next<'a, 'b, 'c, '_>) -> Option<Node<'a, 'b>> {
-		match next {
-			Next::Element(element) => {
-				if let Some(token) = self.tokens.get(self.cursor) {
-					if &token.element == element {
-						self.cursor += 1;
-						return Some(token.clone());
-					}
-				}
-
-				return None;
-			},
-			Next::Function(function) => {
-				return function(self);
-			},
-		}
+		return match next {
+			Next::Element(element) => self.token(element),
+			Next::Function(function) => function(self),
+		};
 	}
 
-	fn commit(&mut self, nexts: Vec<&Next<'a, 'b, 'c, '_>>) -> Option<Vec<Node<'a, 'b>>> {
+	fn token(&mut self, element: &'a Element) -> Option<Node<'a, 'b>> {
+		if let Some(token) = self.tokens.get(self.cursor) {
+			if token.element == element {
+				self.cursor += 1;
+				return Some(token.clone());
+			}
+		}
+
+		return None;
+	}
+
+	fn production(&mut self, element: &'a Element, nexts: Vec<&Next<'a, 'b, 'c, '_>>) -> Option<Node<'a, 'b>> {
 		let mut children = Vec::new();
 		for next in nexts {
 			if let Some(child) = self.next(&next) {
@@ -61,7 +61,7 @@ impl<'a, 'b, 'c> Parser<'a, 'b, 'c> {
 			}
 		}
 
-		return Some(children);
+		return Some(Node::new_production(element, children));
 	}
 
 	fn commit_list(&mut self, next: &Next<'a, 'b, 'c, '_>) -> Vec<Node<'a, 'b>> {

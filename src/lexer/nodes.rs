@@ -945,7 +945,7 @@ const SYMBOL_GUILLEMET_R_T: Node = Node::new(&elements::SYMBOL_GUILLEMET_R_T, &|
 
 const SYMBOL_GUILLEMET_R_T_EQ: Node = Node::new_final(&elements::SYMBOL_GUILLEMET_R_T_EQ);
 
-const SYMBOL_PARENTHESIS_L: Node = Node::new_final(&elements::SYMBOL_PARENTHESIS_R);
+const SYMBOL_PARENTHESIS_L: Node = Node::new_final(&elements::SYMBOL_PARENTHESIS_L);
 
 const SYMBOL_PARENTHESIS_R: Node = Node::new_final(&elements::SYMBOL_PARENTHESIS_R);
 
