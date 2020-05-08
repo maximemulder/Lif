@@ -77,6 +77,7 @@ pub const SYMBOL_CROTCHET_L:       Element = Element::new("CROTCHET_L");
 pub const SYMBOL_CROTCHET_R:       Element = Element::new("CROTCHET_R");
 pub const SYMBOL_DOT:              Element = Element::new("DOT");
 pub const SYMBOL_DOT_D:            Element = Element::new("DOT_D");
+pub const SYMBOL_DOT_D_EQ:         Element = Element::new("DOT_D_EQ");
 pub const SYMBOL_DOT_T:            Element = Element::new("DOT_T");
 pub const SYMBOL_COMMA:            Element = Element::new("COMMA");
 pub const SYMBOL_TILDE:            Element = Element::new("TILDE");

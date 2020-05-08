@@ -966,12 +966,15 @@ const SYMBOL_DOT: Node = Node::new(&elements::SYMBOL_DOT, &|character| {
 });
 
 const SYMBOL_DOT_D: Node = Node::new(&elements::SYMBOL_DOT_D, &|character| {
-	return if character == '.' {
-		Some(&SYMBOL_DOT_T)
-	} else {
-		None
+
+	return match character {
+		'=' => Some(&SYMBOL_DOT_D_EQ),
+		'.' => Some(&SYMBOL_DOT_T),
+		_ => None,
 	};
 });
+
+const SYMBOL_DOT_D_EQ: Node = Node::new_final(&elements::SYMBOL_DOT_D_EQ);
 
 const SYMBOL_DOT_T: Node = Node::new_final(&elements::SYMBOL_DOT_T);
 
