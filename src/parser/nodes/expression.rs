@@ -5,6 +5,7 @@ use crate::parser::{ Next, Parser };
 use super::group::group;
 use super::literal::literal;
 use super::operation_binary::*;
+use super::sequence::sequence;
 
 pub fn expression_1<'a, 'b>(parser: &mut Parser<'a, 'b, '_>) -> Option<Node<'a, 'b>> {
 	if let Some(node) = parser.production(&elements::PRODUCTION_EXPRESSION, vec![
@@ -23,8 +24,8 @@ pub fn expression_1<'a, 'b>(parser: &mut Parser<'a, 'b, '_>) -> Option<Node<'a, 
 }
 
 pub fn expression_2<'a, 'b>(parser: &mut Parser<'a, 'b, '_>) -> Option<Node<'a, 'b>> {
-	if let Some(node) = parser.production(&elements::PRODUCTION_EXPRESSION,vec![
-		&Next::Function(&operation_binary_1),
+	if let Some(node) = parser.production(&elements::PRODUCTION_EXPRESSION, vec![
+		&Next::Function(&sequence)
 	]) {
 		return Some(node);
 	}
@@ -34,7 +35,7 @@ pub fn expression_2<'a, 'b>(parser: &mut Parser<'a, 'b, '_>) -> Option<Node<'a, 
 
 pub fn expression_3<'a, 'b>(parser: &mut Parser<'a, 'b, '_>) -> Option<Node<'a, 'b>> {
 	if let Some(node) = parser.production(&elements::PRODUCTION_EXPRESSION, vec![
-		&Next::Function(&operation_binary_2),
+		&Next::Function(&operation_binary_1),
 	]) {
 		return Some(node);
 	}
@@ -44,7 +45,7 @@ pub fn expression_3<'a, 'b>(parser: &mut Parser<'a, 'b, '_>) -> Option<Node<'a, 
 
 pub fn expression_4<'a, 'b>(parser: &mut Parser<'a, 'b, '_>) -> Option<Node<'a, 'b>> {
 	if let Some(node) = parser.production(&elements::PRODUCTION_EXPRESSION, vec![
-		&Next::Function(&operation_binary_3),
+		&Next::Function(&operation_binary_2),
 	]) {
 		return Some(node);
 	}
@@ -54,7 +55,7 @@ pub fn expression_4<'a, 'b>(parser: &mut Parser<'a, 'b, '_>) -> Option<Node<'a, 
 
 pub fn expression_5<'a, 'b>(parser: &mut Parser<'a, 'b, '_>) -> Option<Node<'a, 'b>> {
 	if let Some(node) = parser.production(&elements::PRODUCTION_EXPRESSION, vec![
-		&Next::Function(&operation_binary_4),
+		&Next::Function(&operation_binary_3),
 	]) {
 		return Some(node);
 	}
@@ -64,7 +65,7 @@ pub fn expression_5<'a, 'b>(parser: &mut Parser<'a, 'b, '_>) -> Option<Node<'a, 
 
 pub fn expression_6<'a, 'b>(parser: &mut Parser<'a, 'b, '_>) -> Option<Node<'a, 'b>> {
 	if let Some(node) = parser.production(&elements::PRODUCTION_EXPRESSION, vec![
-		&Next::Function(&operation_binary_5),
+		&Next::Function(&operation_binary_4),
 	]) {
 		return Some(node);
 	}
@@ -74,7 +75,7 @@ pub fn expression_6<'a, 'b>(parser: &mut Parser<'a, 'b, '_>) -> Option<Node<'a, 
 
 pub fn expression_7<'a, 'b>(parser: &mut Parser<'a, 'b, '_>) -> Option<Node<'a, 'b>> {
 	if let Some(node) = parser.production(&elements::PRODUCTION_EXPRESSION, vec![
-		&Next::Function(&operation_binary_6),
+		&Next::Function(&operation_binary_5),
 	]) {
 		return Some(node);
 	}
@@ -84,7 +85,7 @@ pub fn expression_7<'a, 'b>(parser: &mut Parser<'a, 'b, '_>) -> Option<Node<'a, 
 
 pub fn expression_8<'a, 'b>(parser: &mut Parser<'a, 'b, '_>) -> Option<Node<'a, 'b>> {
 	if let Some(node) = parser.production(&elements::PRODUCTION_EXPRESSION, vec![
-		&Next::Function(&operation_binary_7),
+		&Next::Function(&operation_binary_6),
 	]) {
 		return Some(node);
 	}
@@ -94,7 +95,7 @@ pub fn expression_8<'a, 'b>(parser: &mut Parser<'a, 'b, '_>) -> Option<Node<'a, 
 
 pub fn expression_9<'a, 'b>(parser: &mut Parser<'a, 'b, '_>) -> Option<Node<'a, 'b>> {
 	if let Some(node) = parser.production(&elements::PRODUCTION_EXPRESSION, vec![
-		&Next::Function(&operation_binary_8),
+		&Next::Function(&operation_binary_7),
 	]) {
 		return Some(node);
 	}
@@ -104,7 +105,7 @@ pub fn expression_9<'a, 'b>(parser: &mut Parser<'a, 'b, '_>) -> Option<Node<'a, 
 
 pub fn expression_10<'a, 'b>(parser: &mut Parser<'a, 'b, '_>) -> Option<Node<'a, 'b>> {
 	if let Some(node) = parser.production(&elements::PRODUCTION_EXPRESSION, vec![
-		&Next::Function(&operation_binary_9),
+		&Next::Function(&operation_binary_8),
 	]) {
 		return Some(node);
 	}
@@ -114,7 +115,7 @@ pub fn expression_10<'a, 'b>(parser: &mut Parser<'a, 'b, '_>) -> Option<Node<'a,
 
 pub fn expression_11<'a, 'b>(parser: &mut Parser<'a, 'b, '_>) -> Option<Node<'a, 'b>> {
 	if let Some(node) = parser.production(&elements::PRODUCTION_EXPRESSION, vec![
-		&Next::Function(&operation_binary_10),
+		&Next::Function(&operation_binary_9),
 	]) {
 		return Some(node);
 	}
@@ -124,7 +125,7 @@ pub fn expression_11<'a, 'b>(parser: &mut Parser<'a, 'b, '_>) -> Option<Node<'a,
 
 pub fn expression_12<'a, 'b>(parser: &mut Parser<'a, 'b, '_>) -> Option<Node<'a, 'b>> {
 	if let Some(node) = parser.production(&elements::PRODUCTION_EXPRESSION, vec![
-		&Next::Function(&operation_binary_11),
+		&Next::Function(&operation_binary_10),
 	]) {
 		return Some(node);
 	}
@@ -134,7 +135,7 @@ pub fn expression_12<'a, 'b>(parser: &mut Parser<'a, 'b, '_>) -> Option<Node<'a,
 
 pub fn expression_13<'a, 'b>(parser: &mut Parser<'a, 'b, '_>) -> Option<Node<'a, 'b>> {
 	if let Some(node) = parser.production(&elements::PRODUCTION_EXPRESSION, vec![
-		&Next::Function(&operation_binary_12),
+		&Next::Function(&operation_binary_11),
 	]) {
 		return Some(node);
 	}
@@ -142,6 +143,16 @@ pub fn expression_13<'a, 'b>(parser: &mut Parser<'a, 'b, '_>) -> Option<Node<'a,
 	return expression_12(parser);
 }
 
-pub fn expression<'a, 'b>(parser: &mut Parser<'a, 'b, '_>) -> Option<Node<'a, 'b>> {
+pub fn expression_14<'a, 'b>(parser: &mut Parser<'a, 'b, '_>) -> Option<Node<'a, 'b>> {
+	if let Some(node) = parser.production(&elements::PRODUCTION_EXPRESSION, vec![
+		&Next::Function(&operation_binary_12),
+	]) {
+		return Some(node);
+	}
+
 	return expression_13(parser);
+}
+
+pub fn expression<'a, 'b>(parser: &mut Parser<'a, 'b, '_>) -> Option<Node<'a, 'b>> {
+	return expression_14(parser);
 }

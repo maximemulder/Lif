@@ -966,7 +966,6 @@ const SYMBOL_DOT: Node = Node::new(&elements::SYMBOL_DOT, &|character| {
 });
 
 const SYMBOL_DOT_D: Node = Node::new(&elements::SYMBOL_DOT_D, &|character| {
-
 	return match character {
 		'=' => Some(&SYMBOL_DOT_D_EQ),
 		'.' => Some(&SYMBOL_DOT_T),

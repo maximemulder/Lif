@@ -64,12 +64,26 @@ impl<'a, 'b, 'c> Parser<'a, 'b, 'c> {
 		return Some(Node::new_production(element, children));
 	}
 
-	fn commit_list(&mut self, next: &Next<'a, 'b, 'c, '_>) -> Vec<Node<'a, 'b>> {
+	fn sequence(&mut self, element: &'a Element, next: &Next<'a, 'b, 'c, '_>) -> Option<Node<'a, 'b>> {
 		let mut children = Vec::new();
 		while let Some(child) = self.next(next) {
 			children.push(child);
 		}
 
-		return children;
+		return Some(Node::new_production(element, children));
+	}
+
+	fn list(&mut self, element: &'a Element, next1: &Next<'a, 'b, 'c, '_>, next2: &Next<'a, 'b, 'c, '_>) -> Option<Node<'a, 'b>> {
+		let mut children = Vec::new();
+		while let Some(child) = self.next(next1) {
+			children.push(child);
+			if let Some(separator) = self.next(next2) {
+				children.push(separator);
+			} else {
+				break;
+			}
+		}
+
+		return Some(Node::new_production(element, children));
 	}
 }
