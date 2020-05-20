@@ -14,10 +14,8 @@ pub fn expression_1<'a, 'b>(parser: &mut Parser<'a, 'b, '_>) -> Option<Node<'a, 
 		return Some(node);
 	}
 
-	if let Some(node) = parser.production(&elements::PRODUCTION_EXPRESSION, vec![
-		&Next::Function(&literal),
-	]) {
-		return Some(node);
+	if let Ok(node) = literal(parser) {
+		return Some(Node::new_production(&elements::PRODUCTION_EXPRESSION, vec![node]));
 	}
 
 	return None;
@@ -155,4 +153,32 @@ pub fn expression_14<'a, 'b>(parser: &mut Parser<'a, 'b, '_>) -> Option<Node<'a,
 
 pub fn expression<'a, 'b>(parser: &mut Parser<'a, 'b, '_>) -> Option<Node<'a, 'b>> {
 	return expression_14(parser);
+}
+
+pub fn expression_literal<'a, 'b>(parser: &mut Parser<'a, 'b, '_>) -> Result<Node<'a, 'b>, ()> {
+	return Ok(Node::new_production(&elements::PRODUCTION_EXPRESSION, vec![literal(parser)?]));
+}
+
+pub fn operation<'a, 'b>(parser: &mut Parser<'a, 'b, '_>, left: Node<'a, 'b>) -> Result<Node<'a, 'b>, ()> {
+	let operator = parser.shift()?;
+	match operator.element {
+		&elements::SYMBOL_PLUS | &elements::SYMBOL_MINUS => {
+			if let Ok(right) = _expression(parser) {
+				return Ok(Node::new_production(&elements::PRODUCTION_OPERATION, vec![left, operator, right]));
+			}
+		},
+		_ => (),
+	}
+
+	parser.back();
+	return Err(());
+}
+
+pub fn _expression<'a, 'b>(parser: &mut Parser<'a, 'b, '_>) -> Result<Node<'a, 'b>, ()> {
+	let root = expression_literal(parser)?;
+	if let Ok(operation) = operation(parser, root.clone()) {
+		return Ok(Node::new_production(&elements::PRODUCTION_EXPRESSION, vec![operation]));
+	}
+
+	return Ok(root);
 }
