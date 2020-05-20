@@ -3,25 +3,7 @@ use crate::elements;
 use crate::node::Node;
 use crate::parser::Parser;
 
-/* pub fn _expression_1<'a, 'b>(parser: &mut Parser<'a, 'b, '_>) -> Option<Node<'a, 'b>> {
-	if let Some(node) = parser.production(&elements::PRODUCTION_EXPRESSION, vec![
-		&Next::Function(&group)
-	]) {
-		return Some(node);
-	}
-
-	return None;
-}
-
-pub fn _expression_2<'a, 'b>(parser: &mut Parser<'a, 'b, '_>) -> Option<Node<'a, 'b>> {
-	if let Some(node) = parser.production(&elements::PRODUCTION_EXPRESSION, vec![
-		&Next::Function(&sequence)
-	]) {
-		return Some(node);
-	}
-
-	return _expression_1(parser);
-} */
+use super::expressions::expressions;
 
 fn new_expression<'a, 'b>(node: Node<'a, 'b>) -> Node<'a, 'b> {
 	return Node::new_production(&elements::PRODUCTION_EXPRESSION, vec![node]);
@@ -65,6 +47,35 @@ fn expression_1<'a, 'b>(parser: &mut Parser<'a, 'b, '_>) -> Result<Node<'a, 'b>,
 	));
 }
 
+fn expression_0<'a, 'b>(parser: &mut Parser<'a, 'b, '_>) -> Result<Node<'a, 'b>, ()> {
+	let expression = expression_1(parser)?;
+	if let Ok(open) = parser.shift(&elements::SYMBOL_PARENTHESIS_L) {
+		if let Some(expressions) = expressions(parser) {
+			if let Ok(close) = parser.shift(&elements::SYMBOL_PARENTHESIS_R) {
+				return Ok(new_expression(
+					Node::new_production(&elements::PRODUCTION_SEQUENCE, vec![expression, open, expressions, close])
+				));
+			}
+		}
+
+		parser.back();
+	}
+
+	if let Ok(open) = parser.shift(&elements::SYMBOL_CROTCHET_L) {
+		if let Some(expressions) = expressions(parser) {
+			if let Ok(close) = parser.shift(&elements::SYMBOL_CROTCHET_R) {
+				return Ok(new_expression(
+					Node::new_production(&elements::PRODUCTION_SEQUENCE, vec![expression, open, expressions, close])
+				));
+			}
+		}
+
+		parser.back();
+	}
+
+	return Ok(expression);
+}
+
 const OPERATORS_BINARY_1: [&Element; 4] = [
 	&elements::SYMBOL_ASTERISK,
 	&elements::SYMBOL_SLASH,
@@ -73,7 +84,7 @@ const OPERATORS_BINARY_1: [&Element; 4] = [
 ];
 
 fn expression_2<'a, 'b>(parser: &mut Parser<'a, 'b, '_>) -> Result<Node<'a, 'b>, ()> {
-	return operation_binary(parser, &OPERATORS_BINARY_1, &expression_1, &expression_2);
+	return operation_binary(parser, &OPERATORS_BINARY_1, &expression_0, &expression_2);
 }
 
 const OPERATORS_BINARY_2: [&Element; 2] = [&elements::SYMBOL_PLUS, &elements::SYMBOL_MINUS];
