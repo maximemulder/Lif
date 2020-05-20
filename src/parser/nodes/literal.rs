@@ -1,24 +1,19 @@
+use crate::element::Element;
 use crate::elements;
 use crate::node::Node;
-use crate::parser::{ Next, Parser };
+use crate::parser::Parser;
+
+const ELEMENTS: [&Element; 3] = [&elements::STRING, &elements::NUMBER, &elements::IDENTIFIER];
 
 pub fn literal<'a, 'b>(parser: &mut Parser<'a, 'b, '_>) -> Option<Node<'a, 'b>> {
-	if let Some(node) = parser.production(&elements::PRODUCTION_LITERAL, vec![
-		&Next::Element(&elements::STRING),
-	]) {
-		return Some(node);
-	}
+	if let Some(token) = parser.shift() {
+		for element in ELEMENTS.iter() {
+			if &token.element == element {
+				return Some(Node::new_production(&elements::PRODUCTION_LITERAL, vec![token]));
+			}
+		}
 
-	if let Some(node) = parser.production(&elements::PRODUCTION_LITERAL, vec![
-		&Next::Element(&elements::NUMBER),
-	]) {
-		return Some(node);
-	}
-
-	if let Some(node) = parser.production(&elements::PRODUCTION_LITERAL, vec![
-		&Next::Element(&elements::IDENTIFIER),
-	]) {
-		return Some(node);
+		parser.back();
 	}
 
 	return None;

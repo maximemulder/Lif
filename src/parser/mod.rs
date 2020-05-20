@@ -86,4 +86,17 @@ impl<'a, 'b, 'c> Parser<'a, 'b, 'c> {
 
 		return Some(Node::new_production(element, children));
 	}
+
+	fn shift(&mut self) -> Option<Node<'a, 'b>> {
+		if let Some(token) = self.tokens.get(self.cursor) {
+			self.cursor += 1;
+			return Some(token.clone());
+		}
+
+		return None;
+	}
+
+	fn back(&mut self) {
+		self.cursor -= 1;
+	}
 }
