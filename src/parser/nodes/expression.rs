@@ -1,184 +1,181 @@
+use crate::element::Element;
 use crate::elements;
 use crate::node::Node;
-use crate::parser::{ Next, Parser };
+use crate::parser::Parser;
 
-use super::group::group;
-use super::literal::literal;
-use super::operation_binary::*;
-use super::sequence::sequence;
-
-pub fn expression_1<'a, 'b>(parser: &mut Parser<'a, 'b, '_>) -> Option<Node<'a, 'b>> {
+/* pub fn _expression_1<'a, 'b>(parser: &mut Parser<'a, 'b, '_>) -> Option<Node<'a, 'b>> {
 	if let Some(node) = parser.production(&elements::PRODUCTION_EXPRESSION, vec![
 		&Next::Function(&group)
 	]) {
 		return Some(node);
 	}
 
-	if let Ok(node) = literal(parser) {
-		return Some(Node::new_production(&elements::PRODUCTION_EXPRESSION, vec![node]));
-	}
-
 	return None;
 }
 
-pub fn expression_2<'a, 'b>(parser: &mut Parser<'a, 'b, '_>) -> Option<Node<'a, 'b>> {
+pub fn _expression_2<'a, 'b>(parser: &mut Parser<'a, 'b, '_>) -> Option<Node<'a, 'b>> {
 	if let Some(node) = parser.production(&elements::PRODUCTION_EXPRESSION, vec![
 		&Next::Function(&sequence)
 	]) {
 		return Some(node);
 	}
 
-	return expression_1(parser);
+	return _expression_1(parser);
+} */
+
+fn new_expression<'a, 'b>(node: Node<'a, 'b>) -> Node<'a, 'b> {
+	return Node::new_production(&elements::PRODUCTION_EXPRESSION, vec![node]);
 }
 
-pub fn expression_3<'a, 'b>(parser: &mut Parser<'a, 'b, '_>) -> Option<Node<'a, 'b>> {
-	if let Some(node) = parser.production(&elements::PRODUCTION_EXPRESSION, vec![
-		&Next::Function(&operation_binary_1),
-	]) {
-		return Some(node);
+fn operation_binary<'a, 'b, 'c, 'd>(
+	parser: &mut Parser<'a, 'b, 'c>,
+	operators: &[&Element],
+	expression_left: &'d dyn Fn(&mut Parser<'a, 'b, 'c>) -> Result<Node<'a, 'b>, ()>,
+	expression_right: &'d dyn Fn(&mut Parser<'a, 'b, 'c>) -> Result<Node<'a, 'b>, ()>
+) -> Result<Node<'a, 'b>, ()> {
+	let left = expression_left(parser)?;
+	while let Ok(center) = parser.shifts(&operators) {
+		if let Ok(right) = expression_right(parser) {
+			return Ok(new_expression(
+				Node::new_production(&elements::PRODUCTION_OPERATION, vec![left, center, right])
+			));
+		}
 	}
 
-	return expression_2(parser);
+	return Ok(left);
 }
 
-pub fn expression_4<'a, 'b>(parser: &mut Parser<'a, 'b, '_>) -> Option<Node<'a, 'b>> {
-	if let Some(node) = parser.production(&elements::PRODUCTION_EXPRESSION, vec![
-		&Next::Function(&operation_binary_2),
-	]) {
-		return Some(node);
+const LITERALS: [&Element; 3] = [&elements::STRING, &elements::NUMBER, &elements::IDENTIFIER];
+
+fn expression_1<'a, 'b>(parser: &mut Parser<'a, 'b, '_>) -> Result<Node<'a, 'b>, ()> {
+	if let Ok(open) = parser.shift(&elements::SYMBOL_PARENTHESIS_L) {
+		if let Some(expression) = expression(parser) {
+			if let Ok(close) = parser.shift(&elements::SYMBOL_PARENTHESIS_R) {
+				return Ok(new_expression(
+					Node::new_production(&elements::PRODUCTION_GROUP, vec![open, expression, close])
+				));
+			}
+		}
+
+		parser.back();
 	}
 
-	return expression_3(parser);
+	return Ok(new_expression(
+		Node::new_production(&elements::PRODUCTION_LITERAL, vec![parser.shifts(&LITERALS)?])
+	));
 }
 
-pub fn expression_5<'a, 'b>(parser: &mut Parser<'a, 'b, '_>) -> Option<Node<'a, 'b>> {
-	if let Some(node) = parser.production(&elements::PRODUCTION_EXPRESSION, vec![
-		&Next::Function(&operation_binary_3),
-	]) {
-		return Some(node);
-	}
+const OPERATORS_BINARY_1: [&Element; 4] = [
+	&elements::SYMBOL_ASTERISK,
+	&elements::SYMBOL_SLASH,
+	&elements::SYMBOL_PERCENT,
+	&elements::SYMBOL_ASTERISK_D,
+];
 
-	return expression_4(parser);
+fn expression_2<'a, 'b>(parser: &mut Parser<'a, 'b, '_>) -> Result<Node<'a, 'b>, ()> {
+	return operation_binary(parser, &OPERATORS_BINARY_1, &expression_1, &expression_2);
 }
 
-pub fn expression_6<'a, 'b>(parser: &mut Parser<'a, 'b, '_>) -> Option<Node<'a, 'b>> {
-	if let Some(node) = parser.production(&elements::PRODUCTION_EXPRESSION, vec![
-		&Next::Function(&operation_binary_4),
-	]) {
-		return Some(node);
-	}
+const OPERATORS_BINARY_2: [&Element; 2] = [&elements::SYMBOL_PLUS, &elements::SYMBOL_MINUS];
 
-	return expression_5(parser);
+fn expression_3<'a, 'b>(parser: &mut Parser<'a, 'b, '_>) -> Result<Node<'a, 'b>, ()> {
+	return operation_binary(parser, &OPERATORS_BINARY_2, &expression_2, &expression_3);
 }
 
-pub fn expression_7<'a, 'b>(parser: &mut Parser<'a, 'b, '_>) -> Option<Node<'a, 'b>> {
-	if let Some(node) = parser.production(&elements::PRODUCTION_EXPRESSION, vec![
-		&Next::Function(&operation_binary_5),
-	]) {
-		return Some(node);
-	}
+const OPERATORS_BINARY_3: [&Element; 4] = [
+	&elements::SYMBOL_GUILLEMET_L_D,
+	&elements::SYMBOL_GUILLEMET_R_D,
+	&elements::SYMBOL_GUILLEMET_L_T,
+	&elements::SYMBOL_GUILLEMET_R_T,
+];
 
-	return expression_6(parser);
+fn expression_4<'a, 'b>(parser: &mut Parser<'a, 'b, '_>) -> Result<Node<'a, 'b>, ()> {
+	return operation_binary(parser, &OPERATORS_BINARY_3, &expression_3, &expression_4);
 }
 
-pub fn expression_8<'a, 'b>(parser: &mut Parser<'a, 'b, '_>) -> Option<Node<'a, 'b>> {
-	if let Some(node) = parser.production(&elements::PRODUCTION_EXPRESSION, vec![
-		&Next::Function(&operation_binary_6),
-	]) {
-		return Some(node);
-	}
+const OPERATORS_BINARY_4: [&Element; 4] = [
+	&elements::SYMBOL_GUILLEMET_L,
+	&elements::SYMBOL_GUILLEMET_R,
+	&elements::SYMBOL_GUILLEMET_L_EQ,
+	&elements::SYMBOL_GUILLEMET_R_EQ,
+];
 
-	return expression_7(parser);
+fn expression_5<'a, 'b>(parser: &mut Parser<'a, 'b, '_>) -> Result<Node<'a, 'b>, ()> {
+	return operation_binary(parser, &OPERATORS_BINARY_4, &expression_4, &expression_5);
 }
 
-pub fn expression_9<'a, 'b>(parser: &mut Parser<'a, 'b, '_>) -> Option<Node<'a, 'b>> {
-	if let Some(node) = parser.production(&elements::PRODUCTION_EXPRESSION, vec![
-		&Next::Function(&operation_binary_7),
-	]) {
-		return Some(node);
-	}
+const OPERATORS_BINARY_5: [&Element; 2] = [
+	&elements::SYMBOL_EQUAL_D,
+	&elements::SYMBOL_EXCLAMATION_EQ,
+];
 
-	return expression_8(parser);
+fn expression_6<'a, 'b>(parser: &mut Parser<'a, 'b, '_>) -> Result<Node<'a, 'b>, ()> {
+	return operation_binary(parser, &OPERATORS_BINARY_5, &expression_5, &expression_6);
 }
 
-pub fn expression_10<'a, 'b>(parser: &mut Parser<'a, 'b, '_>) -> Option<Node<'a, 'b>> {
-	if let Some(node) = parser.production(&elements::PRODUCTION_EXPRESSION, vec![
-		&Next::Function(&operation_binary_8),
-	]) {
-		return Some(node);
-	}
+const OPERATORS_BINARY_6: [&Element; 1] = [&elements::SYMBOL_AMPERSAND];
 
-	return expression_9(parser);
+fn expression_7<'a, 'b>(parser: &mut Parser<'a, 'b, '_>) -> Result<Node<'a, 'b>, ()> {
+	return operation_binary(parser, &OPERATORS_BINARY_3, &expression_6, &expression_7);
 }
 
-pub fn expression_11<'a, 'b>(parser: &mut Parser<'a, 'b, '_>) -> Option<Node<'a, 'b>> {
-	if let Some(node) = parser.production(&elements::PRODUCTION_EXPRESSION, vec![
-		&Next::Function(&operation_binary_9),
-	]) {
-		return Some(node);
-	}
+const OPERATORS_BINARY_7: [&Element; 1] = [&elements::SYMBOL_CARET];
 
-	return expression_10(parser);
+fn expression_8<'a, 'b>(parser: &mut Parser<'a, 'b, '_>) -> Result<Node<'a, 'b>, ()> {
+	return operation_binary(parser, &OPERATORS_BINARY_3, &expression_7, &expression_8);
 }
 
-pub fn expression_12<'a, 'b>(parser: &mut Parser<'a, 'b, '_>) -> Option<Node<'a, 'b>> {
-	if let Some(node) = parser.production(&elements::PRODUCTION_EXPRESSION, vec![
-		&Next::Function(&operation_binary_10),
-	]) {
-		return Some(node);
-	}
+const OPERATORS_BINARY_8: [&Element; 1] = [&elements::SYMBOL_PIPE];
 
-	return expression_11(parser);
+fn expression_9<'a, 'b>(parser: &mut Parser<'a, 'b, '_>) -> Result<Node<'a, 'b>, ()> {
+	return operation_binary(parser, &OPERATORS_BINARY_3, &expression_8, &expression_9);
 }
 
-pub fn expression_13<'a, 'b>(parser: &mut Parser<'a, 'b, '_>) -> Option<Node<'a, 'b>> {
-	if let Some(node) = parser.production(&elements::PRODUCTION_EXPRESSION, vec![
-		&Next::Function(&operation_binary_11),
-	]) {
-		return Some(node);
-	}
+const OPERATORS_BINARY_9: [&Element; 1] = [&elements::SYMBOL_AMPERSAND_D];
 
-	return expression_12(parser);
+fn expression_10<'a, 'b>(parser: &mut Parser<'a, 'b, '_>) -> Result<Node<'a, 'b>, ()> {
+	return operation_binary(parser, &OPERATORS_BINARY_3, &expression_9, &expression_10);
 }
 
-pub fn expression_14<'a, 'b>(parser: &mut Parser<'a, 'b, '_>) -> Option<Node<'a, 'b>> {
-	if let Some(node) = parser.production(&elements::PRODUCTION_EXPRESSION, vec![
-		&Next::Function(&operation_binary_12),
-	]) {
-		return Some(node);
-	}
+const OPERATORS_BINARY_10: [&Element; 1] = [&elements::SYMBOL_PIPE_D];
 
-	return expression_13(parser);
+fn expression_11<'a, 'b>(parser: &mut Parser<'a, 'b, '_>) -> Result<Node<'a, 'b>, ()> {
+	return operation_binary(parser, &OPERATORS_BINARY_3, &expression_10, &expression_11);
+}
+
+const OPERATORS_BINARY_11: [&Element; 2] = [&elements::SYMBOL_DOT_D, &elements::SYMBOL_DOT_D_EQ];
+
+fn expression_12<'a, 'b>(parser: &mut Parser<'a, 'b, '_>) -> Result<Node<'a, 'b>, ()> {
+	return operation_binary(parser, &OPERATORS_BINARY_3, &expression_11, &expression_12);
+}
+
+const OPERATORS_BINARY_12: [&Element; 16] = [
+	&elements::SYMBOL_EQUAL,
+	&elements::SYMBOL_PLUS_EQ,
+	&elements::SYMBOL_MINUS_EQ,
+	&elements::SYMBOL_ASTERISK_EQ,
+	&elements::SYMBOL_SLASH_EQ,
+	&elements::SYMBOL_PERCENT_EQ,
+	&elements::SYMBOL_ASTERISK_D_EQ,
+	&elements::SYMBOL_GUILLEMET_L_D_EQ,
+	&elements::SYMBOL_GUILLEMET_R_D_EQ,
+	&elements::SYMBOL_GUILLEMET_L_T_EQ,
+	&elements::SYMBOL_GUILLEMET_R_T_EQ,
+	&elements::SYMBOL_AMPERSAND_EQ,
+	&elements::SYMBOL_CARET_EQ,
+	&elements::SYMBOL_PIPE_EQ,
+	&elements::SYMBOL_AMPERSAND_D_EQ,
+	&elements::SYMBOL_PIPE_D_EQ,
+];
+
+fn expression_13<'a, 'b>(parser: &mut Parser<'a, 'b, '_>) -> Result<Node<'a, 'b>, ()> {
+	return operation_binary(parser, &OPERATORS_BINARY_3, &expression_12, &expression_13);
 }
 
 pub fn expression<'a, 'b>(parser: &mut Parser<'a, 'b, '_>) -> Option<Node<'a, 'b>> {
-	return expression_14(parser);
-}
-
-pub fn expression_literal<'a, 'b>(parser: &mut Parser<'a, 'b, '_>) -> Result<Node<'a, 'b>, ()> {
-	return Ok(Node::new_production(&elements::PRODUCTION_EXPRESSION, vec![literal(parser)?]));
-}
-
-pub fn operation<'a, 'b>(parser: &mut Parser<'a, 'b, '_>, left: Node<'a, 'b>) -> Result<Node<'a, 'b>, ()> {
-	let operator = parser.shift()?;
-	match operator.element {
-		&elements::SYMBOL_PLUS | &elements::SYMBOL_MINUS => {
-			if let Ok(right) = _expression(parser) {
-				return Ok(Node::new_production(&elements::PRODUCTION_OPERATION, vec![left, operator, right]));
-			}
-		},
-		_ => (),
+	if let Ok(node) = expression_13(parser) {
+		return Some(node);
 	}
 
-	parser.back();
-	return Err(());
-}
-
-pub fn _expression<'a, 'b>(parser: &mut Parser<'a, 'b, '_>) -> Result<Node<'a, 'b>, ()> {
-	let root = expression_literal(parser)?;
-	if let Ok(operation) = operation(parser, root.clone()) {
-		return Ok(Node::new_production(&elements::PRODUCTION_EXPRESSION, vec![operation]));
-	}
-
-	return Ok(root);
+	return None;
 }

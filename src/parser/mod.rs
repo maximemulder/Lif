@@ -87,10 +87,24 @@ impl<'a, 'b, 'c> Parser<'a, 'b, 'c> {
 		return Some(Node::new_production(element, children));
 	}
 
-	fn shift(&mut self) -> Result<Node<'a, 'b>, ()> {
+	fn shift(&mut self, element: &Element) -> Result<Node<'a, 'b>, ()> {
 		if let Some(token) = self.tokens.get(self.cursor) {
+			if token.element != element {
+				return Err(());
+			}
+
 			self.cursor += 1;
 			return Ok(token.clone());
+		}
+
+		return Err(());
+	}
+
+	fn shifts(&mut self, elements: &[&Element]) -> Result<Node<'a, 'b>, ()> {
+		for element in elements {
+			if let Ok(token) = self.shift(element) {
+				return Ok(token);
+			}
 		}
 
 		return Err(());
