@@ -26,7 +26,7 @@ fn main() {
 
     println!("=====");
 
-    if let Some(tree) = parser::run(&tokens) {
+    if let Ok(tree) = parser::run(&tokens) {
         printer::tree(&tree);
     }
 }

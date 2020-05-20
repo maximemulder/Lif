@@ -5,21 +5,23 @@ use crate::parser::Parser;
 
 use super::expressions::expressions;
 
+type Next<'a, 'b, 'c, 'd> = &'d dyn Fn(&mut Parser<'a, 'b, 'c>) -> Result<Node<'a, 'b>, ()>;
+
 fn new_expression<'a, 'b>(node: Node<'a, 'b>) -> Node<'a, 'b> {
 	return Node::new_production(&elements::PRODUCTION_EXPRESSION, vec![node]);
 }
 
 fn operation_binary<'a, 'b, 'c, 'd>(
 	parser: &mut Parser<'a, 'b, 'c>,
-	operators: &[&Element],
-	expression_left: &'d dyn Fn(&mut Parser<'a, 'b, 'c>) -> Result<Node<'a, 'b>, ()>,
-	expression_right: &'d dyn Fn(&mut Parser<'a, 'b, 'c>) -> Result<Node<'a, 'b>, ()>
+	operators: &[&'a Element],
+	expression_left: Next<'a, 'b, 'c, 'd>,
+	expression_right: Next<'a, 'b, 'c, 'd>,
 ) -> Result<Node<'a, 'b>, ()> {
 	let left = expression_left(parser)?;
-	while let Ok(center) = parser.shifts(&operators) {
+	while let Ok(expression) = parser.tokens(&operators) {
 		if let Ok(right) = expression_right(parser) {
 			return Ok(new_expression(
-				Node::new_production(&elements::PRODUCTION_OPERATION, vec![left, center, right])
+				Node::new_production(&elements::PRODUCTION_OPERATION, vec![left, expression, right])
 			));
 		}
 	}
@@ -27,52 +29,51 @@ fn operation_binary<'a, 'b, 'c, 'd>(
 	return Ok(left);
 }
 
+fn sequence<'a, 'b>(
+	parser: &mut Parser<'a, 'b, '_>,
+	delimiter_l: &'a Element,
+	delimiter_r: &'a Element,
+	expression: Node<'a, 'b>,
+) -> Result<Node<'a, 'b>, ()> {
+	if let Ok(open) = parser.token(delimiter_l) {
+		let expressions = expressions(parser);
+		if let Ok(close) = parser.token(delimiter_r) {
+			return Ok(new_expression(
+				Node::new_production(&elements::PRODUCTION_SEQUENCE, vec![expression, open, expressions, close])
+			));
+		}
+
+		return Err(());
+	}
+
+	return Ok(expression);
+}
+
 const LITERALS: [&Element; 3] = [&elements::STRING, &elements::NUMBER, &elements::IDENTIFIER];
 
 fn expression_1<'a, 'b>(parser: &mut Parser<'a, 'b, '_>) -> Result<Node<'a, 'b>, ()> {
-	if let Ok(open) = parser.shift(&elements::SYMBOL_PARENTHESIS_L) {
-		if let Some(expression) = expression(parser) {
-			if let Ok(close) = parser.shift(&elements::SYMBOL_PARENTHESIS_R) {
+	if let Ok(open) = parser.token(&elements::SYMBOL_PARENTHESIS_L) {
+		if let Ok(expression) = expression(parser) {
+			if let Ok(close) = parser.token(&elements::SYMBOL_PARENTHESIS_R) {
 				return Ok(new_expression(
 					Node::new_production(&elements::PRODUCTION_GROUP, vec![open, expression, close])
 				));
 			}
 		}
 
-		parser.back();
+		return Err(());
 	}
 
 	return Ok(new_expression(
-		Node::new_production(&elements::PRODUCTION_LITERAL, vec![parser.shifts(&LITERALS)?])
+		Node::new_production(&elements::PRODUCTION_LITERAL, vec![parser.tokens(&LITERALS)?])
 	));
 }
 
 fn expression_0<'a, 'b>(parser: &mut Parser<'a, 'b, '_>) -> Result<Node<'a, 'b>, ()> {
-	let expression = expression_1(parser)?;
-	if let Ok(open) = parser.shift(&elements::SYMBOL_PARENTHESIS_L) {
-		if let Some(expressions) = expressions(parser) {
-			if let Ok(close) = parser.shift(&elements::SYMBOL_PARENTHESIS_R) {
-				return Ok(new_expression(
-					Node::new_production(&elements::PRODUCTION_SEQUENCE, vec![expression, open, expressions, close])
-				));
-			}
-		}
-
-		parser.back();
-	}
-
-	if let Ok(open) = parser.shift(&elements::SYMBOL_CROTCHET_L) {
-		if let Some(expressions) = expressions(parser) {
-			if let Ok(close) = parser.shift(&elements::SYMBOL_CROTCHET_R) {
-				return Ok(new_expression(
-					Node::new_production(&elements::PRODUCTION_SEQUENCE, vec![expression, open, expressions, close])
-				));
-			}
-		}
-
-		parser.back();
-	}
-
+	let mut expression;
+	expression = expression_1(parser)?;
+	expression = sequence(parser, &elements::SYMBOL_PARENTHESIS_L, &elements::SYMBOL_PARENTHESIS_R, expression)?;
+	expression = sequence(parser, &elements::SYMBOL_CROTCHET_L,    &elements::SYMBOL_CROTCHET_R,    expression)?;
 	return Ok(expression);
 }
 
@@ -183,10 +184,6 @@ fn expression_13<'a, 'b>(parser: &mut Parser<'a, 'b, '_>) -> Result<Node<'a, 'b>
 	return operation_binary(parser, &OPERATORS_BINARY_3, &expression_12, &expression_13);
 }
 
-pub fn expression<'a, 'b>(parser: &mut Parser<'a, 'b, '_>) -> Option<Node<'a, 'b>> {
-	if let Ok(node) = expression_13(parser) {
-		return Some(node);
-	}
-
-	return None;
+pub fn expression<'a, 'b>(parser: &mut Parser<'a, 'b, '_>) -> Result<Node<'a, 'b>, ()> {
+	return expression_13(parser);
 }
