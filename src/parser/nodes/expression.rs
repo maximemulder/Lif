@@ -1,21 +1,19 @@
 use crate::element::Element;
 use crate::elements;
 use crate::node::Node;
-use crate::parser::Parser;
+use crate::parser::{ Next, Parser };
 
 use super::expressions::expressions;
-
-type Next<'a, 'b, 'c, 'd> = &'d dyn Fn(&mut Parser<'a, 'b, 'c>) -> Result<Node<'a, 'b>, ()>;
 
 fn new_expression<'a, 'b>(node: Node<'a, 'b>) -> Node<'a, 'b> {
 	return Node::new_production(&elements::PRODUCTION_EXPRESSION, vec![node]);
 }
 
-fn operation_binary<'a, 'b, 'c, 'd>(
+fn operation_binary<'a, 'b, 'c>(
 	parser: &mut Parser<'a, 'b, 'c>,
 	operators: &[&'a Element],
-	expression_left: Next<'a, 'b, 'c, 'd>,
-	expression_right: Next<'a, 'b, 'c, 'd>,
+	expression_left:  &Next<'a, 'b, 'c>,
+	expression_right: &Next<'a, 'b, 'c>,
 ) -> Result<Node<'a, 'b>, ()> {
 	let left = expression_left(parser)?;
 	while let Ok(expression) = parser.tokens(&operators) {
@@ -52,7 +50,7 @@ fn sequence<'a, 'b>(
 const LITERALS: [&Element; 3] = [&elements::STRING, &elements::NUMBER, &elements::IDENTIFIER];
 
 fn expression_1<'a, 'b>(parser: &mut Parser<'a, 'b, '_>) -> Result<Node<'a, 'b>, ()> {
-	if let Ok(open) = parser.token(&elements::SYMBOL_PARENTHESIS_L) {
+	/* if let Ok(open) = parser.token(&elements::SYMBOL_PARENTHESIS_L) {
 		if let Ok(expression) = expression(parser) {
 			if let Ok(close) = parser.token(&elements::SYMBOL_PARENTHESIS_R) {
 				return Ok(new_expression(
@@ -62,6 +60,13 @@ fn expression_1<'a, 'b>(parser: &mut Parser<'a, 'b, '_>) -> Result<Node<'a, 'b>,
 		}
 
 		return Err(());
+	} */
+	if let Ok(children) = parser.elements(&[
+		&|parser| parser.token(&elements::SYMBOL_PARENTHESIS_L),
+		&expression,
+		&|parser| parser.token(&elements::SYMBOL_PARENTHESIS_R),
+	]) {
+		return Ok(new_expression(Node::new_production(&elements::PRODUCTION_GROUP, children)));
 	}
 
 	return Ok(new_expression(

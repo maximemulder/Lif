@@ -4,8 +4,16 @@ use crate::element::Element;
 use crate::node::Node;
 use nodes::program::program;
 
+pub type Next<'a, 'b, 'c> = dyn Fn(&mut Parser<'a, 'b, 'c>) -> Result<Node<'a, 'b>, ()>;
+
 pub fn run<'a, 'b, 'c>(tokens: &'c Vec<Node<'a, 'b>>) -> Result<Node<'a, 'b>, ()> {
-	return Ok(program(&mut Parser::new(tokens)));
+	let mut parser = Parser::new(tokens);
+	let node = program(&mut parser);
+	return if parser.done() {
+		Ok(node)
+	} else {
+		Err(())
+	};
 }
 
 pub struct Parser<'a, 'b, 'c> {
@@ -14,11 +22,15 @@ pub struct Parser<'a, 'b, 'c> {
 }
 
 impl<'a, 'b, 'c> Parser<'a, 'b, 'c> {
-	pub fn new(tokens: &'c Vec<Node<'a, 'b>>) -> Self {
+	fn new(tokens: &'c Vec<Node<'a, 'b>>) -> Self {
 		return Self {
 			tokens,
 			cursor: 0,
 		};
+	}
+
+	fn done(&self) -> bool {
+		return self.cursor == self.tokens.len();
 	}
 
 	fn token(&mut self, element: &'a Element) -> Result<Node<'a, 'b>, ()> {
@@ -42,7 +54,18 @@ impl<'a, 'b, 'c> Parser<'a, 'b, 'c> {
 		return Err(());
 	}
 
-	fn back(&mut self) {
-		self.cursor -= 1;
+	fn elements(&mut self, nexts: &[&Next<'a, 'b, 'c>]) -> Result<Vec<Node<'a, 'b>>, ()> {
+		let cursor = self.cursor;
+		let mut children = Vec::new();
+		for next in nexts {
+			if let Ok(child) = next(self) {
+				children.push(child);
+			} else {
+				self.cursor = cursor;
+				return Err(());
+			}
+		}
+
+		return Ok(children);
 	}
 }
