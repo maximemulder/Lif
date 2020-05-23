@@ -54,7 +54,23 @@ impl<'a, 'b, 'c> Parser<'a, 'b, 'c> {
 		return Err(());
 	}
 
-	fn safe(&mut self, next: &dyn Fn(&mut Parser<'a, 'b, 'c>) -> Result<Node<'a, 'b>, ()>) -> Result<Node<'a, 'b>, ()> {
+	fn safe(
+		&mut self,
+		next: &dyn Fn(&mut Parser<'a, 'b, 'c>) -> Result<Node<'a, 'b>, ()>
+	) -> Result<Node<'a, 'b>, ()> {
+		let cursor = self.cursor;
+		let node = next(self);
+		if node.is_err() {
+			self.cursor = cursor;
+		}
+
+		return node;
+	}
+
+	fn safes(
+		&mut self,
+		next: &dyn Fn(&mut Parser<'a, 'b, 'c>) -> Result<Vec<Node<'a, 'b>>, ()>
+	) -> Result<Vec<Node<'a, 'b>>, ()> {
 		let cursor = self.cursor;
 		let node = next(self);
 		if node.is_err() {

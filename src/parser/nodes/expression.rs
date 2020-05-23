@@ -15,35 +15,13 @@ fn operation_binary<'a, 'b, 'c>(
 	expression_left:  &Next<'a, 'b, 'c>,
 	expression_right: &Next<'a, 'b, 'c>,
 ) -> Result<Node<'a, 'b>, ()> {
-	let left = expression_left(parser)?;
-	let node = parser.safe(&|parser| Ok(Node::new_production(&elements::PRODUCTION_OPERATION, vec![
-		left.clone(),
+	let mut expression = expression_left(parser)?;
+	if let Ok(mut nodes) = parser.safes(&|parser| Ok(vec![
 		parser.tokens(&operators)?,
 		expression_right(parser)?,
-	])));
-
-	if node.is_ok() {
-		return node;
-	}
-
-	return Ok(left);
-}
-
-fn sequence<'a, 'b>(
-	parser: &mut Parser<'a, 'b, '_>,
-	delimiter_l: &'a Element,
-	delimiter_r: &'a Element,
-	expression: Node<'a, 'b>,
-) -> Result<Node<'a, 'b>, ()> {
-	let node = parser.safe(&|parser| Ok(Node::new_production(&elements::PRODUCTION_SEQUENCE, vec![
-		expression.clone(),
-		parser.token(delimiter_l)?,
-		expressions(parser),
-		parser.token(delimiter_r)?,
-	])));
-
-	if node.is_ok() {
-		return node;
+	])) {
+		nodes.insert(0, expression);
+		expression = new_expression(Node::new_production(&elements::PRODUCTION_OPERATION, nodes));
 	}
 
 	return Ok(expression);
@@ -66,11 +44,25 @@ fn expression_1<'a, 'b>(parser: &mut Parser<'a, 'b, '_>) -> Result<Node<'a, 'b>,
 }
 
 fn expression_0<'a, 'b>(parser: &mut Parser<'a, 'b, '_>) -> Result<Node<'a, 'b>, ()> {
-	let mut expression;
-	expression = expression_1(parser)?;
-	expression = sequence(parser, &elements::SYMBOL_PARENTHESIS_L, &elements::SYMBOL_PARENTHESIS_R, expression)?;
-	expression = sequence(parser, &elements::SYMBOL_CROTCHET_L,    &elements::SYMBOL_CROTCHET_R,    expression)?;
-	return Ok(expression);
+	let mut expression = expression_1(parser)?;
+	'outer: loop {
+		for delimiters in [
+			(&elements::SYMBOL_PARENTHESIS_L, &elements::SYMBOL_PARENTHESIS_R),
+			(&elements::SYMBOL_CROTCHET_L, &elements::SYMBOL_CROTCHET_R),
+		].iter() {
+			if let Ok(mut nodes) = parser.safes(&|parser| Ok(vec![
+				parser.token(delimiters.0)?,
+				expressions(parser),
+				parser.token(delimiters.1)?,
+			])) {
+				nodes.insert(0, expression);
+				expression = new_expression(Node::new_production(&elements::PRODUCTION_SEQUENCE, nodes));
+				continue 'outer;
+			}
+		}
+
+		return Ok(expression);
+	}
 }
 
 const OPERATORS_BINARY_1: [&Element; 4] = [
