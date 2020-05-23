@@ -16,12 +16,14 @@ fn operation_binary<'a, 'b, 'c>(
 	expression_right: &Next<'a, 'b, 'c>,
 ) -> Result<Node<'a, 'b>, ()> {
 	let left = expression_left(parser)?;
-	while let Ok(expression) = parser.tokens(&operators) {
-		if let Ok(right) = expression_right(parser) {
-			return Ok(new_expression(
-				Node::new_production(&elements::PRODUCTION_OPERATION, vec![left, expression, right])
-			));
-		}
+	let node = parser.safe(&|parser| Ok(Node::new_production(&elements::PRODUCTION_OPERATION, vec![
+		left.clone(),
+		parser.tokens(&operators)?,
+		expression_right(parser)?,
+	])));
+
+	if node.is_ok() {
+		return node;
 	}
 
 	return Ok(left);
@@ -33,15 +35,15 @@ fn sequence<'a, 'b>(
 	delimiter_r: &'a Element,
 	expression: Node<'a, 'b>,
 ) -> Result<Node<'a, 'b>, ()> {
-	if let Ok(open) = parser.token(delimiter_l) {
-		let expressions = expressions(parser);
-		if let Ok(close) = parser.token(delimiter_r) {
-			return Ok(new_expression(
-				Node::new_production(&elements::PRODUCTION_SEQUENCE, vec![expression, open, expressions, close])
-			));
-		}
+	let node = parser.safe(&|parser| Ok(Node::new_production(&elements::PRODUCTION_SEQUENCE, vec![
+		expression.clone(),
+		parser.token(delimiter_l)?,
+		expressions(parser),
+		parser.token(delimiter_r)?,
+	])));
 
-		return Err(());
+	if node.is_ok() {
+		return node;
 	}
 
 	return Ok(expression);
@@ -50,23 +52,12 @@ fn sequence<'a, 'b>(
 const LITERALS: [&Element; 3] = [&elements::STRING, &elements::NUMBER, &elements::IDENTIFIER];
 
 fn expression_1<'a, 'b>(parser: &mut Parser<'a, 'b, '_>) -> Result<Node<'a, 'b>, ()> {
-	/* if let Ok(open) = parser.token(&elements::SYMBOL_PARENTHESIS_L) {
-		if let Ok(expression) = expression(parser) {
-			if let Ok(close) = parser.token(&elements::SYMBOL_PARENTHESIS_R) {
-				return Ok(new_expression(
-					Node::new_production(&elements::PRODUCTION_GROUP, vec![open, expression, close])
-				));
-			}
-		}
-
-		return Err(());
-	} */
-	if let Ok(children) = parser.elements(&[
-		&|parser| parser.token(&elements::SYMBOL_PARENTHESIS_L),
-		&expression,
-		&|parser| parser.token(&elements::SYMBOL_PARENTHESIS_R),
-	]) {
-		return Ok(new_expression(Node::new_production(&elements::PRODUCTION_GROUP, children)));
+	if let Ok(group) = parser.safe(&|parser| Ok(Node::new_production(&elements::PRODUCTION_GROUP, vec![
+		parser.token(&elements::SYMBOL_PARENTHESIS_L)?,
+		expression(parser)?,
+		parser.token(&elements::SYMBOL_PARENTHESIS_R)?,
+	]))) {
+		return Ok(new_expression(group));
 	}
 
 	return Ok(new_expression(

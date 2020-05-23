@@ -54,18 +54,13 @@ impl<'a, 'b, 'c> Parser<'a, 'b, 'c> {
 		return Err(());
 	}
 
-	fn elements(&mut self, nexts: &[&Next<'a, 'b, 'c>]) -> Result<Vec<Node<'a, 'b>>, ()> {
+	fn safe(&mut self, next: &dyn Fn(&mut Parser<'a, 'b, 'c>) -> Result<Node<'a, 'b>, ()>) -> Result<Node<'a, 'b>, ()> {
 		let cursor = self.cursor;
-		let mut children = Vec::new();
-		for next in nexts {
-			if let Ok(child) = next(self) {
-				children.push(child);
-			} else {
-				self.cursor = cursor;
-				return Err(());
-			}
+		let node = next(self);
+		if node.is_err() {
+			self.cursor = cursor;
 		}
 
-		return Ok(children);
+		return node;
 	}
 }
