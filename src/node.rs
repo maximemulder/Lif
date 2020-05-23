@@ -1,4 +1,5 @@
 use crate::element::Element;
+use crate::elements;
 
 #[derive(Clone)]
 pub enum Content<'a, 'b> {
@@ -28,17 +29,7 @@ impl<'a, 'b> Node<'a, 'b> {
 		return Self::new(element, Content::Production(children));
 	}
 
-	pub fn length(&self) -> usize {
-		return match &self.content {
-			Content::Token(_) => 1,
-			Content::Production(children) => {
-				let mut length = 0;
-				for child in children {
-					length += child.length();
-				}
-
-				length
-			},
-		};
+	pub fn new_expression(element: &'a Element, children: Vec<Node<'a, 'b>>) -> Self {
+		return Self::new_production(&elements::PRODUCTION_EXPRESSION, vec![Node::new_production(element, children)]);
 	}
 }

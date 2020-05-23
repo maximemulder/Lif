@@ -1,68 +1,25 @@
 use crate::element::Element;
 use crate::elements;
 use crate::node::Node;
-use crate::parser::{ Next, Parser };
+use crate::parser::Parser;
 
-use super::expressions::expressions;
-
-fn new_expression<'a, 'b>(node: Node<'a, 'b>) -> Node<'a, 'b> {
-	return Node::new_production(&elements::PRODUCTION_EXPRESSION, vec![node]);
-}
-
-fn operation_binary<'a, 'b, 'c>(
-	parser: &mut Parser<'a, 'b, 'c>,
-	operators: &[&'a Element],
-	expression_left:  &Next<'a, 'b, 'c>,
-	expression_right: &Next<'a, 'b, 'c>,
-) -> Result<Node<'a, 'b>, ()> {
-	let mut expression = expression_left(parser)?;
-	if let Ok(mut nodes) = parser.safes(&|parser| Ok(vec![
-		parser.tokens(&operators)?,
-		expression_right(parser)?,
-	])) {
-		nodes.insert(0, expression);
-		expression = new_expression(Node::new_production(&elements::PRODUCTION_OPERATION, nodes));
-	}
-
-	return Ok(expression);
-}
+use super::group::group;
+use super::operation_binary::operation_binary;
+use super::sequence::sequence;
 
 const LITERALS: [&Element; 3] = [&elements::STRING, &elements::NUMBER, &elements::IDENTIFIER];
 
 fn expression_1<'a, 'b>(parser: &mut Parser<'a, 'b, '_>) -> Result<Node<'a, 'b>, ()> {
-	if let Ok(group) = parser.safe(&|parser| Ok(Node::new_production(&elements::PRODUCTION_GROUP, vec![
-		parser.token(&elements::SYMBOL_PARENTHESIS_L)?,
-		expression(parser)?,
-		parser.token(&elements::SYMBOL_PARENTHESIS_R)?,
-	]))) {
-		return Ok(new_expression(group));
+	if let Ok(group) = group(parser) {
+		return Ok(group);
 	}
 
-	return Ok(new_expression(
-		Node::new_production(&elements::PRODUCTION_LITERAL, vec![parser.tokens(&LITERALS)?])
-	));
+	return Ok(Node::new_expression(&elements::PRODUCTION_LITERAL, vec![parser.tokens(&LITERALS)?]));
 }
 
 fn expression_0<'a, 'b>(parser: &mut Parser<'a, 'b, '_>) -> Result<Node<'a, 'b>, ()> {
-	let mut expression = expression_1(parser)?;
-	'outer: loop {
-		for delimiters in [
-			(&elements::SYMBOL_PARENTHESIS_L, &elements::SYMBOL_PARENTHESIS_R),
-			(&elements::SYMBOL_CROTCHET_L, &elements::SYMBOL_CROTCHET_R),
-		].iter() {
-			if let Ok(mut nodes) = parser.safes(&|parser| Ok(vec![
-				parser.token(delimiters.0)?,
-				expressions(parser),
-				parser.token(delimiters.1)?,
-			])) {
-				nodes.insert(0, expression);
-				expression = new_expression(Node::new_production(&elements::PRODUCTION_SEQUENCE, nodes));
-				continue 'outer;
-			}
-		}
-
-		return Ok(expression);
-	}
+	let expression = expression_1(parser)?;
+	return sequence(parser, expression);
 }
 
 const OPERATORS_BINARY_1: [&Element; 4] = [
