@@ -3,15 +3,25 @@ use crate::elements;
 use crate::node::Node;
 use crate::parser::Parser;
 
+use super::block::block;
 use super::group::group;
 use super::operation_binary::operation_binary;
 use super::sequence::sequence;
+use super::structure::structure;
 
 const LITERALS: [&Element; 3] = [&elements::STRING, &elements::NUMBER, &elements::IDENTIFIER];
 
 fn expression_1<'a, 'b>(parser: &mut Parser<'a, 'b, '_>) -> Result<Node<'a, 'b>, ()> {
-	if let Ok(group) = group(parser) {
-		return Ok(group);
+	if let Ok(node) = group(parser) {
+		return Ok(node);
+	}
+
+	if let Ok(node) = block(parser) {
+		return Ok(node);
+	}
+
+	if let Ok(node) = structure(parser) {
+		return Ok(node);
 	}
 
 	return Ok(Node::new_expression(&elements::PRODUCTION_LITERAL, vec![parser.tokens(&LITERALS)?]));
@@ -73,37 +83,37 @@ fn expression_6<'a, 'b>(parser: &mut Parser<'a, 'b, '_>) -> Result<Node<'a, 'b>,
 const OPERATORS_BINARY_6: [&Element; 1] = [&elements::SYMBOL_AMPERSAND];
 
 fn expression_7<'a, 'b>(parser: &mut Parser<'a, 'b, '_>) -> Result<Node<'a, 'b>, ()> {
-	return operation_binary(parser, &OPERATORS_BINARY_3, &expression_6, &expression_7);
+	return operation_binary(parser, &OPERATORS_BINARY_6, &expression_6, &expression_7);
 }
 
 const OPERATORS_BINARY_7: [&Element; 1] = [&elements::SYMBOL_CARET];
 
 fn expression_8<'a, 'b>(parser: &mut Parser<'a, 'b, '_>) -> Result<Node<'a, 'b>, ()> {
-	return operation_binary(parser, &OPERATORS_BINARY_3, &expression_7, &expression_8);
+	return operation_binary(parser, &OPERATORS_BINARY_7, &expression_7, &expression_8);
 }
 
 const OPERATORS_BINARY_8: [&Element; 1] = [&elements::SYMBOL_PIPE];
 
 fn expression_9<'a, 'b>(parser: &mut Parser<'a, 'b, '_>) -> Result<Node<'a, 'b>, ()> {
-	return operation_binary(parser, &OPERATORS_BINARY_3, &expression_8, &expression_9);
+	return operation_binary(parser, &OPERATORS_BINARY_8, &expression_8, &expression_9);
 }
 
 const OPERATORS_BINARY_9: [&Element; 1] = [&elements::SYMBOL_AMPERSAND_D];
 
 fn expression_10<'a, 'b>(parser: &mut Parser<'a, 'b, '_>) -> Result<Node<'a, 'b>, ()> {
-	return operation_binary(parser, &OPERATORS_BINARY_3, &expression_9, &expression_10);
+	return operation_binary(parser, &OPERATORS_BINARY_9, &expression_9, &expression_10);
 }
 
 const OPERATORS_BINARY_10: [&Element; 1] = [&elements::SYMBOL_PIPE_D];
 
 fn expression_11<'a, 'b>(parser: &mut Parser<'a, 'b, '_>) -> Result<Node<'a, 'b>, ()> {
-	return operation_binary(parser, &OPERATORS_BINARY_3, &expression_10, &expression_11);
+	return operation_binary(parser, &OPERATORS_BINARY_10, &expression_10, &expression_11);
 }
 
 const OPERATORS_BINARY_11: [&Element; 2] = [&elements::SYMBOL_DOT_D, &elements::SYMBOL_DOT_D_EQ];
 
 fn expression_12<'a, 'b>(parser: &mut Parser<'a, 'b, '_>) -> Result<Node<'a, 'b>, ()> {
-	return operation_binary(parser, &OPERATORS_BINARY_3, &expression_11, &expression_12);
+	return operation_binary(parser, &OPERATORS_BINARY_11, &expression_11, &expression_12);
 }
 
 const OPERATORS_BINARY_12: [&Element; 16] = [
@@ -126,7 +136,7 @@ const OPERATORS_BINARY_12: [&Element; 16] = [
 ];
 
 fn expression_13<'a, 'b>(parser: &mut Parser<'a, 'b, '_>) -> Result<Node<'a, 'b>, ()> {
-	return operation_binary(parser, &OPERATORS_BINARY_3, &expression_12, &expression_13);
+	return operation_binary(parser, &OPERATORS_BINARY_12, &expression_12, &expression_13);
 }
 
 pub fn expression<'a, 'b>(parser: &mut Parser<'a, 'b, '_>) -> Result<Node<'a, 'b>, ()> {

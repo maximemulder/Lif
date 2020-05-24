@@ -96,3 +96,7 @@ pub const PRODUCTION_LITERAL:     Element = Element::new("LITERAL");
 pub const PRODUCTION_GROUP:       Element = Element::new("GROUP");
 pub const PRODUCTION_SEQUENCE:    Element = Element::new("SEQUENCE");
 pub const PRODUCTION_OPERATION:   Element = Element::new("OPERATION");
+pub const PRODUCTION_STRUCTURE_IF: Element = Element::new("IF");
+pub const PRODUCTION_STRUCTURE_IF_THEN: Element = Element::new("THEN");
+pub const PRODUCTION_STRUCTURE_IF_ELSE: Element = Element::new("ELSE");
+pub const PRODUCTION_BLOCK: Element = Element::new("BLOCK");
