@@ -1,0 +1,27 @@
+use crate::element::Element;
+
+pub const AS:        Element = Element::new("AS");
+pub const CATCH:     Element = Element::new("CATCH");
+pub const CLASS:     Element = Element::new("CLASS");
+pub const DEFAULT:   Element = Element::new("DEFAULT");
+pub const DO:        Element = Element::new("DO");
+pub const ELSE:      Element = Element::new("ELSE");
+pub const EXPORT:    Element = Element::new("EXPORT");
+pub const FINALLY:   Element = Element::new("FINALLY");
+pub const FOR:       Element = Element::new("FOR");
+pub const FROM:      Element = Element::new("FROM");
+pub const FUNCTION:  Element = Element::new("FUNCTION");
+pub const IF:        Element = Element::new("IF");
+pub const IMPORT:    Element = Element::new("IMPORT");
+pub const IN:        Element = Element::new("IN");
+pub const LET:       Element = Element::new("LET");
+pub const LOOP:      Element = Element::new("LOOP");
+pub const PRIVATE:   Element = Element::new("PRIVATE");
+pub const PROTECTED: Element = Element::new("PROTECTED");
+pub const PUBLIC:    Element = Element::new("PUBLIC");
+pub const RETURN:    Element = Element::new("RETURN");
+pub const STATIC:    Element = Element::new("STATIC");
+pub const THEN:      Element = Element::new("THEN");
+pub const THROW:     Element = Element::new("THROW");
+pub const TRY:       Element = Element::new("TRY");
+pub const WHILE:     Element = Element::new("WHILE");

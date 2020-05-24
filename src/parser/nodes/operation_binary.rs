@@ -15,7 +15,7 @@ pub fn operation_binary<'a, 'b, 'c>(
 		expression_right(parser)?,
 	])) {
 		nodes.insert(0, expression);
-		expression = Node::new_expression(&elements::PRODUCTION_OPERATION, nodes);
+		expression = Node::new_production(&elements::expressions::OPERATION, nodes);
 	}
 
 	return Ok(expression);

@@ -10,5 +10,5 @@ pub fn statements<'a, 'b>(parser: &mut Parser<'a, 'b, '_>) -> Node<'a, 'b> {
 		children.push(child);
 	}
 
-	return Node::new_production(&elements::PRODUCTION_STATEMENTS, children);
+	return Node::new_production(&elements::productions::STATEMENTS, children);
 }

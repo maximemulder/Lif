@@ -1,4 +1,3 @@
-pub mod block;
 pub mod expression;
 pub mod expressions;
 pub mod group;

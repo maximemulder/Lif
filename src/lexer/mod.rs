@@ -1,7 +1,7 @@
 mod node;
 mod nodes;
 use nodes::ROOT;
-use crate::elements::{ WHITESPACE, ENDLINE };
+use crate::elements::ignores::{ WHITESPACE, ENDLINE };
 use crate::element::Element;
 use crate::node::Node;
 

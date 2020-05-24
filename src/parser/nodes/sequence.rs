@@ -6,8 +6,8 @@ use super::expressions::expressions;
 
 pub fn sequence<'a, 'b>(parser: &mut Parser<'a, 'b, '_>, mut expression: Node<'a, 'b>) -> Result<Node<'a, 'b>, ()> {
 	for delimiters in [
-		(&elements::SYMBOL_PARENTHESIS_L, &elements::SYMBOL_PARENTHESIS_R),
-		(&elements::SYMBOL_CROTCHET_L, &elements::SYMBOL_CROTCHET_R),
+		(&elements::symbols::PARENTHESIS_L, &elements::symbols::PARENTHESIS_R),
+		(&elements::symbols::CROTCHET_L, &elements::symbols::CROTCHET_R),
 	].iter() {
 		if let Ok(mut nodes) = parser.safes(&|parser| Ok(vec![
 			parser.token(delimiters.0)?,
@@ -15,7 +15,7 @@ pub fn sequence<'a, 'b>(parser: &mut Parser<'a, 'b, '_>, mut expression: Node<'a
 			parser.token(delimiters.1)?,
 		])) {
 			nodes.insert(0, expression);
-			expression = Node::new_expression(&elements::PRODUCTION_SEQUENCE, nodes);
+			expression = Node::new_production(&elements::expressions::SEQUENCE, nodes);
 			return sequence(parser, expression);
 		}
 	}
