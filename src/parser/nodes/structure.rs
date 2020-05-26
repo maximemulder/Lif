@@ -3,7 +3,6 @@ use crate::node::Node;
 use crate::parser::Parser;
 
 use super::expression::expression;
-use super::statements::statements;
 
 fn structure_else<'a, 'b>(parser: &mut Parser<'a, 'b, '_>) -> Node<'a, 'b> {
 	return Node::new_production(&elements::productions::ELSE, if let Ok(nodes) = parser.safes(&|parser| Ok(vec![
@@ -43,11 +42,30 @@ fn structure_do<'a, 'b>(parser: &mut Parser<'a, 'b, '_>) -> Result<Node<'a, 'b>,
 }
 
 fn structure_block<'a, 'b>(parser: &mut Parser<'a, 'b, '_>) -> Result<Node<'a, 'b>, ()> {
-	return parser.safe(&|parser| Ok(Node::new_production(&elements::structures::BLOCK, vec![
-		parser.token(&elements::symbols::BRACE_L)?,
-		statements(parser),
-		parser.token(&elements::symbols::BRACE_R)?,
-	])));
+	return parser.safe(&|parser| Ok(Node::new_production(&elements::structures::BLOCK, {
+		let mut children = Vec::new();
+		children.push(parser.token(&elements::symbols::BRACE_L)?);
+		let mut statements = Vec::new();
+		let mut tmp = None;
+		while let Ok(expression) = expression(parser) {
+			if let Ok(semicolon) = parser.token(&elements::symbols::SEMICOLON) {
+				statements.push(Node::new_production(&elements::productions::STATEMENT, vec![
+					expression,
+					semicolon,
+				]))
+			} else {
+				tmp = Some(expression);
+				break;
+			}
+		}
+
+		children.push(Node::new_production(&elements::productions::STATEMENTS, statements));
+		if tmp.is_some() {
+			children.push(tmp.unwrap());
+		}
+		children.push(parser.token(&elements::symbols::BRACE_R)?);
+		children
+	})));
 }
 
 fn structure_if<'a, 'b>(parser: &mut Parser<'a, 'b, '_>) -> Result<Node<'a, 'b>, ()> {
