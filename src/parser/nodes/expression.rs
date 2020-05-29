@@ -6,7 +6,7 @@ use crate::parser::Parser;
 use super::group::group;
 use super::operation_binary::operation_binary;
 use super::sequence::sequence;
-use super::structure::structure;
+use super::structures::structure;
 
 const LITERALS: [&Element; 3] = [&elements::variables::STRING, &elements::variables::NUMBER, &elements::variables::IDENTIFIER];
 

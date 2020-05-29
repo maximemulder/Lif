@@ -7,6 +7,7 @@ mod lexer;
 mod node;
 mod parser;
 mod printer;
+mod nodes;
 
 use std::env;
 use std::fs;

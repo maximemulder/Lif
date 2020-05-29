@@ -4,4 +4,4 @@ pub mod group;
 pub mod operation_binary;
 pub mod program;
 pub mod sequence;
-pub mod structure;
+pub mod structures;
