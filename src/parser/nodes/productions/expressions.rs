@@ -2,7 +2,7 @@ use crate::elements;
 use crate::node::Node;
 use crate::parser::Parser;
 
-use super::expression::expression;
+use super::super::expressions::expression;
 
 pub fn expressions<'a, 'b>(parser: &mut Parser<'a, 'b, '_>) -> Node<'a, 'b> {
 	let mut children = Vec::new();

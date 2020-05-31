@@ -2,9 +2,9 @@ use crate::elements;
 use crate::node::Node;
 use crate::parser::Parser;
 
-use super::super::expression::expression;
+use super::super::expressions::expression;
 
-fn structure_block_body<'a, 'b>(parser: &mut Parser<'a, 'b, '_>) -> Vec<Node<'a, 'b>> {
+fn block_body<'a, 'b>(parser: &mut Parser<'a, 'b, '_>) -> Vec<Node<'a, 'b>> {
 	let mut body = Vec::new();
 	let mut statements = Vec::new();
 	while let Ok(expression) = expression(parser) {
@@ -23,11 +23,11 @@ fn structure_block_body<'a, 'b>(parser: &mut Parser<'a, 'b, '_>) -> Vec<Node<'a,
 	return body;
 }
 
-pub fn structure_block<'a, 'b>(parser: &mut Parser<'a, 'b, '_>) -> Result<Node<'a, 'b>, ()> {
+pub fn block<'a, 'b>(parser: &mut Parser<'a, 'b, '_>) -> Result<Node<'a, 'b>, ()> {
 	return Ok(Node::new_production(&elements::structures::BLOCK, {
 		let mut children = Vec::new();
 		children.push(parser.token(&elements::symbols::BRACE_L)?);
-		children.append(&mut structure_block_body(parser));
+		children.append(&mut block_body(parser));
 		children.push(parser.token(&elements::symbols::BRACE_R)?);
 		children
 	}));

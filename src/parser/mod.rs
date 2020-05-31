@@ -2,7 +2,7 @@ mod nodes;
 
 use crate::element::Element;
 use crate::node::Node;
-use nodes::program::program;
+use nodes::productions::program::program;
 
 pub type Next<'a, 'b, 'c> = dyn Fn(&mut Parser<'a, 'b, 'c>) -> Result<Node<'a, 'b>, ()>;
 

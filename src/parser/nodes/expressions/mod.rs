@@ -1,25 +1,41 @@
+mod class;
+mod controls;
+mod declaration;
+mod function;
+mod group;
+mod literals;
+mod operation_binary;
+mod sequence;
+
 use crate::element::Element;
 use crate::elements;
 use crate::node::Node;
 use crate::parser::Parser;
 
-use super::group::group;
-use super::operation_binary::operation_binary;
-use super::sequence::sequence;
-use super::structures::structure;
-
-const LITERALS: [&Element; 3] = [&elements::variables::STRING, &elements::variables::NUMBER, &elements::variables::IDENTIFIER];
+use super::structures;
+use self::operation_binary::operation_binary;
+use self::sequence::sequence;
 
 fn expression_1<'a, 'b>(parser: &mut Parser<'a, 'b, '_>) -> Result<Node<'a, 'b>, ()> {
-	if let Ok(node) = group(parser) {
-		return Ok(node);
+	let functions: [&dyn Fn(&mut Parser<'a, 'b, '_>) -> Result<Node<'a, 'b>, ()>; 9] = [
+		&literals::number,
+		&literals::string,
+		&literals::identifier,
+		&declaration::declaration,
+		&controls::r#continue,
+		&controls::r#break,
+		&controls::r#return,
+		&structures::structure,
+		&group::group,
+	];
+
+	for function in functions.iter() {
+		if let Ok(node) = parser.safe(&|parser| function(parser)) {
+			return Ok(node);
+		}
 	}
 
-	if let Ok(node) = structure(parser) {
-		return Ok(node);
-	}
-
-	return Ok(Node::new_production(&elements::expressions::LITERAL, vec![parser.tokens(&LITERALS)?]));
+	return Err(());
 }
 
 fn expression_0<'a, 'b>(parser: &mut Parser<'a, 'b, '_>) -> Result<Node<'a, 'b>, ()> {

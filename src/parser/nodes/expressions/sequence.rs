@@ -2,7 +2,7 @@ use crate::elements;
 use crate::node::Node;
 use crate::parser::Parser;
 
-use super::expressions::expressions;
+use super::super::productions::expressions::expressions;
 
 pub fn sequence<'a, 'b>(parser: &mut Parser<'a, 'b, '_>, mut expression: Node<'a, 'b>) -> Result<Node<'a, 'b>, ()> {
 	for delimiters in [

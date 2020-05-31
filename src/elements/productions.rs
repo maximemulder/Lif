@@ -7,3 +7,4 @@ pub const DO:          Element = Element::new("DO");
 pub const THEN:        Element = Element::new("THEN");
 pub const ELSE:        Element = Element::new("ELSE");
 pub const EXPRESSIONS: Element = Element::new("EXPRESSIONS");
+pub const TYPE:        Element = Element::new("TYPE");
