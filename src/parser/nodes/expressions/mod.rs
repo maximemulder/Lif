@@ -17,11 +17,13 @@ use self::operation_binary::operation_binary;
 use self::sequence::sequence;
 
 fn expression_1<'a, 'b>(parser: &mut Parser<'a, 'b, '_>) -> Result<Node<'a, 'b>, ()> {
-	let functions: [&dyn Fn(&mut Parser<'a, 'b, '_>) -> Result<Node<'a, 'b>, ()>; 9] = [
+	let functions: [&dyn Fn(&mut Parser<'a, 'b, '_>) -> Result<Node<'a, 'b>, ()>; 11] = [
 		&literals::number,
 		&literals::string,
 		&literals::identifier,
 		&declaration::declaration,
+		&function::function,
+		&class::class,
 		&controls::r#continue,
 		&controls::r#break,
 		&controls::r#return,
@@ -38,7 +40,7 @@ fn expression_1<'a, 'b>(parser: &mut Parser<'a, 'b, '_>) -> Result<Node<'a, 'b>,
 	return Err(());
 }
 
-fn expression_0<'a, 'b>(parser: &mut Parser<'a, 'b, '_>) -> Result<Node<'a, 'b>, ()> {
+fn expression_2<'a, 'b>(parser: &mut Parser<'a, 'b, '_>) -> Result<Node<'a, 'b>, ()> {
 	let expression = expression_1(parser)?;
 	return sequence(parser, expression);
 }
@@ -50,14 +52,14 @@ const OPERATORS_BINARY_1: [&Element; 4] = [
 	&elements::symbols::ASTERISK_D,
 ];
 
-fn expression_2<'a, 'b>(parser: &mut Parser<'a, 'b, '_>) -> Result<Node<'a, 'b>, ()> {
-	return operation_binary(parser, &OPERATORS_BINARY_1, &expression_0, &expression_2);
+fn expression_3<'a, 'b>(parser: &mut Parser<'a, 'b, '_>) -> Result<Node<'a, 'b>, ()> {
+	return operation_binary(parser, &OPERATORS_BINARY_1, &expression_2, &expression_3);
 }
 
 const OPERATORS_BINARY_2: [&Element; 2] = [&elements::symbols::PLUS, &elements::symbols::MINUS];
 
-fn expression_3<'a, 'b>(parser: &mut Parser<'a, 'b, '_>) -> Result<Node<'a, 'b>, ()> {
-	return operation_binary(parser, &OPERATORS_BINARY_2, &expression_2, &expression_3);
+fn expression_4<'a, 'b>(parser: &mut Parser<'a, 'b, '_>) -> Result<Node<'a, 'b>, ()> {
+	return operation_binary(parser, &OPERATORS_BINARY_2, &expression_3, &expression_4);
 }
 
 const OPERATORS_BINARY_3: [&Element; 4] = [
@@ -67,8 +69,8 @@ const OPERATORS_BINARY_3: [&Element; 4] = [
 	&elements::symbols::GUILLEMET_R_T,
 ];
 
-fn expression_4<'a, 'b>(parser: &mut Parser<'a, 'b, '_>) -> Result<Node<'a, 'b>, ()> {
-	return operation_binary(parser, &OPERATORS_BINARY_3, &expression_3, &expression_4);
+fn expression_5<'a, 'b>(parser: &mut Parser<'a, 'b, '_>) -> Result<Node<'a, 'b>, ()> {
+	return operation_binary(parser, &OPERATORS_BINARY_3, &expression_4, &expression_5);
 }
 
 const OPERATORS_BINARY_4: [&Element; 4] = [
@@ -78,8 +80,8 @@ const OPERATORS_BINARY_4: [&Element; 4] = [
 	&elements::symbols::GUILLEMET_R_EQ,
 ];
 
-fn expression_5<'a, 'b>(parser: &mut Parser<'a, 'b, '_>) -> Result<Node<'a, 'b>, ()> {
-	return operation_binary(parser, &OPERATORS_BINARY_4, &expression_4, &expression_5);
+fn expression_6<'a, 'b>(parser: &mut Parser<'a, 'b, '_>) -> Result<Node<'a, 'b>, ()> {
+	return operation_binary(parser, &OPERATORS_BINARY_4, &expression_5, &expression_6);
 }
 
 const OPERATORS_BINARY_5: [&Element; 2] = [
@@ -87,44 +89,44 @@ const OPERATORS_BINARY_5: [&Element; 2] = [
 	&elements::symbols::EXCLAMATION_EQ,
 ];
 
-fn expression_6<'a, 'b>(parser: &mut Parser<'a, 'b, '_>) -> Result<Node<'a, 'b>, ()> {
-	return operation_binary(parser, &OPERATORS_BINARY_5, &expression_5, &expression_6);
+fn expression_7<'a, 'b>(parser: &mut Parser<'a, 'b, '_>) -> Result<Node<'a, 'b>, ()> {
+	return operation_binary(parser, &OPERATORS_BINARY_5, &expression_6, &expression_7);
 }
 
 const OPERATORS_BINARY_6: [&Element; 1] = [&elements::symbols::AMPERSAND];
 
-fn expression_7<'a, 'b>(parser: &mut Parser<'a, 'b, '_>) -> Result<Node<'a, 'b>, ()> {
-	return operation_binary(parser, &OPERATORS_BINARY_6, &expression_6, &expression_7);
+fn expression_8<'a, 'b>(parser: &mut Parser<'a, 'b, '_>) -> Result<Node<'a, 'b>, ()> {
+	return operation_binary(parser, &OPERATORS_BINARY_6, &expression_7, &expression_8);
 }
 
 const OPERATORS_BINARY_7: [&Element; 1] = [&elements::symbols::CARET];
 
-fn expression_8<'a, 'b>(parser: &mut Parser<'a, 'b, '_>) -> Result<Node<'a, 'b>, ()> {
-	return operation_binary(parser, &OPERATORS_BINARY_7, &expression_7, &expression_8);
+fn expression_9<'a, 'b>(parser: &mut Parser<'a, 'b, '_>) -> Result<Node<'a, 'b>, ()> {
+	return operation_binary(parser, &OPERATORS_BINARY_7, &expression_8, &expression_9);
 }
 
 const OPERATORS_BINARY_8: [&Element; 1] = [&elements::symbols::PIPE];
 
-fn expression_9<'a, 'b>(parser: &mut Parser<'a, 'b, '_>) -> Result<Node<'a, 'b>, ()> {
-	return operation_binary(parser, &OPERATORS_BINARY_8, &expression_8, &expression_9);
+fn expression_10<'a, 'b>(parser: &mut Parser<'a, 'b, '_>) -> Result<Node<'a, 'b>, ()> {
+	return operation_binary(parser, &OPERATORS_BINARY_8, &expression_9, &expression_10);
 }
 
 const OPERATORS_BINARY_9: [&Element; 1] = [&elements::symbols::AMPERSAND_D];
 
-fn expression_10<'a, 'b>(parser: &mut Parser<'a, 'b, '_>) -> Result<Node<'a, 'b>, ()> {
-	return operation_binary(parser, &OPERATORS_BINARY_9, &expression_9, &expression_10);
+fn expression_11<'a, 'b>(parser: &mut Parser<'a, 'b, '_>) -> Result<Node<'a, 'b>, ()> {
+	return operation_binary(parser, &OPERATORS_BINARY_9, &expression_10, &expression_11);
 }
 
 const OPERATORS_BINARY_10: [&Element; 1] = [&elements::symbols::PIPE_D];
 
-fn expression_11<'a, 'b>(parser: &mut Parser<'a, 'b, '_>) -> Result<Node<'a, 'b>, ()> {
-	return operation_binary(parser, &OPERATORS_BINARY_10, &expression_10, &expression_11);
+fn expression_12<'a, 'b>(parser: &mut Parser<'a, 'b, '_>) -> Result<Node<'a, 'b>, ()> {
+	return operation_binary(parser, &OPERATORS_BINARY_10, &expression_11, &expression_12);
 }
 
 const OPERATORS_BINARY_11: [&Element; 2] = [&elements::symbols::DOT_D, &elements::symbols::DOT_D_EQ];
 
-fn expression_12<'a, 'b>(parser: &mut Parser<'a, 'b, '_>) -> Result<Node<'a, 'b>, ()> {
-	return operation_binary(parser, &OPERATORS_BINARY_11, &expression_11, &expression_12);
+pub fn expression_13<'a, 'b>(parser: &mut Parser<'a, 'b, '_>) -> Result<Node<'a, 'b>, ()> {
+	return operation_binary(parser, &OPERATORS_BINARY_11, &expression_12, &expression_13);
 }
 
 const OPERATORS_BINARY_12: [&Element; 16] = [
@@ -146,10 +148,10 @@ const OPERATORS_BINARY_12: [&Element; 16] = [
 	&elements::symbols::PIPE_D_EQ,
 ];
 
-fn expression_13<'a, 'b>(parser: &mut Parser<'a, 'b, '_>) -> Result<Node<'a, 'b>, ()> {
-	return operation_binary(parser, &OPERATORS_BINARY_12, &expression_12, &expression_13);
+fn expression_14<'a, 'b>(parser: &mut Parser<'a, 'b, '_>) -> Result<Node<'a, 'b>, ()> {
+	return operation_binary(parser, &OPERATORS_BINARY_12, &expression_13, &expression_14);
 }
 
 pub fn expression<'a, 'b>(parser: &mut Parser<'a, 'b, '_>) -> Result<Node<'a, 'b>, ()> {
-	return expression_13(parser);
+	return expression_14(parser);
 }

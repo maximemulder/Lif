@@ -1,6 +1,6 @@
-mod block;
-mod conditionnals;
-mod loops;
+pub mod block;
+pub mod conditionnals;
+pub mod loops;
 
 use crate::node::Node;
 use crate::parser::Parser;

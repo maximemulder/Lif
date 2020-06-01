@@ -1,13 +1,12 @@
 use super::expression::Expression;
 use super::Node;
 
-pub struct Unary<'a> {
+pub struct Statement {
 	expression: Expression,
-	operator: &'a str,
 }
 
-impl Node for Unary<'_> {
+impl Node for Statement {
 	fn execute(&self) {
-
+		self.expression.execute();
 	}
 }

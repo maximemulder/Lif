@@ -1,6 +1,14 @@
 use super::expression::Expression;
+use super::Node;
 
-struct Binary {
-	left: Box<dyn Expression>,
-	right: Box<dyn Expression>,
+pub struct Binary<'a> {
+	left: Expression,
+	right: Expression,
+	operator: &'a str,
+}
+
+impl Node for Binary<'_> {
+	fn execute(&self) {
+
+	}
 }
