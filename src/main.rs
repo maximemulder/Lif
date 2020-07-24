@@ -1,4 +1,4 @@
-// #![allow(dead_code)]
+#![allow(dead_code)]
 #![feature(const_fn)]
 
 mod element;
@@ -6,6 +6,7 @@ mod elements;
 mod lexer;
 mod node;
 mod parser;
+mod parser2;
 mod printer;
 mod nodes;
 
@@ -19,7 +20,7 @@ fn main() {
     if args.len() != 2 {
         println!("Incorrect arguments length.");
         panic!();
-    }
+	}
 
     let text = fs::read_to_string(&args[1]).expect("");
     let tokens = lexer::lex(&text);
@@ -27,7 +28,7 @@ fn main() {
 
     println!("=====");
 
-    if let Ok(tree) = parser::run(&tokens) {
+    if let Some(tree) = parser2::run(&tokens) {
         printer::tree(&tree);
-    }
+	}
 }
