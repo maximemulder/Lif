@@ -3,6 +3,37 @@ use crate::node::Node;
 use crate::parser2::matcher::*;
 use crate::parser2::Parser;
 
+pub fn run<'a, 'b>(tokens: &Vec<Node<'a, 'b>>) -> Option<Node<'a, 'b>> {
+
+	let matchers: [&dyn Matcher; 18] = [
+		&token(&elements::variables::NUMBER),
+		&token(&elements::variables::STRING),
+		&token(&elements::variables::IDENTIFIER),
+		&choice(&[0, 1, 2]),
+		&element(3, &elements::expressions::LITERAL),
+		&token(&elements::keywords::IF),
+		&sequence(&[5, 11]),
+		&element(6, &elements::structures::IF),
+		&choice(&[7]),
+		&element(8, &elements::structures::STRUCTURE),
+		&choice(&[9, 4]),
+		&element(10, &elements::productions::EXPRESSION),
+		&token(&elements::symbols::SEMICOLON),
+		&sequence(&[11, 12]),
+		&element(13, &elements::productions::STATEMENT),
+		&list(14),
+		&element(15, &elements::productions::STATEMENTS),
+		&element(16, &elements::productions::PROGRAM),
+	 ];
+
+	return if let Some(mut nodes) = matchers[17].go(&mut Parser::new(tokens, &matchers)) {
+		nodes.pop()
+	} else {
+		None
+	};
+}
+
+/*
 pub fn run<'a, 'b>(parser: &mut Parser<'a, 'b, '_>) -> Option<Node<'a, 'b>> {
 
 	let none = token(&elements::ignores::WHITESPACE);
@@ -59,3 +90,4 @@ pub fn run<'a, 'b>(parser: &mut Parser<'a, 'b, '_>) -> Option<Node<'a, 'b>> {
 		None
 	};
 }
+*/

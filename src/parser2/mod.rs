@@ -2,11 +2,12 @@
 #![allow(dead_code)]
 
 pub mod matcher;
-mod nodes;
+pub mod nodes;
 
 use crate::node::Node;
+use matcher::Matcher;
 
-pub fn run<'a, 'b, 'c>(tokens: &'c Vec<Node<'a, 'b>>) -> Option<Node<'a, 'b>> {
+/* pub fn run<'a, 'b, 'c>(tokens: &'c Vec<Node<'a, 'b>>) -> Option<Node<'a, 'b>> {
 	let mut parser = Parser::new(tokens);
 	let tree = nodes::run(&mut parser);
 	return if parser.done() {
@@ -14,17 +15,19 @@ pub fn run<'a, 'b, 'c>(tokens: &'c Vec<Node<'a, 'b>>) -> Option<Node<'a, 'b>> {
 	} else {
 		None
 	};
-}
+} */
 
 pub struct Parser<'a, 'b, 'c> {
 	tokens: &'c Vec<Node<'a, 'b>>,
+	matchers: &'c [&'c dyn Matcher<'a>],
 	cursor: usize,
 }
 
 impl<'a, 'b, 'c> Parser<'a, 'b, 'c> {
-	fn new(tokens: &'c Vec<Node<'a, 'b>>) -> Self {
+	fn new(tokens: &'c Vec<Node<'a, 'b>>, matchers: &'c [&dyn Matcher<'a>]) -> Self {
 		return Self {
 			tokens,
+			matchers,
 			cursor: 0,
 		};
 	}
@@ -52,5 +55,9 @@ impl<'a, 'b, 'c> Parser<'a, 'b, 'c> {
 
 	fn advance(&mut self) {
 		self.cursor += 1;
+	}
+
+	fn go(&mut self, index: usize) -> Option<Vec<Node<'a, 'b>>> {
+		return self.matchers[index].go(self);
 	}
 }
