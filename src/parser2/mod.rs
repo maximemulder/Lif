@@ -7,12 +7,18 @@ mod nodes;
 use crate::node::Node;
 
 pub fn run<'a, 'b, 'c>(tokens: &'c Vec<Node<'a, 'b>>) -> Option<Node<'a, 'b>> {
-	return nodes::run(&mut Parser::new(tokens));
+	let mut parser = Parser::new(tokens);
+	let tree = nodes::run(&mut parser);
+	return if parser.done() {
+		tree
+	} else {
+		None
+	};
 }
 
 pub struct Parser<'a, 'b, 'c> {
-	pub tokens: &'c Vec<Node<'a, 'b>>,
-	pub cursor: usize,
+	tokens: &'c Vec<Node<'a, 'b>>,
+	cursor: usize,
 }
 
 impl<'a, 'b, 'c> Parser<'a, 'b, 'c> {
@@ -21,6 +27,10 @@ impl<'a, 'b, 'c> Parser<'a, 'b, 'c> {
 			tokens,
 			cursor: 0,
 		};
+	}
+
+	fn done(&self) -> bool {
+		return self.cursor == self.tokens.len();
 	}
 
 	fn save(&self) -> usize {

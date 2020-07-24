@@ -1,5 +1,6 @@
 use crate::element::Element;
 
+pub const STRUCTURE: Element = Element::new("STRUCTURE");
 pub const BLOCK:    Element = Element::new("BLOCK");
 pub const IF:       Element = Element::new("IF");
 pub const LOOP:     Element = Element::new("LOOP");
