@@ -24,7 +24,7 @@ pub struct Parser<'a, 'b, 'c> {
 }
 
 impl<'a, 'b, 'c> Parser<'a, 'b, 'c> {
-	fn new(tokens: &'c Vec<Node<'a, 'b>>, matchers: &'c [&dyn Matcher<'a>]) -> Self {
+	fn new(tokens: &'c Vec<Node<'a, 'b>>, matchers: &'c [&'c dyn Matcher<'a>]) -> Self {
 		return Self {
 			tokens,
 			matchers,
