@@ -88,9 +88,7 @@ impl<'a> Matcher<'a> for MatcherElement<'a> {
 
 impl<'a> Matcher<'a> for MatcherChoice {
 	fn go<'b>(&self, parser: &mut Parser<'a, 'b, '_>) -> Option<Vec<Node<'a, 'b>>> {
-		let cursor = parser.save();
 		for matcher in self.matchers.iter() {
-			parser.restore(cursor);
 			if let Some(nodes) = parser.go(*matcher) {
 				return Some(nodes);
 			}
@@ -118,8 +116,8 @@ impl<'a> Matcher<'a> for MatcherSequence {
 impl<'a> Matcher<'a> for MatcherList {
 	fn go<'b>(&self, parser: &mut Parser<'a, 'b, '_>) -> Option<Vec<Node<'a, 'b>>> {
 		let mut nodes = Vec::new();
-		while let Some(node) = parser.go(self.matcher) {
-			nodes.extend(node);
+		while let Some(children) = parser.go(self.matcher) {
+			nodes.extend(children);
 		}
 
 		return Some(nodes);
@@ -134,9 +132,8 @@ impl<'a> Matcher<'a> for MatcherOption {
 
 impl<'a> Matcher<'a> for MatcherToken<'a> {
 	fn go<'b>(&self, parser: &mut Parser<'a, 'b, '_>) -> Option<Vec<Node<'a, 'b>>> {
-		if let Some(token) = parser.token() {
+		if let Some(token) = parser.next() {
 			if token.element == self.element {
-				parser.advance();
 				return Some(vec![token]);
 			}
 		}

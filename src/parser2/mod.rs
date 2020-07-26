@@ -38,28 +38,23 @@ impl<'a, 'b, 'c> Parser<'a, 'b, 'c> {
 		return self.cursor == self.tokens.len();
 	}
 
-	fn save(&self) -> usize {
-		return self.cursor;
-	}
-
-	fn restore(&mut self, cursor: usize) {
-		self.cursor = cursor;
-	}
-
-	fn token(&mut self) -> Option<Node<'a, 'b>> {
+	fn next(&mut self) -> Option<Node<'a, 'b>> {
 		let option = self.tokens.get(self.cursor);
 		if let Some(token) = option {
+			self.cursor += 1;
 			return Some(token.clone());
 		}
 
 		return None;
 	}
 
-	fn advance(&mut self) {
-		self.cursor += 1;
-	}
-
 	fn go(&mut self, index: usize) -> Option<Vec<Node<'a, 'b>>> {
-		return self.matchers.get(index).go(self);
+		let cursor = self.cursor;
+		let nodes = self.matchers.get(index).go(self);
+		if nodes.is_none() {
+			self.cursor = cursor;
+		}
+
+		return nodes;
 	}
 }
