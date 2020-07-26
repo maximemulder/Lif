@@ -2,6 +2,7 @@ use crate::elements;
 use crate::node::Node;
 use crate::parser2::matcher::*;
 use crate::parser2::Parser;
+use std::mem::MaybeUninit;
 
 const NUMBER_TOKEN:       usize = 0;
 const STRING_TOKEN:       usize = 1;
@@ -23,31 +24,28 @@ const STATEMENTS_ELEMENT: usize = 16;
 const PROGRAM_ELEMENT:    usize = 17;
 
 pub struct Arena<'a, 'b> {
-	none: &'b dyn Matcher<'a>,
-	matchers: Vec<&'b dyn Matcher<'a>>,
+	matchers: Vec<MaybeUninit<&'b dyn Matcher<'a>>>,
 }
 
 impl<'a, 'b> Arena<'a, 'b> {
 	fn new(none: &'b dyn Matcher<'a>) -> Self {
 		return Self {
-			none,
 			matchers: Vec::new(),
 		};
 	}
 
 	fn insert(&mut self, index: usize, matcher: &'b dyn Matcher<'a>) {
 		while self.matchers.len() <= index {
-			self.matchers.push(self.none);
+			self.matchers.push(MaybeUninit::uninit());
 		}
 
-		self.matchers[index] = matcher;
+		self.matchers[index] = MaybeUninit::new(matcher);
 	}
 
 	pub fn get(&self, index: usize) -> &'b dyn Matcher<'a> {
-		return self.matchers[index];
+		return unsafe { self.matchers[index].assume_init() };
 	}
 }
-
 
 pub fn run<'a, 'b>(tokens: &Vec<Node<'a, 'b>>) -> Option<Node<'a, 'b>> {
 	let none = token(&elements::ignores::WHITESPACE);
