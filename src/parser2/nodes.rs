@@ -36,7 +36,7 @@ impl<'a, 'b> Arena<'a, 'b> {
 	}
 
 	fn insert(&mut self, index: usize, matcher: &'b dyn Matcher<'a>) {
-		while self.matchers.len() < index {
+		while self.matchers.len() <= index {
 			self.matchers.push(self.none);
 		}
 
@@ -48,29 +48,37 @@ impl<'a, 'b> Arena<'a, 'b> {
 	}
 }
 
-pub fn run<'a, 'b>(tokens: &Vec<Node<'a, 'b>>) -> Option<Node<'a, 'b>> {
-	let mut matchers = Arena::new(&token(&elements::ignores::WHITESPACE));
-	let program = element(STATEMENTS_ELEMENT, &elements::productions::PROGRAM);
-	matchers.insert(PROGRAM_ELEMENT, &program);
-	matchers.insert(STATEMENTS_ELEMENT, &element(STATEMENTS_LIST, &elements::productions::STATEMENTS));
-	matchers.insert(STATEMENTS_LIST, &list(STATEMENT_ELEMENT));
-	matchers.insert(STATEMENT_ELEMENT, &element(STATEMENT_SEQUENCE, &elements::productions::STATEMENT));
-	matchers.insert(STATEMENT_SEQUENCE, &sequence(&[EXPRESSION_ELEMENT, SEMICOLON_TOKEN]));
-	matchers.insert(SEMICOLON_TOKEN, &token(&elements::symbols::SEMICOLON));
-	matchers.insert(EXPRESSION_ELEMENT, &element(EXPRESSION_CHOICE, &elements::productions::EXPRESSION));
-	matchers.insert(EXPRESSION_CHOICE, &choice(&[STRUCTURE_ELEMENT, LITERAL_ELEMENT]));
-	matchers.insert(STRUCTURE_ELEMENT, &element(STRUCTURE_CHOICE, &elements::structures::STRUCTURE));
-	matchers.insert(STRUCTURE_CHOICE, &choice(&[IF_ELEMENT]));
-	matchers.insert(IF_ELEMENT, &element(IF_SEQUENCE, &elements::structures::IF));
-	matchers.insert(IF_SEQUENCE, &sequence(&[IF_TOKEN, EXPRESSION_ELEMENT]));
-	matchers.insert(IF_TOKEN, &token(&elements::keywords::IF));
-	matchers.insert(LITERAL_ELEMENT, &element(LITERAL_CHOICE, &elements::expressions::LITERAL));
-	matchers.insert(LITERAL_CHOICE, &choice(&[NUMBER_TOKEN, STRING_TOKEN, IDENTIFIER_TOKEN]));
-	matchers.insert(IDENTIFIER_TOKEN, &token(&elements::variables::IDENTIFIER));
-	matchers.insert(STRING_TOKEN, &token(&elements::variables::STRING));
-	matchers.insert(NUMBER_TOKEN, &token(&elements::variables::NUMBER));
 
-	return if let Some(mut nodes) = program.go(&mut Parser::new(tokens, &matchers)) {
+pub fn run<'a, 'b>(tokens: &Vec<Node<'a, 'b>>) -> Option<Node<'a, 'b>> {
+	let none = token(&elements::ignores::WHITESPACE);
+	let mut matchers = Arena::new(&none);
+	macro_rules! rule {
+		( $index:expr, $rule:expr ) => {
+			let variable = $rule;
+			matchers.insert($index, &variable);
+		};
+	}
+
+	rule!(PROGRAM_ELEMENT, element(STATEMENTS_ELEMENT, &elements::productions::PROGRAM));
+	rule!(STATEMENTS_ELEMENT, element(STATEMENTS_LIST, &elements::productions::STATEMENTS));
+	rule!(STATEMENTS_LIST, list(STATEMENT_ELEMENT));
+	rule!(STATEMENT_ELEMENT, element(STATEMENT_SEQUENCE, &elements::productions::STATEMENT));
+	rule!(STATEMENT_SEQUENCE, sequence(&[EXPRESSION_ELEMENT, SEMICOLON_TOKEN]));
+	rule!(SEMICOLON_TOKEN, token(&elements::symbols::SEMICOLON));
+	rule!(EXPRESSION_ELEMENT, element(EXPRESSION_CHOICE, &elements::productions::EXPRESSION));
+	rule!(EXPRESSION_CHOICE, choice(&[STRUCTURE_ELEMENT, LITERAL_ELEMENT]));
+	rule!(STRUCTURE_ELEMENT, element(STRUCTURE_CHOICE, &elements::structures::STRUCTURE));
+	rule!(STRUCTURE_CHOICE, choice(&[IF_ELEMENT]));
+	rule!(IF_ELEMENT, element(IF_SEQUENCE, &elements::structures::IF));
+	rule!(IF_SEQUENCE, sequence(&[IF_TOKEN, EXPRESSION_ELEMENT]));
+	rule!(IF_TOKEN, token(&elements::keywords::IF));
+	rule!(LITERAL_ELEMENT, element(LITERAL_CHOICE, &elements::expressions::LITERAL));
+	rule!(LITERAL_CHOICE, choice(&[NUMBER_TOKEN, STRING_TOKEN, IDENTIFIER_TOKEN]));
+	rule!(IDENTIFIER_TOKEN, token(&elements::variables::IDENTIFIER));
+	rule!(STRING_TOKEN, token(&elements::variables::STRING));
+	rule!(NUMBER_TOKEN, token(&elements::variables::NUMBER));
+
+	return if let Some(mut nodes) = matchers.get(PROGRAM_ELEMENT).go(&mut Parser::new(tokens, &matchers)) {
 		nodes.pop()
 	} else {
 		None

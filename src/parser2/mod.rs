@@ -17,7 +17,7 @@ use nodes::Arena;
 	};
 } */
 
-struct Parser<'a, 'b, 'c> {
+pub struct Parser<'a, 'b, 'c> {
 	tokens: &'c Vec<Node<'a, 'b>>,
 	matchers: &'c Arena<'a, 'c>,
 	cursor: usize,
