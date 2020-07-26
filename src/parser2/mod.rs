@@ -7,6 +7,7 @@ pub mod arena;
 
 use crate::node::Node;
 use arena::Arena;
+use matcher::Matcher;
 
 /* pub fn run<'a, 'b, 'c>(tokens: &'c Vec<Node<'a, 'b>>) -> Option<Node<'a, 'b>> {
 	let mut parser = Parser::new(tokens);
@@ -20,12 +21,12 @@ use arena::Arena;
 
 pub struct Parser<'a, 'b, 'c> {
 	tokens: &'c Vec<Node<'a, 'b>>,
-	matchers: Arena<'a, 'c>,
+	matchers: Arena<&'c dyn Matcher<'a>>,
 	cursor: usize,
 }
 
 impl<'a, 'b, 'c> Parser<'a, 'b, 'c> {
-	fn new(tokens: &'c Vec<Node<'a, 'b>>, matchers: Arena<'a, 'c>) -> Self {
+	fn new(tokens: &'c Vec<Node<'a, 'b>>, matchers: Arena<&'c dyn Matcher<'a>>) -> Self {
 		return Self {
 			tokens,
 			matchers,

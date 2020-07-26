@@ -1,16 +1,15 @@
-use crate::parser2::matcher::Matcher;
 use std::mem::MaybeUninit;
 
-pub struct Arena<'a, 'b> {
+pub struct Arena<T: Copy> {
 	index: usize,
-	matchers: Vec<MaybeUninit<&'b dyn Matcher<'a>>>,
+	elements: Vec<MaybeUninit<T>>,
 }
 
-impl<'a, 'b> Arena<'a, 'b> {
+impl<T: Copy> Arena<T> {
 	pub fn new() -> Self {
 		return Self {
 			index: 0,
-			matchers: Vec::new(),
+			elements: Vec::new(),
 		};
 	}
 
@@ -20,15 +19,15 @@ impl<'a, 'b> Arena<'a, 'b> {
 		return index;
 	}
 
-	pub fn insert(&mut self, index: usize, matcher: &'b dyn Matcher<'a>) {
-		while self.matchers.len() <= index {
-			self.matchers.push(MaybeUninit::uninit());
+	pub fn insert(&mut self, index: usize, element: T) {
+		while self.elements.len() <= index {
+			self.elements.push(MaybeUninit::uninit());
 		}
 
-		self.matchers[index] = MaybeUninit::new(matcher);
+		self.elements[index] = MaybeUninit::new(element);
 	}
 
-	pub fn get(&self, index: usize) -> &'b dyn Matcher<'a> {
-		return unsafe { self.matchers[index].assume_init() };
+	pub fn get(&self, index: usize) -> T {
+		return unsafe { self.elements[index].assume_init() };
 	}
 }
