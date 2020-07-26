@@ -11,12 +11,12 @@ pub struct MatcherElement<'a> {
 	element: &'a Element,
 }
 
-pub struct MatcherChoice<'a> {
-	matchers: &'a [usize],
+pub struct MatcherChoice {
+	matchers: Vec<usize>,
 }
 
-pub struct MatcherSequence<'a> {
-	matchers: &'a [usize],
+pub struct MatcherSequence {
+	matchers: Vec<usize>,
 }
 
 pub struct MatcherList {
@@ -38,13 +38,13 @@ pub fn element<'a>(matcher: usize, element: &'a Element) -> MatcherElement<'a> {
 	};
 }
 
-pub fn choice<'a>(matchers: &'a [usize]) -> MatcherChoice<'a> {
+pub fn choice(matchers: Vec<usize>) -> MatcherChoice {
 	return MatcherChoice {
 		matchers,
 	};
 }
 
-pub fn sequence<'a>(matchers: &'a [usize]) -> MatcherSequence<'a> {
+pub fn sequence(matchers: Vec<usize>) -> MatcherSequence {
 	return MatcherSequence {
 		matchers,
 	};
@@ -86,10 +86,10 @@ impl<'a> Matcher<'a> for MatcherElement<'a> {
 	}
 }
 
-impl<'a> Matcher<'a> for MatcherChoice<'a> {
+impl<'a> Matcher<'a> for MatcherChoice {
 	fn go<'b>(&self, parser: &mut Parser<'a, 'b, '_>) -> Option<Vec<Node<'a, 'b>>> {
 		let cursor = parser.save();
-		for matcher in self.matchers {
+		for matcher in self.matchers.iter() {
 			parser.restore(cursor);
 			if let Some(nodes) = parser.go(*matcher) {
 				return Some(nodes);
@@ -100,10 +100,10 @@ impl<'a> Matcher<'a> for MatcherChoice<'a> {
 	}
 }
 
-impl<'a> Matcher<'a> for MatcherSequence<'a> {
+impl<'a> Matcher<'a> for MatcherSequence {
 	fn go<'b>(&self, parser: &mut Parser<'a, 'b, '_>) -> Option<Vec<Node<'a, 'b>>> {
 		let mut nodes = Vec::new();
-		for matcher in self.matchers {
+		for matcher in self.matchers.iter() {
 			if let Some(children) = parser.go(*matcher) {
 				nodes.extend(children);
 			} else {
