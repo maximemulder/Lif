@@ -1,35 +1,25 @@
 #![allow(unused_variables)]
 #![allow(dead_code)]
 
-pub mod matcher;
+pub mod rule;
 pub mod nodes;
 pub mod arena;
 
 use crate::node::Node;
 use arena::Arena;
-use matcher::Matcher;
-
-/* pub fn run<'a, 'b, 'c>(tokens: &'c Vec<Node<'a, 'b>>) -> Option<Node<'a, 'b>> {
-	let mut parser = Parser::new(tokens);
-	let tree = nodes::run(&mut parser);
-	return if parser.done() {
-		tree
-	} else {
-		None
-	};
-} */
+use rule::Rule;
 
 pub struct Parser<'a, 'b, 'c> {
 	tokens: &'c Vec<Node<'a, 'b>>,
-	matchers: Arena<&'c dyn Matcher<'a>>,
+	rules: Arena<&'c dyn Rule<'a>>,
 	cursor: usize,
 }
 
 impl<'a, 'b, 'c> Parser<'a, 'b, 'c> {
-	fn new(tokens: &'c Vec<Node<'a, 'b>>, matchers: Arena<&'c dyn Matcher<'a>>) -> Self {
+	fn new(tokens: &'c Vec<Node<'a, 'b>>, rules: Arena<&'c dyn Rule<'a>>) -> Self {
 		return Self {
 			tokens,
-			matchers,
+			rules,
 			cursor: 0,
 		};
 	}
@@ -48,9 +38,9 @@ impl<'a, 'b, 'c> Parser<'a, 'b, 'c> {
 		return None;
 	}
 
-	fn go(&mut self, index: usize) -> Option<Vec<Node<'a, 'b>>> {
+	fn rule(&mut self, index: usize) -> Option<Vec<Node<'a, 'b>>> {
 		let cursor = self.cursor;
-		let nodes = self.matchers.get(index).go(self);
+		let nodes = self.rules.get(index).rule(self);
 		if nodes.is_none() {
 			self.cursor = cursor;
 		}
