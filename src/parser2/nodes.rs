@@ -5,7 +5,7 @@ use crate::parser2::rule::*;
 use crate::parser2::Parser;
 
 pub fn run<'a, 'b>(tokens: &Vec<Node<'a, 'b>>) -> Option<Node<'a, 'b>> {
-	let mut rules = Arena::new();
+	let mut rules = Arena::<dyn Rule>::new();
 	macro_rules! declare {
 		( $name:ident ) => {
 			let $name = rules.index();

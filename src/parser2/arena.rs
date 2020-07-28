@@ -1,13 +1,12 @@
 use std::marker::Unsize;
 use std::mem::MaybeUninit;
-use crate::parser2::rule::Rule;
 
-pub struct Arena<'a, 'b> {
+pub struct Arena<T: ?Sized> {
 	index: usize,
-	elements: Vec<MaybeUninit<Box<dyn Rule<'a> + 'b>>>,
+	elements: Vec<MaybeUninit<Box<T>>>,
 }
 
-impl<'a, 'b> Arena<'a, 'b> {
+impl<T: ?Sized> Arena<T> {
 	pub fn new() -> Self {
 		return Self {
 			index: 0,
@@ -21,19 +20,25 @@ impl<'a, 'b> Arena<'a, 'b> {
 		return index;
 	}
 
-	pub fn insert<T>(&mut self, index: usize, element: T) where T: Unsize<dyn Rule<'a> + 'b> {
+	pub fn insert<N: Unsize<T>>(&mut self, index: usize, element: N) {
 		while self.elements.len() <= index {
 			self.elements.push(MaybeUninit::uninit());
 		}
 
-		self.elements[index] = MaybeUninit::new(Box::<T>::new(element));
+		self.elements[index] = MaybeUninit::new(Box::<N>::new(element));
 	}
 
-	pub fn get(&'b self, index: usize) -> &'b dyn Rule<'a> {
+	pub fn push<N: Unsize<T>>(&mut self, element: N) -> usize {
+		let index = self.elements.len();
+		self.elements.push(MaybeUninit::new(Box::<N>::new(element)));
+		return index;
+	}
+
+	pub fn get(&self, index: usize) -> &T {
 		return unsafe { self.elements[index].get_ref().as_ref() };
 	}
 
-	pub fn get_mut(&'b mut self, index: usize) -> &'b mut dyn Rule<'a> {
+	pub fn get_mut(&mut self, index: usize) -> &mut T {
 		return unsafe { self.elements[index].get_mut().as_mut() };
 	}
 }

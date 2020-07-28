@@ -7,15 +7,16 @@ pub mod arena;
 
 use crate::node::Node;
 use arena::Arena;
+use rule::Rule;
 
 pub struct Parser<'a, 'b, 'c> {
 	tokens: &'c Vec<Node<'a, 'b>>,
-	rules: &'c Arena<'a, 'c>,
+	rules: &'c Arena<dyn Rule<'a> + 'c>,
 	cursor: usize,
 }
 
 impl<'a, 'b, 'c> Parser<'a, 'b, 'c> {
-	fn new(tokens: &'c Vec<Node<'a, 'b>>, rules: &'c Arena<'a, 'c>) -> Self {
+	fn new(tokens: &'c Vec<Node<'a, 'b>>, rules: &'c Arena<dyn Rule<'a> + 'c>) -> Self {
 		return Self {
 			tokens,
 			rules,
