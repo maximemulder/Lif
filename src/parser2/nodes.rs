@@ -8,7 +8,7 @@ pub fn run<'a, 'b>(tokens: &Vec<Node<'a, 'b>>) -> Option<Node<'a, 'b>> {
 	let mut rules = Arena::<dyn Rule>::new();
 	macro_rules! declare {
 		( $name:ident ) => {
-			let $name = rules.index();
+			let $name = rules.reserve();
 		}
 	}
 
@@ -18,10 +18,15 @@ pub fn run<'a, 'b>(tokens: &Vec<Node<'a, 'b>>) -> Option<Node<'a, 'b>> {
 		};
 	}
 
+	macro_rules! create {
+		( $rule:expr ) => {
+			rules.push($rule)
+		}
+	}
+
 	macro_rules! token {
 		( $name:ident, $element:expr ) => {
-			declare!($name);
-			define!($name, token($element));
+			let $name = create!(token($element));
 		}
 	}
 
