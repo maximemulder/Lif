@@ -1,5 +1,7 @@
 #![allow(dead_code)]
 #![feature(const_fn)]
+#![feature(maybe_uninit_ref)]
+#![feature(unsize)]
 
 mod element;
 mod elements;

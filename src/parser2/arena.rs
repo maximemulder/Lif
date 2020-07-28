@@ -1,11 +1,13 @@
+use std::marker::Unsize;
 use std::mem::MaybeUninit;
+use crate::parser2::rule::Rule;
 
-pub struct Arena<T: Copy> {
+pub struct Arena<'a, 'b> {
 	index: usize,
-	elements: Vec<MaybeUninit<T>>,
+	elements: Vec<MaybeUninit<Box<dyn Rule<'a> + 'b>>>,
 }
 
-impl<T: Copy> Arena<T> {
+impl<'a, 'b> Arena<'a, 'b> {
 	pub fn new() -> Self {
 		return Self {
 			index: 0,
@@ -19,15 +21,19 @@ impl<T: Copy> Arena<T> {
 		return index;
 	}
 
-	pub fn insert(&mut self, index: usize, element: T) {
+	pub fn insert<T>(&mut self, index: usize, element: T) where T: Unsize<dyn Rule<'a> + 'b> {
 		while self.elements.len() <= index {
 			self.elements.push(MaybeUninit::uninit());
 		}
 
-		self.elements[index] = MaybeUninit::new(element);
+		self.elements[index] = MaybeUninit::new(Box::<T>::new(element));
 	}
 
-	pub fn get(&self, index: usize) -> T {
-		return unsafe { self.elements[index].assume_init() };
+	pub fn get(&'b self, index: usize) -> &'b dyn Rule<'a> {
+		return unsafe { self.elements[index].get_ref().as_ref() };
+	}
+
+	pub fn get_mut(&'b mut self, index: usize) -> &'b mut dyn Rule<'a> {
+		return unsafe { self.elements[index].get_mut().as_mut() };
 	}
 }
