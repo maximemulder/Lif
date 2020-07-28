@@ -148,11 +148,11 @@ pub fn run<'a, 'b>(tokens: &Vec<Node<'a, 'b>>) -> Option<Node<'a, 'b>> {
 	define_operation!(expression_2, expression_1_element, vec![token_asterisk, token_slash, token_percent, token_asterisk_d]);
 	define_operation!(expression_3, expression_2, vec![token_plus, token_minus]);
 	define_operation!(expression_4, expression_3, vec![guillemet_l_d, guillemet_r_d, guillemet_l_t, guillemet_l_t]);
-	define_operation!(expression_5, expression_4, vec![guillemet_l, guillemet_r, guillemet_l_eq, guillemet_l_eq]);
-	define_operation!(expression_6, expression_5, vec![equal_d, exclamation_eq]);
-	define_operation!(expression_7, expression_6, vec![ampersand]);
-	define_operation!(expression_8, expression_7, vec![caret]);
-	define_operation!(expression_9, expression_8, vec![pipe]);
+	define_operation!(expression_5, expression_4, vec![ampersand]);
+	define_operation!(expression_6, expression_5, vec![caret]);
+	define_operation!(expression_7, expression_6, vec![pipe]);
+	define_operation!(expression_8, expression_7, vec![guillemet_l, guillemet_r, guillemet_l_eq, guillemet_l_eq]);
+	define_operation!(expression_9, expression_8, vec![equal_d, exclamation_eq]);
 	define_operation!(expression_10, expression_9, vec![ampersand_d]);
 	define_operation!(expression_11, expression_10, vec![pipe_d]);
 	define_operation!(expression_12, expression_11, vec![dot_d, dot_d_eq]);
