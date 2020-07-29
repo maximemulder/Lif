@@ -10,6 +10,3 @@ pub const LOOP_BODY: Element = Element::new("LOOP_BODY");
 pub const WHILE:     Element = Element::new("WHILE");
 pub const DO_WHILE:  Element = Element::new("DO_WHILE");
 pub const FOR_IN:    Element = Element::new("FOR_IN");
-pub const CONTINUE:  Element = Element::new("CONTINUE");
-pub const BREAK:     Element = Element::new("BREAK");
-pub const RETURN:    Element = Element::new("RETURN");

@@ -1,3 +1,5 @@
+
+pub mod controls;
 pub mod expressions;
 pub mod ignores;
 pub mod keywords;

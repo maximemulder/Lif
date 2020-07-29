@@ -22,13 +22,13 @@ fn control<'a, 'b>(
 }
 
 pub fn r#break<'a, 'b>(parser: &mut Parser<'a, 'b, '_>) -> Result<Node<'a, 'b>, ()> {
-	return control(parser, &elements::structures::BREAK, &elements::keywords::BREAK);
+	return control(parser, &elements::controls::BREAK, &elements::keywords::BREAK);
 }
 
 pub fn r#continue<'a, 'b>(parser: &mut Parser<'a, 'b, '_>) -> Result<Node<'a, 'b>, ()> {
-	return control(parser, &elements::structures::CONTINUE, &elements::keywords::CONTINUE);
+	return control(parser, &elements::controls::CONTINUE, &elements::keywords::CONTINUE);
 }
 
 pub fn r#return<'a, 'b>(parser: &mut Parser<'a, 'b, '_>) -> Result<Node<'a, 'b>, ()> {
-	return control(parser, &elements::structures::RETURN, &elements::keywords::RETURN);
+	return control(parser, &elements::controls::RETURN, &elements::keywords::RETURN);
 }
