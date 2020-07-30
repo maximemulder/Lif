@@ -113,9 +113,9 @@ pub fn run<'a, 'b>(tokens: &Vec<Node<'a, 'b>>) -> Option<Node<'a, 'b>> {
 	token!(symbol_colon,            &elements::symbols::COLON);
 	token!(symbol_semicolon,        &elements::symbols::SEMICOLON);
 	token!(symbol_backslash,        &elements::symbols::BACKSLASH);
-	token!(token_number,            &elements::variables::NUMBER);
-	token!(token_string,            &elements::variables::STRING);
-	token!(token_identifier,        &elements::variables::IDENTIFIER);
+	token!(variable_number,            &elements::variables::NUMBER);
+	token!(variable_string,            &elements::variables::STRING);
+	token!(variable_identifier,        &elements::variables::IDENTIFIER);
 
 	declare!(program_element);
 	declare!(statements_element);
@@ -127,6 +127,9 @@ pub fn run<'a, 'b>(tokens: &Vec<Node<'a, 'b>>) -> Option<Node<'a, 'b>> {
 	declare!(expression_list);
 	declare!(expression_element);
 	declare!(expression_choice);
+	declare!(function_element);
+	declare!(function_sequence);
+	declare!(parameters);
 	declare!(call);
 	declare!(call_choice);
 	declare!(call_sequence_1);
@@ -164,6 +167,10 @@ pub fn run<'a, 'b>(tokens: &Vec<Node<'a, 'b>>) -> Option<Node<'a, 'b>> {
 	declare!(loop_do_sequence);
 	declare!(while_element);
 	declare!(while_sequence);
+	declare!(for_element);
+	declare!(for_sequence);
+	declare!(declaration_element);
+	declare!(declaration_sequence);
 	declare!(control_element);
 	declare!(control_choice);
 	declare!(return_element);
@@ -179,7 +186,6 @@ pub fn run<'a, 'b>(tokens: &Vec<Node<'a, 'b>>) -> Option<Node<'a, 'b>> {
 	define!(statement_sequence, sequence(vec![expression, symbol_semicolon]));
 
 	define!(expression, alias(operation_12));
-
 	define!(expression_option, option(expression));
 
 	macro_rules! define_list {
@@ -199,17 +205,55 @@ pub fn run<'a, 'b>(tokens: &Vec<Node<'a, 'b>>) -> Option<Node<'a, 'b>> {
 	define_list!(expression_list, expression, &elements::productions::EXPRESSIONS);
 
 	define!(expression_element, element(expression_choice, &elements::productions::EXPRESSION));
-	define!(expression_choice, choice(vec![group_element, structure_element, control_element, literal_element]));
+	define!(expression_choice, choice(vec![function_element, structure_element, declaration_element, control_element, group_element, literal_element]));
 
-	define!(call, recurse(expression_element, call_choice, &(|nodes|  vec![
-		Node::new_production(&elements::productions::EXPRESSION, vec![
-			Node::new_production(&elements::expressions::SEQUENCE, nodes)
-		])
-	])));
+	define!(function_element,  element(function_sequence, &elements::expressions::FUNCTION));
+	define!(function_sequence, sequence(vec![keyword_function, symbol_parenthesis_l, parameters, symbol_parenthesis_r, block_element]));
+	define_list!(parameters, variable_identifier, &elements::productions::PARAMETERS);
 
-	define!(call_choice, choice(vec![call_sequence_1, call_sequence_2]));
-	define!(call_sequence_1, sequence(vec![symbol_parenthesis_l, expression_list, symbol_parenthesis_r]));
-	define!(call_sequence_2, sequence(vec![symbol_crotchet_l, expression_list, symbol_crotchet_r]));
+	define!(structure_element, element(structure_choice, &elements::structures::STRUCTURE));
+	define!(structure_choice, choice(vec![block_element, if_element, loop_element, while_element, for_element]));
+	define!(block_element, element(block_sequence, &elements::structures::BLOCK));
+	define!(block_sequence, sequence(vec![symbol_brace_l, statements_element, expression_option, symbol_brace_r]));
+	define!(if_element, element(if_sequence, &elements::structures::IF));
+	define!(if_sequence, sequence(vec![keyword_if, expression, if_body_element, if_else_option]));
+	define!(if_body_element, element(if_body_choice, &elements::structures::IF_BODY));
+	define!(if_body_choice, choice(vec![if_then_sequence, block_element]));
+	define!(if_then_sequence, sequence(vec![keyword_then, expression]));
+	define!(if_else_option, option(if_else_element));
+	define!(if_else_element, element(if_else_sequence, &elements::structures::IF_ELSE));
+	define!(if_else_sequence, sequence(vec![keyword_else, expression]));
+	define!(loop_element, element(loop_sequence, &elements::structures::LOOP));
+	define!(loop_sequence, sequence(vec![keyword_loop, expression]));
+	define!(loop_body_element, element(loop_body_choice, &elements::structures::LOOP_BODY));
+	define!(loop_body_choice, choice(vec![loop_do_sequence, block_element]));
+	define!(loop_do_sequence, sequence(vec![keyword_do, expression]));
+	define!(while_element, element(while_sequence, &elements::structures::WHILE));
+	define!(while_sequence, sequence(vec![keyword_while, expression, loop_body_element]));
+	define!(for_element, element(for_sequence, &elements::structures::FOR_IN));
+	define!(for_sequence, sequence(vec![keyword_for, variable_identifier, keyword_in, expression]));
+
+	macro_rules! define_control {
+		( $name:ident, $keyword:expr, $element:expr ) => {
+			declare!(control_sequence);
+			define!($name, element(control_sequence, $element));
+			define!(control_sequence, sequence(vec![$keyword, expression_option]));
+		}
+	}
+
+	define!(declaration_element,  element(declaration_sequence, &elements::expressions::DECLARATION));
+	define!(declaration_sequence, sequence(vec![keyword_let, variable_identifier]));
+
+	define!(control_element, element(control_choice, &elements::controls::CONTROL));
+	define!(control_choice,  choice(vec![return_element, break_element, continue_element]));
+	define_control!(return_element,   keyword_return,   &elements::controls::RETURN);
+	define_control!(break_element,    keyword_break,    &elements::controls::BREAK);
+	define_control!(continue_element, keyword_continue, &elements::controls::CONTINUE);
+
+	define!(group_element,  element(group_sequence, &elements::expressions::GROUP));
+	define!(group_sequence, sequence(vec![symbol_parenthesis_l, expression, symbol_parenthesis_r]));
+	define!(literal_element, element(literal_choice, &elements::expressions::LITERAL));
+	define!(literal_choice, choice(vec![variable_number, variable_string, variable_identifier]));
 
 	macro_rules! define_operation {
 		( $name:ident, $child:expr, $tokens:expr ) => {
@@ -242,45 +286,15 @@ pub fn run<'a, 'b>(tokens: &Vec<Node<'a, 'b>>) -> Option<Node<'a, 'b>> {
 		symbol_ampersand_eq, symbol_caret_eq, symbol_pipe_eq, symbol_ampersand_d_eq, symbol_pipe_d_eq
 	]);
 
-	define!(group_element,  element(group_sequence, &elements::expressions::GROUP));
-	define!(group_sequence, sequence(vec![symbol_parenthesis_l, expression, symbol_parenthesis_r]));
+	define!(call, recurse(expression_element, call_choice, &(|nodes|  vec![
+		Node::new_production(&elements::productions::EXPRESSION, vec![
+			Node::new_production(&elements::expressions::SEQUENCE, nodes)
+		])
+	])));
 
-	define!(structure_element, element(structure_choice, &elements::structures::STRUCTURE));
-	define!(structure_choice, choice(vec![block_element, if_element, loop_element, while_element]));
-	define!(block_element, element(block_sequence, &elements::structures::BLOCK));
-	define!(block_sequence, sequence(vec![symbol_brace_l, statements_element, expression_option, symbol_brace_r]));
-	define!(if_element, element(if_sequence, &elements::structures::IF));
-	define!(if_sequence, sequence(vec![keyword_if, expression, if_body_element, if_else_option]));
-	define!(if_body_element, element(if_body_choice, &elements::structures::IF_BODY));
-	define!(if_body_choice, choice(vec![if_then_sequence, block_element]));
-	define!(if_then_sequence, sequence(vec![keyword_then, expression]));
-	define!(if_else_option, option(if_else_element));
-	define!(if_else_element, element(if_else_sequence, &elements::structures::IF_ELSE));
-	define!(if_else_sequence, sequence(vec![keyword_else, expression]));
-	define!(loop_element, element(loop_sequence, &elements::structures::LOOP));
-	define!(loop_sequence, sequence(vec![keyword_loop, expression]));
-	define!(loop_body_element, element(loop_body_choice, &elements::structures::LOOP_BODY));
-	define!(loop_body_choice, choice(vec![loop_do_sequence, block_element]));
-	define!(loop_do_sequence, sequence(vec![keyword_do, expression]));
-	define!(while_element, element(while_sequence, &elements::structures::WHILE));
-	define!(while_sequence, sequence(vec![keyword_while, expression, loop_body_element]));
-
-	macro_rules! define_control {
-		( $name:ident, $keyword:expr, $element:expr ) => {
-			declare!(control_sequence);
-			define!($name, element(control_sequence, $element));
-			define!(control_sequence, sequence(vec![$keyword, expression_option]));
-		}
-	}
-
-	define!(control_element,   element(control_choice, &elements::controls::CONTROL));
-	define!(control_choice,    choice(vec![return_element, break_element, continue_element]));
-	define_control!(return_element,   keyword_return,   &elements::controls::RETURN);
-	define_control!(break_element,    keyword_break,    &elements::controls::BREAK);
-	define_control!(continue_element, keyword_continue, &elements::controls::CONTINUE);
-
-	define!(literal_element, element(literal_choice, &elements::expressions::LITERAL));
-	define!(literal_choice, choice(vec![token_number, token_string, token_identifier]));
+	define!(call_choice, choice(vec![call_sequence_1, call_sequence_2]));
+	define!(call_sequence_1, sequence(vec![symbol_parenthesis_l, expression_list, symbol_parenthesis_r]));
+	define!(call_sequence_2, sequence(vec![symbol_crotchet_l, expression_list, symbol_crotchet_r]));
 
 	let program = &rules.get(program_element);
 	let mut parser = Parser::new(tokens, &rules);
