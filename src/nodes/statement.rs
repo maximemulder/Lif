@@ -1,8 +1,16 @@
 use super::expression::Expression;
-use super::Node;
+use super::{ Node, SyntaxNode };
 
 pub struct Statement {
 	expression: Expression,
+}
+
+impl Statement {
+	pub fn build(node: &SyntaxNode) -> Statement {
+		return Statement {
+			expression: Expression::build(&node.children()[0]),
+		};
+	}
 }
 
 impl Node for Statement {

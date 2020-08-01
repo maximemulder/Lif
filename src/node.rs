@@ -27,4 +27,18 @@ impl<'a, 'b> Node<'a, 'b> {
 	pub fn new_production(element: &'a Element, children: Vec<Node<'a, 'b>>) -> Self {
 		return Self::new(element, Content::Production(children));
 	}
+
+	pub fn children(&self) -> &Vec<Node<'a, 'b>> {
+		return match &self.content {
+			Content::Production(content) => &content,
+			Content::Token(_) => panic!(),
+		};
+	}
+
+	pub fn text(&self) -> &str {
+		return match &self.content {
+			Content::Production(_) => panic!(),
+			Content::Token(content) => content,
+		};
+	}
 }

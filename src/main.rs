@@ -1,5 +1,6 @@
 #![allow(dead_code)]
 #![feature(const_fn)]
+#![feature(new_uninit)]
 #![feature(maybe_uninit_ref)]
 #![feature(unsize)]
 
@@ -11,6 +12,7 @@ mod parser;
 mod parser2;
 mod printer;
 mod nodes;
+mod engine;
 
 use std::env;
 use std::fs;

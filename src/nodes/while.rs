@@ -1,13 +1,12 @@
 use super::expression::Expression;
 use super::Node;
 
-pub struct If {
+pub struct While {
 	condition: Expression,
-	then:      Expression,
-	r#else:    Expression,
+	body:      Expression,
 }
 
-impl Node for If {
+impl Node for While {
 	fn execute(&self) {
 		self.condition.execute();
 	}
