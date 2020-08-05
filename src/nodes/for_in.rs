@@ -1,9 +1,22 @@
+use super::{ Node, SyntaxNode };
 use super::expression::Expression;
-use super::Node;
+use super::loop_body::LoopBody;
+use super::identifier::Identifier;
 
 pub struct ForIn {
-	iterable: Expression,
-	body:     Expression,
+	identifier: Identifier,
+	expression: Expression,
+	body:       LoopBody,
+}
+
+impl ForIn {
+	pub fn build(node: &SyntaxNode) -> ForIn {
+		return ForIn {
+			identifier: Identifier::build(&node.children()[1]),
+			expression: Expression::build(&node.children()[3]),
+			body:       LoopBody::build(&node.children()[4]),
+		};
+	}
 }
 
 impl Node for ForIn {

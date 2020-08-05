@@ -9,11 +9,11 @@ pub struct Expression {
 
 impl Expression {
 	pub fn build(node: &SyntaxNode) -> Expression {
-		let child = node.children()[0].element;
+		let child = &node.children()[0];
 		return Expression {
-			content: match child {
-				&elements::expressions::LITERAL   => Box::new(Literal::build(node)),
-				&elements::structures::STRUCTURE => Box::new(Structure::build(node)),
+			content: match child.element {
+				&elements::expressions::LITERAL   => Box::new(Literal::build(child)),
+				&elements::structures::STRUCTURE => Box::new(Structure::build(child)),
 				_ => panic!(),
 			},
 		};

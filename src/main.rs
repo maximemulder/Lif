@@ -34,5 +34,6 @@ fn main() {
 
     if let Some(tree) = parser2::nodes::run(&tokens) {
         printer::tree(&tree);
+		nodes::program::Program::build(&tree);
 	}
 }

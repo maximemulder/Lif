@@ -1,7 +1,7 @@
 use crate::nodes::statements::Statements;
 use crate::nodes::{ Node, SyntaxNode };
 
-struct Program {
+pub struct Program {
 	statements: Statements,
 }
 

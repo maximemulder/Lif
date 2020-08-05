@@ -5,14 +5,14 @@ use super::r#loop::Loop;
 use super::r#while::While;
 use super::for_in::ForIn;
 
-pub struct Expression {
+pub struct Structure {
 	content: Box<dyn Node>,
 }
 
-impl Expression {
-	pub fn build(node: &SyntaxNode) -> Expression {
+impl Structure {
+	pub fn build(node: &SyntaxNode) -> Structure {
 		let child = node.children()[0].element;
-		return Expression {
+		return Structure {
 			content: match child {
 				&elements::structures::IF     => Box::new(If::build(node)),
 				&elements::structures::LOOP   => Box::new(Loop::build(node)),
@@ -24,7 +24,7 @@ impl Expression {
 	}
 }
 
-impl Node for Expression {
+impl Node for Structure {
 	fn execute(&self) {
 
 	}

@@ -20,9 +20,9 @@ impl Literal {
 		let child = &node.children()[0];
 		return Literal {
 			content: match child.element {
-				&elements::variables::STRING     => Content::String(String::build(node)),
-				&elements::variables::IDENTIFIER => Content::Identifier(Identifier::build(node)),
-				&elements::variables::NUMBER     => Content::Number(Number::build(node)),
+				&elements::variables::STRING     => Content::String(String::build(child)),
+				&elements::variables::IDENTIFIER => Content::Identifier(Identifier::build(child)),
+				&elements::variables::NUMBER     => Content::Number(Number::build(child)),
 				_ => panic!(),
 			},
 		};
