@@ -1,19 +1,19 @@
 use super::expression::Expression;
 use super::{ Node, SyntaxNode };
 
-pub struct ThenBody {
+pub struct Group {
 	expression: Expression,
 }
 
-impl ThenBody {
-	pub fn build(node: &SyntaxNode) -> ThenBody {
-		return ThenBody {
+impl Group {
+	pub fn build(node: &SyntaxNode) -> Group {
+		return Group {
 			expression: Expression::build(&node.children()[node.children().len() - 1]),
 		};
 	}
 }
 
-impl Node for ThenBody {
+impl Node for Group {
 	fn execute(&self) {
 		self.expression.execute();
 	}

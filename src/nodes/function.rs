@@ -1,0 +1,23 @@
+use super::{ Node, SyntaxNode };
+use super::block::Block;
+use super::parameters::Parameters;
+
+pub struct Function {
+	parameters: Parameters,
+	block: Block,
+}
+
+impl Function {
+	pub fn build(node: &SyntaxNode) -> Function {
+		return Function {
+			parameters: Parameters::build(&node.children()[2]),
+			block:      Block::build(&node.children()[4]),
+		};
+	}
+}
+
+impl Node for Function {
+	fn execute(&self) {
+		self.block.execute();
+	}
+}

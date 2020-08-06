@@ -17,11 +17,15 @@ pub mod structure;
 pub mod operation;
 pub mod sequence;
 pub mod symbol;
-pub mod then_body;
-pub mod loop_body;
+pub mod then;
+pub mod r#do;
 pub mod expressions;
 pub mod declaration;
 pub mod r#else;
+pub mod parameters;
+pub mod function;
+pub mod block;
+pub mod group;
 
 pub use crate::node::Node as SyntaxNode;
 

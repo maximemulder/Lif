@@ -1,12 +1,12 @@
 use super::expression::Expression;
 use super::{ Node, SyntaxNode };
 
-pub struct Else {
+pub struct Expressions {
 	expressions: Vec<Expression>,
 }
 
-impl Else {
-	pub fn build(node: &SyntaxNode) -> Else {
+impl Expressions {
+	pub fn build(node: &SyntaxNode) -> Expressions {
 		let mut expressions = Vec::new();
 		for (i, child) in node.children().iter().enumerate()  {
 			if i % 2 == 1 {
@@ -16,13 +16,13 @@ impl Else {
 			expressions.push(Expression::build(child));
 		}
 
-		return Else {
+		return Expressions {
 			expressions,
 		};
 	}
 }
 
-impl Node for Else {
+impl Node for Expressions {
 	fn execute(&self) {
 
 	}

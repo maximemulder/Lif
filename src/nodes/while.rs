@@ -1,17 +1,17 @@
 use super::expression::Expression;
-use super::loop_body::LoopBody;
+use super::r#do::Do;
 use super::{ Node, SyntaxNode };
 
 pub struct While {
 	condition: Expression,
-	body:      LoopBody,
+	body:      Do,
 }
 
 impl While {
 	pub fn build(node: &SyntaxNode) -> While {
 		return While {
 			condition: Expression::build(&node.children()[1]),
-			body:      LoopBody::build(&node.children()[2]),
+			body:      Do::build(&node.children()[2]),
 		};
 	}
 }

@@ -1,12 +1,12 @@
 use super::{ Node, SyntaxNode };
 use super::expression::Expression;
-use super::loop_body::LoopBody;
+use super::r#do::Do;
 use super::identifier::Identifier;
 
 pub struct ForIn {
 	identifier: Identifier,
 	expression: Expression,
-	body:       LoopBody,
+	body:       Do,
 }
 
 impl ForIn {
@@ -14,7 +14,7 @@ impl ForIn {
 		return ForIn {
 			identifier: Identifier::build(&node.children()[1]),
 			expression: Expression::build(&node.children()[3]),
-			body:       LoopBody::build(&node.children()[4]),
+			body:       Do::build(&node.children()[4]),
 		};
 	}
 }
