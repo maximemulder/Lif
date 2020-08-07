@@ -1,5 +1,6 @@
-use super::{ Node, SyntaxNode };
+use super::{ Engine, Node, SyntaxNode };
 use crate::elements;
+use super::block::Block;
 use super::r#if::If;
 use super::r#loop::Loop;
 use super::r#while::While;
@@ -11,13 +12,14 @@ pub struct Structure {
 
 impl Structure {
 	pub fn build(node: &SyntaxNode) -> Structure {
-		let child = node.children()[0].element;
+		let child = &node.children()[0];
 		return Structure {
-			content: match child {
-				&elements::structures::IF     => Box::new(If::build(node)),
-				&elements::structures::LOOP   => Box::new(Loop::build(node)),
-				&elements::structures::WHILE  => Box::new(While::build(node)),
-				&elements::structures::FOR_IN => Box::new(ForIn::build(node)),
+			content: match child.element {
+				&elements::structures::BLOCK  => Box::new(Block::build(child)),
+				&elements::structures::IF     => Box::new(If::build(child)),
+				&elements::structures::LOOP   => Box::new(Loop::build(child)),
+				&elements::structures::WHILE  => Box::new(While::build(child)),
+				&elements::structures::FOR_IN => Box::new(ForIn::build(child)),
 				_ => panic!(),
 			},
 		};
@@ -25,7 +27,7 @@ impl Structure {
 }
 
 impl Node for Structure {
-	fn execute(&self) {
+	fn execute(&self, engine: &mut Engine) {
 
 	}
 }

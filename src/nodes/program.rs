@@ -1,5 +1,5 @@
 use crate::nodes::statements::Statements;
-use crate::nodes::{ Node, SyntaxNode };
+use super::{ Engine, Node, SyntaxNode };
 
 pub struct Program {
 	statements: Statements,
@@ -14,7 +14,7 @@ impl Program {
 }
 
 impl Node for Program {
-	fn execute(&self) {
-		self.statements.execute();
+	fn execute(&self, engine: &mut Engine) {
+		self.statements.execute(engine);
 	}
 }

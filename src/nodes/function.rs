@@ -1,4 +1,4 @@
-use super::{ Node, SyntaxNode };
+use super::{ Engine, Node, SyntaxNode };
 use super::block::Block;
 use super::parameters::Parameters;
 
@@ -17,7 +17,7 @@ impl Function {
 }
 
 impl Node for Function {
-	fn execute(&self) {
-		self.block.execute();
+	fn execute(&self, engine: &mut Engine) {
+		self.block.execute(engine);
 	}
 }

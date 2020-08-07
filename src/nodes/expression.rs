@@ -1,8 +1,9 @@
-use super::{ Node, SyntaxNode };
+use super::{ Engine, Node, SyntaxNode };
 use super::literal::Literal;
 use super::sequence::Sequence;
 use super::structure::Structure;
 use super::operation::Operation;
+use super::function::Function;
 use super::group::Group;
 use super::declaration::Declaration;
 use crate::elements;
@@ -18,8 +19,7 @@ impl Expression {
 			content: match child.element {
 				&elements::expressions::LITERAL   => Box::new(Literal::build(child)),
 				&elements::structures::STRUCTURE => Box::new(Structure::build(child)),
-				&elements::expressions::FUNCTION => Box::new(Structure::build(child)),
-				&elements::structures::BLOCK => Box::new(Structure::build(child)),
+				&elements::expressions::FUNCTION => Box::new(Function::build(child)),
 				&elements::expressions::OPERATION => Box::new(Operation::build(child)),
 				&elements::expressions::SEQUENCE => Box::new(Sequence::build(child)),
 				&elements::expressions::GROUP => Box::new(Group::build(child)),
@@ -31,7 +31,7 @@ impl Expression {
 }
 
 impl Node for Expression {
-	fn execute(&self) {
+	fn execute(&self, engine: &mut Engine) {
 
 	}
 }

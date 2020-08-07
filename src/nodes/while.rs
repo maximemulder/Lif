@@ -1,6 +1,6 @@
 use super::expression::Expression;
 use super::r#do::Do;
-use super::{ Node, SyntaxNode };
+use super::{ Engine, Node, SyntaxNode };
 
 pub struct While {
 	condition: Expression,
@@ -17,7 +17,7 @@ impl While {
 }
 
 impl Node for While {
-	fn execute(&self) {
-		self.condition.execute();
+	fn execute(&self, engine: &mut Engine) {
+		self.condition.execute(engine);
 	}
 }

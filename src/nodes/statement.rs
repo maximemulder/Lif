@@ -1,5 +1,5 @@
 use super::expression::Expression;
-use super::{ Node, SyntaxNode };
+use super::{ Engine, Node, SyntaxNode };
 
 pub struct Statement {
 	expression: Expression,
@@ -14,7 +14,7 @@ impl Statement {
 }
 
 impl Node for Statement {
-	fn execute(&self) {
-		self.expression.execute();
+	fn execute(&self, engine: &mut Engine) {
+		self.expression.execute(engine);
 	}
 }

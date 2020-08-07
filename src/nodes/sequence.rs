@@ -1,7 +1,7 @@
 use super::expression::Expression;
 use super::expressions::Expressions;
 use super::symbol::Symbol;
-use super::{ Node, SyntaxNode };
+use super::{ Engine, Node, SyntaxNode };
 
 pub struct Sequence {
 	expression:  Expression,
@@ -22,9 +22,9 @@ impl Sequence {
 }
 
 impl Node for Sequence {
-	fn execute(&self) {
+	fn execute(&self, engine: &mut Engine) {
 		loop {
-			self.expression.execute();
+			self.expression.execute(engine);
 		}
 	}
 }

@@ -1,4 +1,4 @@
-use super::{ Node, SyntaxNode };
+use super::{ Engine, Node, SyntaxNode };
 
 pub struct Number {
 	text: Box<str>,
@@ -13,7 +13,7 @@ impl Number {
 }
 
 impl Node for Number {
-	fn execute(&self) {
+	fn execute(&self, engine: &mut Engine) {
 
 	}
 }

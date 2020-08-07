@@ -1,7 +1,7 @@
-use super::{ Node, SyntaxNode };
+use super::{ Engine, Node, SyntaxNode };
 
 pub struct Identifier {
-	text: Box<str>,
+	pub text: Box<str>,
 }
 
 impl Identifier {
@@ -13,7 +13,7 @@ impl Identifier {
 }
 
 impl Node for Identifier {
-	fn execute(&self) {
+	fn execute(&self, engine: &mut Engine) {
 
 	}
 }

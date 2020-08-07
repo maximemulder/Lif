@@ -1,7 +1,7 @@
 use super::expression::Expression;
 use super::then::Then;
 use super::r#else::Else;
-use super::{ Node, SyntaxNode };
+use super::{ Engine, Node, SyntaxNode };
 
 pub struct If {
 	condition: Expression,
@@ -24,7 +24,7 @@ impl If {
 }
 
 impl Node for If {
-	fn execute(&self) {
-		self.condition.execute();
+	fn execute(&self, engine: &mut Engine) {
+		self.condition.execute(engine);
 	}
 }

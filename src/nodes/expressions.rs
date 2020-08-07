@@ -1,5 +1,5 @@
 use super::expression::Expression;
-use super::{ Node, SyntaxNode };
+use super::{ Engine, Node, SyntaxNode };
 
 pub struct Expressions {
 	expressions: Vec<Expression>,
@@ -23,7 +23,7 @@ impl Expressions {
 }
 
 impl Node for Expressions {
-	fn execute(&self) {
+	fn execute(&self, engine: &mut Engine) {
 
 	}
 }

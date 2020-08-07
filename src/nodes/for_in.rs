@@ -1,4 +1,4 @@
-use super::{ Node, SyntaxNode };
+use super::{ Engine, Node, SyntaxNode };
 use super::expression::Expression;
 use super::r#do::Do;
 use super::identifier::Identifier;
@@ -20,7 +20,7 @@ impl ForIn {
 }
 
 impl Node for ForIn {
-	fn execute(&self) {
-		self.body.execute();
+	fn execute(&self, engine: &mut Engine) {
+		self.body.execute(engine);
 	}
 }

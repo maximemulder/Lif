@@ -1,6 +1,6 @@
 use super::expression::Expression;
 use super::statements::Statements;
-use super::{ Node, SyntaxNode };
+use super::{ Engine, Node, SyntaxNode };
 
 pub struct Block {
 	statements: Statements,
@@ -10,9 +10,9 @@ pub struct Block {
 impl Block {
 	pub fn build(node: &SyntaxNode) -> Block {
 		return Block {
-			statements: Statements::build(&node.children()[0]),
-			expression: if node.children().len() == 2 {
-				Some(Expression::build(&node.children()[1]))
+			statements: Statements::build(&node.children()[1]),
+			expression: if node.children().len() == 4 {
+				Some(Expression::build(&node.children()[2]))
 			} else {
 				None
 			},
@@ -21,7 +21,7 @@ impl Block {
 }
 
 impl Node for Block {
-	fn execute(&self) {
-		self.statements.execute();
+	fn execute(&self, engine: &mut Engine) {
+		self.statements.execute(engine);
 	}
 }

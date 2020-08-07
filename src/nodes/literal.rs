@@ -1,4 +1,4 @@
-use super::{ Node, SyntaxNode };
+use super::{ Engine, Node, SyntaxNode };
 use crate::elements;
 
 use super::string::String;
@@ -30,7 +30,7 @@ impl Literal {
 }
 
 impl Node for Literal {
-	fn execute(&self) {
+	fn execute(&self, engine: &mut Engine) {
 
 	}
 }

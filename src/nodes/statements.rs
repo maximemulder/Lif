@@ -1,5 +1,5 @@
 use super::statement::Statement;
-use super::{ Node, SyntaxNode };
+use super::{ Engine, Node, SyntaxNode };
 
 pub struct Statements {
 	statements: Vec<Statement>,
@@ -19,9 +19,9 @@ impl Statements {
 }
 
 impl Node for Statements {
-	fn execute(&self) {
+	fn execute(&self, engine: &mut Engine) {
 		for statement in self.statements.iter() {
-			statement.execute();
+			statement.execute(engine);
 		}
 	}
 }

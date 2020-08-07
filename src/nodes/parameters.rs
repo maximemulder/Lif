@@ -1,5 +1,5 @@
 use super::identifier::Identifier;
-use super::{ Node, SyntaxNode };
+use super::{ Engine, Node, SyntaxNode };
 
 pub struct Parameters {
 	identifiers: Vec<Identifier>,
@@ -23,7 +23,7 @@ impl Parameters {
 }
 
 impl Node for Parameters {
-	fn execute(&self) {
+	fn execute(&self, engine: &mut Engine) {
 
 	}
 }

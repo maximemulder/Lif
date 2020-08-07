@@ -1,5 +1,5 @@
 use super::expression::Expression;
-use super::{ Node, SyntaxNode };
+use super::{ Engine, Node, SyntaxNode };
 
 pub struct Loop {
 	body: Expression,
@@ -14,9 +14,9 @@ impl Loop {
 }
 
 impl Node for Loop {
-	fn execute(&self) {
+	fn execute(&self, engine: &mut Engine) {
 		loop {
-			self.body.execute();
+			self.body.execute(engine);
 		}
 	}
 }

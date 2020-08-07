@@ -1,5 +1,4 @@
 #![allow(dead_code)]
-pub mod binary;
 pub mod expression;
 pub mod program;
 pub mod r#if;
@@ -27,10 +26,12 @@ pub mod function;
 pub mod block;
 pub mod group;
 
+use crate::runtime::Engine;
+
 pub use crate::node::Node as SyntaxNode;
 
 pub trait Node {
-	fn execute(&self);
+	fn execute(&self, engine: &mut Engine);
 }
 
 
