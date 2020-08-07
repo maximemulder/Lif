@@ -21,6 +21,15 @@ impl ForIn {
 
 impl Node for ForIn {
 	fn execute(&self, engine: &mut Engine) {
-		self.body.execute(engine);
+		let value = self.expression.execute(engine);
+		engine.cast(value, engine.types.array);
+		let elements = value.data.asArray().elements;
+		for element in elements {
+			engine.push_scope();
+			let value = engine.new_variable(self.identifier.text.to_string());
+			engine.set_variable(value);
+			self.body.execute(engine);
+			engine.pop_scope();
+		}
 	}
 }
