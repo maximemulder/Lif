@@ -17,7 +17,7 @@ impl Function {
 }
 
 impl Node for Function {
-	fn execute(&self, engine: &mut Engine) {
-		self.block.execute(engine);
+	fn execute(&self, engine: &mut Engine) -> Option<usize> {
+		return self.block.execute(engine);
 	}
 }

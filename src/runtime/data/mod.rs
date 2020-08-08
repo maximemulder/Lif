@@ -6,13 +6,13 @@ mod integer;
 mod text;
 mod r#type;
 
-use array::Array;
-use boolean::Boolean;
-use function::Function;
-use instance::Instance;
-use integer::Integer;
-use text::Text;
-use r#type::Type;
+pub use array::Array;
+pub use boolean::Boolean;
+pub use function::Function;
+pub use instance::Instance;
+pub use integer::Integer;
+pub use text::Text;
+pub use r#type::Type;
 
 pub enum Data {
 	Array(Array),
@@ -20,7 +20,7 @@ pub enum Data {
 	Instance(Instance),
 	Integer(Integer),
 	Function(Function),
-	Text(Text),
+	String(Text),
 	Type(Type),
 	Null,
 }

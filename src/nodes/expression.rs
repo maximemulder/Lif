@@ -31,7 +31,7 @@ impl Expression {
 }
 
 impl Node for Expression {
-	fn execute(&self, engine: &mut Engine) {
-
+	fn execute(&self, engine: &mut Engine) -> Option<usize> {
+		return self.content.execute(engine);
 	}
 }

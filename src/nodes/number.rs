@@ -1,7 +1,7 @@
-use super::{ Engine, Node, SyntaxNode };
+use super::SyntaxNode;
 
 pub struct Number {
-	text: Box<str>,
+	pub text: Box<str>,
 }
 
 impl Number {
@@ -12,8 +12,3 @@ impl Number {
 	}
 }
 
-impl Node for Number {
-	fn execute(&self, engine: &mut Engine) {
-
-	}
-}

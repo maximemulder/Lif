@@ -1,4 +1,4 @@
-use super::{ Engine, Node, SyntaxNode };
+use super::SyntaxNode;
 
 pub struct Identifier {
 	pub text: Box<str>,
@@ -9,11 +9,5 @@ impl Identifier {
 		return Identifier {
 			text: Box::from(node.text()),
 		};
-	}
-}
-
-impl Node for Identifier {
-	fn execute(&self, engine: &mut Engine) {
-
 	}
 }

@@ -23,7 +23,7 @@ impl Expressions {
 }
 
 impl Node for Expressions {
-	fn execute(&self, engine: &mut Engine) {
-
+	fn execute(&self, engine: &mut Engine) -> Option<usize> {
+		return None;
 	}
 }

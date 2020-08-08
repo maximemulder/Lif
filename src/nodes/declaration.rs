@@ -14,8 +14,7 @@ impl Declaration {
 }
 
 impl Node for Declaration {
-	fn execute(&self, engine: &mut Engine) {
-		let value = engine.new_variable(self.identifier.text.to_string());
-		engine.set_value(value);
+	fn execute(&self, engine: &mut Engine) -> Option<usize> {
+		return Some(engine.new_variable(&self.identifier.text));
 	}
 }

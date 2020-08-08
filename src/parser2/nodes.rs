@@ -113,9 +113,9 @@ pub fn run<'a, 'b>(tokens: &Vec<Node<'a, 'b>>) -> Option<Node<'a, 'b>> {
 	token!(symbol_colon,            &elements::symbols::COLON);
 	token!(symbol_semicolon,        &elements::symbols::SEMICOLON);
 	token!(symbol_backslash,        &elements::symbols::BACKSLASH);
-	token!(variable_number,            &elements::variables::NUMBER);
-	token!(variable_string,            &elements::variables::STRING);
-	token!(variable_identifier,        &elements::variables::IDENTIFIER);
+	token!(variable_identifier,     &elements::variables::IDENTIFIER);
+	token!(variable_string,         &elements::variables::STRING);
+	token!(variable_number,         &elements::variables::NUMBER);
 
 	declare!(program_element);
 	declare!(statements_element);
@@ -253,7 +253,7 @@ pub fn run<'a, 'b>(tokens: &Vec<Node<'a, 'b>>) -> Option<Node<'a, 'b>> {
 	define!(group_element,  element(group_sequence, &elements::expressions::GROUP));
 	define!(group_sequence, sequence(vec![symbol_parenthesis_l, expression, symbol_parenthesis_r]));
 	define!(literal_element, element(literal_choice, &elements::expressions::LITERAL));
-	define!(literal_choice, choice(vec![variable_number, variable_string, variable_identifier]));
+	define!(literal_choice, choice(vec![variable_identifier, variable_string, variable_number]));
 
 	macro_rules! define_operation {
 		( $name:ident, $child:expr, $tokens:expr ) => {

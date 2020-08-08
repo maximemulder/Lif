@@ -14,7 +14,7 @@ impl Group {
 }
 
 impl Node for Group {
-	fn execute(&self, engine: &mut Engine) {
-		self.expression.execute(engine);
+	fn execute(&self, engine: &mut Engine) -> Option<usize> {
+		return self.expression.execute(engine);
 	}
 }

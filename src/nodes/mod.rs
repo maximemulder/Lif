@@ -31,7 +31,7 @@ use crate::runtime::Engine;
 pub use crate::node::Node as SyntaxNode;
 
 pub trait Node {
-	fn execute(&self, engine: &mut Engine);
+	fn execute(&self, engine: &mut Engine) -> Option<usize>;
 }
 
 

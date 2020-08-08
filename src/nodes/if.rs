@@ -24,7 +24,7 @@ impl If {
 }
 
 impl Node for If {
-	fn execute(&self, engine: &mut Engine) {
-		self.condition.execute(engine);
+	fn execute(&self, engine: &mut Engine) -> Option<usize> {
+		return self.condition.execute(engine);
 	}
 }

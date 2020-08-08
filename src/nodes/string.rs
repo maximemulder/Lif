@@ -1,7 +1,7 @@
-use super::{ Engine, Node, SyntaxNode };
+use super::SyntaxNode;
 
 pub struct String {
-	text: Box<str>,
+	pub text: Box<str>,
 }
 
 impl String {
@@ -9,11 +9,5 @@ impl String {
 		return String {
 			text: Box::from(node.text()),
 		};
-	}
-}
-
-impl Node for String {
-	fn execute(&self, engine: &mut Engine) {
-
 	}
 }

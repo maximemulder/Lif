@@ -14,7 +14,8 @@ impl Program {
 }
 
 impl Node for Program {
-	fn execute(&self, engine: &mut Engine) {
+	fn execute(&self, engine: &mut Engine) -> Option<usize> {
 		self.statements.execute(engine);
+		return None;
 	}
 }

@@ -1,13 +1,14 @@
 use super::{ Engine, Node, SyntaxNode };
 use crate::elements;
 
-use super::string::String;
 use super::identifier::Identifier;
+use super::string::String;
 use super::number::Number;
+use crate::runtime::Value;
 
 enum Content {
-	String(String),
 	Identifier(Identifier),
+	String(String),
 	Number(Number),
 }
 
@@ -20,8 +21,8 @@ impl Literal {
 		let child = &node.children()[0];
 		return Literal {
 			content: match child.element {
-				&elements::variables::STRING     => Content::String(String::build(child)),
 				&elements::variables::IDENTIFIER => Content::Identifier(Identifier::build(child)),
+				&elements::variables::STRING     => Content::String(String::build(child)),
 				&elements::variables::NUMBER     => Content::Number(Number::build(child)),
 				_ => panic!(),
 			},
@@ -30,7 +31,11 @@ impl Literal {
 }
 
 impl Node for Literal {
-	fn execute(&self, engine: &mut Engine) {
-
+	fn execute(&self, engine: &mut Engine) -> Option<usize> {
+		return Some(match &self.content {
+			Content::Identifier(identifier) => engine.get_variable(&identifier.text),
+			Content::String(string)         => engine.new_value(Value::new_string(&string.text)),
+			Content::Number(number)         => engine.new_value(Value::new_integer(number.text.parse::<usize>().unwrap())),
+		});
 	}
 }

@@ -19,9 +19,11 @@ impl Statements {
 }
 
 impl Node for Statements {
-	fn execute(&self, engine: &mut Engine) {
+	fn execute(&self, engine: &mut Engine) -> Option<usize> {
 		for statement in self.statements.iter() {
 			statement.execute(engine);
 		}
+
+		return None;
 	}
 }

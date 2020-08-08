@@ -21,7 +21,16 @@ impl Block {
 }
 
 impl Node for Block {
-	fn execute(&self, engine: &mut Engine) {
+	fn execute(&self, engine: &mut Engine) -> Option<usize> {
+		engine.push_scope();
 		self.statements.execute(engine);
+		let value = if let Some(expression) = &self.expression {
+			expression.execute(engine)
+		} else {
+			None
+		};
+
+		engine.pop_scope();
+		return value;
 	}
 }

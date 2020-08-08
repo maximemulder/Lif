@@ -19,7 +19,9 @@ impl Operation {
 }
 
 impl Node for Operation {
-	fn execute(&self, engine: &mut Engine) {
+	fn execute(&self, engine: &mut Engine) -> Option<usize> {
 		self.left.execute(engine);
+		self.right.execute(engine);
+		return None;
 	}
 }
