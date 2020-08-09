@@ -40,10 +40,8 @@ impl Engine {
 		self.values[index] = value;
 	}
 
-	pub fn get_value(&mut self, index: usize) -> &Value {
-		return &self.values[index];
-
-		panic!();
+	pub fn get_value(&mut self, index: usize) -> &mut Value {
+		return &mut self.values[index];
 	}
 
 	pub fn get_scope(&mut self) -> &mut Scope {
@@ -88,8 +86,13 @@ impl Engine {
 		self.get_value(index);
 	} */
 
-	pub fn get_cast_boolean_primitive(&self, index: usize) -> bool {
+	pub fn get_cast_array(&self, index: usize) -> Vec<usize> {
+		self.values[index].cast(self.classes.array);
+		return self.values[index].data.as_array();
+	}
+
+	pub fn get_cast_boolean(&self, index: usize) -> bool {
 		self.values[index].cast(self.classes.boolean);
-		return self.values[index].data.as_boolean().boolean;
+		return self.values[index].data.as_boolean();
 	}
 }

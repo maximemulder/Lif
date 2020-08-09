@@ -1,5 +1,6 @@
 mod data;
 
+use crate::runtime::Engine;
 use data::*;
 
 pub struct Value {
@@ -15,20 +16,20 @@ impl Value {
 		};
 	}
 
-	pub fn new_boolean(boolean: bool) -> Self {
-		return Self::new(0, Data::Boolean(Boolean::new(boolean)));
+	pub fn new_boolean(engine: &Engine, boolean: bool) -> Self {
+		return Self::new(engine.classes.boolean, Data::Boolean(boolean));
 	}
 
-	pub fn new_class() -> Self {
-		return Self::new(0, Data::Class(Class::new()));
+	pub fn new_class(engine: &Engine) -> Self {
+		return Self::new(engine.classes.class, Data::Class(Class::new()));
 	}
 
-	pub fn new_integer(integer: usize) -> Self {
-		return Self::new(0, Data::Integer(Integer::new(integer)));
+	pub fn new_integer(engine: &Engine, integer: usize) -> Self {
+		return Self::new(engine.classes.integer, Data::Integer(integer));
 	}
 
-	pub fn new_string(string: &str) -> Self {
-		return Self::new(0, Data::String(Text::new(string)));
+	pub fn new_string(engine: &Engine, string: &str) -> Self {
+		return Self::new(engine.classes.string, Data::String(string.to_string()));
 	}
 
 	pub fn new_undefined() -> Self {

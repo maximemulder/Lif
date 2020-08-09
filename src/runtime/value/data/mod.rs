@@ -1,34 +1,34 @@
-mod array;
-mod boolean;
 mod function;
 mod instance;
-mod integer;
-mod text;
 mod class;
 
-pub use array::Array;
-pub use boolean::Boolean;
 pub use function::Function;
 pub use instance::Instance;
-pub use integer::Integer;
-pub use text::Text;
 pub use class::Class;
 
 pub enum Data {
-	Array(Array),
-	Boolean(Boolean),
+	Array(Vec<usize>),
+	Boolean(bool),
 	Class(Class),
 	Instance(Instance),
-	Integer(Integer),
+	Integer(usize),
 	Function(Function),
-	String(Text),
+	String(String),
 	Undefined(()),
 }
 
 impl Data {
-	pub fn as_boolean(&self) -> &Boolean {
+	pub fn as_array(&self) -> Vec<usize> {
+		if let Data::Array(array) = self {
+			return array.clone();
+		}
+
+		panic!();
+	}
+
+	pub fn as_boolean(&self) -> bool {
 		if let Data::Boolean(boolean) = self {
-			return boolean;
+			return *boolean;
 		}
 
 		panic!();

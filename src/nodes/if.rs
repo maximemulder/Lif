@@ -25,10 +25,8 @@ impl If {
 
 impl Node for If {
 	fn execute(&self, engine: &mut Engine) -> Option<usize> {
-		return if {
-			let value = self.condition.execute(engine).unwrap();
-			engine.get_cast_boolean_primitive(value)
-		} {
+		let condition = self.condition.execute(engine).unwrap();
+		return if engine.get_cast_boolean(condition) {
 			self.then.execute(engine)
 		} else if let Some(r#else) = &self.r#else {
 			r#else.execute(engine)

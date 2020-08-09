@@ -13,7 +13,6 @@ pub mod token;
 pub mod structure;
 pub mod operation;
 pub mod sequence;
-pub mod symbol;
 pub mod then;
 pub mod r#do;
 pub mod expressions;

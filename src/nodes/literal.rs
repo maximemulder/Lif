@@ -34,8 +34,8 @@ impl Node for Literal {
 	fn execute(&self, engine: &mut Engine) -> Option<usize> {
 		return Some(match &self.content {
 			Content::Identifier => engine.get_variable(&self.text),
-			Content::String     => engine.new_value(Value::new_string(&self.text)),
-			Content::Number     => engine.new_value(Value::new_integer(self.text.parse::<usize>().unwrap())),
+			Content::String     => engine.new_value(Value::new_string(engine, &self.text)),
+			Content::Number     => engine.new_value(Value::new_integer(engine, self.text.parse::<usize>().unwrap())),
 		});
 	}
 }
