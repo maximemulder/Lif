@@ -34,5 +34,8 @@ impl Engine {
 		self.classes.string   = self.new_value(Value::new_class(self));
 
 		self.get_value(self.classes.class).class = self.classes.class;
+
+		let primitive = self.new_value(Value::new_primitive(self, &|_engine, _parameters| None));
+		self.get_value(self.classes.integer).data.as_class().methods.insert("yo".to_string(), primitive);
 	}
 }

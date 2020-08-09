@@ -85,13 +85,13 @@ impl Engine {
 		self.get_value(index);
 	} */
 
-	pub fn get_cast_array(&self, index: usize) -> Vec<usize> {
+	pub fn get_cast_array(&mut self, index: usize) -> Vec<usize> {
 		self.values[index].cast(self.classes.array);
-		return self.values[index].data.as_array();
+		return self.values[index].data.as_array().clone();
 	}
 
-	pub fn get_cast_boolean(&self, index: usize) -> bool {
+	pub fn get_cast_boolean(&mut self, index: usize) -> bool {
 		self.values[index].cast(self.classes.boolean);
-		return self.values[index].data.as_boolean();
+		return *self.values[index].data.as_boolean();
 	}
 }

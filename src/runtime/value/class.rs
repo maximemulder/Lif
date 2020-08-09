@@ -3,7 +3,7 @@ use std::collections::HashMap;
 pub struct Class {
 	parent: Option<usize>,
 	statics: HashMap<String, usize>,
-	methods: HashMap<String, usize>,
+	pub methods: HashMap<String, usize>,
 }
 
 impl Class {
