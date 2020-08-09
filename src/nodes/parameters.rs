@@ -1,8 +1,8 @@
-use super::identifier::Identifier;
+use super::token::Token;
 use super::SyntaxNode;
 
 pub struct Parameters {
-	identifiers: Vec<Identifier>,
+	identifiers: Vec<Box<str>>,
 }
 
 impl Parameters {
@@ -13,7 +13,7 @@ impl Parameters {
 				continue;
 			}
 
-			identifiers.push(Identifier::build(child));
+			identifiers.push(Token::build(child));
 		}
 
 		return Parameters {

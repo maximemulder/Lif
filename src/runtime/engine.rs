@@ -1,41 +1,47 @@
 use super::scope::Scope;
+use super::classes::Classes;
 use super::Value;
 
 pub struct Engine {
-	values: Vec<Option<Value>>,
+	pub classes: Classes,
+	values: Vec<Value>,
 	scopes: Vec<Scope>,
 	scope: usize,
 }
 
 impl Engine {
 	pub fn new() -> Self {
-		return Self {
+		let mut engine = Self {
 			values: Vec::new(),
-			scopes: vec![Scope::new()],
+			classes: Classes::new(),
+			scopes: Vec::new(),
 			scope: 0,
 		};
+
+		engine.scopes.push(Scope::new());
+		engine.build_classes();
+
+		return engine;
 	}
 
 	pub fn new_undefined(&mut self) -> usize {
 		let index = self.values.len();
-		self.values.push(None);
+		self.values.push(Value::new_undefined());
 		return index;
 	}
 
 	pub fn new_value(&mut self, value: Value) -> usize {
 		let index = self.values.len();
-		self.values.push(Some(value));
+		self.values.push(value);
 		return index;
 	}
 
 	pub fn set_value(&mut self, index: usize, value: Value) {
-		self.values[index] = Some(value);
+		self.values[index] = value;
 	}
 
 	pub fn get_value(&mut self, index: usize) -> &Value {
-		if let Some(value) = &self.values[index] {
-			return value;
-		}
+		return &self.values[index];
 
 		panic!();
 	}
@@ -81,4 +87,9 @@ impl Engine {
 		let index = self.get_variable(name);
 		self.get_value(index);
 	} */
+
+	pub fn get_cast_boolean_primitive(&self, index: usize) -> bool {
+		self.values[index].cast(self.classes.boolean);
+		return self.values[index].data.as_boolean().boolean;
+	}
 }

@@ -1,18 +1,18 @@
 use super::{ Engine, Node, SyntaxNode };
 use super::expression::Expression;
 use super::r#do::Do;
-use super::identifier::Identifier;
+use super::token::Token;
 
 pub struct ForIn {
-	identifier: Identifier,
+	identifier: Box<str>,
 	expression: Expression,
-	body:       Do,
+	body:       Expression,
 }
 
 impl ForIn {
 	pub fn build(node: &SyntaxNode) -> ForIn {
 		return ForIn {
-			identifier: Identifier::build(&node.children()[1]),
+			identifier: Token::build(&node.children()[1]),
 			expression: Expression::build(&node.children()[3]),
 			body:       Do::build(&node.children()[4]),
 		};

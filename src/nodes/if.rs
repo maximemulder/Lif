@@ -5,8 +5,8 @@ use super::{ Engine, Node, SyntaxNode };
 
 pub struct If {
 	condition: Expression,
-	then:      Then,
-	r#else:    Option<Else>,
+	then:      Expression,
+	r#else:    Option<Expression>,
 }
 
 impl If {
@@ -25,6 +25,15 @@ impl If {
 
 impl Node for If {
 	fn execute(&self, engine: &mut Engine) -> Option<usize> {
-		return self.condition.execute(engine);
+		return if {
+			let value = self.condition.execute(engine).unwrap();
+			engine.get_cast_boolean_primitive(value)
+		} {
+			self.then.execute(engine)
+		} else if let Some(r#else) = &self.r#else {
+			r#else.execute(engine)
+		} else {
+			return None;
+		}
 	}
 }

@@ -4,7 +4,7 @@ use super::{ Engine, Node, SyntaxNode };
 
 pub struct While {
 	condition: Expression,
-	body:      Do,
+	body:      Expression,
 }
 
 impl While {
@@ -18,6 +18,13 @@ impl While {
 
 impl Node for While {
 	fn execute(&self, engine: &mut Engine) -> Option<usize> {
-		return self.condition.execute(engine);
+		while {
+			let value = self.condition.execute(engine).unwrap();
+			engine.get_cast_boolean_primitive(value)
+		} {
+			self.body.execute(engine);
+		}
+
+		return None;
 	}
 }

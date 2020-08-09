@@ -1,20 +1,10 @@
 use super::expression::Expression;
-use super::{ Engine, Node, SyntaxNode };
+use super::SyntaxNode;
 
-pub struct Then {
-	expression: Expression,
-}
+pub struct Then;
 
 impl Then {
-	pub fn build(node: &SyntaxNode) -> Then {
-		return Then {
-			expression: Expression::build(&node.children()[node.children().len() - 1]),
-		};
-	}
-}
-
-impl Node for Then {
-	fn execute(&self, engine: &mut Engine) -> Option<usize> {
-		return self.expression.execute(engine);
+	pub fn build(node: &SyntaxNode) -> Expression {
+		return Expression::build(&node.children()[node.children().len() - 1]);
 	}
 }
