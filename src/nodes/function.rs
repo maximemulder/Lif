@@ -3,7 +3,7 @@ use super::block::Block;
 use super::parameters::Parameters;
 
 pub struct Function {
-	parameters: Parameters,
+	parameters: Vec<Box<str>>,
 	block: Block,
 }
 

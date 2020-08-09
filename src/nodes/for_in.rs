@@ -23,9 +23,10 @@ impl Node for ForIn {
 	fn execute(&self, engine: &mut Engine) -> Option<usize> {
 		let array = self.expression.execute(engine).unwrap();
 		for value in engine.get_cast_array(array) {
-			engine.new_variable(&self.identifier);
+			engine.new_variable(&self.identifier, value);
 			self.body.execute(engine);
 		}
+
 		return None;
 	}
 }

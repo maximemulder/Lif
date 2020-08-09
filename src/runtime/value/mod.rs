@@ -1,7 +1,12 @@
+mod callable;
+mod class;
 mod data;
+mod instance;
 
 use crate::runtime::Engine;
-use data::*;
+use data::Data;
+use class::Class;
+use callable::{ Function, Primitive };
 
 pub struct Value {
 	pub class: usize,
@@ -26,6 +31,14 @@ impl Value {
 
 	pub fn new_integer(engine: &Engine, integer: usize) -> Self {
 		return Self::new(engine.classes.integer, Data::Integer(integer));
+	}
+
+	pub fn new_function(engine: &Engine, function: Function) -> Self {
+		return Self::new(engine.classes.function, Data::Callable(Box::new(function)));
+	}
+
+	pub fn new_primitive<'a>(engine: &Engine, callback: &'static dyn for<'b> Fn(&'b Engine, Vec<usize>) -> Option<usize>) -> Self {
+		return Self::new(engine.classes.function, Data::Callable(Box::new(Primitive::new(callback))));
 	}
 
 	pub fn new_string(engine: &Engine, string: &str) -> Self {

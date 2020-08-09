@@ -15,6 +15,7 @@ impl Declaration {
 
 impl Node for Declaration {
 	fn execute(&self, engine: &mut Engine) -> Option<usize> {
-		return Some(engine.new_variable(&self.identifier));
+		let value = engine.new_undefined();
+		return Some(engine.new_variable(&self.identifier, value));
 	}
 }

@@ -60,8 +60,7 @@ impl Engine {
 		}
 	}
 
-	pub fn new_variable(&mut self, name: &str) -> usize {
-		let index = self.new_undefined();
+	pub fn new_variable(&mut self, name: &str, index: usize) -> usize {
 		self.get_scope().add_variable(name, index);
 		return index;
 	}

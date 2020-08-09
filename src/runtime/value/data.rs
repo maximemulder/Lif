@@ -1,10 +1,6 @@
-mod function;
-mod instance;
-mod class;
-
-pub use function::Function;
-pub use instance::Instance;
-pub use class::Class;
+use super::class::Class;
+use super::callable::Callable;
+use super::instance::Instance;
 
 pub enum Data {
 	Array(Vec<usize>),
@@ -12,7 +8,7 @@ pub enum Data {
 	Class(Class),
 	Instance(Instance),
 	Integer(usize),
-	Function(Function),
+	Callable(Box<dyn Callable>),
 	String(String),
 	Undefined(()),
 }
