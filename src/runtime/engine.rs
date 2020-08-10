@@ -47,6 +47,10 @@ impl<'a> Engine<'a> {
 		return self.new_reference(value);
 	}
 
+	pub fn get_value(&mut self, reference: Reference) -> Value {
+		return self.references[reference.0];
+	}
+
 	pub fn get_object(&mut self, value: Value) -> &mut Object<'a> {
 		return &mut self.objects[value.0];
 	}
