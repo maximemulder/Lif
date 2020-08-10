@@ -1,7 +1,8 @@
+use crate::runtime::{ Engine, Reference };
 use super::expression::Expression;
 use super::expressions::Expressions;
 use super::token::Token;
-use super::{ Engine, Node, SyntaxNode };
+use super::{ Node, SyntaxNode };
 
 pub struct Sequence {
 	expression:  Expression,
@@ -22,12 +23,12 @@ impl Sequence {
 }
 
 impl Node for Sequence {
-	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> Option<usize> {
+	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> Reference {
 		let expression = self.expression.execute(engine);
 		for argument in self.expressions.iter() {
 			argument.execute(engine);
 		}
 
-		return None;
+		return engine.new_undefined();
 	}
 }

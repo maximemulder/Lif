@@ -1,20 +1,21 @@
+use crate::runtime::{ Reference };
 use super::class::Class;
 use super::callable::Callable;
 use super::instance::Instance;
 
 pub enum Data<'a> {
-	Array(Vec<usize>),
+	Array(Vec<Reference>),
 	Boolean(bool),
+	Callable(Box<dyn Callable<'a> + 'a>),
 	Class(Class),
 	Instance(Instance),
 	Integer(usize),
-	Callable(Box<dyn Callable<'a> + 'a>),
 	String(String),
-	Undefined(()),
+	Null,
 }
 
 impl Data<'_> {
-	pub fn as_array(&mut self) -> &mut Vec<usize> {
+	pub fn as_array(&mut self) -> &mut Vec<Reference> {
 		if let Data::Array(array) = self {
 			return array;
 		}

@@ -1,8 +1,8 @@
-use super::{ Engine, Node, SyntaxNode };
+use crate::runtime::{ Engine, Object, Reference };
+use super::{ Node, SyntaxNode };
 use crate::elements;
 
 use super::token::Token;
-use crate::runtime::Value;
 
 enum Content {
 	Identifier,
@@ -31,11 +31,11 @@ impl Literal {
 }
 
 impl Node for Literal {
-	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> Option<usize> {
-		return Some(match &self.content {
+	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> Reference {
+		return match &self.content {
 			Content::Identifier => engine.get_variable(&self.text),
-			Content::String     => engine.new_value(Value::new_string(engine, &self.text)),
-			Content::Number     => engine.new_value(Value::new_integer(engine, self.text.parse::<usize>().unwrap())),
-		});
+			Content::String     => engine.new_object(Object::new_string(engine, &self.text)),
+			Content::Number     => engine.new_object(Object::new_integer(engine, self.text.parse::<usize>().unwrap())),
+		};
 	}
 }

@@ -1,15 +1,16 @@
+use crate::runtime::{ Value, Reference };
 use std::collections::HashMap;
 
 pub struct Class {
-	parent: Option<usize>,
-	statics: HashMap<String, usize>,
-	pub methods: HashMap<String, usize>,
+	parent: Option<Value>,
+	statics: HashMap<String, Reference>,
+	pub methods: HashMap<String, Value>,
 }
 
 impl Class {
 	pub fn new() -> Self {
 		return Self {
-			parent: None,
+			parent:  None,
 			statics: HashMap::new(),
 			methods: HashMap::new(),
 		}

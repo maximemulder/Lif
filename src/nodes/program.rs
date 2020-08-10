@@ -1,5 +1,6 @@
 use crate::nodes::statements::Statements;
-use super::{ Engine, Node, SyntaxNode };
+use crate::runtime::{ Engine, Reference };
+use super::{ Node, SyntaxNode };
 
 pub struct Program {
 	statements: Statements,
@@ -14,8 +15,8 @@ impl Program {
 }
 
 impl Node for Program {
-	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> Option<usize> {
+	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> Reference {
 		self.statements.execute(engine);
-		return None;
+		return engine.new_undefined();
 	}
 }

@@ -1,6 +1,7 @@
+use crate::runtime::{ Engine, Reference };
 use super::expression::Expression;
 use super::token::Token;
-use super::{ Engine, Node, SyntaxNode };
+use super::{ Node, SyntaxNode };
 
 pub struct Operation {
 	left:     Expression,
@@ -19,9 +20,9 @@ impl Operation {
 }
 
 impl Node for Operation {
-	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> Option<usize> {
+	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> Reference {
 		self.left.execute(engine);
 		self.right.execute(engine);
-		return None;
+		return engine.new_undefined();
 	}
 }

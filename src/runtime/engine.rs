@@ -1,20 +1,22 @@
 use super::scope::Scope;
 use super::classes::Classes;
-use super::Value;
+use super::{ Object, Reference, Value };
 
 pub struct Engine<'a> {
 	pub classes: Classes,
 	pub scope: usize,
-	values: Vec<Value<'a>>,
+	references: Vec<Value>,
+	objects: Vec<Object<'a>>,
 	scopes: Vec<Scope>,
 }
 
 impl<'a> Engine<'a> {
 	pub fn new() -> Self {
 		let mut engine = Self {
-			values: Vec::new(),
-			scope: 0,
 			classes: Classes::new(),
+			scope: 0,
+			references: Vec::new(),
+			objects: Vec::new(),
 			scopes: Vec::new(),
 		};
 
@@ -24,24 +26,29 @@ impl<'a> Engine<'a> {
 		return engine;
 	}
 
-	pub fn new_undefined(&mut self) -> usize {
-		let index = self.values.len();
-		self.values.push(Value::new_undefined());
-		return index;
+	pub fn new_undefined(&mut self) -> Reference {
+		return self.new_reference(Value::new_undefined());
 	}
 
-	pub fn new_value(&mut self, value: Value<'a>) -> usize {
-		let index = self.values.len();
-		self.values.push(value);
-		return index;
+	pub fn new_reference(&mut self, value: Value) -> Reference {
+		let reference = Reference(self.references.len());
+		self.references.push(value);
+		return reference;
 	}
 
-	pub fn set_value(&mut self, index: usize, value: Value<'a>) {
-		self.values[index] = value;
+	pub fn new_value(&mut self, object: Object<'a>) -> Value {
+		let value = Value(self.objects.len());
+		self.objects.push(object);
+		return value;
 	}
 
-	pub fn get_value(&mut self, index: usize) -> &mut Value<'a> {
-		return &mut self.values[index];
+	pub fn new_object(&mut self, object: Object<'a>) -> Reference {
+		let value = self.new_value(object);
+		return self.new_reference(value);
+	}
+
+	pub fn get_object(&mut self, value: Value) -> &mut Object<'a> {
+		return &mut self.objects[value.0];
 	}
 
 	pub fn get_scope(&mut self) -> &mut Scope {
@@ -70,16 +77,15 @@ impl<'a> Engine<'a> {
 		self.scope = frame;
 	}
 
-	pub fn new_variable(&mut self, name: &str, index: usize) -> usize {
-		self.get_scope().add_variable(name, index);
-		return index;
+	pub fn new_variable(&mut self, name: &str, reference: Reference) {
+		self.get_scope().add_variable(name, reference);
 	}
 
-	pub fn get_variable(&mut self, name: &str) -> usize {
+	pub fn get_variable(&mut self, name: &str) -> Reference {
 		let mut scope = self.get_scope();
 		loop {
-			if let Some(value) = scope.get_variable(name) {
-				return value;
+			if let Some(object) = scope.get_variable(name) {
+				return object;
 			}
 
 			if let Some(parent) = scope.parent {
@@ -90,18 +96,21 @@ impl<'a> Engine<'a> {
 		}
 	}
 
-	/* pub fn get_variable_value(&mut self, name: &str) {
-		let index = self.get_variable(name);
-		self.get_value(index);
-	} */
-
-	pub fn get_cast_array(&mut self, index: usize) -> Vec<usize> {
-		self.values[index].cast(self.classes.array);
-		return self.values[index].data.as_array().clone();
+	pub fn get_cast_array(&mut self, value: Value) -> &Vec<Reference> {
+		self.objects[value.0].cast(self.classes.array);
+		return self.objects[value.0].data.as_array();
 	}
 
-	pub fn get_cast_boolean(&mut self, index: usize) -> bool {
-		self.values[index].cast(self.classes.boolean);
-		return *self.values[index].data.as_boolean();
+	pub fn get_cast_boolean(&mut self, value: Value) -> bool {
+		self.objects[value.0].cast(self.classes.boolean);
+		return *self.objects[value.0].data.as_boolean();
+	}
+
+	pub fn read(&self, reference: Reference) -> Value {
+		return self.references[reference.0];
+	}
+
+	pub fn write(&mut self, reference: Reference, value: Value) {
+		self.references[reference.0] = value;
 	}
 }

@@ -3,19 +3,19 @@ mod class;
 mod data;
 mod instance;
 
-use crate::runtime::Engine;
+use crate::runtime::{ Engine, Reference, Value };
 use crate::nodes::block::Block;
 use data::Data;
 use class::Class;
 use callable::{ Function, Primitive };
 
-pub struct Value<'a> {
-	pub class: usize,
+pub struct Object<'a> {
+	pub class: Value,
 	pub data: Data<'a>,
 }
 
-impl<'a> Value<'a> {
-	pub fn new(class: usize, data: Data<'a>) -> Self {
+impl<'a> Object<'a> {
+	pub fn new(class: Value, data: Data<'a>) -> Self {
 		return Self {
 			class,
 			data,
@@ -38,7 +38,7 @@ impl<'a> Value<'a> {
 		return Self::new(engine.classes.function, Data::Callable(Box::new(Function::new(engine.scope, parameters, block))));
 	}
 
-	pub fn new_primitive(engine: &Engine, callback: &'static dyn for<'b> Fn(&'b Engine, Vec<usize>) -> Option<usize>) -> Self {
+	pub fn new_primitive(engine: &Engine, callback: &'static dyn for<'b> Fn(&'b mut Engine, Vec<Reference>) -> Reference) -> Self {
 		return Self::new(engine.classes.function, Data::Callable(Box::new(Primitive::new(callback))));
 	}
 
@@ -46,11 +46,7 @@ impl<'a> Value<'a> {
 		return Self::new(engine.classes.string, Data::String(string.to_string()));
 	}
 
-	pub fn new_undefined() -> Self {
-		return Self::new(0, Data::Undefined(()));
-	}
-
-	pub fn cast(&self, class: usize) {
+	pub fn cast(&self, class: Value) {
 		if self.class != class {
 			panic!();
 		}

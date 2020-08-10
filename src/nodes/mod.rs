@@ -23,12 +23,12 @@ pub mod function;
 pub mod block;
 pub mod group;
 
-use crate::runtime::Engine;
+use crate::runtime::{ Engine, Reference };
 
 pub use crate::node::Node as SyntaxNode;
 
 pub trait Node {
-	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> Option<usize>;
+	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> Reference;
 }
 
 

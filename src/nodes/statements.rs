@@ -1,5 +1,6 @@
+use crate::runtime::{ Engine, Reference };
 use super::statement::Statement;
-use super::{ Engine, Node, SyntaxNode };
+use super::{ Node, SyntaxNode };
 
 pub struct Statements {
 	statements: Vec<Statement>,
@@ -19,11 +20,11 @@ impl Statements {
 }
 
 impl Node for Statements {
-	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> Option<usize> {
+	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> Reference {
 		for statement in self.statements.iter() {
 			statement.execute(engine);
 		}
 
-		return None;
+		return engine.new_undefined();
 	}
 }

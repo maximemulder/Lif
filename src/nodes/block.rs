@@ -1,6 +1,7 @@
+use crate::runtime::{ Engine, Reference };
 use super::expression::Expression;
 use super::statements::Statements;
-use super::{ Engine, Node, SyntaxNode };
+use super::{ Node, SyntaxNode };
 
 pub struct Block {
 	statements: Statements,
@@ -21,13 +22,13 @@ impl Block {
 }
 
 impl Node for Block {
-	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> Option<usize> {
+	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> Reference {
 		engine.push_scope();
 		self.statements.execute(engine);
 		let value = if let Some(expression) = &self.expression {
 			expression.execute(engine)
 		} else {
-			None
+			engine.new_undefined()
 		};
 
 		engine.pop_scope();

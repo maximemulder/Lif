@@ -1,5 +1,6 @@
-use super::{ Engine, Node, SyntaxNode };
 use crate::elements;
+use crate::runtime::{ Engine, Reference };
+use super::{ Node, SyntaxNode };
 use super::block::Block;
 use super::r#if::If;
 use super::r#loop::Loop;
@@ -27,7 +28,7 @@ impl Structure {
 }
 
 impl Node for Structure {
-	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> Option<usize> {
+	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> Reference {
 		return self.content.execute(engine);
 	}
 }

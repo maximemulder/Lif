@@ -1,7 +1,8 @@
+use crate::runtime::{ Engine, Reference };
 use super::expression::Expression;
 use super::then::Then;
 use super::r#else::Else;
-use super::{ Engine, Node, SyntaxNode };
+use super::{ Node, SyntaxNode };
 
 pub struct If {
 	condition: Expression,
@@ -24,14 +25,15 @@ impl If {
 }
 
 impl Node for If {
-	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> Option<usize> {
-		let condition = self.condition.execute(engine).unwrap();
+	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> Reference {
+		let reference = self.condition.execute(engine);
+		let condition = engine.read(reference);
 		return if engine.get_cast_boolean(condition) {
 			self.then.execute(engine)
 		} else if let Some(r#else) = &self.r#else {
 			r#else.execute(engine)
 		} else {
-			return None;
+			return engine.new_undefined();
 		}
 	}
 }

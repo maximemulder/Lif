@@ -1,4 +1,6 @@
-use super::{ Engine, Node, SyntaxNode };
+use crate::elements;
+use crate::runtime::{ Engine, Reference };
+use super::{ Node, SyntaxNode };
 use super::literal::Literal;
 use super::sequence::Sequence;
 use super::structure::Structure;
@@ -6,7 +8,6 @@ use super::operation::Operation;
 use super::function::Function;
 use super::group::Group;
 use super::declaration::Declaration;
-use crate::elements;
 
 pub struct Expression {
 	content: Box<dyn Node>,
@@ -31,7 +32,7 @@ impl Expression {
 }
 
 impl Node for Expression {
-	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> Option<usize> {
+	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> Reference {
 		return self.content.execute(engine);
 	}
 }

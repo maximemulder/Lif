@@ -1,5 +1,6 @@
+use crate::runtime::{ Engine, Reference };
 use super::expression::Expression;
-use super::{ Engine, Node, SyntaxNode };
+use super::{ Node, SyntaxNode };
 
 pub struct Loop {
 	body: Expression,
@@ -14,7 +15,7 @@ impl Loop {
 }
 
 impl Node for Loop {
-	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> Option<usize> {
+	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> Reference {
 		loop {
 			self.body.execute(engine);
 		}
