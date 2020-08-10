@@ -3,7 +3,7 @@ use crate::nodes::Node;
 use crate::runtime::{ Engine, Reference };
 
 pub trait Callable<'a> {
-	fn call(&self, engine: &mut Engine<'a>, expressions: Vec<Reference>) -> Reference;
+	fn call(&self, engine: &mut Engine<'a>, arguments: Vec<Reference>) -> Reference;
 }
 
 pub struct Primitive<'a, 'b> {
@@ -19,8 +19,8 @@ impl<'a, 'b> Primitive<'a, 'b> {
 }
 
 impl<'a> Callable<'a> for Primitive<'a, '_> {
-	fn call(&self, engine: &mut Engine<'a>, expressions: Vec<Reference>) -> Reference {
-		return (self.callback)(engine, expressions);
+	fn call(&self, engine: &mut Engine<'a>, arguments: Vec<Reference>) -> Reference {
+		return (self.callback)(engine, arguments);
 	}
 }
 
@@ -41,7 +41,7 @@ impl<'a> Function<'a> {
 }
 
 impl<'a> Callable<'a> for Function<'a> {
-	fn call(&self, engine: &mut Engine<'a>, expressions: Vec<Reference>) -> Reference {
+	fn call(&self, engine: &mut Engine<'a>, arguments: Vec<Reference>) -> Reference {
 		let frame = engine.push_frame(self.scope);
 		let reference = self.block.execute(engine);
 		engine.pop_frame(frame);
