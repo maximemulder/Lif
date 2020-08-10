@@ -1,6 +1,7 @@
 use super::{ Engine, Node, SyntaxNode };
 use super::block::Block;
 use super::parameters::Parameters;
+use crate::runtime::Value;
 
 pub struct Function {
 	parameters: Vec<Box<str>>,
@@ -18,6 +19,7 @@ impl Function {
 
 impl Node for Function {
 	fn execute(&self, engine: &mut Engine) -> Option<usize> {
-		return self.block.execute(engine);
+		return Some(engine.new_value(Value::new_function(engine, self.parameters, &self.block)));
+		// return self.block.execute(engine);
 	}
 }

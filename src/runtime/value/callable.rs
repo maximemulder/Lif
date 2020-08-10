@@ -1,4 +1,6 @@
 use crate::runtime::Engine;
+use crate::nodes::block::Block;
+use crate::nodes::Node;
 
 pub trait Callable {
 	fn call(&self, engine: &mut Engine, expressions: Vec<usize>) -> Option<usize>;
@@ -22,26 +24,24 @@ impl Callable for Primitive<'_> {
 	}
 }
 
-// use crate::nodes::block::Block;
-
-pub struct Function {
+pub struct Function<'a> {
 	scope: usize,
 	parameters: Vec<Box<str>>,
-	// block: Block,
+	block: &'a Block,
 }
 
-impl Function {
-	pub fn new(scope: usize, parameters: Vec<Box<str>>/*, block: Block */) -> Self {
+impl<'a> Function<'a> {
+	pub fn new(scope: usize, parameters: Vec<Box<str>>, block: &'a Block) -> Self {
 		return Self {
 			scope,
 			parameters,
-			/* block, */
+			block,
 		};
 	}
 }
 
-impl Callable for Function {
+impl Callable for Function<'_> {
 	fn call(&self, engine: &mut Engine, expressions: Vec<usize>) -> Option<usize> {
-		return None;
+		return self.block.execute(engine);
 	}
 }

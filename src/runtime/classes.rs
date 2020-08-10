@@ -23,7 +23,7 @@ impl Classes {
 	}
 }
 
-impl Engine {
+impl Engine<'_> {
 	pub fn build_classes(&mut self) {
 		self.classes.class    = self.new_value(Value::new_class(self));
 

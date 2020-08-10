@@ -2,20 +2,20 @@ use super::scope::Scope;
 use super::classes::Classes;
 use super::Value;
 
-pub struct Engine {
+pub struct Engine<'a> {
 	pub classes: Classes,
-	values: Vec<Value>,
+	pub scope: usize,
+	values: Vec<Value<'a>>,
 	scopes: Vec<Scope>,
-	scope: usize,
 }
 
-impl Engine {
+impl<'a> Engine<'a> {
 	pub fn new() -> Self {
 		let mut engine = Self {
 			values: Vec::new(),
+			scope: 0,
 			classes: Classes::new(),
 			scopes: Vec::new(),
-			scope: 0,
 		};
 
 		engine.scopes.push(Scope::new());
@@ -30,17 +30,17 @@ impl Engine {
 		return index;
 	}
 
-	pub fn new_value(&mut self, value: Value) -> usize {
+	pub fn new_value(&mut self, value: Value<'a>) -> usize {
 		let index = self.values.len();
 		self.values.push(value);
 		return index;
 	}
 
-	pub fn set_value(&mut self, index: usize, value: Value) {
+	pub fn set_value(&mut self, index: usize, value: Value<'a>) {
 		self.values[index] = value;
 	}
 
-	pub fn get_value(&mut self, index: usize) -> &mut Value {
+	pub fn get_value(&mut self, index: usize) -> &mut Value<'a> {
 		return &mut self.values[index];
 	}
 

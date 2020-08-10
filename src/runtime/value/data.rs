@@ -2,18 +2,18 @@ use super::class::Class;
 use super::callable::Callable;
 use super::instance::Instance;
 
-pub enum Data {
+pub enum Data<'a> {
 	Array(Vec<usize>),
 	Boolean(bool),
 	Class(Class),
 	Instance(Instance),
 	Integer(usize),
-	Callable(Box<dyn Callable>),
+	Callable(Box<dyn Callable + 'a>),
 	String(String),
 	Undefined(()),
 }
 
-impl Data {
+impl Data<'_> {
 	pub fn as_array(&mut self) -> &mut Vec<usize> {
 		if let Data::Array(array) = self {
 			return array;

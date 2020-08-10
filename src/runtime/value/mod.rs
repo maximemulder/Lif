@@ -4,17 +4,18 @@ mod data;
 mod instance;
 
 use crate::runtime::Engine;
+use crate::nodes::block::Block;
 use data::Data;
 use class::Class;
 use callable::{ Function, Primitive };
 
-pub struct Value {
+pub struct Value<'a> {
 	pub class: usize,
-	pub data: Data,
+	pub data: Data<'a>,
 }
 
-impl Value {
-	pub fn new(class: usize, data: Data) -> Self {
+impl<'a> Value<'a> {
+	pub fn new(class: usize, data: Data<'a>) -> Self {
 		return Self {
 			class,
 			data,
@@ -33,11 +34,11 @@ impl Value {
 		return Self::new(engine.classes.integer, Data::Integer(integer));
 	}
 
-	pub fn new_function(engine: &Engine, function: Function) -> Self {
-		return Self::new(engine.classes.function, Data::Callable(Box::new(function)));
+	pub fn new_function(engine: &Engine, parameters: Vec<Box<str>>, block: &'a Block) -> Self {
+		return Self::new(engine.classes.function, Data::Callable(Box::new(Function::new(engine.scope, parameters, block))));
 	}
 
-	pub fn new_primitive<'a>(engine: &Engine, callback: &'static dyn for<'b> Fn(&'b Engine, Vec<usize>) -> Option<usize>) -> Self {
+	pub fn new_primitive(engine: &Engine, callback: &'static dyn for<'b> Fn(&'b Engine, Vec<usize>) -> Option<usize>) -> Self {
 		return Self::new(engine.classes.function, Data::Callable(Box::new(Primitive::new(callback))));
 	}
 
