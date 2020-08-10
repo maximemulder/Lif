@@ -17,7 +17,7 @@ impl While {
 }
 
 impl Node for While {
-	fn execute(&self, engine: &mut Engine) -> Option<usize> {
+	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> Option<usize> {
 		let condition = self.condition.execute(engine).unwrap();
 		while engine.get_cast_boolean(condition) {
 			self.body.execute(engine);

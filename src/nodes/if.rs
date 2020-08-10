@@ -24,7 +24,7 @@ impl If {
 }
 
 impl Node for If {
-	fn execute(&self, engine: &mut Engine) -> Option<usize> {
+	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> Option<usize> {
 		let condition = self.condition.execute(engine).unwrap();
 		return if engine.get_cast_boolean(condition) {
 			self.then.execute(engine)

@@ -34,7 +34,7 @@ impl<'a> Value<'a> {
 		return Self::new(engine.classes.integer, Data::Integer(integer));
 	}
 
-	pub fn new_function(engine: &Engine, parameters: Vec<Box<str>>, block: &'a Block) -> Self {
+	pub fn new_function(engine: &Engine, parameters: &'a Vec<Box<str>>, block: &'a Block) -> Self {
 		return Self::new(engine.classes.function, Data::Callable(Box::new(Function::new(engine.scope, parameters, block))));
 	}
 

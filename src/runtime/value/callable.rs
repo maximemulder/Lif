@@ -2,36 +2,36 @@ use crate::runtime::Engine;
 use crate::nodes::block::Block;
 use crate::nodes::Node;
 
-pub trait Callable {
-	fn call(&self, engine: &mut Engine, expressions: Vec<usize>) -> Option<usize>;
+pub trait Callable<'a> {
+	fn call(&self, engine: &mut Engine<'a>, expressions: Vec<usize>) -> Option<usize>;
 }
 
-pub struct Primitive<'a> {
-	callback: &'a dyn for<'b> Fn(&'b Engine, Vec<usize>) -> Option<usize>,
+pub struct Primitive<'a, 'b> {
+	callback: &'b dyn for<'c> Fn(&'c Engine<'a>, Vec<usize>) -> Option<usize>,
 }
 
-impl<'a> Primitive<'a> {
-	pub fn new(callback: &'a dyn for<'b> Fn(&'b Engine, Vec<usize>) -> Option<usize>) -> Self {
+impl<'a, 'b> Primitive<'a, 'b> {
+	pub fn new(callback: &'b dyn for<'c> Fn(&'c Engine<'a>, Vec<usize>) -> Option<usize>) -> Self {
 		return Self {
 			callback,
 		};
 	}
 }
 
-impl Callable for Primitive<'_> {
-	fn call(&self, engine: &mut Engine, expressions: Vec<usize>) -> Option<usize> {
+impl<'a> Callable<'a> for Primitive<'a, '_> {
+	fn call(&self, engine: &mut Engine<'a>, expressions: Vec<usize>) -> Option<usize> {
 		return (self.callback)(engine, expressions);
 	}
 }
 
 pub struct Function<'a> {
 	scope: usize,
-	parameters: Vec<Box<str>>,
+	parameters: &'a Vec<Box<str>>,
 	block: &'a Block,
 }
 
 impl<'a> Function<'a> {
-	pub fn new(scope: usize, parameters: Vec<Box<str>>, block: &'a Block) -> Self {
+	pub fn new(scope: usize, parameters: &'a Vec<Box<str>>, block: &'a Block) -> Self {
 		return Self {
 			scope,
 			parameters,
@@ -40,8 +40,11 @@ impl<'a> Function<'a> {
 	}
 }
 
-impl Callable for Function<'_> {
-	fn call(&self, engine: &mut Engine, expressions: Vec<usize>) -> Option<usize> {
-		return self.block.execute(engine);
+impl<'a> Callable<'a> for Function<'a> {
+	fn call(&self, engine: &mut Engine<'a>, expressions: Vec<usize>) -> Option<usize> {
+		let frame = engine.push_frame(self.scope);
+		let value = self.block.execute(engine);
+		engine.pop_frame(frame);
+		return value;
 	}
 }

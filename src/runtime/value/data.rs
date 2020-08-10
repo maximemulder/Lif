@@ -8,7 +8,7 @@ pub enum Data<'a> {
 	Class(Class),
 	Instance(Instance),
 	Integer(usize),
-	Callable(Box<dyn Callable + 'a>),
+	Callable(Box<dyn Callable<'a> + 'a>),
 	String(String),
 	Undefined(()),
 }

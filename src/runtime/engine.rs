@@ -60,6 +60,16 @@ impl<'a> Engine<'a> {
 		}
 	}
 
+	pub fn push_frame(&mut self, frame: usize) -> usize {
+		let scope = self.scope;
+		self.scope = frame;
+		return scope;
+	}
+
+	pub fn pop_frame(&mut self, frame: usize) {
+		self.scope = frame;
+	}
+
 	pub fn new_variable(&mut self, name: &str, index: usize) -> usize {
 		self.get_scope().add_variable(name, index);
 		return index;

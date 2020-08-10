@@ -27,7 +27,7 @@ impl Structure {
 }
 
 impl Node for Structure {
-	fn execute(&self, engine: &mut Engine) -> Option<usize> {
+	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> Option<usize> {
 		return self.content.execute(engine);
 	}
 }

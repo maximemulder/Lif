@@ -14,7 +14,7 @@ impl Loop {
 }
 
 impl Node for Loop {
-	fn execute(&self, engine: &mut Engine) -> Option<usize> {
+	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> Option<usize> {
 		loop {
 			self.body.execute(engine);
 		}

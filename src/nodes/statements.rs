@@ -19,7 +19,7 @@ impl Statements {
 }
 
 impl Node for Statements {
-	fn execute(&self, engine: &mut Engine) -> Option<usize> {
+	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> Option<usize> {
 		for statement in self.statements.iter() {
 			statement.execute(engine);
 		}

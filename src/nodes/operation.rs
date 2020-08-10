@@ -19,7 +19,7 @@ impl Operation {
 }
 
 impl Node for Operation {
-	fn execute(&self, engine: &mut Engine) -> Option<usize> {
+	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> Option<usize> {
 		self.left.execute(engine);
 		self.right.execute(engine);
 		return None;

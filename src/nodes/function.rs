@@ -18,8 +18,7 @@ impl Function {
 }
 
 impl Node for Function {
-	fn execute(&self, engine: &mut Engine) -> Option<usize> {
-		return Some(engine.new_value(Value::new_function(engine, self.parameters, &self.block)));
-		// return self.block.execute(engine);
+	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> Option<usize> {
+		return Some(engine.new_value(Value::new_function(engine, &self.parameters, &self.block)));
 	}
 }

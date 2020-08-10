@@ -22,7 +22,7 @@ impl Sequence {
 }
 
 impl Node for Sequence {
-	fn execute(&self, engine: &mut Engine) -> Option<usize> {
+	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> Option<usize> {
 		let expression = self.expression.execute(engine);
 		for argument in self.expressions.iter() {
 			argument.execute(engine);

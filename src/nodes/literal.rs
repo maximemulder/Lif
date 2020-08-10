@@ -31,7 +31,7 @@ impl Literal {
 }
 
 impl Node for Literal {
-	fn execute(&self, engine: &mut Engine) -> Option<usize> {
+	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> Option<usize> {
 		return Some(match &self.content {
 			Content::Identifier => engine.get_variable(&self.text),
 			Content::String     => engine.new_value(Value::new_string(engine, &self.text)),
