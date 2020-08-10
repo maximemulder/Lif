@@ -1,4 +1,4 @@
-use crate::runtime::{ Engine, Reference };
+use crate::runtime::{ Engine, Reference, Value };
 use super::expression::Expression;
 use super::expressions::Expressions;
 use super::token::Token;
@@ -24,11 +24,16 @@ impl Sequence {
 
 impl Node for Sequence {
 	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> Reference {
-		let expression = self.expression.execute(engine);
+		let reference = self.expression.execute(engine);
+		let mut arguments = Vec::new();
 		for argument in self.expressions.iter() {
-			argument.execute(engine);
+			arguments.push(argument.execute(engine));
 		}
 
+		let value = engine.get_value(reference);
+		let callable = engine.get_cast_callable(value);
+		// return callable.call(engine, arguments);
 		return engine.new_undefined();
 	}
 }
+

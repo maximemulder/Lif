@@ -1,7 +1,7 @@
-mod callable;
-mod class;
-mod data;
-mod instance;
+pub mod callable;
+pub mod class;
+pub mod data;
+pub mod instance;
 
 use crate::runtime::{ Engine, Reference, Value };
 use crate::nodes::block::Block;

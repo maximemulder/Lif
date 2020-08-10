@@ -14,7 +14,7 @@ pub enum Data<'a> {
 	Null,
 }
 
-impl Data<'_> {
+impl<'a> Data<'a> {
 	pub fn as_array(&mut self) -> &mut Vec<Reference> {
 		if let Data::Array(array) = self {
 			return array;
@@ -26,6 +26,14 @@ impl Data<'_> {
 	pub fn as_boolean(&mut self) -> &mut bool {
 		if let Data::Boolean(boolean) = self {
 			return boolean;
+		}
+
+		panic!();
+	}
+
+	pub fn as_callable(&mut self) -> &mut dyn Callable<'a> {
+		if let Data::Callable(callable) = self {
+			return callable.as_mut();
 		}
 
 		panic!();

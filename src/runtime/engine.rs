@@ -1,6 +1,7 @@
 use super::scope::Scope;
 use super::classes::Classes;
 use super::{ Object, Reference, Value };
+use super::object::callable::Callable;
 
 pub struct Engine<'a> {
 	pub classes: Classes,
@@ -108,6 +109,11 @@ impl<'a> Engine<'a> {
 	pub fn get_cast_boolean(&mut self, value: Value) -> bool {
 		self.objects[value.0].cast(self.classes.boolean);
 		return *self.objects[value.0].data.as_boolean();
+	}
+
+	pub fn get_cast_callable(&mut self, value: Value) -> &dyn Callable<'a> {
+		self.objects[value.0].cast(self.classes.function);
+		return self.objects[value.0].data.as_callable();
 	}
 
 	pub fn read(&self, reference: Reference) -> Value {
