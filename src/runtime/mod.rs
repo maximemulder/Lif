@@ -1,7 +1,7 @@
-mod classes;
-mod engine;
-mod object;
-mod scope;
+pub mod classes;
+pub mod engine;
+pub mod object;
+pub mod scope;
 
 pub use engine::Engine;
 pub use object::Object;

@@ -111,7 +111,7 @@ impl<'a> Engine<'a> {
 		return *self.objects[value.0].data.as_boolean();
 	}
 
-	pub fn get_cast_callable(&mut self, value: Value) -> &dyn Callable<'a> {
+	pub fn get_cast_callable(&mut self, value: Value) -> &Box<dyn Callable<'a> + 'a> {
 		self.objects[value.0].cast(self.classes.function);
 		return self.objects[value.0].data.as_callable();
 	}

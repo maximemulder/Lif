@@ -1,4 +1,5 @@
-use crate::runtime::{ Engine, Reference, Value };
+use crate::cheat;
+use crate::runtime::{ Engine, Reference };
 use super::expression::Expression;
 use super::expressions::Expressions;
 use super::token::Token;
@@ -30,10 +31,9 @@ impl Node for Sequence {
 			arguments.push(argument.execute(engine));
 		}
 
+		let engine2 = cheat(engine);
 		let value = engine.get_value(reference);
 		let callable = engine.get_cast_callable(value);
-		// return callable.call(engine, arguments);
-		return engine.new_undefined();
+		return callable.call(engine2, arguments);
 	}
 }
-

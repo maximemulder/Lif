@@ -31,9 +31,9 @@ impl<'a> Data<'a> {
 		panic!();
 	}
 
-	pub fn as_callable(&mut self) -> &mut dyn Callable<'a> {
+	pub fn as_callable(&mut self) -> &mut Box<dyn Callable<'a> + 'a> {
 		if let Data::Callable(callable) = self {
-			return callable.as_mut();
+			return callable;
 		}
 
 		panic!();

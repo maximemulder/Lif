@@ -34,7 +34,8 @@ impl Engine<'_> {
 
 		self.get_object(self.classes.class).class = self.classes.class;
 
-		let primitive = self.new_value(Object::new_primitive(self, &|engine, _parameters| engine.new_undefined()));
-		self.get_object(self.classes.integer).data.as_class().methods.insert("yo".to_string(), primitive);
+		let primitive = self.new_value(Object::new_primitive(self, &|engine, _parameters| { println!("YES YES YES YES"); engine.new_undefined() }));
+		let reference = self.new_reference(primitive);
+		self.new_variable("print", reference);
 	}
 }
