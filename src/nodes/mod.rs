@@ -22,6 +22,9 @@ pub mod parameters;
 pub mod function;
 pub mod block;
 pub mod group;
+pub mod integer;
+pub mod identifier;
+pub mod string;
 
 use crate::runtime::{ Engine, Reference };
 

@@ -18,12 +18,12 @@ impl Expression {
 		let child = &node.children()[0];
 		return Expression {
 			content: match child.element {
-				&elements::expressions::LITERAL   => Box::new(Literal::build(child)),
-				&elements::structures::STRUCTURE => Box::new(Structure::build(child)),
-				&elements::expressions::FUNCTION => Box::new(Function::build(child)),
-				&elements::expressions::OPERATION => Box::new(Operation::build(child)),
-				&elements::expressions::SEQUENCE => Box::new(Sequence::build(child)),
-				&elements::expressions::GROUP => Box::new(Group::build(child)),
+				&elements::expressions::LITERAL     => Literal::build(child),
+				&elements::structures::STRUCTURE    => Box::new(Structure::build(child)),
+				&elements::expressions::FUNCTION    => Box::new(Function::build(child)),
+				&elements::expressions::OPERATION   => Box::new(Operation::build(child)),
+				&elements::expressions::SEQUENCE    => Box::new(Sequence::build(child)),
+				&elements::expressions::GROUP       => Box::new(Group::build(child)),
 				&elements::expressions::DECLARATION => Box::new(Declaration::build(child)),
 				_ => panic!(),
 			},
