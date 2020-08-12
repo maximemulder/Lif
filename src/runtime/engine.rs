@@ -43,7 +43,7 @@ impl<'a> Engine<'a> {
 	}
 
 	pub fn new_undefined(&self) -> Reference {
-		return self.cheat().new_reference(Value::new_undefined());
+		return self.new_reference(Value::new_undefined());
 	}
 
 	pub fn new_reference(&self, value: Value) -> Reference {
