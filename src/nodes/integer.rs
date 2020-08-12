@@ -1,5 +1,5 @@
 use crate::nodes::{ Node, SyntaxNode };
-use crate::runtime::{ Engine, Object, Reference };
+use crate::runtime::{ Engine, Reference };
 
 pub struct Integer {
 	integer: usize,
@@ -15,6 +15,6 @@ impl Integer {
 
 impl Node for Integer {
 	fn execute<'a>(&'a self, engine: &Engine<'a>) -> Reference {
-		return engine.new_object(Object::new_integer(engine, self.integer));
+		return engine.new_integer(self.integer);
 	}
 }

@@ -2,6 +2,11 @@ use super::scope::Scope;
 use super::primitives::Primitives;
 use super::{ Object, Reference, Value };
 use super::object::callable::Callable;
+use super::object::data::Data;
+use super::object::callable::{ Function, Primitive };
+use super::object::instance::Instance;
+use crate::nodes::block::Block;
+use super::object::class::Class;
 
 pub struct Engine<'a> {
 	pub primitives: Primitives,
@@ -142,5 +147,39 @@ impl<'a> Engine<'a> {
 
 	pub fn write(&self, reference: Reference, value: Value) {
 		*self.get_value(reference) = value;
+	}
+}
+
+impl<'a> Engine<'a> {
+	pub fn new_array(&self, elements: Vec<Reference>) -> Reference {
+		return self.new_object(Object::new(self.primitives.class, Data::Array(elements)));
+	}
+
+	pub fn new_boolean(&self, boolean: bool) -> Reference {
+		return self.new_object(Object::new(self.primitives.boolean, Data::Boolean(boolean)));
+	}
+
+	pub fn new_class(&self) -> Reference {
+		return self.new_object(Object::new(self.primitives.class, Data::Class(Class::new())));
+	}
+
+	pub fn new_instance(&self, parent: Value) -> Reference {
+		return self.new_object(Object::new(parent, Data::Instance(Instance::new())));
+	}
+
+	pub fn new_integer(&self, integer: usize) -> Reference {
+		return self.new_object(Object::new(self.primitives.integer, Data::Integer(integer)));
+	}
+
+	pub fn new_function(&self, parameters: &'a Vec<Box<str>>, block: &'a Block) -> Reference {
+		return self.new_object(Object::new(self.primitives.function, Data::Callable(Box::new(Function::new(self.scope, parameters, block)))));
+	}
+
+	pub fn new_primitive(&self, callback: &'static dyn for<'b> Fn(&'b Engine, Vec<Reference>) -> Reference) -> Reference {
+		return self.new_object(Object::new(self.primitives.function, Data::Callable(Box::new(Primitive::new(callback)))));
+	}
+
+	pub fn new_string(&self, string: String) -> Reference {
+		return self.new_object(Object::new(self.primitives.string, Data::String(string)));
 	}
 }

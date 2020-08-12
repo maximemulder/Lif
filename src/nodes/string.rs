@@ -1,5 +1,5 @@
 use crate::nodes::{ Node, SyntaxNode };
-use crate::runtime::{ Engine, Object, Reference };
+use crate::runtime::{ Engine, Reference };
 
 pub struct String {
 	string: Box<str>,
@@ -16,6 +16,6 @@ impl String {
 
 impl Node for String {
 	fn execute<'a>(&'a self, engine: &Engine<'a>) -> Reference {
-		return engine.new_object(Object::new_string(engine, self.string.to_string()));
+		return engine.new_string(self.string.to_string());
 	}
 }

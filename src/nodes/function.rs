@@ -1,4 +1,4 @@
-use crate::runtime::{ Engine, Object, Reference };
+use crate::runtime::{ Engine, Reference };
 use super::{ Node, SyntaxNode };
 use super::block::Block;
 use super::parameters::Parameters;
@@ -19,6 +19,6 @@ impl Function {
 
 impl Node for Function {
 	fn execute<'a>(&'a self, engine: &Engine<'a>) -> Reference {
-		return engine.new_object(Object::new_function(engine, &self.parameters, &self.block));
+		return engine.new_function(&self.parameters, &self.block);
 	}
 }

@@ -1,4 +1,6 @@
 use crate::runtime::{ Engine, Object, Reference, Value };
+use crate::runtime::object::data::Data;
+use crate::runtime::object::class::Class;
 
 pub struct Primitives {
 	pub array:    Value,
@@ -25,27 +27,27 @@ impl Primitives {
 }
 
 impl<'a> Engine<'a> {
-	pub fn new_primitive(&self, name: &str, object: Object<'a>) {
-		self.new_variable(name, self.new_reference(self.new_value(object)));
+	pub fn create_class(&self) -> Value {
+		return self.new_value(Object::new(self.primitives.class, Data::Class(Class::new())));
 	}
 
 	pub fn build_primitives(&mut self) {
-		self.primitives.class    = self.new_value(Object::new_class(self));
+		self.primitives.class = self.create_class();
 
-		self.primitives.array    = self.new_value(Object::new_class(self));
-		self.primitives.boolean  = self.new_value(Object::new_class(self));
-		self.primitives.function = self.new_value(Object::new_class(self));
-		self.primitives.instance = self.new_value(Object::new_class(self));
-		self.primitives.integer  = self.new_value(Object::new_class(self));
-		self.primitives.string   = self.new_value(Object::new_class(self));
+		self.primitives.array    = self.create_class();
+		self.primitives.boolean  = self.create_class();
+		self.primitives.function = self.create_class();
+		self.primitives.instance = self.create_class();
+		self.primitives.integer  = self.create_class();
+		self.primitives.string   = self.create_class();
 
 		self.get_object(self.primitives.class).class = self.primitives.class;
 
-		self.new_primitive("assert", Object::new_primitive(self, &primitive_assert));
-		self.new_primitive("error",  Object::new_primitive(self, &primitive_error));
-		self.new_primitive("exit",   Object::new_primitive(self, &primitive_exit));
-		self.new_primitive("new",    Object::new_primitive(self, &primitive_new));
-		self.new_primitive("print",  Object::new_primitive(self, &primitive_print));
+		self.new_variable("assert", self.new_primitive(&primitive_assert));
+		self.new_variable("error",  self.new_primitive(&primitive_error));
+		self.new_variable("exit",   self.new_primitive(&primitive_exit));
+		self.new_variable("new",    self.new_primitive(&primitive_new));
+		self.new_variable("print",  self.new_primitive(&primitive_print));
 	}
 }
 
@@ -56,6 +58,7 @@ fn primitive_assert(engine: &Engine, parameters: Vec<Reference>) -> Reference {
 
 	return engine.new_undefined();
 }
+
 fn primitive_error(engine: &Engine, parameters: Vec<Reference>) -> Reference {
 	println!("{}", engine.get_cast_string(engine.read(parameters[0])));
 	panic!();
@@ -66,7 +69,7 @@ fn primitive_exit(_: &Engine, _: Vec<Reference>) -> Reference {
 }
 
 fn primitive_new(engine: &Engine, parameters: Vec<Reference>) -> Reference {
-	return engine.new_object(Object::new_instance(engine, engine.read(parameters[0])));
+	return engine.new_instance(engine.read(parameters[0]));
 }
 
 fn primitive_print(engine: &Engine, parameters: Vec<Reference>) -> Reference {
@@ -75,11 +78,11 @@ fn primitive_print(engine: &Engine, parameters: Vec<Reference>) -> Reference {
 }
 
 fn array_to_string(engine: &Engine, _: Vec<Reference>) -> Reference {
-	return engine.new_object(Object::new_string(engine, "ARRAY".to_string()));
+	return engine.new_string("ARRAY".to_string());
 }
 
 fn array_copy(engine: &Engine, parameters: Vec<Reference>) -> Reference {
-	return engine.new_object(Object::new_array(engine, engine.get_object(engine.read(parameters[0])).data.as_array().clone()));
+	return engine.new_array(engine.get_object(engine.read(parameters[0])).data.as_array().clone());
 }
 
 fn array_append(engine: &Engine, parameters: Vec<Reference>) -> Reference {
@@ -107,11 +110,11 @@ fn array_remove(engine: &Engine, parameters: Vec<Reference>) -> Reference {
 }
 
 fn array_access(engine: &Engine, _: Vec<Reference>) -> Reference {
-	return engine.new_object(Object::new_string(engine, "FUNCTION".to_string()));
+	return engine.new_string("FUNCTION".to_string());
 }
 
 fn function_to_string(engine: &Engine, _: Vec<Reference>) -> Reference {
-	return engine.new_object(Object::new_string(engine, "FUNCTION".to_string()));
+	return engine.new_string("FUNCTION".to_string());
 }
 
 fn function_call(engine: &Engine, parameters: Vec<Reference>) -> Reference {
@@ -137,66 +140,64 @@ fn instance_chain(engine: &Engine, parameters: Vec<Reference>) -> Reference {
 }
 
 fn integer_to_string(engine: &Engine, parameters: Vec<Reference>) -> Reference {
-	return engine.new_object(Object::new_string(engine,
-		engine.get_object(engine.read(parameters[0])).data.as_integer().to_string()
-	));
+	return engine.new_string(engine.get_object(engine.read(parameters[0])).data.as_integer().to_string());
 }
 
 fn integer_comparison(engine: &Engine, parameters: Vec<Reference>) -> Reference {
-	return engine.new_object(Object::new_boolean(engine,
+	return engine.new_boolean(
 		*engine.get_object(engine.read(parameters[0])).data.as_integer() ==
 		*engine.get_object(engine.read(parameters[1])).data.as_integer()
-	));
+	);
 }
 
 fn integer_order_lesser(engine: &Engine, parameters: Vec<Reference>) -> Reference {
-	return engine.new_object(Object::new_boolean(engine,
+	return engine.new_boolean(
 		*engine.get_object(engine.read(parameters[0])).data.as_integer() <
 		*engine.get_object(engine.read(parameters[1])).data.as_integer()
-	));
+	);
 }
 
 fn integer_addition(engine: &Engine, parameters: Vec<Reference>) -> Reference {
-	return engine.new_object(Object::new_integer(engine,
+	return engine.new_integer(
 		*engine.get_object(engine.read(parameters[0])).data.as_integer() +
 		*engine.get_object(engine.read(parameters[1])).data.as_integer()
-	));
+	);
 }
 
 fn integer_substraction(engine: &Engine, parameters: Vec<Reference>) -> Reference {
-	return engine.new_object(Object::new_integer(engine,
+	return engine.new_integer(
 		*engine.get_object(engine.read(parameters[0])).data.as_integer() +
 		*engine.get_object(engine.read(parameters[1])).data.as_integer()
-	));
+	);
 }
 
 fn integer_multiplication(engine: &Engine, parameters: Vec<Reference>) -> Reference {
-	return engine.new_object(Object::new_integer(engine,
+	return engine.new_integer(
 		*engine.get_object(engine.read(parameters[0])).data.as_integer() +
 		*engine.get_object(engine.read(parameters[1])).data.as_integer()
-	));
+	);
 }
 
 fn integer_division(engine: &Engine, parameters: Vec<Reference>) -> Reference {
-	return engine.new_object(Object::new_integer(engine,
+	return engine.new_integer(
 		*engine.get_object(engine.read(parameters[0])).data.as_integer() /
 		*engine.get_object(engine.read(parameters[1])).data.as_integer()
-	));
+	);
 }
 
 fn integer_remainder(engine: &Engine, parameters: Vec<Reference>) -> Reference {
-	return engine.new_object(Object::new_integer(engine,
+	return engine.new_integer(
 		*engine.get_object(engine.read(parameters[0])).data.as_integer() %
 		*engine.get_object(engine.read(parameters[1])).data.as_integer()
-	));
+	);
 }
 
 fn object_to_string(engine: &Engine, _: Vec<Reference>) -> Reference {
-	return engine.new_object(Object::new_string(engine, "OBJECT".to_string()));
+	return engine.new_string("OBJECT".to_string());
 }
 
 fn object_comparison(engine: &Engine, parameters: Vec<Reference>) -> Reference {
-	return engine.new_object(Object::new_boolean(engine, engine.read(parameters[0]) == engine.read(parameters[1])));
+	return engine.new_boolean(engine.read(parameters[0]) == engine.read(parameters[1]));
 }
 
 fn object_chain(engine: &Engine, parameters: Vec<Reference>) -> Reference {
@@ -215,21 +216,21 @@ fn string_to_string(_: &Engine, parameters: Vec<Reference>) -> Reference {
 }
 
 fn string_comparison(engine: &Engine, parameters: Vec<Reference>) -> Reference {
-	return engine.new_object(Object::new_boolean(engine,
+	return engine.new_boolean(
 		engine.get_object(engine.read(parameters[0])).data.as_string() ==
+		engine.get_object(engine.read(parameters[1])).data.as_string()
+	);
+}
+
+fn string_concatenation(engine: &Engine, parameters: Vec<Reference>) -> Reference {
+	return engine.new_string(format!("{}{}",
+		engine.get_object(engine.read(parameters[0])).data.as_string(),
 		engine.get_object(engine.read(parameters[1])).data.as_string()
 	));
 }
 
-fn string_concatenation(engine: &Engine, parameters: Vec<Reference>) -> Reference {
-	return engine.new_object(Object::new_string(engine, format!("{}{}",
-		engine.get_object(engine.read(parameters[0])).data.as_string(),
-		engine.get_object(engine.read(parameters[1])).data.as_string()
-	)));
-}
-
 fn type_to_string(engine: &Engine, _: Vec<Reference>) -> Reference {
-	return engine.new_object(Object::new_string(engine, "TYPE".to_string()));
+	return engine.new_string("TYPE".to_string());
 }
 
 fn type_chain(engine: &Engine, parameters: Vec<Reference>) -> Reference {
