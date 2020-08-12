@@ -46,4 +46,12 @@ impl<'a> Data<'a> {
 
 		panic!();
 	}
+
+	pub fn as_string(&mut self) -> &mut String {
+		if let Data::String(string) = self {
+			return string;
+		}
+
+		panic!();
+	}
 }

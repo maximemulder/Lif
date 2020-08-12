@@ -34,7 +34,7 @@ impl Node for Literal {
 	fn execute<'a>(&'a self, engine: &Engine<'a>) -> Reference {
 		return match &self.content {
 			Content::Identifier => engine.get_variable(&self.text),
-			Content::String     => engine.new_object(Object::new_string(engine, &self.text)),
+			Content::String     => engine.new_object(Object::new_string(engine, &self.text[1 .. self.text.len() - 1])),
 			Content::Number     => engine.new_object(Object::new_integer(engine, self.text.parse::<usize>().unwrap())),
 		};
 	}

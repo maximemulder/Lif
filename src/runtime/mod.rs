@@ -1,6 +1,6 @@
-pub mod classes;
 pub mod engine;
 pub mod object;
+pub mod primitives;
 pub mod scope;
 
 pub use engine::Engine;

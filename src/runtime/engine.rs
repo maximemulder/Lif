@@ -1,5 +1,5 @@
 use super::scope::Scope;
-use super::classes::Classes;
+use super::primitives::Primitives;
 use super::{ Object, Reference, Value };
 use super::object::callable::Callable;
 
@@ -8,7 +8,7 @@ pub fn cheat<T>(reference: &T) -> &mut T {
 }
 
 pub struct Engine<'a> {
-	pub classes: Classes,
+	pub primitives: Primitives,
 	pub scope: usize,
 	references: Vec<Value>,
 	objects: Vec<Object<'a>>,
@@ -18,7 +18,7 @@ pub struct Engine<'a> {
 impl<'a> Engine<'a> {
 	pub fn new() -> Self {
 		let mut engine = Self {
-			classes: Classes::new(),
+			primitives: Primitives::new(),
 			scope: 0,
 			references: Vec::new(),
 			objects: Vec::new(),
@@ -26,7 +26,7 @@ impl<'a> Engine<'a> {
 		};
 
 		engine.scopes.push(Scope::new());
-		engine.build_classes();
+		engine.build_primitives();
 
 		return engine;
 	}
@@ -107,20 +107,26 @@ impl<'a> Engine<'a> {
 
 	pub fn get_cast_array(&self, value: Value) -> &Vec<Reference> {
 		let object = self.get_object(value);
-		object.cast(self.classes.array);
+		object.cast(self.primitives.array);
 		return object.data.as_array();
 	}
 
 	pub fn get_cast_boolean(&self, value: Value) -> &bool {
 		let object = self.get_object(value);
-		object.cast(self.classes.boolean);
+		object.cast(self.primitives.boolean);
 		return object.data.as_boolean();
 	}
 
 	pub fn get_cast_callable(&self, value: Value) -> &Box<dyn Callable<'a> + 'a> {
 		let object = self.get_object(value);
-		object.cast(self.classes.function);
+		object.cast(self.primitives.function);
 		return object.data.as_callable();
+	}
+
+	pub fn get_cast_string(&self, value: Value) -> &String {
+		let object = self.get_object(value);
+		object.cast(self.primitives.string);
+		return object.data.as_string();
 	}
 
 	pub fn read(&self, reference: Reference) -> Value {

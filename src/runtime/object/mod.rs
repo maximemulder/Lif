@@ -23,27 +23,27 @@ impl<'a> Object<'a> {
 	}
 
 	pub fn new_boolean(engine: &Engine, boolean: bool) -> Self {
-		return Self::new(engine.classes.boolean, Data::Boolean(boolean));
+		return Self::new(engine.primitives.boolean, Data::Boolean(boolean));
 	}
 
 	pub fn new_class(engine: &Engine) -> Self {
-		return Self::new(engine.classes.class, Data::Class(Class::new()));
+		return Self::new(engine.primitives.class, Data::Class(Class::new()));
 	}
 
 	pub fn new_integer(engine: &Engine, integer: usize) -> Self {
-		return Self::new(engine.classes.integer, Data::Integer(integer));
+		return Self::new(engine.primitives.integer, Data::Integer(integer));
 	}
 
 	pub fn new_function(engine: &Engine, parameters: &'a Vec<Box<str>>, block: &'a Block) -> Self {
-		return Self::new(engine.classes.function, Data::Callable(Box::new(Function::new(engine.scope, parameters, block))));
+		return Self::new(engine.primitives.function, Data::Callable(Box::new(Function::new(engine.scope, parameters, block))));
 	}
 
 	pub fn new_primitive(engine: &Engine, callback: &'static dyn for<'b> Fn(&'b Engine, Vec<Reference>) -> Reference) -> Self {
-		return Self::new(engine.classes.function, Data::Callable(Box::new(Primitive::new(callback))));
+		return Self::new(engine.primitives.function, Data::Callable(Box::new(Primitive::new(callback))));
 	}
 
 	pub fn new_string(engine: &Engine, string: &str) -> Self {
-		return Self::new(engine.classes.string, Data::String(string.to_string()));
+		return Self::new(engine.primitives.string, Data::String(string.to_string()));
 	}
 
 	pub fn cast(&self, class: Value) {
