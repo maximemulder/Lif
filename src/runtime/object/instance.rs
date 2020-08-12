@@ -2,5 +2,13 @@ use crate::runtime::Reference;
 use std::collections::HashMap;
 
 pub struct Instance {
-	attributes: HashMap<String, Reference>,
+	pub attributes: HashMap<String, Reference>,
+}
+
+impl Instance {
+	pub fn new() -> Self {
+		return Self {
+			attributes: HashMap::new(),
+		}
+	}
 }

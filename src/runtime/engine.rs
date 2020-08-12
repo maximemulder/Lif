@@ -3,19 +3,20 @@ use super::primitives::Primitives;
 use super::{ Object, Reference, Value };
 use super::object::callable::Callable;
 
-pub fn cheat<T>(reference: &T) -> &mut T {
-	return unsafe { (reference as *const T as *mut T).as_mut().unwrap() };
-}
-
 pub struct Engine<'a> {
 	pub primitives: Primitives,
 	pub scope: usize,
+	pub this: Option<Value>,
 	references: Vec<Value>,
 	objects: Vec<Object<'a>>,
 	scopes: Vec<Scope>,
 }
 
 impl<'a> Engine<'a> {
+	pub fn cheat(&self) -> &mut Engine<'a> {
+		return unsafe { (self as *const Engine<'a> as *mut Engine<'a>).as_mut().unwrap() };
+	}
+
 	pub fn new() -> Self {
 		let mut engine = Self {
 			primitives: Primitives::new(),
@@ -23,6 +24,7 @@ impl<'a> Engine<'a> {
 			references: Vec::new(),
 			objects: Vec::new(),
 			scopes: Vec::new(),
+			this: None,
 		};
 
 		engine.scopes.push(Scope::new());
@@ -32,22 +34,22 @@ impl<'a> Engine<'a> {
 	}
 
 	fn get_value(&self, reference: Reference) -> &mut Value {
-		return &mut cheat(self).references[reference.0];
+		return &mut self.cheat().references[reference.0];
 	}
 
 	pub fn new_undefined(&self) -> Reference {
-		return cheat(self).new_reference(Value::new_undefined());
+		return self.cheat().new_reference(Value::new_undefined());
 	}
 
 	pub fn new_reference(&self, value: Value) -> Reference {
 		let reference = Reference(self.references.len());
-		cheat(self).references.push(value);
+		self.cheat().references.push(value);
 		return reference;
 	}
 
 	pub fn new_value(&self, object: Object<'a>) -> Value {
 		let value = Value(self.objects.len());
-		cheat(self).objects.push(object);
+		self.cheat().objects.push(object);
 		return value;
 	}
 
@@ -57,20 +59,20 @@ impl<'a> Engine<'a> {
 	}
 
 	pub fn get_object(&self, value: Value) -> &mut Object<'a> {
-		return &mut cheat(self).objects[value.0];
+		return &mut self.cheat().objects[value.0];
 	}
 
 	pub fn get_scope(&self) -> &mut Scope {
-		return &mut cheat(self).scopes[self.scope];
+		return &mut self.cheat().scopes[self.scope];
 	}
 
 	pub fn push_scope(&self) {
-		cheat(self).scopes.push(Scope::new_child(self.scope));
+		self.cheat().scopes.push(Scope::new_child(self.scope));
 	}
 
 	pub fn pop_scope(&self) {
 		if let Some(parent) = self.get_scope().parent {
-			cheat(self).scope = parent;
+			self.cheat().scope = parent;
 		} else {
 			panic!();
 		}
@@ -78,12 +80,12 @@ impl<'a> Engine<'a> {
 
 	pub fn push_frame(&self, frame: usize) -> usize {
 		let scope = self.scope;
-		cheat(self).scope = frame;
+		self.cheat().scope = frame;
 		return scope;
 	}
 
 	pub fn pop_frame(&self, frame: usize) {
-		cheat(self).scope = frame;
+		self.cheat().scope = frame;
 	}
 
 	pub fn new_variable(&self, name: &str, reference: Reference) {
@@ -98,7 +100,7 @@ impl<'a> Engine<'a> {
 			}
 
 			if let Some(parent) = scope.parent {
-				scope = &mut cheat(self).scopes[parent];
+				scope = &mut self.cheat().scopes[parent];
 			} else {
 				panic!();
 			}

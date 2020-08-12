@@ -16,6 +16,6 @@ impl String {
 
 impl Node for String {
 	fn execute<'a>(&'a self, engine: &Engine<'a>) -> Reference {
-		return engine.new_object(Object::new_string(engine, &self.string));
+		return engine.new_object(Object::new_string(engine, self.string.to_string()));
 	}
 }
