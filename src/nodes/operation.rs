@@ -20,7 +20,7 @@ impl Operation {
 }
 
 impl Node for Operation {
-	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> Reference {
+	fn execute<'a>(&'a self, engine: &Engine<'a>) -> Reference {
 		self.left.execute(engine);
 		self.right.execute(engine);
 		return engine.new_undefined();

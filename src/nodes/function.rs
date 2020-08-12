@@ -18,7 +18,7 @@ impl Function {
 }
 
 impl Node for Function {
-	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> Reference {
+	fn execute<'a>(&'a self, engine: &Engine<'a>) -> Reference {
 		return engine.new_object(Object::new_function(engine, &self.parameters, &self.block));
 	}
 }

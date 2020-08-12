@@ -19,10 +19,6 @@ use nodes::Node;
 use std::env;
 use std::fs;
 
-pub fn cheat<'a, T>(reference: *mut T) -> &'a mut T {
-	return unsafe { (reference as *mut T).as_mut().unwrap() };
-}
-
 fn main() {
 	println!("Leaf compiler.");
 

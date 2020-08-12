@@ -25,10 +25,8 @@ impl If {
 }
 
 impl Node for If {
-	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> Reference {
-		let reference = self.condition.execute(engine);
-		let condition = engine.read(reference);
-		return if engine.get_cast_boolean(condition) {
+	fn execute<'a>(&'a self, engine: &Engine<'a>) -> Reference {
+		return if *engine.get_cast_boolean(engine.read(self.condition.execute(engine))) {
 			self.then.execute(engine)
 		} else if let Some(r#else) = &self.r#else {
 			r#else.execute(engine)

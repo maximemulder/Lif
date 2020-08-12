@@ -18,10 +18,8 @@ impl While {
 }
 
 impl Node for While {
-	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> Reference {
-		let reference = self.condition.execute(engine);
-		let condition = engine.read(reference);
-		while engine.get_cast_boolean(condition) {
+	fn execute<'a>(&'a self, engine: &Engine<'a>) -> Reference {
+		while *engine.get_cast_boolean(engine.read(self.condition.execute(engine))) {
 			self.body.execute(engine);
 		}
 

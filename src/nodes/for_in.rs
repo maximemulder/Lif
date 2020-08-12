@@ -21,11 +21,9 @@ impl ForIn {
 }
 
 impl Node for ForIn {
-	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> Reference {
-		let reference = self.expression.execute(engine);
-		let array = engine.read(reference);
-		for value in engine.get_cast_array(array).clone() {
-			engine.new_variable(&self.identifier, value);
+	fn execute<'a>(&'a self, engine: &Engine<'a>) -> Reference {
+		for element in engine.get_cast_array(engine.read(self.expression.execute(engine))) {
+			engine.new_variable(&self.identifier, *element);
 			self.body.execute(engine);
 		}
 

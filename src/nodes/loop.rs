@@ -15,7 +15,7 @@ impl Loop {
 }
 
 impl Node for Loop {
-	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> Reference {
+	fn execute<'a>(&'a self, engine: &Engine<'a>) -> Reference {
 		loop {
 			self.body.execute(engine);
 		}

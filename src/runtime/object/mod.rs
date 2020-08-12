@@ -38,7 +38,7 @@ impl<'a> Object<'a> {
 		return Self::new(engine.classes.function, Data::Callable(Box::new(Function::new(engine.scope, parameters, block))));
 	}
 
-	pub fn new_primitive(engine: &Engine, callback: &'static dyn for<'b> Fn(&'b mut Engine, Vec<Reference>) -> Reference) -> Self {
+	pub fn new_primitive(engine: &Engine, callback: &'static dyn for<'b> Fn(&'b Engine, Vec<Reference>) -> Reference) -> Self {
 		return Self::new(engine.classes.function, Data::Callable(Box::new(Primitive::new(callback))));
 	}
 

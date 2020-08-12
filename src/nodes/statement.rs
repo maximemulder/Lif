@@ -15,7 +15,7 @@ impl Statement {
 }
 
 impl Node for Statement {
-	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> Reference {
+	fn execute<'a>(&'a self, engine: &Engine<'a>) -> Reference {
 		self.expression.execute(engine);
 		return engine.new_undefined();
 	}

@@ -15,7 +15,7 @@ impl Program {
 }
 
 impl Node for Program {
-	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> Reference {
+	fn execute<'a>(&'a self, engine: &Engine<'a>) -> Reference {
 		self.statements.execute(engine);
 		return engine.new_undefined();
 	}

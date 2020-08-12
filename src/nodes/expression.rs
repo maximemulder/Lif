@@ -32,7 +32,7 @@ impl Expression {
 }
 
 impl Node for Expression {
-	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> Reference {
+	fn execute<'a>(&'a self, engine: &Engine<'a>) -> Reference {
 		return self.content.execute(engine);
 	}
 }

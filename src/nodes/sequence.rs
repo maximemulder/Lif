@@ -1,4 +1,3 @@
-use crate::cheat;
 use crate::runtime::{ Engine, Reference };
 use super::expression::Expression;
 use super::expressions::Expressions;
@@ -24,16 +23,13 @@ impl Sequence {
 }
 
 impl Node for Sequence {
-	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> Reference {
-		let reference = self.expression.execute(engine);
+	fn execute<'a>(&'a self, engine: &Engine<'a>) -> Reference {
 		let mut arguments = Vec::new();
+		let reference = self.expression.execute(engine);
 		for argument in self.expressions.iter() {
 			arguments.push(argument.execute(engine));
 		}
 
-		let engine2 = cheat(engine);
-		let value = engine.get_value(reference);
-		let callable = engine.get_cast_callable(value);
-		return callable.call(engine2, arguments);
+		return engine.get_cast_callable(engine.read(reference)).call(engine, arguments);
 	}
 }
