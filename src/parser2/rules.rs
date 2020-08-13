@@ -10,99 +10,31 @@ pub struct RuleAlias {
 	rule: usize,
 }
 
-pub struct RuleFilter {
-	rule: usize,
-	filter: usize,
-}
-
-pub struct RuleChoice {
-	rules: Vec<usize>,
-}
-
-pub struct RuleSequence {
-	rules: Vec<usize>,
-}
-
-pub struct RuleList {
-	rule: usize,
-}
-
-pub struct RuleRecurse<'a> {
-	left: usize,
-	right: usize,
-	mapper: &'a dyn for<'b, 'c> Fn(Vec<Node<'b, 'c>>) -> Vec<Node<'b, 'c>>,
-}
-
-pub struct RuleOption {
-	rule: usize,
-}
-
-pub struct RuleToken<'a> {
-	element: &'a Element,
-}
-
-pub fn alias(rule: usize) -> RuleAlias {
-	return RuleAlias {
-		rule,
-	};
-}
-
-pub fn filter(rule: usize, filter: usize) -> RuleFilter {
-	return RuleFilter {
-		rule,
-		filter,
-	};
-}
-
-pub fn choice(rules: Vec<usize>) -> RuleChoice {
-	return RuleChoice {
-		rules,
-	};
-}
-
-pub fn sequence(rules: Vec<usize>) -> RuleSequence {
-	return RuleSequence {
-		rules,
-	};
-}
-
-pub fn list(rule: usize) -> RuleList {
-	return RuleList {
-		rule,
-	};
-}
-
-pub fn recurse<'c>(left: usize, right: usize, mapper: &'c dyn for<'a, 'b> Fn(Vec<Node<'a, 'b>>) -> Vec<Node<'a, 'b>>) -> RuleRecurse<'c> {
-	return RuleRecurse {
-		left,
-		right,
-		mapper,
-	};
-}
-
-pub fn option(rule: usize) -> RuleOption {
-	return RuleOption {
-		rule,
-	};
-}
-
-pub fn token<'a>(element: &'a Element) -> RuleToken<'a> {
-	return RuleToken {
-		element,
-	};
-}
-
-fn vector<T>(option: Option<Vec<T>>) -> Vec<T> {
-	return if let Some(vector) = option {
-		vector
-	} else {
-		Vec::new()
-	};
+impl RuleAlias {
+	pub fn new(rule: usize) -> Self {
+		return Self {
+			rule,
+		};
+	}
 }
 
 impl<'a> Rule<'a> for RuleAlias {
 	fn rule<'b>(&self, parser: &mut Parser<'a, 'b, '_>) -> Option<Vec<Node<'a, 'b>>> {
 		return parser.rule(self.rule);
+	}
+}
+
+pub struct RuleFilter {
+	rule: usize,
+	filter: usize,
+}
+
+impl RuleFilter {
+	pub fn new(rule: usize, filter: usize) -> Self {
+		return Self {
+			rule,
+			filter,
+		};
 	}
 }
 
@@ -116,6 +48,18 @@ impl<'a> Rule<'a> for RuleFilter {
 	}
 }
 
+pub struct RuleChoice {
+	rules: Vec<usize>,
+}
+
+impl RuleChoice {
+	pub fn new(rules: Vec<usize>) -> Self {
+		return Self {
+			rules,
+		};
+	}
+}
+
 impl<'a> Rule<'a> for RuleChoice {
 	fn rule<'b>(&self, parser: &mut Parser<'a, 'b, '_>) -> Option<Vec<Node<'a, 'b>>> {
 		for rule in self.rules.iter() {
@@ -125,6 +69,18 @@ impl<'a> Rule<'a> for RuleChoice {
 		}
 
 		return None;
+	}
+}
+
+pub struct RuleSequence {
+	rules: Vec<usize>,
+}
+
+impl RuleSequence {
+	pub fn new(rules: Vec<usize>) -> Self {
+		return Self {
+			rules,
+		};
 	}
 }
 
@@ -143,6 +99,18 @@ impl<'a> Rule<'a> for RuleSequence {
 	}
 }
 
+pub struct RuleList {
+	rule: usize,
+}
+
+impl RuleList {
+	pub fn new(rule: usize) -> Self {
+		return Self {
+			rule,
+		};
+	}
+}
+
 impl<'a> Rule<'a> for RuleList {
 	fn rule<'b>(&self, parser: &mut Parser<'a, 'b, '_>) -> Option<Vec<Node<'a, 'b>>> {
 		let mut nodes = Vec::new();
@@ -151,6 +119,22 @@ impl<'a> Rule<'a> for RuleList {
 		}
 
 		return Some(nodes);
+	}
+}
+
+pub struct RuleRecurse<'a> {
+	left: usize,
+	right: usize,
+	mapper: &'a dyn for<'b, 'c> Fn(Vec<Node<'b, 'c>>) -> Vec<Node<'b, 'c>>,
+}
+
+impl<'a> RuleRecurse<'a> {
+	pub fn new(left: usize, right: usize, mapper: &'a dyn for<'b, 'c> Fn(Vec<Node<'b, 'c>>) -> Vec<Node<'b, 'c>>) -> Self {
+		return Self {
+			left,
+			right,
+			mapper,
+		};
 	}
 }
 
@@ -169,9 +153,38 @@ impl<'a> Rule<'a> for RuleRecurse<'_> {
 	}
 }
 
+pub struct RuleOption {
+	rule: usize,
+}
+
+impl RuleOption {
+	pub fn new(rule: usize) -> Self {
+		return Self {
+			rule,
+		};
+	}
+}
+
 impl<'a> Rule<'a> for RuleOption {
 	fn rule<'b>(&self, parser: &mut Parser<'a, 'b, '_>) -> Option<Vec<Node<'a, 'b>>> {
-		return Some(vector(parser.rule(self.rule)));
+		let nodes = parser.rule(self.rule);
+		if nodes.is_some() {
+			return nodes;
+		}
+
+		return Some(Vec::new());
+	}
+}
+
+pub struct RuleToken<'a> {
+	element: &'a Element,
+}
+
+impl<'a> RuleToken<'a> {
+	pub fn new(element: &'a Element) -> Self {
+		return Self {
+			element,
+		};
 	}
 }
 
