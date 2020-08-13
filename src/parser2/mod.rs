@@ -1,25 +1,29 @@
 #![allow(unused_variables)]
 #![allow(dead_code)]
 
-pub mod rule;
+pub mod rules;
+pub mod filters;
 pub mod nodes;
 pub mod arena;
 
 use crate::node::Node;
 use arena::Arena;
-use rule::Rule;
+use rules::Rule;
+use filters::Filter;
 
 pub struct Parser<'a, 'b, 'c> {
 	tokens: &'c Vec<Node<'a, 'b>>,
 	rules: &'c Arena<dyn Rule<'a> + 'c>,
+	filters: &'c Arena<dyn Filter<'a> + 'c>,
 	cursor: usize,
 }
 
 impl<'a, 'b, 'c> Parser<'a, 'b, 'c> {
-	fn new(tokens: &'c Vec<Node<'a, 'b>>, rules: &'c Arena<dyn Rule<'a> + 'c>) -> Self {
+	fn new(tokens: &'c Vec<Node<'a, 'b>>, rules: &'c Arena<dyn Rule<'a> + 'c>, filters: &'c Arena<dyn Filter<'a> + 'c>) -> Self {
 		return Self {
 			tokens,
 			rules,
+			filters,
 			cursor: 0,
 		};
 	}
@@ -46,5 +50,9 @@ impl<'a, 'b, 'c> Parser<'a, 'b, 'c> {
 		}
 
 		return nodes;
+	}
+
+	fn filter(&mut self, index: usize, nodes: Vec<Node<'a, 'b>>) -> Vec<Node<'a, 'b>> {
+		return self.filters.get(index).filter(self, nodes);
 	}
 }

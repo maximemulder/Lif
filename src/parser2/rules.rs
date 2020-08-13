@@ -10,9 +10,9 @@ pub struct RuleAlias {
 	rule: usize,
 }
 
-pub struct RuleElement<'a> {
+pub struct RuleFilter {
 	rule: usize,
-	element: &'a Element,
+	filter: usize,
 }
 
 pub struct RuleChoice {
@@ -47,10 +47,10 @@ pub fn alias(rule: usize) -> RuleAlias {
 	};
 }
 
-pub fn element<'a>(rule: usize, element: &'a Element) -> RuleElement<'a> {
-	return RuleElement {
+pub fn filter(rule: usize, filter: usize) -> RuleFilter {
+	return RuleFilter {
 		rule,
-		element,
+		filter,
 	};
 }
 
@@ -106,13 +106,13 @@ impl<'a> Rule<'a> for RuleAlias {
 	}
 }
 
-impl<'a> Rule<'a> for RuleElement<'a> {
+impl<'a> Rule<'a> for RuleFilter {
 	fn rule<'b>(&self, parser: &mut Parser<'a, 'b, '_>) -> Option<Vec<Node<'a, 'b>>> {
-		return if let Some(children) = parser.rule(self.rule) {
-			Some(vec![Node::new_production(self.element, children)])
-		} else {
-			None
-		};
+		if let Some(nodes) = parser.rule(self.rule) {
+			return Some(parser.filter(self.filter, nodes));
+		}
+
+		return None;
 	}
 }
 

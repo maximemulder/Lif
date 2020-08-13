@@ -18,8 +18,8 @@ pub struct Engine<'a> {
 }
 
 impl<'a> Engine<'a> {
-	pub fn cheat(&self) -> &mut Engine<'a> {
-		return unsafe { (self as *const Engine<'a> as *mut Engine<'a>).as_mut().unwrap() };
+	pub fn cheat(&self) -> &mut Self {
+		return unsafe { (self as *const Self as *mut Self).as_mut().unwrap() };
 	}
 
 	pub fn new() -> Self {
