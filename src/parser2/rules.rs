@@ -193,6 +193,6 @@ impl RuleNone {
 
 impl<'a> Rule<'a> for RuleNone {
 	fn rule<'b>(&self, parser: &mut Parser<'a, 'b, '_>) -> Option<Vec<Node<'a, 'b>>> {
-		return Some(vec![]);
+		return Some(Vec::new());
 	}
 }
