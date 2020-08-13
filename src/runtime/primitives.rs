@@ -54,6 +54,7 @@ impl<'a> Engine<'a> {
 		self.primitives.string   = self.create_class();
 
 		self.get_object(self.primitives.class).class = self.primitives.class;
+		self.get_object(self.primitives.class).data.as_class_mut().parent = Some(self.primitives.class);
 
 		self.new_variable("assert", self.new_primitive(&primitive_assert));
 		self.new_variable("error",  self.new_primitive(&primitive_error));
