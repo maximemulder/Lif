@@ -11,19 +11,19 @@ pub fn run<'a, 'b>(tokens: &Vec<Node<'a, 'b>>) -> Option<Node<'a, 'b>> {
 
 	macro_rules! declare {
 		( $name:ident ) => {
-			let $name = rules.reserve();
+			let $name = rules.declare();
 		}
 	}
 
 	macro_rules! define {
 		( $index:expr, $rule:expr ) => {
-			rules.insert($index, $rule);
+			rules.define($index, $rule);
 		};
 	}
 
 	macro_rules! create {
 		( $rule:expr ) => {
-			rules.push($rule)
+			rules.create($rule)
 		}
 	}
 
@@ -35,7 +35,7 @@ pub fn run<'a, 'b>(tokens: &Vec<Node<'a, 'b>>) -> Option<Node<'a, 'b>> {
 
 	macro_rules! element {
 		( $rule:expr, $element: expr ) => {
-			RuleFilter::new($rule, filters.push(FilterElement::new($element)))
+			RuleFilter::new($rule, filters.create(FilterElement::new($element)))
 		};
 	}
 
@@ -272,11 +272,12 @@ pub fn run<'a, 'b>(tokens: &Vec<Node<'a, 'b>>) -> Option<Node<'a, 'b>> {
 		( $name:ident, $child:expr, $tokens:expr ) => {
 			declare!(operation_sequence);
 			declare!(operation_choice);
-			define!($name, RuleRecurse::new($child, operation_sequence, &(|nodes| vec![
-				Node::new_production(&elements::productions::EXPRESSION, vec![
-					Node::new_production(&elements::expressions::OPERATION, nodes)
-				])
-			])));
+			let op_1 = filters.create(FilterElement::new(&elements::productions::EXPRESSION));
+			let op_2 = filters.create(FilterElement::new(&elements::expressions::SEQUENCE));
+			let op_3 = filters.create(FilterList::new(vec![op_1, op_2]));
+
+			let op_filter = filters.create(FilterRecurse::new(operation_sequence, op_3));
+			define!($name, RuleFilter::new($child, op_filter));
 
 			define!(operation_sequence, RuleSequence::new(vec![operation_choice, $child]));
 			define!(operation_choice, RuleChoice::new($tokens));
@@ -299,11 +300,12 @@ pub fn run<'a, 'b>(tokens: &Vec<Node<'a, 'b>>) -> Option<Node<'a, 'b>> {
 		symbol_ampersand_eq, symbol_caret_eq, symbol_pipe_eq, symbol_ampersand_d_eq, symbol_pipe_d_eq
 	]);
 
-	define!(call, RuleRecurse::new(expression_element, call_choice, &(|nodes|  vec![
-		Node::new_production(&elements::productions::EXPRESSION, vec![
-			Node::new_production(&elements::expressions::SEQUENCE, nodes)
-		])
-	])));
+	let call_1 = filters.create(FilterElement::new(&elements::productions::EXPRESSION));
+	let call_2 = filters.create(FilterElement::new(&elements::expressions::SEQUENCE));
+	let call_3 = filters.create(FilterList::new(vec![call_1, call_2]));
+
+	let call_filter = filters.create(FilterRecurse::new(call_choice, call_3));
+	define!(call, RuleFilter::new(expression_element, call_filter));
 
 	define!(call_choice, RuleChoice::new(vec![call_sequence_1, call_sequence_2]));
 	define!(call_sequence_1, RuleSequence::new(vec![symbol_parenthesis_l, expression_list, symbol_parenthesis_r]));

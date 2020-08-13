@@ -12,19 +12,19 @@ impl<T: ?Sized> Arena<T> {
 		};
 	}
 
-	pub fn reserve(&mut self) -> usize {
+	pub fn declare(&mut self) -> usize {
 		let index = self.elements.len();
 		self.elements.push(MaybeUninit::uninit());
 		return index;
 	}
 
-	pub fn insert<N: Unsize<T>>(&mut self, index: usize, element: N) {
+	pub fn define<N: Unsize<T>>(&mut self, index: usize, element: N) {
 		self.elements[index] = MaybeUninit::new(Box::<N>::new(element));
 	}
 
-	pub fn push<N: Unsize<T>>(&mut self, element: N) -> usize {
-		let index = self.reserve();
-		self.insert(index, element);
+	pub fn create<N: Unsize<T>>(&mut self, element: N) -> usize {
+		let index = self.declare();
+		self.define(index, element);
 		return index;
 	}
 

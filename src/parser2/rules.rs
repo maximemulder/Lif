@@ -122,37 +122,6 @@ impl<'a> Rule<'a> for RuleList {
 	}
 }
 
-pub struct RuleRecurse<'a> {
-	left: usize,
-	right: usize,
-	mapper: &'a dyn for<'b, 'c> Fn(Vec<Node<'b, 'c>>) -> Vec<Node<'b, 'c>>,
-}
-
-impl<'a> RuleRecurse<'a> {
-	pub fn new(left: usize, right: usize, mapper: &'a dyn for<'b, 'c> Fn(Vec<Node<'b, 'c>>) -> Vec<Node<'b, 'c>>) -> Self {
-		return Self {
-			left,
-			right,
-			mapper,
-		};
-	}
-}
-
-impl<'a> Rule<'a> for RuleRecurse<'_> {
-	fn rule<'b>(&self, parser: &mut Parser<'a, 'b, '_>) -> Option<Vec<Node<'a, 'b>>> {
-		if let Some(mut nodes) = parser.rule(self.left) {
-			while let Some(children) = parser.rule(self.right) {
-				nodes.extend(children);
-				nodes = (self.mapper)(nodes);
-			}
-
-			return Some(nodes);
-		}
-
-		return None;
-	}
-}
-
 pub struct RuleOption {
 	rule: usize,
 }
