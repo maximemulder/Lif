@@ -125,7 +125,7 @@ pub fn run<'a, 'b>(tokens: &Vec<Node<'a, 'b>>) -> Option<Node<'a, 'b>> {
 				filters.create(FilterList::new(vec![
 					filter,
 					filters.create(FilterElement::new(&elements::productions::EXPRESSION)),
-					filters.create(FilterElement::new(&elements::expressions::SEQUENCE)),
+					filters.create(FilterElement::new(&elements::expressions::OPERATION)),
 				]))
 			));
 
