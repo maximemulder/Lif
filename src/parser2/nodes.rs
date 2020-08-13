@@ -167,8 +167,10 @@ pub fn run<'a, 'b>(tokens: &Vec<Node<'a, 'b>>) -> Option<Node<'a, 'b>> {
 	declare!(loop_do_sequence);
 	declare!(while_element);
 	declare!(while_sequence);
-	declare!(for_element);
-	declare!(for_sequence);
+	declare!(do_while_element);
+	declare!(do_while_sequence);
+	declare!(for_in_element);
+	declare!(for_in_sequence);
 	declare!(declaration_element);
 	declare!(declaration_sequence);
 	declare!(control_element);
@@ -212,7 +214,7 @@ pub fn run<'a, 'b>(tokens: &Vec<Node<'a, 'b>>) -> Option<Node<'a, 'b>> {
 	define_list!(parameters, variable_identifier, &elements::productions::PARAMETERS);
 
 	define!(structure_element, element(structure_choice, &elements::structures::STRUCTURE));
-	define!(structure_choice, choice(vec![block_element, if_element, loop_element, while_element, for_element]));
+	define!(structure_choice, choice(vec![block_element, if_element, loop_element, while_element, do_while_element, for_in_element]));
 	define!(block_element, element(block_sequence, &elements::structures::BLOCK));
 	define!(block_sequence, sequence(vec![symbol_brace_l, statements_element, expression_option, symbol_brace_r]));
 	define!(if_element, element(if_sequence, &elements::structures::IF));
@@ -230,8 +232,10 @@ pub fn run<'a, 'b>(tokens: &Vec<Node<'a, 'b>>) -> Option<Node<'a, 'b>> {
 	define!(loop_do_sequence, sequence(vec![keyword_do, expression]));
 	define!(while_element, element(while_sequence, &elements::structures::WHILE));
 	define!(while_sequence, sequence(vec![keyword_while, expression, loop_body_element]));
-	define!(for_element, element(for_sequence, &elements::structures::FOR_IN));
-	define!(for_sequence, sequence(vec![keyword_for, variable_identifier, keyword_in, expression]));
+	define!(do_while_element, element(while_sequence, &elements::structures::DO_WHILE));
+	define!(do_while_sequence, sequence(vec![keyword_do, expression, keyword_while, expression]));
+	define!(for_in_element, element(for_in_sequence, &elements::structures::FOR_IN));
+	define!(for_in_sequence, sequence(vec![keyword_for, variable_identifier, keyword_in, expression]));
 
 	macro_rules! define_control {
 		( $name:ident, $keyword:expr, $element:expr ) => {

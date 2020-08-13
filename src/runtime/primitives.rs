@@ -109,8 +109,8 @@ fn array_remove(engine: &Engine, parameters: Vec<Reference>) -> Reference {
 	return engine.new_undefined();
 }
 
-fn array_access(engine: &Engine, _: Vec<Reference>) -> Reference {
-	return engine.new_string("FUNCTION".to_string());
+fn array_access(engine: &Engine, parameters: Vec<Reference>) -> Reference {
+	return engine.get_object(engine.read(parameters[0])).data.as_array()[*engine.get_object(engine.read(parameters[1])).data.as_integer()];
 }
 
 fn function_to_string(engine: &Engine, _: Vec<Reference>) -> Reference {
