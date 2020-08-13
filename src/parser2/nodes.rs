@@ -6,8 +6,8 @@ use crate::parser2::rules::*;
 use crate::parser2::Parser;
 
 pub fn run<'a, 'b>(tokens: &Vec<Node<'a, 'b>>) -> Option<Node<'a, 'b>> {
-	let mut rules = Arena::<dyn Rule>::new();
-	let mut filters = Arena::<dyn Filter>::new();
+	let rules = Arena::<dyn Rule>::new();
+	let filters = Arena::<dyn Filter>::new();
 
 	macro_rules! declare {
 		( $name:ident ) => {
@@ -126,11 +126,6 @@ pub fn run<'a, 'b>(tokens: &Vec<Node<'a, 'b>>) -> Option<Node<'a, 'b>> {
 	token!(variable_string,         &elements::variables::STRING);
 	token!(variable_number,         &elements::variables::NUMBER);
 
-	declare!(program_element);
-	declare!(statements_element);
-	declare!(statements_list);
-	declare!(statement_element);
-	declare!(statement_sequence);
 	declare!(expression);
 	declare!(expression_option);
 	declare!(expression_list);
@@ -157,29 +152,6 @@ pub fn run<'a, 'b>(tokens: &Vec<Node<'a, 'b>>) -> Option<Node<'a, 'b>> {
 	declare!(operation_12);
 	declare!(group_element);
 	declare!(group_sequence);
-	declare!(structure_element);
-	declare!(structure_choice);
-	declare!(block_element);
-	declare!(block_sequence);
-	declare!(if_element);
-	declare!(if_sequence);
-	declare!(if_body_element);
-	declare!(if_body_choice);
-	declare!(if_then_sequence);
-	declare!(if_else_option);
-	declare!(if_else_element);
-	declare!(if_else_sequence);
-	declare!(loop_element);
-	declare!(loop_sequence);
-	declare!(loop_body_element);
-	declare!(loop_body_choice);
-	declare!(loop_do_sequence);
-	declare!(while_element);
-	declare!(while_sequence);
-	declare!(do_while_element);
-	declare!(do_while_sequence);
-	declare!(for_in_element);
-	declare!(for_in_sequence);
 	declare!(declaration_element);
 	declare!(declaration_sequence);
 	declare!(control_element);
@@ -190,11 +162,81 @@ pub fn run<'a, 'b>(tokens: &Vec<Node<'a, 'b>>) -> Option<Node<'a, 'b>> {
 	declare!(literal_element);
 	declare!(literal_choice);
 
-	define!(program_element, element!(statements_element, &elements::productions::PROGRAM));
-	define!(statements_element, element!(statements_list, &elements::productions::STATEMENTS));
-	define!(statements_list, RuleList::new(statement_element));
-	define!(statement_element, element!(statement_sequence, &elements::productions::STATEMENT));
-	define!(statement_sequence, RuleSequence::new(vec![expression, symbol_semicolon]));
+	let statements = rules.declare();
+
+	let block = rules.create(RuleFilter::new(
+		rules.create(RuleSequence::new(vec![symbol_brace_l, statements, expression_option, symbol_brace_r])),
+		filters.create(FilterElement::new(&elements::structures::BLOCK))
+	));
+
+	let r#if = rules.create(RuleFilter::new(
+		rules.create(RuleSequence::new(vec![
+			keyword_if,
+			expression,
+			rules.create(RuleFilter::new(
+				rules.create(RuleChoice::new(vec![
+					rules.create(RuleSequence::new(vec![keyword_then, expression])),
+					block,
+				])),
+				filters.create(FilterElement::new(&elements::structures::IF_BODY))
+			)),
+			rules.create(RuleOption::new(
+				rules.create(RuleFilter::new(
+					rules.create(RuleSequence::new(vec![keyword_else, expression])),
+					filters.create(FilterElement::new(&elements::structures::IF_ELSE))
+				))
+			)),
+		])),
+		filters.create(FilterElement::new(&elements::structures::IF))
+	));
+
+	let loop_body = rules.create(RuleFilter::new(
+		rules.create(RuleChoice::new(vec![
+			rules.create(RuleSequence::new(vec![keyword_do, expression])),
+			block
+		])),
+		filters.create(FilterElement::new(&elements::structures::LOOP_BODY))
+	));
+
+	let r#loop = rules.create(RuleFilter::new(
+		rules.create(RuleSequence::new(vec![keyword_loop, expression])),
+		filters.create(FilterElement::new(&elements::structures::LOOP))
+	));
+
+	let r#while = rules.create(RuleFilter::new(
+		rules.create(RuleSequence::new(vec![keyword_while, expression, loop_body])),
+		filters.create(FilterElement::new(&elements::structures::WHILE))
+	));
+
+	let do_while = rules.create(RuleFilter::new(
+		rules.create(RuleSequence::new(vec![keyword_do, expression, keyword_while, expression])),
+		filters.create(FilterElement::new(&elements::structures::DO_WHILE))
+	));
+
+	let for_in = rules.create(RuleFilter::new(
+		rules.create(RuleSequence::new(vec![keyword_for, variable_identifier, keyword_in, expression, loop_body])),
+		filters.create(FilterElement::new(&elements::structures::FOR_IN))
+	));
+
+	let structure = rules.create(RuleFilter::new(
+		rules.create(RuleChoice::new(vec![block, r#if, r#loop, r#while, do_while, for_in])),
+		filters.create(FilterElement::new(&elements::structures::STRUCTURE))
+	));
+
+	let statement = rules.create(RuleFilter::new(
+		rules.create(RuleSequence::new(vec![expression, symbol_semicolon])),
+		filters.create(FilterElement::new(&elements::productions::STATEMENT))
+	));
+
+	rules.define(statements, RuleFilter::new(
+		rules.create(RuleList::new(statement)),
+		filters.create(FilterElement::new(&elements::productions::STATEMENTS))
+	));
+
+	let program = rules.create(RuleFilter::new(
+		statements,
+		filters.create(FilterElement::new(&elements::productions::PROGRAM))
+	));
 
 	define!(expression, RuleAlias::new(operation_12));
 	define!(expression_option, RuleOption::new(expression));
@@ -216,35 +258,11 @@ pub fn run<'a, 'b>(tokens: &Vec<Node<'a, 'b>>) -> Option<Node<'a, 'b>> {
 	define_list!(expression_list, expression, &elements::productions::EXPRESSIONS);
 
 	define!(expression_element, element!(expression_choice, &elements::productions::EXPRESSION));
-	define!(expression_choice, RuleChoice::new(vec![function_element, structure_element, declaration_element, control_element, group_element, literal_element]));
+	define!(expression_choice, RuleChoice::new(vec![function_element, structure, declaration_element, control_element, group_element, literal_element]));
 
 	define!(function_element,  element!(function_sequence, &elements::expressions::FUNCTION));
-	define!(function_sequence, RuleSequence::new(vec![keyword_function, symbol_parenthesis_l, parameters, symbol_parenthesis_r, block_element]));
+	define!(function_sequence, RuleSequence::new(vec![keyword_function, symbol_parenthesis_l, parameters, symbol_parenthesis_r, block]));
 	define_list!(parameters, variable_identifier, &elements::productions::PARAMETERS);
-
-	define!(structure_element, element!(structure_choice, &elements::structures::STRUCTURE));
-	define!(structure_choice, RuleChoice::new(vec![block_element, if_element, loop_element, while_element, do_while_element, for_in_element]));
-	define!(block_element, element!(block_sequence, &elements::structures::BLOCK));
-	define!(block_sequence, RuleSequence::new(vec![symbol_brace_l, statements_element, expression_option, symbol_brace_r]));
-	define!(if_element, element!(if_sequence, &elements::structures::IF));
-	define!(if_sequence, RuleSequence::new(vec![keyword_if, expression, if_body_element, if_else_option]));
-	define!(if_body_element, element!(if_body_choice, &elements::structures::IF_BODY));
-	define!(if_body_choice, RuleChoice::new(vec![if_then_sequence, block_element]));
-	define!(if_then_sequence, RuleSequence::new(vec![keyword_then, expression]));
-	define!(if_else_option, RuleOption::new(if_else_element));
-	define!(if_else_element, element!(if_else_sequence, &elements::structures::IF_ELSE));
-	define!(if_else_sequence, RuleSequence::new(vec![keyword_else, expression]));
-	define!(loop_element, element!(loop_sequence, &elements::structures::LOOP));
-	define!(loop_sequence, RuleSequence::new(vec![keyword_loop, expression]));
-	define!(loop_body_element, element!(loop_body_choice, &elements::structures::LOOP_BODY));
-	define!(loop_body_choice, RuleChoice::new(vec![loop_do_sequence, block_element]));
-	define!(loop_do_sequence, RuleSequence::new(vec![keyword_do, expression]));
-	define!(while_element, element!(while_sequence, &elements::structures::WHILE));
-	define!(while_sequence, RuleSequence::new(vec![keyword_while, expression, loop_body_element]));
-	define!(do_while_element, element!(while_sequence, &elements::structures::DO_WHILE));
-	define!(do_while_sequence, RuleSequence::new(vec![keyword_do, expression, keyword_while, expression]));
-	define!(for_in_element, element!(for_in_sequence, &elements::structures::FOR_IN));
-	define!(for_in_sequence, RuleSequence::new(vec![keyword_for, variable_identifier, keyword_in, expression]));
 
 	macro_rules! define_control {
 		( $name:ident, $keyword:expr, $element:expr ) => {
@@ -311,7 +329,7 @@ pub fn run<'a, 'b>(tokens: &Vec<Node<'a, 'b>>) -> Option<Node<'a, 'b>> {
 	define!(call_sequence_1, RuleSequence::new(vec![symbol_parenthesis_l, expression_list, symbol_parenthesis_r]));
 	define!(call_sequence_2, RuleSequence::new(vec![symbol_crotchet_l, expression_list, symbol_crotchet_r]));
 
-	let program = &rules.get(program_element);
+	let program = &rules.get(program);
 	let mut parser = Parser::new(tokens, &rules, &filters);
 	let node = if let Some(mut nodes) = program.rule(&mut parser) {
 		nodes.pop()

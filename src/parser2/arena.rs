@@ -1,3 +1,4 @@
+use crate::cheat;
 use std::marker::Unsize;
 use std::mem::MaybeUninit;
 
@@ -12,19 +13,19 @@ impl<T: ?Sized> Arena<T> {
 		};
 	}
 
-	pub fn declare(&mut self) -> usize {
+	pub fn declare(&self) -> usize {
 		let index = self.elements.len();
-		self.elements.push(MaybeUninit::uninit());
+		cheat(self).elements.push(MaybeUninit::uninit());
 		return index;
 	}
 
-	pub fn define<N: Unsize<T>>(&mut self, index: usize, element: N) {
-		self.elements[index] = MaybeUninit::new(Box::<N>::new(element));
+	pub fn define<N: Unsize<T>>(&self, index: usize, element: N) {
+		cheat(self).elements[index] = MaybeUninit::new(Box::<N>::new(element));
 	}
 
-	pub fn create<N: Unsize<T>>(&mut self, element: N) -> usize {
+	pub fn create<N: Unsize<T>>(&self, element: N) -> usize {
 		let index = self.declare();
-		self.define(index, element);
+		cheat(self).define(index, element);
 		return index;
 	}
 

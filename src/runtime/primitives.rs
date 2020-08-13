@@ -1,3 +1,4 @@
+use crate::cheat;
 use crate::runtime::{ Engine, Object, Reference, Value };
 use crate::runtime::object::data::Data;
 use crate::runtime::object::class::Class;
@@ -125,7 +126,7 @@ fn instance_chain(engine: &Engine, parameters: Vec<Reference>) -> Reference {
 	let name = engine.get_object(engine.read(parameters[1])).data.as_string();
 	let this = engine.read(parameters[0]);
 	if let Some(method) = engine.get_object(engine.get_object(this).class).get_method(engine, name) {
-		engine.cheat().this = Some(this);
+		cheat(engine).this = Some(this);
 		return method;
 	}
 
@@ -204,7 +205,7 @@ fn object_chain(engine: &Engine, parameters: Vec<Reference>) -> Reference {
 	let name = engine.get_object(engine.read(parameters[1])).data.as_string();
 	let this = engine.read(parameters[0]);
 	if let Some(method) = engine.get_object(engine.get_object(this).class).get_method(engine, name) {
-		engine.cheat().this = Some(this);
+		cheat(engine).this = Some(this);
 		return method;
 	}
 
@@ -237,7 +238,7 @@ fn type_chain(engine: &Engine, parameters: Vec<Reference>) -> Reference {
 	let name = engine.get_object(engine.read(parameters[1])).data.as_string();
 	let this = engine.read(parameters[0]);
 	if let Some(method) = engine.get_object(engine.get_object(this).class).get_method(engine, name) {
-		engine.cheat().this = Some(this);
+		cheat(engine).this = Some(this);
 		return method;
 	}
 

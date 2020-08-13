@@ -14,10 +14,14 @@ mod printer;
 mod nodes;
 mod runtime;
 
-use runtime::Engine;
-use nodes::Node;
+// use runtime::Engine;
+// use nodes::Node;
 use std::env;
 use std::fs;
+
+fn cheat<T>(value: &T) -> &mut T {
+	return unsafe { (value as *const T as *mut T).as_mut().unwrap() };
+}
 
 fn main() {
 	println!("Leaf compiler.");
@@ -36,7 +40,7 @@ fn main() {
 
     if let Some(tree) = parser2::nodes::run(&tokens) {
         printer::tree(&tree);
-		let program = nodes::program::Program::build(&tree);
-		program.execute(&mut Engine::new());
+		let _program = nodes::program::Program::build(&tree);
+		// program.execute(&mut Engine::new());
 	}
 }
