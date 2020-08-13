@@ -134,10 +134,6 @@ pub fn run<'a, 'b>(tokens: &Vec<Node<'a, 'b>>) -> Option<Node<'a, 'b>> {
 	declare!(function_element);
 	declare!(function_sequence);
 	declare!(parameters);
-	declare!(call);
-	declare!(call_choice);
-	declare!(call_sequence_1);
-	declare!(call_sequence_2);
 	declare!(operation_1);
 	declare!(operation_2);
 	declare!(operation_3);
@@ -163,6 +159,31 @@ pub fn run<'a, 'b>(tokens: &Vec<Node<'a, 'b>>) -> Option<Node<'a, 'b>> {
 	declare!(literal_choice);
 
 	let statements = rules.declare();
+
+	let extension = filters.declare();
+
+	let chain = filters.create(FilterExtension::new(
+		rules.create(RuleSequence::new(vec![symbol_dot, variable_identifier])),
+		filters.create(FilterList::new(vec![
+			extension,
+			filters.create(FilterElement::new(&elements::productions::EXPRESSION)),
+			filters.create(FilterElement::new(&elements::expressions::CHAIN)),
+		]))
+	));
+
+	let sequence = filters.create(FilterExtension::new(
+		rules.create(RuleChoice::new(vec![
+			rules.create(RuleSequence::new(vec![symbol_parenthesis_l, expression_list, symbol_parenthesis_r])),
+			rules.create(RuleSequence::new(vec![symbol_crotchet_l, expression_list, symbol_crotchet_r])),
+		])),
+		filters.create(FilterList::new(vec![
+			extension,
+			filters.create(FilterElement::new(&elements::productions::EXPRESSION)),
+			filters.create(FilterElement::new(&elements::expressions::SEQUENCE)),
+		]))
+	));
+
+	filters.define(extension, FilterList::new(vec![chain, sequence]));
 
 	let block = rules.create(RuleFilter::new(
 		rules.create(RuleSequence::new(vec![symbol_brace_l, statements, expression_option, symbol_brace_r])),
@@ -290,19 +311,30 @@ pub fn run<'a, 'b>(tokens: &Vec<Node<'a, 'b>>) -> Option<Node<'a, 'b>> {
 		( $name:ident, $child:expr, $tokens:expr ) => {
 			declare!(operation_sequence);
 			declare!(operation_choice);
-			let op_1 = filters.create(FilterElement::new(&elements::productions::EXPRESSION));
-			let op_2 = filters.create(FilterElement::new(&elements::expressions::SEQUENCE));
-			let op_3 = filters.create(FilterList::new(vec![op_1, op_2]));
 
-			let op_filter = filters.create(FilterRecurse::new(operation_sequence, op_3));
-			define!($name, RuleFilter::new($child, op_filter));
+			let filter = filters.declare();
+
+			filters.define(filter, FilterExtension::new(
+				operation_sequence,
+				filters.create(FilterList::new(vec![
+					filter,
+					filters.create(FilterElement::new(&elements::productions::EXPRESSION)),
+					filters.create(FilterElement::new(&elements::expressions::SEQUENCE))
+				]))
+			));
+
+			define!($name, RuleFilter::new($child, filter));
 
 			define!(operation_sequence, RuleSequence::new(vec![operation_choice, $child]));
 			define!(operation_choice, RuleChoice::new($tokens));
 		}
 	}
 
-	define_operation!(operation_1,  call,         vec![symbol_asterisk, symbol_slash, symbol_percent, symbol_asterisk_d]);
+	define_operation!(operation_1,   rules.create(RuleFilter::new(
+		expression_element,
+		extension,
+	)), vec![symbol_asterisk, symbol_slash, symbol_percent, symbol_asterisk_d]);
+
 	define_operation!(operation_2,  operation_1,  vec![symbol_plus, symbol_minus]);
 	define_operation!(operation_3,  operation_2,  vec![symbol_guillemet_l_d, symbol_guillemet_r_d, symbol_guillemet_l_t, symbol_guillemet_l_t]);
 	define_operation!(operation_4,  operation_3,  vec![symbol_ampersand]);
@@ -317,17 +349,6 @@ pub fn run<'a, 'b>(tokens: &Vec<Node<'a, 'b>>) -> Option<Node<'a, 'b>> {
 		symbol_percent_eq, symbol_asterisk_d_eq, symbol_guillemet_l_d_eq, symbol_guillemet_r_d_eq, symbol_guillemet_l_t_eq, symbol_guillemet_r_t_eq,
 		symbol_ampersand_eq, symbol_caret_eq, symbol_pipe_eq, symbol_ampersand_d_eq, symbol_pipe_d_eq
 	]);
-
-	let call_1 = filters.create(FilterElement::new(&elements::productions::EXPRESSION));
-	let call_2 = filters.create(FilterElement::new(&elements::expressions::SEQUENCE));
-	let call_3 = filters.create(FilterList::new(vec![call_1, call_2]));
-
-	let call_filter = filters.create(FilterRecurse::new(call_choice, call_3));
-	define!(call, RuleFilter::new(expression_element, call_filter));
-
-	define!(call_choice, RuleChoice::new(vec![call_sequence_1, call_sequence_2]));
-	define!(call_sequence_1, RuleSequence::new(vec![symbol_parenthesis_l, expression_list, symbol_parenthesis_r]));
-	define!(call_sequence_2, RuleSequence::new(vec![symbol_crotchet_l, expression_list, symbol_crotchet_r]));
 
 	let program = &rules.get(program);
 	let mut parser = Parser::new(tokens, &rules, &filters);

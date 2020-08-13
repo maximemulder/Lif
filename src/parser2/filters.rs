@@ -20,7 +20,7 @@ impl FilterList {
 
 impl<'a> Filter<'a> for FilterList {
 	fn filter<'b>(&self, parser: &mut Parser<'a, 'b, '_>, mut nodes: Vec<Node<'a, 'b>>) -> Vec<Node<'a, 'b>> {
-		for filter in self.filters.iter() {
+		for filter in self.filters.iter().rev() {
 			nodes = parser.filter(*filter, nodes);
 		}
 
@@ -28,12 +28,12 @@ impl<'a> Filter<'a> for FilterList {
 	}
 }
 
-pub struct FilterRecurse {
+pub struct FilterExtension {
 	rule: usize,
 	filter: usize,
 }
 
-impl FilterRecurse {
+impl FilterExtension {
 	pub fn new(rule: usize, filter: usize) -> Self {
 		return Self {
 			rule,
@@ -42,11 +42,11 @@ impl FilterRecurse {
 	}
 }
 
-impl<'a> Filter<'a> for FilterRecurse {
+impl<'a> Filter<'a> for FilterExtension {
 	fn filter<'b>(&self, parser: &mut Parser<'a, 'b, '_>, mut nodes: Vec<Node<'a, 'b>>) -> Vec<Node<'a, 'b>> {
-		while let Some(children) = parser.rule(self.rule) {
+		if let Some(children) = parser.rule(self.rule) {
 			nodes.extend(children);
-			nodes = parser.filter(self.filter, nodes);
+			return parser.filter(self.filter, nodes);
 		}
 
 		return nodes;
