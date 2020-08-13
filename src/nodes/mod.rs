@@ -25,6 +25,7 @@ pub mod group;
 pub mod integer;
 pub mod identifier;
 pub mod string;
+pub mod chain;
 
 use crate::runtime::{ Engine, Reference };
 
@@ -33,5 +34,3 @@ pub use crate::node::Node as SyntaxNode;
 pub trait Node {
 	fn execute<'a>(&'a self, engine: &Engine<'a>) -> Reference;
 }
-
-

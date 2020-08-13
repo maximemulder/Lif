@@ -25,7 +25,7 @@ impl<'a> Object<'a> {
 		}
 	}
 
-	pub fn get_method(&self, engine: &Engine, name: &String) -> Option<Reference> {
-		return self.data.as_class().get_method(engine, name);
+	pub fn get_method(&self, engine: &Engine, name: &str) -> Option<Reference> {
+		return engine.get_object(self.class).data.as_class().get_method(engine, name);
 	}
 }

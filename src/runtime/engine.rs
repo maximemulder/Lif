@@ -12,7 +12,7 @@ use super::object::class::Class;
 pub struct Engine<'a> {
 	pub primitives: Primitives,
 	pub scope: usize,
-	pub this: Option<Value>,
+	pub this: Option<Reference>,
 	references: Vec<Value>,
 	objects: Vec<Object<'a>>,
 	scopes: Vec<Scope>,
@@ -30,7 +30,7 @@ impl<'a> Engine<'a> {
 		};
 
 		engine.scopes.push(Scope::new());
-		engine.build_primitives();
+		engine.populate();
 
 		return engine;
 	}
@@ -145,6 +145,15 @@ impl<'a> Engine<'a> {
 	pub fn write(&self, reference: Reference, value: Value) {
 		*self.get_value(reference) = value;
 	}
+
+	pub fn call_method(&self, reference: Reference, name: &str, mut arguments: Vec<Reference>) -> Reference {
+		arguments.insert(0, reference);
+		return self.get_object(self.read(self.get_object(self.read(reference)).get_method(self, name).unwrap())).data.as_callable().call(self, arguments);
+	}
+
+	pub fn call_method_self(&self, reference: Reference, name: &str, arguments: Vec<Reference>) -> Reference {
+		return self.get_object(self.read(self.get_object(self.read(reference)).get_method(self, name).unwrap())).data.as_callable().call(self, arguments);
+	}
 }
 
 impl<'a> Engine<'a> {
@@ -157,7 +166,7 @@ impl<'a> Engine<'a> {
 	}
 
 	pub fn new_class(&self) -> Reference {
-		return self.new_object(Object::new(self.primitives.class, Data::Class(Class::new())));
+		return self.new_object(Object::new(self.primitives.class, Data::Class(Class::new(Some(self.primitives.object)))));
 	}
 
 	pub fn new_instance(&self, parent: Value) -> Reference {

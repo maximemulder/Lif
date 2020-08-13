@@ -2,21 +2,21 @@ use crate::runtime::{ Engine, Value, Reference };
 use std::collections::HashMap;
 
 pub struct Class {
-	pub parent:      Option<Value>,
-	pub statics:     HashMap<String, Reference>,
+	pub parent:  Option<Value>,
+	pub statics: HashMap<String, Reference>,
 	pub methods: HashMap<String, Reference>,
 }
 
 impl Class {
-	pub fn new() -> Self {
+	pub fn new(parent: Option<Value>) -> Self {
 		return Self {
-			parent:  None,
+			parent:  parent,
 			statics: HashMap::new(),
 			methods: HashMap::new(),
 		}
 	}
 
-	pub fn get_method(&self, engine: &Engine, name: &String) -> Option<Reference> {
+	pub fn get_method(&self, engine: &Engine, name: &str) -> Option<Reference> {
 		if let Some(&method) = self.methods.get(name) {
 			return Some(method);
 		}

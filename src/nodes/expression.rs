@@ -8,6 +8,7 @@ use super::operation::Operation;
 use super::function::Function;
 use super::group::Group;
 use super::declaration::Declaration;
+use super::chain::Chain;
 
 pub struct Expression {
 	content: Box<dyn Node>,
@@ -25,6 +26,7 @@ impl Expression {
 				&elements::expressions::SEQUENCE    => Box::new(Sequence::build(child)),
 				&elements::expressions::GROUP       => Box::new(Group::build(child)),
 				&elements::expressions::DECLARATION => Box::new(Declaration::build(child)),
+				&elements::expressions::CHAIN       => Box::new(Chain::build(child)),
 				_ => panic!(),
 			},
 		};
