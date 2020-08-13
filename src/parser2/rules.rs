@@ -100,13 +100,15 @@ impl<'a> Rule<'a> for RuleSequence {
 }
 
 pub struct RuleList {
-	rule: usize,
+	element:   usize,
+	separator: usize,
 }
 
 impl RuleList {
-	pub fn new(rule: usize) -> Self {
+	pub fn new(element: usize, separator: usize) -> Self {
 		return Self {
-			rule,
+			element,
+			separator,
 		};
 	}
 }
@@ -114,8 +116,20 @@ impl RuleList {
 impl<'a> Rule<'a> for RuleList {
 	fn rule<'b>(&self, parser: &mut Parser<'a, 'b, '_>) -> Option<Vec<Node<'a, 'b>>> {
 		let mut nodes = Vec::new();
-		while let Some(children) = parser.rule(self.rule) {
-			nodes.extend(children);
+		if let Some(first) = parser.rule(self.element) {
+			nodes.extend(first);
+		}
+
+		loop {
+			if let Some(separator) = parser.rule(self.separator) {
+				if let Some(element) = parser.rule(self.element) {
+					nodes.extend(separator);
+					nodes.extend(element);
+					continue;
+				}
+			}
+
+			break;
 		}
 
 		return Some(nodes);
@@ -166,5 +180,19 @@ impl<'a> Rule<'a> for RuleToken<'a> {
 		}
 
 		return None;
+	}
+}
+
+pub struct RuleNone;
+
+impl RuleNone {
+	pub fn new() -> Self {
+		return Self;
+	}
+}
+
+impl<'a> Rule<'a> for RuleNone {
+	fn rule<'b>(&self, parser: &mut Parser<'a, 'b, '_>) -> Option<Vec<Node<'a, 'b>>> {
+		return Some(vec![]);
 	}
 }
