@@ -54,7 +54,7 @@ impl<'a> EngineData<'a> {
 		return self.new_reference(value);
 	}
 
-	pub fn new_variable_primitive(&mut self, name: &str, callback: &'static dyn Fn(&Engine<'a>, Vec<Reference>) -> Reference) {
+	pub fn new_variable_primitive(&mut self, name: &str, callback: &'static dyn for<'b> Fn(&'b Engine, Vec<Reference>) -> Reference) {
 		let primitive = self.new_primitive(callback);
 		self.new_variable(name, primitive);
 	}
@@ -64,7 +64,7 @@ impl<'a> EngineData<'a> {
 		self.new_variable(name, reference);
 	}
 
-	fn new_method_primitive(&mut self, value: Value, name: &str, callback: &'static dyn Fn(&Engine<'a>, Vec<Reference>) -> Reference) {
+	fn new_method_primitive(&mut self, value: Value, name: &str, callback: &'static dyn for<'b> Fn(&'b Engine, Vec<Reference>) -> Reference) {
 		let primitive = self.new_primitive(callback);
 		self.get_object_mut(value).data.as_class_mut().methods.insert(name.to_string(), primitive);
 	}
@@ -99,13 +99,13 @@ impl<'a> EngineData<'a> {
 		let string   = self.primitives.string;
 
 		self.new_variable_value("Array",    array);
-		self.new_variable_value("Boolean",  boolean);
-		self.new_variable_value("Class",    class);
-		self.new_variable_value("Function", function);
-		self.new_variable_value("Instance", instance);
-		self.new_variable_value("Integer",  integer);
-		self.new_variable_value("Object",   object);
-		self.new_variable_value("String",   string);
+		self.new_variable_value("Boolean",  self.primitives.boolean);
+		self.new_variable_value("Class",    self.primitives.class);
+		self.new_variable_value("Function", self.primitives.function);
+		self.new_variable_value("Instance", self.primitives.instance);
+		self.new_variable_value("Integer",  self.primitives.integer);
+		self.new_variable_value("Object",   self.primitives.object);
+		self.new_variable_value("String",   self.primitives.string);
 
 		self.new_method_primitive(array, "to_string", &array_to_string);
 		self.new_method_primitive(array, "copy",      &array_copy);
