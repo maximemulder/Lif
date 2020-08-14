@@ -30,6 +30,9 @@ impl Node for Sequence {
 			arguments.push(argument.execute(engine));
 		}
 
-		return engine.get_cast_callable(engine.read(reference)).call(engine, arguments);
+		// return engine.get_cast_callable(engine.read(reference)).call(engine, arguments);
+		// engine.get_cast_callable(engine.read(reference)).call(engine, arguments);
+		engine.call(engine.read(reference), arguments);
+		return engine.new_undefined();
 	}
 }
