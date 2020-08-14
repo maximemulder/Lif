@@ -195,7 +195,7 @@ impl<'a> Engine<'a> {
 		return self.data.borrow_mut().new_function(parameters, block);
 	}
 
-	pub fn new_primitive(&self, callback: &'static dyn for<'b> Fn(&'b Engine, Vec<Reference>) -> Reference) -> Reference {
+	pub fn new_primitive(&self, callback: &'static dyn Fn(&Engine<'a>, Vec<Reference>) -> Reference) -> Reference {
 		return self.data.borrow_mut().new_primitive(callback);
 	}
 
