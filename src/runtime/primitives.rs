@@ -171,8 +171,7 @@ fn primitive_new(engine: &Engine, arguments: Vec<Reference>) -> Reference {
 }
 
 fn primitive_print(engine: &Engine, arguments: Vec<Reference>) -> Reference {
-	// println!("{}", engine.get_object(engine.read(engine.call_method(arguments[0], "to_string", Vec::new()))).data.as_string());
-	println!("A");
+	println!("{}", engine.get_object(engine.read(engine.call_method(arguments[0], "to_string", Vec::new()))).data.as_string());
 	return engine.new_undefined();
 }
 
@@ -309,7 +308,8 @@ fn instance_chain(engine: &Engine, arguments: Vec<Reference>) -> Reference {
 }
 
 fn integer_to_string(engine: &Engine, arguments: Vec<Reference>) -> Reference {
-	return engine.new_string(engine.get_object(engine.read(arguments[0])).data.as_integer().to_string());
+	let string = engine.get_object(engine.read(arguments[0])).data.as_integer().to_string();
+	return engine.new_string(string);
 }
 
 fn integer_comparison(engine: &Engine, arguments: Vec<Reference>) -> Reference {
