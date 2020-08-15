@@ -361,11 +361,6 @@ fn integer_remainder(engine: &Engine, arguments: Vec<Reference>) -> Reference {
 	);
 }
 
-fn object_assignment(engine: &Engine, arguments: Vec<Reference>) -> Reference {
-	engine.write(arguments[0], engine.read(arguments[1]));
-	return engine.new_undefined();
-}
-
 fn object_comparison(engine: &Engine, arguments: Vec<Reference>) -> Reference {
 	return engine.new_boolean(engine.read(arguments[0]) == engine.read(arguments[1]));
 }

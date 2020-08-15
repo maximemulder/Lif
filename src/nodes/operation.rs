@@ -21,8 +21,13 @@ impl Operation {
 
 impl Node for Operation {
 	fn execute<'a>(&'a self, engine: &Engine<'a>) -> Reference {
-		self.left.execute(engine);
-		self.right.execute(engine);
-		return engine.new_undefined();
+		let left = self.left.execute(engine);
+		let right = self.right.execute(engine);
+		if self.operator.to_string() == "=" {
+			engine.write(left, engine.read(right));
+			return engine.new_undefined();
+		} else {
+			return engine.call(engine.read(engine.get_object(engine.read(left)).get_method(engine, &self.operator).unwrap()), vec![left, right]);
+		}
 	}
 }
