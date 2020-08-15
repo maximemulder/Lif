@@ -157,16 +157,16 @@ impl<'a> Engine<'a> {
 
 	pub fn call_method(&self, reference: Reference, name: &str, mut arguments: Vec<Reference>) -> Reference {
 		arguments.insert(0, reference);
-		return self.get_object(self.read(self.get_object(self.read(reference)).get_method(self, name).unwrap())).data.as_callable().call(self, arguments);
+		return self.call(self.read(self.get_object(self.read(reference)).get_method(self, name).unwrap()), arguments);
 	}
 
 	pub fn call_method_self(&self, reference: Reference, name: &str, arguments: Vec<Reference>) -> Reference {
-		return self.get_object(self.read(self.get_object(self.read(reference)).get_method(self, name).unwrap())).data.as_callable().call(self, arguments);
+		return self.call(self.read(self.get_object(self.read(reference)).get_method(self, name).unwrap()), arguments);
 	}
 
-	pub fn call(&self, value: Value, arguments: Vec<Reference>) {
-		/* let callable: &Box<dyn Callable> = &self.get_cast_callable(value);
-		callable.call(self, arguments); */
+	pub fn call(&self, value: Value, arguments: Vec<Reference>) -> Reference {
+		let callable = self.data.borrow().get_object(value).data.as_callable().duplicate();
+		return callable.call(self, arguments);
 	}
 }
 
