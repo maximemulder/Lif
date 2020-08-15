@@ -1,11 +1,9 @@
 pub mod engine;
-pub mod engine_data;
 pub mod object;
 pub mod primitives;
 pub mod scope;
 
 pub use engine::Engine;
-pub use engine_data::EngineData;
 pub use object::Object;
 
 #[derive(Clone,Copy,Eq,PartialEq)]

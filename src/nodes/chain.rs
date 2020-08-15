@@ -18,7 +18,9 @@ impl Chain {
 }
 
 impl Node for Chain {
-	fn execute<'a>(&'a self, engine: &Engine<'a>) -> Reference {
-		return engine.call_method(self.expression.execute(engine), ".", vec![engine.new_string(self.member.to_string())]);
+	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> Reference {
+		let reference = self.expression.execute(engine);
+		let string = engine.new_string(self.member.to_string());
+		return engine.call_method(reference, ".", vec![string]);
 	}
 }

@@ -20,7 +20,7 @@ impl Statements {
 }
 
 impl Node for Statements {
-	fn execute<'a>(&'a self, engine: &Engine<'a>) -> Reference {
+	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> Reference {
 		for statement in self.statements.iter() {
 			statement.execute(engine);
 		}

@@ -32,5 +32,5 @@ use crate::runtime::{ Engine, Reference };
 pub use crate::node::Node as SyntaxNode;
 
 pub trait Node {
-	fn execute<'a>(&'a self, engine: &Engine<'a>) -> Reference;
+	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> Reference;
 }

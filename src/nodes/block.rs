@@ -22,7 +22,7 @@ impl Block {
 }
 
 impl Node for Block {
-	fn execute<'a>(&'a self, engine: &Engine<'a>) -> Reference {
+	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> Reference {
 		engine.push_scope();
 		self.statements.execute(engine);
 		let value = if let Some(expression) = &self.expression {

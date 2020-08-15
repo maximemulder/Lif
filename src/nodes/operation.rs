@@ -20,7 +20,7 @@ impl Operation {
 }
 
 impl Node for Operation {
-	fn execute<'a>(&'a self, engine: &Engine<'a>) -> Reference {
+	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> Reference {
 		let left = self.left.execute(engine);
 		let right = self.right.execute(engine);
 		if self.operator.to_string() == "=" {

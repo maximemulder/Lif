@@ -15,7 +15,7 @@ impl Declaration {
 }
 
 impl Node for Declaration {
-	fn execute<'a>(&'a self, engine: &Engine<'a>) -> Reference {
+	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> Reference {
 		let reference = engine.new_undefined();
 		engine.new_variable(&self.identifier, reference);
 		return reference;

@@ -1,4 +1,4 @@
-use crate::runtime::{ Engine, EngineData, Object, Reference, Value };
+use crate::runtime::{ Engine, Object, Reference, Value };
 use crate::runtime::object::data::Data;
 use crate::runtime::object::class::Class;
 
@@ -28,33 +28,12 @@ impl Primitives {
 	}
 }
 
-impl<'a> EngineData<'a> {
+impl<'a> Engine<'a> {
 	fn create_class(&mut self) -> Value {
 		return self.new_value(Object::new(self.primitives.class, Data::Class(Class::new(Some(self.primitives.object)))));
 	}
 
-	pub fn new_variable(&mut self, name: &str, reference: Reference) {
-		self.scopes[self.scope].add_variable(name, reference);
-	}
-
-	fn new_reference(&mut self, value: Value) -> Reference {
-		let reference = Reference(self.references.len());
-		self.references.push(value);
-		return reference;
-	}
-
-	fn new_value(&mut self, object: Object<'a>) -> Value {
-		let value = Value(self.objects.len());
-		self.objects.push(object);
-		return value;
-	}
-
-	pub fn new_object(&mut self, object: Object<'a>) -> Reference {
-		let value = self.new_value(object);
-		return self.new_reference(value);
-	}
-
-	pub fn new_variable_primitive(&mut self, name: &str, callback: &'static dyn for<'b> Fn(&'b Engine, Vec<Reference>) -> Reference) {
+	pub fn new_variable_primitive(&mut self, name: &str, callback: &'static dyn for<'b> Fn(&'b mut Engine, Vec<Reference>) -> Reference) {
 		let primitive = self.new_primitive(callback);
 		self.new_variable(name, primitive);
 	}
@@ -64,7 +43,7 @@ impl<'a> EngineData<'a> {
 		self.new_variable(name, reference);
 	}
 
-	fn new_method_primitive(&mut self, value: Value, name: &str, callback: &'static dyn for<'b> Fn(&'b Engine, Vec<Reference>) -> Reference) {
+	fn new_method_primitive(&mut self, value: Value, name: &str, callback: &'static dyn for<'b> Fn(&'b mut Engine, Vec<Reference>) -> Reference) {
 		let primitive = self.new_primitive(callback);
 		self.get_object_mut(value).data.as_class_mut().methods.insert(name.to_string(), primitive);
 	}
@@ -81,7 +60,8 @@ impl<'a> EngineData<'a> {
 		self.primitives.string   = self.create_class();
 
 		self.get_object_mut(self.primitives.class).class = self.primitives.class;
-		self.get_object_mut(self.primitives.class).data.as_class_mut().parent = Some(self.primitives.class);
+		self.get_object_mut(self.primitives.class).data.as_class_mut().parent = Some(self.primitives.object);
+		self.get_object_mut(self.primitives.object).data.as_class_mut().parent = None;
 
 		self.new_variable_primitive("assert", &primitive_assert);
 		self.new_variable_primitive("error",  &primitive_error);
@@ -149,7 +129,7 @@ impl<'a> EngineData<'a> {
 	}
 }
 
-fn primitive_assert(engine: &Engine, arguments: Vec<Reference>) -> Reference {
+fn primitive_assert(engine: &mut Engine, arguments: Vec<Reference>) -> Reference {
 	if !engine.get_object(engine.read(arguments[0])).data.as_boolean() {
 		panic!();
 	}
@@ -157,30 +137,32 @@ fn primitive_assert(engine: &Engine, arguments: Vec<Reference>) -> Reference {
 	return engine.new_undefined();
 }
 
-fn primitive_error(engine: &Engine, arguments: Vec<Reference>) -> Reference {
-	println!("{}", engine.get_object(engine.read(engine.call_method(arguments[0], "to_string", Vec::new()))).data.as_string());
+fn primitive_error(engine: &mut Engine, arguments: Vec<Reference>) -> Reference {
+	let reference = engine.call_method(arguments[0], "to_string", Vec::new());
+	println!("{}", engine.get_object(engine.read(reference)).data.as_string());
 	panic!();
 }
 
-fn primitive_exit(_: &Engine, _: Vec<Reference>) -> Reference {
+fn primitive_exit(_: &mut Engine, _: Vec<Reference>) -> Reference {
 	panic!();
 }
 
-fn primitive_new(engine: &Engine, arguments: Vec<Reference>) -> Reference {
+fn primitive_new(engine: &mut Engine, arguments: Vec<Reference>) -> Reference {
 	return engine.new_instance(engine.read(arguments[0]));
 }
 
-fn primitive_print(engine: &Engine, arguments: Vec<Reference>) -> Reference {
-	println!("{}", engine.get_object(engine.read(engine.call_method(arguments[0], "to_string", Vec::new()))).data.as_string());
+fn primitive_print(engine: &mut Engine, arguments: Vec<Reference>) -> Reference {
+	let reference = engine.call_method(arguments[0], "to_string", Vec::new());
+	println!("{}", engine.get_object(engine.read(reference)).data.as_string());
 	return engine.new_undefined();
 }
 
-fn array_to_string(engine: &Engine, arguments: Vec<Reference>) -> Reference {
+fn array_to_string(engine: &mut Engine, arguments: Vec<Reference>) -> Reference {
 	let mut string = String::from("[");
-	let one = engine.get_object(engine.read(arguments[0]));
-	let elements = one.data.as_array();
-	for element in elements {
-		string.push_str(engine.get_object(engine.read(engine.call_method(*element, "to_string", Vec::new()))).data.as_string());
+	let elements = engine.get_object(engine.read(arguments[0])).data.as_array().clone();
+	for element in elements.iter() {
+		let reference = engine.call_method(*element, "to_string", Vec::new());
+		string.push_str(engine.get_object(engine.read(reference)).data.as_string());
 		string.push_str(", ");
 	}
 
@@ -192,90 +174,91 @@ fn array_to_string(engine: &Engine, arguments: Vec<Reference>) -> Reference {
 	return engine.new_string(string);
 }
 
-fn array_copy(engine: &Engine, arguments: Vec<Reference>) -> Reference {
+fn array_copy(engine: &mut Engine, arguments: Vec<Reference>) -> Reference {
 	return engine.new_array(engine.get_object(engine.read(arguments[0])).data.as_array().clone());
 }
 
-fn array_append(engine: &Engine, arguments: Vec<Reference>) -> Reference {
-	engine.get_object_mut(engine.read(arguments[0])).data.as_array_mut().push(engine.new_reference(engine.read(arguments[1])));
+fn array_append(engine: &mut Engine, arguments: Vec<Reference>) -> Reference {
+	let reference = engine.new_reference(engine.read(arguments[1]));
+	engine.get_object_mut(engine.read(arguments[0])).data.as_array_mut().push(reference);
 	return engine.new_undefined();
 }
 
-fn array_prepend(engine: &Engine, arguments: Vec<Reference>) -> Reference {
-	engine.get_object_mut(engine.read(arguments[0])).data.as_array_mut().insert(0, engine.new_reference(engine.read(arguments[1])));
+fn array_prepend(engine: &mut Engine, arguments: Vec<Reference>) -> Reference {
+	let reference = engine.new_reference(engine.read(arguments[1]));
+	engine.get_object_mut(engine.read(arguments[0])).data.as_array_mut().insert(0, reference);
 	return engine.new_undefined();
 }
 
-fn array_insert(engine: &Engine, arguments: Vec<Reference>) -> Reference {
-	engine.get_object_mut(engine.read(arguments[0])).data.as_array_mut().insert(
-		*engine.get_object(engine.read(arguments[1])).data.as_integer(),
-		engine.new_reference(engine.read(arguments[2]))
-	);
+fn array_insert(engine: &mut Engine, arguments: Vec<Reference>) -> Reference {
+	let index = *engine.get_object(engine.read(arguments[1])).data.as_integer();
+	let element = engine.new_reference(engine.read(arguments[2]));
+	engine.get_object_mut(engine.read(arguments[0])).data.as_array_mut().insert(index, element);
 
 	return engine.new_undefined();
 }
 
-fn array_remove(engine: &Engine, arguments: Vec<Reference>) -> Reference {
-	engine.get_object_mut(engine.read(arguments[0])).data.as_array_mut().remove(*engine.get_object(engine.read(arguments[1])).data.as_integer());
+fn array_remove(engine: &mut Engine, arguments: Vec<Reference>) -> Reference {
+	let index = *engine.get_object(engine.read(arguments[1])).data.as_integer();
+	engine.get_object_mut(engine.read(arguments[0])).data.as_array_mut().remove(index);
 	return engine.new_undefined();
 }
 
-fn array_access(engine: &Engine, arguments: Vec<Reference>) -> Reference {
+fn array_access(engine: &mut Engine, arguments: Vec<Reference>) -> Reference {
 	return engine.get_object(engine.read(arguments[0])).data.as_array()[*engine.get_object(engine.read(arguments[1])).data.as_integer()];
 }
 
-fn boolean_to_string(engine: &Engine, arguments: Vec<Reference>) -> Reference {
+fn boolean_to_string(engine: &mut Engine, arguments: Vec<Reference>) -> Reference {
 	return engine.new_string(engine.get_object(engine.read(arguments[0])).data.as_boolean().to_string());
 }
 
-fn boolean_comparison(engine: &Engine, arguments: Vec<Reference>) -> Reference {
+fn boolean_comparison(engine: &mut Engine, arguments: Vec<Reference>) -> Reference {
 	return engine.new_boolean(engine.get_object(engine.read(arguments[0])).data.as_boolean() == engine.get_object(engine.read(arguments[1])).data.as_boolean());
 }
 
-fn class_to_string(engine: &Engine, _: Vec<Reference>) -> Reference {
+fn class_to_string(engine: &mut Engine, _: Vec<Reference>) -> Reference {
 	return engine.new_string("CLASS".to_string());
 }
 
-fn class_chain(engine: &Engine, arguments: Vec<Reference>) -> Reference {
-	let one = engine.get_object(engine.read(arguments[1]));
-	let name = one.data.as_string();
+fn class_chain(engine: &mut Engine, arguments: Vec<Reference>) -> Reference {
+	let name = engine.get_object(engine.read(arguments[1])).data.as_string().clone();
 	let this = engine.read(arguments[0]);
-	if let Some(method) = engine.get_object(engine.get_object(this).class).get_method(engine, name) {
-		engine.data.borrow_mut().this = Some(arguments[0]);
+	if let Some(method) = engine.get_object(this).get_method(engine, &name) {
+		engine.this = Some(arguments[0]);
 		return method;
 	}
 
-	let mut two = engine.get_object_mut(this);
+	let member = engine.new_undefined();
+	let two = engine.get_object_mut(this);
 	let class = two.data.as_class_mut();
-	return if let Some(&member) = class.statics.get(name) {
+	return if let Some(&member) = class.statics.get(&name) {
 		member
 	} else {
-		let member = engine.new_undefined();
 		class.statics.insert(name.clone(), member);
 		member
 	}
 }
 
-fn class_access(engine: &Engine, _: Vec<Reference>) -> Reference {
-	return engine.new_reference(engine.data.borrow().primitives.array);
+fn class_access(engine: &mut Engine, _: Vec<Reference>) -> Reference {
+	return engine.new_reference(engine.primitives.array);
 }
 
-fn function_to_string(engine: &Engine, _: Vec<Reference>) -> Reference {
+fn function_to_string(engine: &mut Engine, _: Vec<Reference>) -> Reference {
 	return engine.new_string("FUNCTION".to_string());
 }
 
-fn function_call(engine: &Engine, arguments: Vec<Reference>) -> Reference {
-	return engine.get_object(engine.read(arguments[0])).data.as_callable().call(engine, arguments[1..].to_vec());
+fn function_call(engine: &mut Engine, arguments: Vec<Reference>) -> Reference {
+	return engine.get_object(engine.read(arguments[0])).data.as_callable().duplicate().call(engine, arguments[1..].to_vec());
 }
 
-fn instance_to_string(engine: &Engine, arguments: Vec<Reference>) -> Reference {
+fn instance_to_string(engine: &mut Engine, arguments: Vec<Reference>) -> Reference {
 	let mut string = String::from("{");
-	let one = engine.get_object(engine.read(arguments[0]));
-	let attributes = &one.data.as_instance().attributes;
+	let attributes = &engine.get_object(engine.read(arguments[0])).data.as_instance().attributes.clone();
 	for (name, attribute) in attributes {
-		string.push_str(name);
+		string.push_str(&name);
 		string.push_str(": ");
-		string.push_str(engine.get_object(engine.read(engine.call_method(*attribute, "to_string", Vec::new()))).data.as_string());
+		let a = engine.call_method(*attribute, "to_string", Vec::new());
+		string.push_str(engine.get_object(engine.read(a)).data.as_string());
 		string.push_str(", ");
 	}
 
@@ -287,132 +270,139 @@ fn instance_to_string(engine: &Engine, arguments: Vec<Reference>) -> Reference {
 	return engine.new_string(string);
 }
 
-fn instance_chain(engine: &Engine, arguments: Vec<Reference>) -> Reference {
-	let one = engine.get_object(engine.read(arguments[1]));
-	let name = one.data.as_string();
+fn instance_chain(engine: &mut Engine, arguments: Vec<Reference>) -> Reference {
+	let name = engine.get_object(engine.read(arguments[1])).data.as_string().clone();
 	let this = engine.read(arguments[0]);
-	if let Some(method) = engine.get_object(engine.get_object(this).class).get_method(engine, name) {
-		engine.data.borrow_mut().this = Some(arguments[0]);
+	if let Some(method) = engine.get_object(this).get_method(engine, &name) {
+		engine.this = Some(arguments[0]);
 		return method;
 	}
 
-	let mut two = engine.get_object_mut(this);
+	let member = engine.new_undefined();
+	let two = engine.get_object_mut(this);
 	let instance = two.data.as_instance_mut();
-	return if let Some(&member) = instance.attributes.get(name) {
+	return if let Some(&member) = instance.attributes.get(&name) {
 		member
 	} else {
-		let member = engine.new_undefined();
 		instance.attributes.insert(name.clone(), member);
 		member
 	}
 }
 
-fn integer_to_string(engine: &Engine, arguments: Vec<Reference>) -> Reference {
+fn integer_to_string(engine: &mut Engine, arguments: Vec<Reference>) -> Reference {
 	let string = engine.get_object(engine.read(arguments[0])).data.as_integer().to_string();
 	return engine.new_string(string);
 }
 
-fn integer_comparison(engine: &Engine, arguments: Vec<Reference>) -> Reference {
+fn integer_comparison(engine: &mut Engine, arguments: Vec<Reference>) -> Reference {
 	return engine.new_boolean(
 		*engine.get_object(engine.read(arguments[0])).data.as_integer() ==
 		*engine.get_object(engine.read(arguments[1])).data.as_integer()
 	);
 }
 
-fn integer_lesser(engine: &Engine, arguments: Vec<Reference>) -> Reference {
+fn integer_lesser(engine: &mut Engine, arguments: Vec<Reference>) -> Reference {
 	return engine.new_boolean(
 		*engine.get_object(engine.read(arguments[0])).data.as_integer() <
 		*engine.get_object(engine.read(arguments[1])).data.as_integer()
 	);
 }
 
-fn integer_addition(engine: &Engine, arguments: Vec<Reference>) -> Reference {
+fn integer_addition(engine: &mut Engine, arguments: Vec<Reference>) -> Reference {
 	return engine.new_integer(
 		*engine.get_object(engine.read(arguments[0])).data.as_integer() +
 		*engine.get_object(engine.read(arguments[1])).data.as_integer()
 	);
 }
 
-fn integer_subtraction(engine: &Engine, arguments: Vec<Reference>) -> Reference {
+fn integer_subtraction(engine: &mut Engine, arguments: Vec<Reference>) -> Reference {
 	return engine.new_integer(
 		*engine.get_object(engine.read(arguments[0])).data.as_integer() +
 		*engine.get_object(engine.read(arguments[1])).data.as_integer()
 	);
 }
 
-fn integer_multiplication(engine: &Engine, arguments: Vec<Reference>) -> Reference {
+fn integer_multiplication(engine: &mut Engine, arguments: Vec<Reference>) -> Reference {
 	return engine.new_integer(
 		*engine.get_object(engine.read(arguments[0])).data.as_integer() +
 		*engine.get_object(engine.read(arguments[1])).data.as_integer()
 	);
 }
 
-fn integer_division(engine: &Engine, arguments: Vec<Reference>) -> Reference {
+fn integer_division(engine: &mut Engine, arguments: Vec<Reference>) -> Reference {
 	return engine.new_integer(
 		*engine.get_object(engine.read(arguments[0])).data.as_integer() /
 		*engine.get_object(engine.read(arguments[1])).data.as_integer()
 	);
 }
 
-fn integer_remainder(engine: &Engine, arguments: Vec<Reference>) -> Reference {
+fn integer_remainder(engine: &mut Engine, arguments: Vec<Reference>) -> Reference {
 	return engine.new_integer(
 		*engine.get_object(engine.read(arguments[0])).data.as_integer() %
 		*engine.get_object(engine.read(arguments[1])).data.as_integer()
 	);
 }
 
-fn object_comparison(engine: &Engine, arguments: Vec<Reference>) -> Reference {
+fn object_comparison(engine: &mut Engine, arguments: Vec<Reference>) -> Reference {
 	return engine.new_boolean(engine.read(arguments[0]) == engine.read(arguments[1]));
 }
 
-fn object_difference(engine: &Engine, arguments: Vec<Reference>) -> Reference {
-	return engine.new_boolean(!engine.get_object(engine.read(engine.call_method_self(arguments[0], "==", arguments))).data.as_boolean());
+fn object_difference(engine: &mut Engine, arguments: Vec<Reference>) -> Reference {
+	let reference = engine.call_method_self(arguments[0], "==", arguments);
+	return engine.new_boolean(!engine.get_object(engine.read(reference)).data.as_boolean());
 }
 
-fn object_greater(engine: &Engine, arguments: Vec<Reference>) -> Reference {
+fn object_greater(engine: &mut Engine, arguments: Vec<Reference>) -> Reference {
+	let left  = engine.call_method_self(arguments[0], "<", arguments.clone());
+	let right = engine.call_method_self(arguments[0], "==", arguments.clone());
 	return engine.new_boolean(
-		!engine.get_object(engine.read(engine.call_method_self(arguments[0], "<", arguments.clone()))).data.as_boolean() &&
-		!engine.get_object(engine.read(engine.call_method_self(arguments[0], "==", arguments))).data.as_boolean()
+		!engine.get_object(engine.read(left)).data.as_boolean() &&
+		!engine.get_object(engine.read(right)).data.as_boolean()
 	);
 }
 
-fn object_greater_equal(engine: &Engine, arguments: Vec<Reference>) -> Reference {
-	return engine.new_boolean(!engine.get_object(engine.read(engine.call_method_self(arguments[0], "<", arguments))).data.as_boolean());
+fn object_greater_equal(engine: &mut Engine, arguments: Vec<Reference>) -> Reference {
+	let reference = engine.call_method_self(arguments[0], "<", arguments);
+	return engine.new_boolean(!engine.get_object(engine.read(reference)).data.as_boolean());
 }
 
-fn object_lesser_equal(engine: &Engine, arguments: Vec<Reference>) -> Reference {
+fn object_lesser_equal(engine: &mut Engine, arguments: Vec<Reference>) -> Reference {
+	let left  = engine.call_method_self(arguments[0], "<", arguments.clone());
+	let right = engine.call_method_self(arguments[0], "==", arguments.clone());
 	return engine.new_boolean(
-		*engine.get_object(engine.read(engine.call_method_self(arguments[0], "<", arguments.clone()))).data.as_boolean() ||
-		*engine.get_object(engine.read(engine.call_method_self(arguments[0], "==", arguments))).data.as_boolean()
+		*engine.get_object(engine.read(left)).data.as_boolean() ||
+		*engine.get_object(engine.read(right)).data.as_boolean()
 	);
 }
 
-fn object_chain(engine: &Engine, arguments: Vec<Reference>) -> Reference {
+fn object_chain(engine: &mut Engine, arguments: Vec<Reference>) -> Reference {
 	let one = engine.get_object(engine.read(arguments[1]));
 	let name = one.data.as_string();
 	let this = engine.read(arguments[0]);
-	if let Some(method) = engine.get_object(engine.get_object(this).class).get_method(engine, name) {
-		engine.data.borrow_mut().this = Some(arguments[0]);
+	if let Some(method) = engine.get_object(this).get_method(engine, name) {
+		engine.this = Some(arguments[0]);
 		return method;
 	}
 
 	panic!();
 }
 
-fn string_to_string(_: &Engine, arguments: Vec<Reference>) -> Reference {
+fn string_to_string(_: &mut Engine, arguments: Vec<Reference>) -> Reference {
 	return arguments[0];
 }
 
-fn string_comparison(engine: &Engine, arguments: Vec<Reference>) -> Reference {
+fn string_comparison(engine: &mut Engine, arguments: Vec<Reference>) -> Reference {
 	return engine.new_boolean(
 		engine.get_object(engine.read(arguments[0])).data.as_string() ==
 		engine.get_object(engine.read(arguments[1])).data.as_string()
 	);
 }
 
-fn string_concatenation(engine: &Engine, arguments: Vec<Reference>) -> Reference {
+fn string_concatenation(engine: &mut Engine, arguments: Vec<Reference>) -> Reference {
+	let left  = arguments[0];
+	let right = engine.call_method(arguments[1], "to_string", Vec::new());
 	return engine.new_string(format!("{}{}",
-		engine.get_object(engine.read(arguments[0])).data.as_string(),
-		engine.get_object(engine.read(engine.call_method(arguments[1], "to_string", Vec::new()))).data.as_string()
+		engine.get_object(engine.read(left)).data.as_string(),
+		engine.get_object(engine.read(right)).data.as_string()
 	));
 }

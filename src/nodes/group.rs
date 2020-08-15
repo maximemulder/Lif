@@ -15,7 +15,7 @@ impl Group {
 }
 
 impl Node for Group {
-	fn execute<'a>(&'a self, engine: &Engine<'a>) -> Reference {
+	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> Reference {
 		return self.expression.execute(engine);
 	}
 }

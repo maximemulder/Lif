@@ -14,7 +14,7 @@ impl Identifier {
 }
 
 impl Node for Identifier {
-	fn execute<'a>(&'a self, engine: &Engine<'a>) -> Reference {
+	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> Reference {
 		return engine.get_variable(&self.identifier);
 	}
 }

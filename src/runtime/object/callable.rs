@@ -3,17 +3,17 @@ use crate::nodes::Node;
 use crate::runtime::{ Engine, Reference };
 
 pub trait Callable<'a> {
-	fn call(&self, engine: &Engine<'a>, arguments: Vec<Reference>) -> Reference;
+	fn call(&self, engine: &mut Engine<'a>, arguments: Vec<Reference>) -> Reference;
 	fn duplicate(&self) -> Box<dyn Callable<'a> + 'a>;
 }
 
 #[derive(Clone)]
 pub struct Primitive<'a> {
-	callback: &'a dyn Fn(&Engine<'a>, Vec<Reference>) -> Reference,
+	callback: &'a dyn Fn(&mut Engine<'a>, Vec<Reference>) -> Reference,
 }
 
 impl<'a> Primitive<'a> {
-	pub fn new(callback: &'a dyn Fn(&Engine<'a>, Vec<Reference>) -> Reference) -> Self {
+	pub fn new(callback: &'a dyn Fn(&mut Engine<'a>, Vec<Reference>) -> Reference) -> Self {
 		return Self {
 			callback,
 		};
@@ -21,7 +21,7 @@ impl<'a> Primitive<'a> {
 }
 
 impl<'a> Callable<'a> for Primitive<'a> {
-	fn call(&self, engine: &Engine<'a>, arguments: Vec<Reference>) -> Reference {
+	fn call(&self, engine: &mut Engine<'a>, arguments: Vec<Reference>) -> Reference {
 		return (self.callback)(engine, arguments);
 	}
 
@@ -48,10 +48,11 @@ impl<'a> Function<'a> {
 }
 
 impl<'a> Callable<'a> for Function<'a> {
-	fn call(&self, engine: &Engine<'a>, arguments: Vec<Reference>) -> Reference {
+	fn call(&self, engine: &mut Engine<'a>, arguments: Vec<Reference>) -> Reference {
 		let frame = engine.push_frame(self.scope);
 		for (parameter, argument) in self.parameters.iter().zip(arguments) {
-			engine.new_variable(&parameter, engine.new_reference(engine.read(argument)));
+			let reference = engine.new_reference(engine.read(argument));
+			engine.new_variable(&parameter, reference);
 		}
 
 		let reference = self.block.execute(engine);
