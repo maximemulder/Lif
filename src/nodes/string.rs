@@ -1,4 +1,4 @@
-use crate::nodes::{ Node, SyntaxNode, Product };
+use crate::nodes::{ Node, Product };
 use crate::runtime::Engine;
 
 pub struct String {
@@ -6,10 +6,9 @@ pub struct String {
 }
 
 impl String {
-	pub fn build(node: &SyntaxNode) -> Self {
-		let text = node.text();
+	pub fn new(string: Box<str>) -> Self {
 		return Self {
-			string: Box::from(&text[1 .. text.len() - 1]),
+			string,
 		};
 	}
 }

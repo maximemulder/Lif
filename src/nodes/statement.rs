@@ -1,15 +1,15 @@
 use crate::runtime::Engine;
 use super::expression::Expression;
-use super::{ Node, SyntaxNode, Product };
+use super::{ Node, Product };
 
 pub struct Statement {
 	expression: Expression,
 }
 
 impl Statement {
-	pub fn build(node: &SyntaxNode) -> Statement {
-		return Statement {
-			expression: Expression::build(&node.children()[0]),
+	pub fn new(expression: Expression) -> Self {
+		return Self {
+			expression,
 		};
 	}
 }

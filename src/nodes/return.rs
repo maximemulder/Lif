@@ -1,5 +1,5 @@
 use crate::runtime::Engine;
-use super::{ Node, SyntaxNode, Product, Control };
+use super::{ Node, Product, Control };
 use super::expression::Expression;
 
 pub struct Return {
@@ -7,13 +7,9 @@ pub struct Return {
 }
 
 impl Return {
-	pub fn build(node: &SyntaxNode) -> Self {
+	pub fn new(expression: Option<Expression>) -> Self {
 		return Self {
-			expression: if let Some(child) = node.children().get(1) {
-				Some(Expression::build(child))
-			} else {
-				None
-			}
+			expression,
 		};
 	}
 }

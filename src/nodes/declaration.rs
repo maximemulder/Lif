@@ -1,15 +1,14 @@
 use crate::runtime::Engine;
-use super::{ Node, SyntaxNode, Product };
-use super::token::token;
+use super::{ Node, Product };
 
 pub struct Declaration {
 	identifier: Box<str>,
 }
 
 impl Declaration {
-	pub fn build(node: &SyntaxNode) -> Declaration {
-		return Declaration {
-			identifier: token(&node.children()[1]),
+	pub fn new(identifier: Box<str>) -> Self {
+		return Self {
+			identifier,
 		};
 	}
 }

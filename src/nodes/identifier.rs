@@ -1,4 +1,4 @@
-use crate::nodes::{ Node, SyntaxNode, Product };
+use crate::nodes::{ Node, Product };
 use crate::runtime::Engine;
 
 pub struct Identifier {
@@ -6,9 +6,9 @@ pub struct Identifier {
 }
 
 impl Identifier {
-	pub fn build(node: &SyntaxNode) -> Self {
+	pub fn new(identifier: Box<str>) -> Self {
 		return Self {
-			identifier: Box::from(node.text()),
+			identifier,
 		};
 	}
 }

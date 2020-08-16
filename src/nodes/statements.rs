@@ -1,19 +1,14 @@
 use crate::runtime::Engine;
 use super::statement::Statement;
-use super::{ Node, SyntaxNode, Product };
+use super::{ Node, Product };
 
 pub struct Statements {
 	statements: Vec<Statement>,
 }
 
 impl Statements {
-	pub fn build(node: &SyntaxNode) -> Statements {
-		let mut statements = Vec::new();
-		for child in node.children() {
-			statements.push(Statement::build(child));
-		}
-
-		return Statements {
+	pub fn new(statements: Vec<Statement>) -> Self {
+		return Self {
 			statements,
 		};
 	}

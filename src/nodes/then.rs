@@ -1,6 +1,0 @@
-use super::expression::Expression;
-use super::SyntaxNode;
-
-pub fn then(node: &SyntaxNode) -> Expression {
-	return Expression::build(&node.children()[node.children().len() - 1]);
-}

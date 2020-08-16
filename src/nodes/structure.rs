@@ -1,34 +1,20 @@
-use crate::elements;
 use crate::runtime::Engine;
-use super::{ Node, SyntaxNode, Product };
-use super::block::Block;
-use super::r#if::If;
-use super::r#loop::Loop;
-use super::r#while::While;
-use super::for_in::ForIn;
+use super::{ Node, Product };
 
 pub struct Structure {
-	content: Box<dyn Node>,
+	node: Box<dyn Node>,
 }
 
 impl Structure {
-	pub fn build(node: &SyntaxNode) -> Structure {
-		let child = &node.children()[0];
-		return Structure {
-			content: match child.element {
-				&elements::structures::BLOCK  => Box::new(Block::build(child)),
-				&elements::structures::IF     => Box::new(If::build(child)),
-				&elements::structures::LOOP   => Box::new(Loop::build(child)),
-				&elements::structures::WHILE  => Box::new(While::build(child)),
-				&elements::structures::FOR_IN => Box::new(ForIn::build(child)),
-				_ => panic!(),
-			},
+	pub fn new(node: Box<dyn Node>) -> Self {
+		return Self {
+			node,
 		};
 	}
 }
 
 impl Node for Structure {
 	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> Product {
-		return self.content.execute(engine);
+		return self.node.execute(engine);
 	}
 }

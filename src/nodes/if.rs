@@ -1,8 +1,6 @@
 use crate::runtime::Engine;
 use super::expression::Expression;
-use super::then::then;
-use super::r#else::r#else;
-use super::{ Node, SyntaxNode, Product };
+use super::{ Node, Product };
 
 pub struct If {
 	condition: Expression,
@@ -11,15 +9,11 @@ pub struct If {
 }
 
 impl If {
-	pub fn build(node: &SyntaxNode) -> If {
-		return If {
-			condition: Expression::build(&node.children()[0]),
-			then:      then(&node.children()[1]),
-			r#else: if let Some(child) = node.children().get(2) {
-				Some(r#else(child))
-			} else {
-				None
-			},
+	pub fn new(condition: Expression, then: Expression, r#else: Option<Expression>) -> Self {
+		return Self {
+			condition,
+			then,
+			r#else,
 		};
 	}
 }

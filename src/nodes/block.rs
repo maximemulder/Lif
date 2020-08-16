@@ -1,7 +1,7 @@
 use crate::runtime::Engine;
 use super::expression::Expression;
 use super::statements::Statements;
-use super::{ Node, SyntaxNode, Product };
+use super::{ Node, Product };
 
 pub struct Block {
 	statements: Statements,
@@ -9,14 +9,10 @@ pub struct Block {
 }
 
 impl Block {
-	pub fn build(node: &SyntaxNode) -> Block {
-		return Block {
-			statements: Statements::build(&node.children()[1]),
-			expression: if node.children().len() == 4 {
-				Some(Expression::build(&node.children()[2]))
-			} else {
-				None
-			},
+	pub fn new(statements: Statements, expression: Option<Expression>) -> Self {
+		return Self {
+			statements,
+			expression,
 		};
 	}
 }

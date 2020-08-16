@@ -1,8 +1,6 @@
 use crate::runtime::Engine;
-use super::{ Node, SyntaxNode, Product };
+use super::{ Node, Product };
 use super::expression::Expression;
-use super::r#do::r#do;
-use super::token::token;
 
 pub struct ForIn {
 	identifier: Box<str>,
@@ -11,11 +9,11 @@ pub struct ForIn {
 }
 
 impl ForIn {
-	pub fn build(node: &SyntaxNode) -> ForIn {
-		return ForIn {
-			identifier: token(&node.children()[1]),
-			expression: Expression::build(&node.children()[3]),
-			body:       r#do(&node.children()[4]),
+	pub fn new(	identifier: Box<str>, expression: Expression, body: Expression) -> Self {
+		return Self {
+			identifier,
+			expression,
+			body,
 		};
 	}
 }

@@ -1,4 +1,4 @@
-use crate::nodes::{ Node, SyntaxNode, Product };
+use crate::nodes::{ Node, Product };
 use crate::runtime::Engine;
 
 pub struct Integer {
@@ -6,9 +6,9 @@ pub struct Integer {
 }
 
 impl Integer {
-	pub fn build(node: &SyntaxNode) -> Self {
+	pub fn new(integer: usize) -> Self {
 		return Self {
-			integer: node.text().parse::<usize>().unwrap(),
+			integer,
 		};
 	}
 }

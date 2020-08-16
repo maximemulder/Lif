@@ -1,15 +1,15 @@
 use crate::runtime::Engine;
 use super::expression::Expression;
-use super::{ Node, SyntaxNode, Product, Control };
+use super::{ Node, Product, Control };
 
 pub struct Loop {
 	body: Expression,
 }
 
 impl Loop {
-	pub fn build(node: &SyntaxNode) -> Loop {
-		return Loop {
-			body: Expression::build(&node.children()[1]),
+	pub fn new(body: Expression) -> Self {
+		return Self {
+			body,
 		};
 	}
 }

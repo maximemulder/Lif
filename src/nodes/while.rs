@@ -1,7 +1,6 @@
 use super::expression::Expression;
-use super::r#do::r#do;
 use crate::runtime::Engine;
-use super::{ Node, SyntaxNode, Product, Control };
+use super::{ Node, Product, Control };
 
 pub struct While {
 	condition: Expression,
@@ -9,10 +8,10 @@ pub struct While {
 }
 
 impl While {
-	pub fn build(node: &SyntaxNode) -> While {
-		return While {
-			condition: Expression::build(&node.children()[1]),
-			body:      r#do(&node.children()[2]),
+	pub fn new(condition: Expression, body: Expression) -> Self {
+		return Self {
+			condition,
+			body,
 		};
 	}
 }

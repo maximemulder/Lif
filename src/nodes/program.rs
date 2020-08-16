@@ -1,15 +1,15 @@
 use crate::nodes::statements::Statements;
 use crate::runtime::Engine;
-use super::{ Node, SyntaxNode, Product };
+use super::{ Node, Product };
 
 pub struct Program {
 	statements: Statements,
 }
 
 impl Program {
-	pub fn build(node: &SyntaxNode) -> Program {
-		return Program {
-			statements: Statements::build(&node.children()[0]),
+	pub fn new(statements: Statements) -> Self {
+		return Self {
+			statements,
 		};
 	}
 }
