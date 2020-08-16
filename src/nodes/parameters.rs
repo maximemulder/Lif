@@ -1,19 +1,15 @@
-use super::token::Token;
+use super::token::token;
 use super::SyntaxNode;
 
-pub struct Parameters;
-
-impl Parameters {
-	pub fn build(node: &SyntaxNode) -> Vec<Box<str>> {
-		let mut identifiers = Vec::new();
-		for (i, child) in node.children().iter().enumerate()  {
-			if i % 2 == 1 {
-				continue;
-			}
-
-			identifiers.push(Token::build(child));
+pub fn parameters(node: &SyntaxNode) -> Vec<Box<str>> {
+	let mut identifiers = Vec::new();
+	for (i, child) in node.children().iter().enumerate()  {
+		if i % 2 == 1 {
+			continue;
 		}
 
-		return identifiers;
+		identifiers.push(token(child));
 	}
+
+	return identifiers;
 }

@@ -1,5 +1,5 @@
 use super::expression::Expression;
-use super::r#do::Do;
+use super::r#do::r#do;
 use crate::runtime::{ Engine, Reference };
 use super::{ Node, SyntaxNode };
 
@@ -12,7 +12,7 @@ impl While {
 	pub fn build(node: &SyntaxNode) -> While {
 		return While {
 			condition: Expression::build(&node.children()[1]),
-			body:      Do::build(&node.children()[2]),
+			body:      r#do(&node.children()[2]),
 		};
 	}
 }

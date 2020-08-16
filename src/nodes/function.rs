@@ -1,7 +1,7 @@
 use crate::runtime::{ Engine, Reference };
 use super::{ Node, SyntaxNode };
 use super::block::Block;
-use super::parameters::Parameters;
+use super::parameters::parameters;
 
 pub struct Function {
 	parameters: Vec<Box<str>>,
@@ -11,7 +11,7 @@ pub struct Function {
 impl Function {
 	pub fn build(node: &SyntaxNode) -> Function {
 		return Function {
-			parameters: Parameters::build(&node.children()[2]),
+			parameters: parameters(&node.children()[2]),
 			block:      Block::build(&node.children()[4]),
 		};
 	}

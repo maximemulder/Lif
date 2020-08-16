@@ -1,7 +1,7 @@
 use crate::runtime::{ Engine, Reference };
 use super::expression::Expression;
-use super::expressions::Expressions;
-use super::token::Token;
+use super::expressions::expressions;
+use super::token::token;
 use super::{ Node, SyntaxNode };
 
 pub struct Sequence {
@@ -15,9 +15,9 @@ impl Sequence {
 	pub fn build(node: &SyntaxNode) -> Sequence {
 		return Sequence {
 			expression:  Expression::build(&node.children()[0]),
-			open:        Token::build(&node.children()[1]),
-			expressions: Expressions::build(&node.children()[2]),
-			close:       Token::build(&node.children()[3]),
+			open:        token(&node.children()[1]),
+			expressions: expressions(&node.children()[2]),
+			close:       token(&node.children()[3]),
 		};
 	}
 }

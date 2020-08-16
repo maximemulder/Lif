@@ -1,6 +1,6 @@
 use crate::runtime::{ Engine, Reference };
 use super::expression::Expression;
-use super::token::Token;
+use super::token::token;
 use super::{ Node, SyntaxNode };
 
 pub struct Chain {
@@ -12,7 +12,7 @@ impl Chain {
 	pub fn build(node: &SyntaxNode) -> Chain {
 		return Chain {
 			expression: Expression::build(&node.children()[0]),
-			member:     Token::build(&node.children()[2]),
+			member:     token(&node.children()[2]),
 		};
 	}
 }
