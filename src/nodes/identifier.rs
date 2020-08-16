@@ -1,5 +1,5 @@
-use crate::nodes::{ Node, SyntaxNode };
-use crate::runtime::{ Engine, Reference };
+use crate::nodes::{ Node, SyntaxNode, Product };
+use crate::runtime::Engine;
 
 pub struct Identifier {
 	identifier: Box<str>,
@@ -14,7 +14,7 @@ impl Identifier {
 }
 
 impl Node for Identifier {
-	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> Reference {
-		return engine.get_variable(&self.identifier);
+	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> Product {
+		return Product::new(engine.get_variable(&self.identifier));
 	}
 }

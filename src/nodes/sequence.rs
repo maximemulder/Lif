@@ -1,8 +1,8 @@
-use crate::runtime::{ Engine, Reference };
+use crate::runtime::Engine;
 use super::expression::Expression;
 use super::expressions::expressions;
 use super::token::token;
-use super::{ Node, SyntaxNode };
+use super::{ Node, SyntaxNode, Product };
 
 pub struct Sequence {
 	expression:  Expression,
@@ -23,13 +23,13 @@ impl Sequence {
 }
 
 impl Node for Sequence {
-	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> Reference {
+	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> Product {
+		let reference = value!(self.expression.execute(engine));
 		let mut arguments = Vec::new();
-		let reference = self.expression.execute(engine);
 		for argument in self.expressions.iter() {
-			arguments.push(argument.execute(engine));
+			arguments.push(value!(argument.execute(engine)));
 		}
 
-		return engine.call(engine.read(reference), arguments);
+		return Product::new(engine.call(engine.read(reference), arguments));
 	}
 }

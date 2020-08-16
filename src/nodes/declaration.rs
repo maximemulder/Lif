@@ -1,5 +1,5 @@
-use crate::runtime::{ Engine, Reference };
-use super::{ Node, SyntaxNode };
+use crate::runtime::Engine;
+use super::{ Node, SyntaxNode, Product };
 use super::token::token;
 
 pub struct Declaration {
@@ -15,9 +15,9 @@ impl Declaration {
 }
 
 impl Node for Declaration {
-	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> Reference {
+	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> Product {
 		let reference = engine.new_undefined();
 		engine.new_variable(&self.identifier, reference);
-		return reference;
+		return Product::new(reference);
 	}
 }

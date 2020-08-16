@@ -1,6 +1,6 @@
-use crate::runtime::{ Engine, Reference };
+use crate::runtime::Engine;
 use super::statement::Statement;
-use super::{ Node, SyntaxNode };
+use super::{ Node, SyntaxNode, Product };
 
 pub struct Statements {
 	statements: Vec<Statement>,
@@ -20,11 +20,11 @@ impl Statements {
 }
 
 impl Node for Statements {
-	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> Reference {
+	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> Product {
 		for statement in self.statements.iter() {
-			statement.execute(engine);
+			value!(statement.execute(engine));
 		}
 
-		return engine.new_undefined();
+		return Product::new(engine.new_undefined());
 	}
 }

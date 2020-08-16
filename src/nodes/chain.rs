@@ -1,7 +1,7 @@
-use crate::runtime::{ Engine, Reference };
+use crate::runtime::Engine;
 use super::expression::Expression;
 use super::token::token;
-use super::{ Node, SyntaxNode };
+use super::{ Node, SyntaxNode, Product };
 
 pub struct Chain {
 	expression: Expression,
@@ -18,9 +18,9 @@ impl Chain {
 }
 
 impl Node for Chain {
-	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> Reference {
-		let reference = self.expression.execute(engine);
+	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> Product {
+		let reference = value!(self.expression.execute(engine));
 		let string = engine.new_string(self.member.to_string());
-		return engine.call_method(reference, ".", vec![string]);
+		return Product::new(engine.call_method(reference, ".", vec![string]));
 	}
 }

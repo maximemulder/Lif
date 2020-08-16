@@ -1,6 +1,6 @@
-use crate::runtime::{ Engine, Reference };
+use crate::runtime::Engine;
 use super::expression::Expression;
-use super::{ Node, SyntaxNode };
+use super::{ Node, SyntaxNode, Product };
 
 pub struct Group {
 	expression: Expression,
@@ -15,7 +15,7 @@ impl Group {
 }
 
 impl Node for Group {
-	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> Reference {
+	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> Product {
 		return self.expression.execute(engine);
 	}
 }

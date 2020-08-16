@@ -1,4 +1,4 @@
-use crate::nodes::block::Block;
+use crate::nodes::{ block::Block, Control };
 use crate::nodes::Node;
 use crate::runtime::{ Engine, Reference };
 
@@ -55,7 +55,15 @@ impl<'a> Callable<'a> for Function<'a> {
 			engine.new_variable(&parameter, reference);
 		}
 
-		let reference = self.block.execute(engine);
+		let product = self.block.execute(engine);
+		let reference = match &product.control {
+			Some(control) => match control {
+				Control::Break | Control::Continue => panic!(),
+				Control::Return => product.reference,
+			},
+			None => engine.new_undefined(),
+		};
+
 		engine.pop_frame(frame);
 		return reference;
 	}

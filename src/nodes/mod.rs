@@ -1,4 +1,17 @@
 #![allow(dead_code)]
+
+#[macro_use]
+macro_rules! value {
+	( $product:expr ) => {{
+		let product = $product;
+		if product.control.is_none() {
+			product.reference
+		} else {
+			return product;
+		}
+	}}
+}
+
 pub mod expression;
 pub mod program;
 pub mod r#if;
@@ -26,11 +39,42 @@ pub mod integer;
 pub mod identifier;
 pub mod string;
 pub mod chain;
+pub mod control;
+pub mod r#return;
+pub mod r#break;
+pub mod r#continue;
 
 use crate::runtime::{ Engine, Reference };
 
 pub use crate::node::Node as SyntaxNode;
 
 pub trait Node {
-	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> Reference;
+	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> Product;
+}
+
+pub struct Product {
+	pub reference: Reference,
+	pub control: Option<Control>,
+}
+
+impl Product {
+	pub fn new(reference: Reference) -> Self {
+		return Self {
+			reference,
+			control: None
+		};
+	}
+
+	pub fn new_control(reference: Reference, control: Control) -> Self {
+		return Self {
+			reference,
+			control: Some(control),
+		};
+	}
+}
+
+pub enum Control {
+	Return,
+	Break,
+	Continue,
 }

@@ -1,7 +1,7 @@
-use crate::runtime::{ Engine, Reference };
+use crate::runtime::Engine;
 use super::expression::Expression;
 use super::token::token;
-use super::{ Node, SyntaxNode };
+use super::{ Node, SyntaxNode, Product };
 
 pub struct Operation {
 	left:     Expression,
@@ -20,14 +20,14 @@ impl Operation {
 }
 
 impl Node for Operation {
-	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> Reference {
-		let left = self.left.execute(engine);
-		let right = self.right.execute(engine);
+	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> Product {
+		let left  = value!(self.left.execute(engine));
+		let right = value!(self.right.execute(engine));
 		if self.operator.to_string() == "=" {
 			engine.write(left, engine.read(right));
-			return engine.new_undefined();
-		} else {
-			return engine.call(engine.read(engine.get_object(engine.read(left)).get_method(engine, &self.operator).unwrap()), vec![left, right]);
+			return Product::new(engine.new_undefined());
 		}
+
+		return Product::new(engine.call(engine.read(engine.get_object(engine.read(left)).get_method(engine, &self.operator).unwrap()), vec![left, right]));
 	}
 }

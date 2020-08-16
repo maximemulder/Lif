@@ -1,6 +1,6 @@
-use crate::runtime::{ Engine, Reference };
+use crate::runtime::Engine;
 use super::expression::Expression;
-use super::{ Node, SyntaxNode };
+use super::{ Node, SyntaxNode, Product, Control };
 
 pub struct Loop {
 	body: Expression,
@@ -15,9 +15,26 @@ impl Loop {
 }
 
 impl Node for Loop {
-	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> Reference {
+	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> Product {
+		let mut array = Vec::new();
 		loop {
-			self.body.execute(engine);
+			let product = self.body.execute(engine);
+			match &product.control {
+				Some(control) => match control {
+					Control::Return => return product,
+					Control::Continue => {
+						array.push(product.reference);
+						continue;
+					},
+					Control::Break => {
+						array.push(product.reference);
+						break
+					},
+				},
+				None => array.push(product.reference),
+			}
 		}
+
+		return Product::new(engine.new_array(array));
 	}
 }

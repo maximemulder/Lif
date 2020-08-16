@@ -1,5 +1,5 @@
-use crate::runtime::{ Engine, Reference };
-use super::{ Node, SyntaxNode };
+use crate::runtime::Engine;
+use super::{ Node, SyntaxNode, Product };
 use super::block::Block;
 use super::parameters::parameters;
 
@@ -18,7 +18,7 @@ impl Function {
 }
 
 impl Node for Function {
-	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> Reference {
-		return engine.new_function(&self.parameters, &self.block);
+	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> Product {
+		return Product::new(engine.new_function(&self.parameters, &self.block));
 	}
 }

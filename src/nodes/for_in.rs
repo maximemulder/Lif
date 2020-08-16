@@ -1,5 +1,5 @@
-use crate::runtime::{ Engine, Reference };
-use super::{ Node, SyntaxNode };
+use crate::runtime::Engine;
+use super::{ Node, SyntaxNode, Product };
 use super::expression::Expression;
 use super::r#do::r#do;
 use super::token::token;
@@ -21,15 +21,15 @@ impl ForIn {
 }
 
 impl Node for ForIn {
-	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> Reference {
+	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> Product {
 		for element in {
-			let reference = self.expression.execute(engine);
+			let reference = value!(self.expression.execute(engine));
 			engine.get_cast_array(engine.read(reference)).clone()
 		} {
 			engine.new_variable(&self.identifier, element);
 			self.body.execute(engine);
 		}
 
-		return engine.new_undefined();
+		return Product::new(engine.new_undefined());
 	}
 }

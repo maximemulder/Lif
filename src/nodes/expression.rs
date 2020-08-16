@@ -1,6 +1,6 @@
 use crate::elements;
-use crate::runtime::{ Engine, Reference };
-use super::{ Node, SyntaxNode };
+use crate::runtime::Engine;
+use super::{ Node, SyntaxNode, Product };
 use super::literal::literal;
 use super::sequence::Sequence;
 use super::structure::Structure;
@@ -9,6 +9,7 @@ use super::function::Function;
 use super::group::Group;
 use super::declaration::Declaration;
 use super::chain::Chain;
+use super::control::control;
 
 pub struct Expression {
 	node: Box<dyn Node>,
@@ -20,6 +21,7 @@ impl Expression {
 		return Expression {
 			node: match child.element {
 				&elements::expressions::LITERAL     => literal(child),
+				&elements::controls::CONTROL     => control(child),
 				&elements::structures::STRUCTURE    => Box::new(Structure::build(child)),
 				&elements::expressions::FUNCTION    => Box::new(Function::build(child)),
 				&elements::expressions::OPERATION   => Box::new(Operation::build(child)),
@@ -34,7 +36,7 @@ impl Expression {
 }
 
 impl Node for Expression {
-	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> Reference {
+	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> Product {
 		return self.node.execute(engine);
 	}
 }
