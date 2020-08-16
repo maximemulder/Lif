@@ -126,25 +126,25 @@ impl<'a> Engine<'a> {
 	pub fn get_cast_array(&self, value: Value) -> &Vec<Reference> {
 		let object = self.get_object(value);
 		object.cast(self.primitives.function);
-		return object.data.as_array();
+		return object.data_array();
 	}
 
 	pub fn get_cast_boolean(&self, value: Value) -> &bool {
 		let object = self.get_object(value);
 		object.cast(self.primitives.function);
-		return object.data.as_boolean();
+		return object.data_boolean();
 	}
 
 	pub fn get_cast_callable(&self, value: Value) -> &Box<dyn Callable<'a> + 'a> {
 		let object = self.get_object(value);
 		object.cast(self.primitives.function);
-		return object.data.as_callable();
+		return object.data_callable();
 	}
 
 	pub fn get_cast_string(&self, value: Value) -> &String {
 		let object = self.get_object(value);
 		object.cast(self.primitives.string);
-		return object.data.as_string();
+		return object.data_string();
 	}
 
 	pub fn read(&self, reference: Reference) -> Value {
@@ -175,7 +175,7 @@ impl<'a> Engine<'a> {
 			self.this = None;
 		}
 
-		let callable = self.get_object(value).data.as_callable().duplicate();
+		let callable = self.get_object(value).data_callable().duplicate();
 		return callable.call(self, arguments);
 	}
 }

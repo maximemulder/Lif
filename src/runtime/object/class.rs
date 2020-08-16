@@ -22,7 +22,7 @@ impl Class {
 		}
 
 		if let Some(parent) = self.parent {
-			return engine.get_object(parent).data.as_class().get_method(engine, name);
+			return engine.get_object(parent).data_class().get_method(engine, name);
 		}
 
 		return None;
