@@ -20,6 +20,7 @@ pub mod structure;
 pub mod r#if;
 pub mod r#loop;
 pub mod r#while;
+pub mod do_while;
 pub mod for_in;
 pub mod operation;
 pub mod sequence;

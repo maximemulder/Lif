@@ -1,31 +1,25 @@
+use super::expression::Expression;
 use crate::runtime::Engine;
 use super::{ Node, Product, Control };
-use super::expression::Expression;
 
-pub struct ForIn {
-	identifier: Box<str>,
-	expression: Expression,
-	body:       Expression,
+pub struct DoWhile {
+	body:      Expression,
+	condition: Expression,
 }
 
-impl ForIn {
-	pub fn new(	identifier: Box<str>, expression: Expression, body: Expression) -> Self {
+impl DoWhile {
+	pub fn new(body: Expression, condition: Expression) -> Self {
 		return Self {
-			identifier,
-			expression,
 			body,
+			condition,
 		};
 	}
 }
 
-impl Node for ForIn {
+impl Node for DoWhile {
 	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> Product {
 		let mut array = Vec::new();
-		for element in {
-			let reference = value!(self.expression.execute(engine));
-			engine.get_cast_array(engine.read(reference)).clone()
-		} {
-			engine.new_variable(&self.identifier, element);
+		loop {
 			let product = self.body.execute(engine);
 			match &product.control {
 				Some(control) => match control {
@@ -40,6 +34,13 @@ impl Node for ForIn {
 					},
 				},
 				None => array.push(product.reference),
+			}
+
+			if {
+				let reference = value!(self.condition.execute(engine));
+				!engine.get_cast_boolean(engine.read(reference))
+			} {
+				break;
 			}
 		}
 

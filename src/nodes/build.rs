@@ -5,9 +5,10 @@ use super::program::Program;
 use super::r#if::If;
 use super::r#loop::Loop;
 use super::r#while::While;
+use super::do_while::DoWhile;
+use super::for_in::ForIn;
 use super::statement::Statement;
 use super::statements::Statements;
-use super::for_in::ForIn;
 use super::structure::Structure;
 use super::operation::Operation;
 use super::sequence::Sequence;
@@ -81,11 +82,12 @@ fn identifier(node: &SyntaxNode) -> Identifier {
 
 fn structure(node: &SyntaxNode) -> Structure {	let child = &node.children()[0];
 	return Structure::new(match child.element {
-		&elements::structures::BLOCK  => Box::new(block(child)),
-		&elements::structures::IF     => Box::new(r#if(child)),
-		&elements::structures::LOOP   => Box::new(r#loop(child)),
-		&elements::structures::WHILE  => Box::new(r#while(child)),
-		&elements::structures::FOR_IN => Box::new(for_in(child)),
+		&elements::structures::BLOCK    => Box::new(block(child)),
+		&elements::structures::IF       => Box::new(r#if(child)),
+		&elements::structures::LOOP     => Box::new(r#loop(child)),
+		&elements::structures::WHILE    => Box::new(r#while(child)),
+		&elements::structures::DO_WHILE => Box::new(do_while(child)),
+		&elements::structures::FOR_IN   => Box::new(for_in(child)),
 		_ => panic!(),
 	});
 }
@@ -107,7 +109,11 @@ fn r#if(node: &SyntaxNode) -> If {
 }
 
 fn then(node: &SyntaxNode) -> Expression {
-	return expression(&node.children()[node.children().len() - 1]);
+	return if node.children().len() == 1 {
+		Expression::new(Box::new(block(&node.children()[0])))
+	} else {
+		expression(&node.children()[1])
+	};
 }
 
 fn r#else(node: &SyntaxNode) -> Expression {
@@ -115,7 +121,11 @@ fn r#else(node: &SyntaxNode) -> Expression {
 }
 
 fn r#do(node: &SyntaxNode) -> Expression {
-	return expression(&node.children()[node.children().len() - 1]);
+	return if node.children().len() == 1 {
+		Expression::new(Box::new(block(&node.children()[0])))
+	} else {
+		expression(&node.children()[1])
+	};
 }
 
 fn r#loop(node: &SyntaxNode) -> Loop {
@@ -124,6 +134,10 @@ fn r#loop(node: &SyntaxNode) -> Loop {
 
 fn r#while(node: &SyntaxNode) -> While {
 	return While::new(expression(&node.children()[1]), r#do(&node.children()[2]));
+}
+
+fn do_while(node: &SyntaxNode) -> DoWhile {
+	return DoWhile::new(expression(&node.children()[1]), expression(&node.children()[3]));
 }
 
 fn for_in(node: &SyntaxNode) -> ForIn {
