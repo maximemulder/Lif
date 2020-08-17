@@ -125,13 +125,13 @@ impl<'a> Engine<'a> {
 
 	pub fn get_cast_array(&self, value: Value) -> &Vec<Reference> {
 		let object = self.get_object(value);
-		object.cast(self.primitives.function);
+		object.cast(self.primitives.array);
 		return object.data_array();
 	}
 
 	pub fn get_cast_boolean(&self, value: Value) -> &bool {
 		let object = self.get_object(value);
-		object.cast(self.primitives.function);
+		object.cast(self.primitives.boolean);
 		return object.data_boolean();
 	}
 
