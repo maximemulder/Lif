@@ -17,7 +17,7 @@ impl While {
 }
 
 impl Node for While {
-	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> Product {
+	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> Product<'a> {
 		let mut array = Vec::new();
 		while {
 			let reference = value!(self.condition.execute(engine));

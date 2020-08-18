@@ -1,19 +1,26 @@
 pub mod engine;
-pub mod object;
-pub mod primitives;
+pub mod environment;
 pub mod scope;
+pub mod value;
 
 pub use engine::Engine;
-pub use object::Object;
+pub use value::Value;
 
 #[derive(Clone,Copy,Eq,PartialEq)]
-pub struct Reference(pub usize);
+pub struct Reference<'a> {
+	value: *mut Value<'a>,
+}
 
-#[derive(Clone,Copy,Eq,PartialEq)]
-pub struct Value(pub usize);
+impl<'a> Reference<'a> {
+	pub fn new(value: *mut Value<'a>) -> Self {
+		return Self {
+			value,
+		}
+	}
 
-impl Value {
 	pub fn new_undefined() -> Self {
-		return Self(usize::MAX);
+		return Self {
+			value: std::ptr::null_mut(),
+		};
 	}
 }

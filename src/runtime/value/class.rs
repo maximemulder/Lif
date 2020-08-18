@@ -1,14 +1,14 @@
 use crate::runtime::{ Engine, Value, Reference };
 use std::collections::HashMap;
 
-pub struct Class {
-	pub parent:  Option<Value>,
-	pub statics: HashMap<String, Reference>,
-	pub methods: HashMap<String, Reference>,
+pub struct Class<'a> {
+	pub parent:  Option<*mut Value<'a>>,
+	pub statics: HashMap<String, Reference<'a>>,
+	pub methods: HashMap<String, Reference<'a>>,
 }
 
-impl Class {
-	pub fn new(parent: Option<Value>) -> Self {
+impl<'a> Class<'a> {
+	pub fn new(parent: Option<*mut Value<'a>>) -> Self {
 		return Self {
 			parent:  parent,
 			statics: HashMap::new(),

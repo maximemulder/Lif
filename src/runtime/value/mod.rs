@@ -3,27 +3,27 @@ pub mod class;
 pub mod data;
 pub mod instance;
 
-use crate::runtime::{ Engine, Reference, Value };
+use crate::runtime::{ Engine, Reference };
 use data::Data;
 use class::Class;
 use callable::Callable;
 use instance::Instance;
 
-pub struct Object<'a> {
-	pub class: Value,
+pub struct Value<'a> {
+	pub class: *mut Value<'a>,
 	data: Data<'a>,
 }
 
-impl<'a> Object<'a> {
-	pub fn new(class: Value, data: Data<'a>) -> Self {
+impl<'a> Value<'a> {
+	pub fn new(class: *mut Value<'a>, data: Data<'a>) -> Self {
 		return Self {
 			class,
 			data,
 		};
 	}
 
-	pub fn cast(&self, class: Value) {
-		if self.class != class {
+	pub fn cast(&self, class: *const Value<'a>) {
+		if !std::ptr::eq(self.class, class) {
 			panic!();
 		}
 	}
@@ -53,12 +53,12 @@ macro_rules! data_mut {
 	};
 }
 
-impl<'a> Object<'a> {
-	pub fn data_array(&self) -> &Vec<Reference> {
+impl<'a> Value<'a> {
+	pub fn data_array(&self) -> &Vec<Reference<'a>> {
 		data!(self, Array);
 	}
 
-	pub fn data_array_mut(&mut self) -> &mut Vec<Reference> {
+	pub fn data_array_mut(&mut self) -> &mut Vec<Reference<'a>> {
 		data_mut!(self, Array);
 	}
 
@@ -78,19 +78,19 @@ impl<'a> Object<'a> {
 		data_mut!(self, Callable);
 	}
 
-	pub fn data_class(&self) -> &Class {
+	pub fn data_class(&self) -> &Class<'a> {
 		data!(self, Class);
 	}
 
-	pub fn data_class_mut(&mut self) -> &mut Class {
+	pub fn data_class_mut(&mut self) -> &mut Class<'a> {
 		data_mut!(self, Class);
 	}
 
-	pub fn data_instance(&self) -> &Instance {
+	pub fn data_instance(&self) -> &Instance<'a> {
 		data!(self, Instance);
 	}
 
-	pub fn data_instance_mut(&mut self) -> &mut Instance {
+	pub fn data_instance_mut(&mut self) -> &mut Instance<'a> {
 		data_mut!(self, Instance);
 	}
 

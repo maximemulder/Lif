@@ -14,7 +14,7 @@ impl Identifier {
 }
 
 impl Node for Identifier {
-	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> Product {
+	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> Product<'a> {
 		return Product::new(engine.get_variable(&self.identifier));
 	}
 }

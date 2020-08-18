@@ -1,4 +1,4 @@
-use crate::runtime::Engine;
+use crate::runtime::{ Engine, Reference };
 use super::expression::Expression;
 use super::{ Node, Product };
 
@@ -19,7 +19,7 @@ impl If {
 }
 
 impl Node for If {
-	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> Product {
+	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> Product<'a> {
 		return if {
 			let reference = value!(self.condition.execute(engine));
 			*engine.get_cast_boolean(engine.read(reference))
@@ -28,7 +28,7 @@ impl Node for If {
 		} else if let Some(r#else) = &self.r#else {
 			r#else.execute(engine)
 		} else {
-			return Product::new(engine.new_undefined());
+			return Product::new(Reference::new_undefined());
 		}
 	}
 }

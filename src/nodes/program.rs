@@ -1,5 +1,5 @@
 use crate::nodes::statements::Statements;
-use crate::runtime::Engine;
+use crate::runtime::{ Engine, Reference };
 use super::{ Node, Product };
 
 pub struct Program {
@@ -15,8 +15,8 @@ impl Program {
 }
 
 impl Node for Program {
-	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> Product {
+	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> Product<'a> {
 		self.statements.execute(engine);
-		return Product::new(engine.new_undefined());
+		return Product::new(Reference::new_undefined());
 	}
 }

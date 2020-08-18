@@ -1,4 +1,4 @@
-use crate::runtime::Engine;
+use crate::runtime::{ Engine, Reference };
 use super::{ Node, Product, Control };
 use super::expression::Expression;
 
@@ -15,11 +15,11 @@ impl Continue {
 }
 
 impl Node for Continue {
-	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> Product {
+	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> Product<'a> {
 		return Product::new_control(if let Some(expression) = &self.expression {
 			value!(expression.execute(engine))
 		} else {
-			engine.new_undefined()
+			Reference::new_undefined()
 		}, Control::Continue);
 	}
 }

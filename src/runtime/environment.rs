@@ -1,29 +1,29 @@
-use crate::runtime::{ Engine, Object, Reference, Value };
-use crate::runtime::object::data::Data;
-use crate::runtime::object::class::Class;
+use crate::runtime::{ Engine, Reference, Value };
+use crate::runtime::value::data::Data;
+use crate::runtime::value::class::Class;
 
-pub struct Primitives {
-	pub array:    Value,
-	pub boolean:  Value,
-	pub class:    Value,
-	pub function: Value,
-	pub instance: Value,
-	pub integer:  Value,
-	pub object:   Value,
-	pub string:   Value,
+pub struct Environment<'a> {
+	pub array:    *mut Value<'a>,
+	pub boolean:  *mut Value<'a>,
+	pub class:    *mut Value<'a>,
+	pub function: *mut Value<'a>,
+	pub instance: *mut Value<'a>,
+	pub integer:  *mut Value<'a>,
+	pub object:   *mut Value<'a>,
+	pub string:   *mut Value<'a>,
 }
 
-impl Primitives {
+impl<'a> Environment<'a> {
 	pub fn new() -> Self {
 		return Self {
-			array:    Value::new_undefined(),
-			boolean:  Value::new_undefined(),
-			class:    Value::new_undefined(),
-			function: Value::new_undefined(),
-			instance: Value::new_undefined(),
-			integer:  Value::new_undefined(),
-			object:   Value::new_undefined(),
-			string:   Value::new_undefined(),
+			array:    std::ptr::null_mut(),
+			boolean:  std::ptr::null_mut(),
+			class:    std::ptr::null_mut(),
+			function: std::ptr::null_mut(),
+			instance: std::ptr::null_mut(),
+			integer:  std::ptr::null_mut(),
+			object:   std::ptr::null_mut(),
+			string:   std::ptr::null_mut(),
 		};
 	}
 }

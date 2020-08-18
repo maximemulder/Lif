@@ -1,4 +1,4 @@
-use crate::runtime::Engine;
+use crate::runtime::{ Engine, Reference };
 use super::expression::Expression;
 use super::{ Node, Product };
 
@@ -19,12 +19,12 @@ impl Operation {
 }
 
 impl Node for Operation {
-	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> Product {
+	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> Product<'a> {
 		let left  = value!(self.left.execute(engine));
 		let right = value!(self.right.execute(engine));
 		if self.operator.to_string() == "=" {
 			engine.write(left, engine.read(right));
-			return Product::new(engine.new_undefined());
+			return Product::new(Reference::new_undefined());
 		}
 
 		return Product::new(engine.call(engine.read(engine.get_object(engine.read(left)).get_method(engine, &self.operator).unwrap()), vec![left, right]));

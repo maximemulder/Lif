@@ -1,4 +1,4 @@
-use crate::runtime::Engine;
+use crate::runtime::{ Engine, Reference };
 use super::statement::Statement;
 use super::{ Node, Product };
 
@@ -15,11 +15,11 @@ impl Statements {
 }
 
 impl Node for Statements {
-	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> Product {
+	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> Product<'a> {
 		for statement in self.statements.iter() {
 			value!(statement.execute(engine));
 		}
 
-		return Product::new(engine.new_undefined());
+		return Product::new(Reference::new_undefined());
 	}
 }

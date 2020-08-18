@@ -1,31 +1,29 @@
 use crate::nodes::block::Block;
 use super::scope::Scope;
-use super::{ Object, Reference, Value };
-use super::object::callable::Callable;
-use super::primitives::Primitives;
-use super::object::data::Data;
-use super::object::callable::{ Function, Primitive };
-use super::object::instance::Instance;
-use super::object::class::Class;
+use super::{ Reference, Value };
+use super::value::callable::Callable;
+use super::environment::Environment;
+use super::value::data::Data;
+use super::value::callable::{ Function, Primitive };
+use super::value::instance::Instance;
+use super::value::class::Class;
 
 pub struct Engine<'a> {
-	pub primitives: Primitives,
+	pub objects: Vec<*const Value<'a>>,
+	pub environment: Environment<'a>,
+	pub this: Option<Reference<'a>>,
+	pub scopes: Vec<Scope<'a>>,
 	pub scope: usize,
-	pub this: Option<Reference>,
-	pub references: Vec<Value>,
-	pub objects: Vec<Object<'a>>,
-	pub scopes: Vec<Scope>,
 }
 
 impl<'a> Engine<'a> {
 	pub fn new() -> Self {
 		let mut engine = Self {
-			primitives: Primitives::new(),
-			scope: 0,
-			references: Vec::new(),
 			objects: Vec::new(),
-			scopes: Vec::new(),
+			environment: Environment::new(),
 			this: None,
+			scopes: Vec::new(),
+			scope: 0,
 		};
 
 		engine.scopes.push(Scope::new());
@@ -125,19 +123,19 @@ impl<'a> Engine<'a> {
 
 	pub fn get_cast_array(&self, value: Value) -> &Vec<Reference> {
 		let object = self.get_object(value);
-		object.cast(self.primitives.array);
+		object.cast(self.environment.array);
 		return object.data_array();
 	}
 
 	pub fn get_cast_boolean(&self, value: Value) -> &bool {
 		let object = self.get_object(value);
-		object.cast(self.primitives.boolean);
+		object.cast(self.environment.boolean);
 		return object.data_boolean();
 	}
 
 	pub fn get_cast_callable(&self, value: Value) -> &Box<dyn Callable<'a> + 'a> {
 		let object = self.get_object(value);
-		object.cast(self.primitives.function);
+		object.cast(self.environment.function);
 		return object.data_callable();
 	}
 
@@ -181,35 +179,35 @@ impl<'a> Engine<'a> {
 }
 
 impl<'a> Engine<'a> {
-	pub fn new_array(&mut self, elements: Vec<Reference>) -> Reference {
-		return self.new_object(Object::new(self.primitives.class, Data::Array(elements)));
+	pub fn new_array(&mut self, elements: Vec<Reference>) -> Reference<'a> {
+		return self.new_object(Value::new(self.environment.class, Data::Array(elements)));
 	}
 
-	pub fn new_boolean(&mut self, boolean: bool) -> Reference {
-		return self.new_object(Object::new(self.primitives.boolean, Data::Boolean(boolean)));
+	pub fn new_boolean(&mut self, boolean: bool) -> Reference<'a> {
+		return self.new_object(Value::new(self.environment.boolean, Data::Boolean(boolean)));
 	}
 
-	pub fn new_class(&mut self) -> Reference {
-		return self.new_object(Object::new(self.primitives.class, Data::Class(Class::new(Some(self.primitives.object)))));
+	pub fn new_class(&mut self) -> Reference<'a> {
+		return self.new_object(Value::new(self.environment.class, Data::Class(Class::new(Some(self.environment.object)))));
 	}
 
-	pub fn new_instance(&mut self, parent: Value) -> Reference {
-		return self.new_object(Object::new(parent, Data::Instance(Instance::new())));
+	pub fn new_instance(&mut self, parent: *mut Value<'a>) -> Reference<'a> {
+		return self.new_object(Value::new(parent, Data::Instance(Instance::new())));
 	}
 
-	pub fn new_integer(&mut self, integer: usize) -> Reference {
-		return self.new_object(Object::new(self.primitives.integer, Data::Integer(integer)));
+	pub fn new_integer(&mut self, integer: usize) -> Reference<'a> {
+		return self.new_object(Value::new(self.environment.integer, Data::Integer(integer)));
 	}
 
-	pub fn new_function(&mut self, parameters: &'a Vec<Box<str>>, block: &'a Block) -> Reference {
-		return self.new_object(Object::new(self.primitives.function, Data::Callable(Box::new(Function::new(self.scope, parameters, block)))));
+	pub fn new_function(&mut self, parameters: &'a Vec<Box<str>>, block: &'a Block) -> Reference<'a> {
+		return self.new_object(Value::new(self.environment.function, Data::Callable(Box::new(Function::new(self.scope, parameters, block)))));
 	}
 
-	pub fn new_primitive(&mut self, callback: &'static dyn for<'b> Fn(&'b mut Engine, Vec<Reference>) -> Reference) -> Reference {
-		return self.new_object(Object::new(self.primitives.function, Data::Callable(Box::new(Primitive::new(callback)))));
+	pub fn new_primitive(&mut self, callback: &'static dyn for<'b> Fn(&'b mut Engine, Vec<Reference<'a>>) -> Reference<'a>) -> Reference {
+		return self.new_object(Value::new(self.environment.function, Data::Callable(Box::new(Primitive::new(callback)))));
 	}
 
 	pub fn new_string(&mut self, string: String) -> Reference {
-		return self.new_object(Object::new(self.primitives.string, Data::String(string)));
+		return self.new_object(Value::new(self.environment.string, Data::String(string)));
 	}
 }
