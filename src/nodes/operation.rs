@@ -20,13 +20,14 @@ impl Operation {
 
 impl Node for Operation {
 	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> Product<'a> {
-		let left  = value!(self.left.execute(engine));
+		let mut left  = value!(self.left.execute(engine));
 		let right = value!(self.right.execute(engine));
 		if self.operator.to_string() == "=" {
-			engine.write(left, engine.read(right));
+			println!("{}", self.operator);
+			*left.value_mut() = *right.value_ref();
 			return Product::new(Reference::new_undefined());
 		}
 
-		return Product::new(engine.call(engine.read(engine.get_object(engine.read(left)).get_method(engine, &self.operator).unwrap()), vec![left, right]));
+		return Product::new(engine.call(*(left.object_ref().get_method(engine, &self.operator).unwrap()).value_ref(), vec![left, right]));
 	}
 }

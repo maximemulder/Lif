@@ -51,7 +51,7 @@ impl<'a> Callable<'a> for Function<'a> {
 	fn call(&self, engine: &mut Engine<'a>, arguments: Vec<Reference<'a>>) -> Reference<'a> {
 		let frame = engine.push_frame(self.scope);
 		for (parameter, argument) in self.parameters.iter().zip(arguments) {
-			let reference = engine.new_reference(engine.read(argument));
+			let reference = argument.clone();
 			engine.new_variable(&parameter, reference);
 		}
 

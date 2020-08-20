@@ -28,6 +28,6 @@ impl Node for Sequence {
 			arguments.push(value!(argument.execute(engine)));
 		}
 
-		return Product::new(engine.call(engine.read(reference), arguments));
+		return Product::new(engine.call(*reference.value_ref(), arguments));
 	}
 }

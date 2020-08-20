@@ -3,35 +3,57 @@ pub mod class;
 pub mod data;
 pub mod instance;
 
-use crate::runtime::{ Engine, Reference };
+use crate::runtime::{ Engine, Reference, Value };
 use data::Data;
 use class::Class;
 use callable::Callable;
 use instance::Instance;
 
-pub struct Value<'a> {
-	pub class: *mut Value<'a>,
+pub struct Object<'a> {
+	pub class: Value<'a>,
 	data: Data<'a>,
 }
 
-impl<'a> Value<'a> {
-	pub fn new(class: *mut Value<'a>, data: Data<'a>) -> Self {
+impl<'a> Object<'a> {
+	pub fn new(class: Value<'a>, data: Data<'a>) -> Self {
 		return Self {
 			class,
 			data,
 		};
 	}
 
-	pub fn cast(&self, class: *const Value<'a>) {
-		if !std::ptr::eq(self.class, class) {
+	pub fn cast(&self, class: Value<'a>) {
+		if self.class != class {
 			panic!();
 		}
 	}
 
-	pub fn get_method(&self, engine: &Engine, name: &str) -> Option<Reference> {
-		return engine.get_object(self.class).data_class().get_method(engine, name);
+	pub fn get_cast_array(&self, engine: &Engine<'a>) -> &Vec<Reference<'a>> {
+		self.cast(engine.environment.array);
+		return self.data_array();
+	}
+
+	pub fn get_cast_boolean(&self, engine: &Engine<'a>) -> &bool {
+		self.cast(engine.environment.boolean);
+		return self.data_boolean();
+	}
+
+	pub fn get_cast_callable(&self, engine: &Engine<'a>) -> &Box<dyn Callable<'a> + 'a> {
+		self.cast(engine.environment.function);
+		return self.data_callable();
+	}
+
+	pub fn get_cast_string(&self, engine: &Engine<'a>) -> &String {
+		self.cast(engine.environment.string);
+		return self.data_string();
+	}
+
+	pub fn get_method(&self, engine: &Engine<'a>, name: &str) -> Option<Reference<'a>> {
+		return self.class.object_ref().data_class().get_method(engine, name);
 	}
 }
+
+
 
 macro_rules! data {
 	( $this:expr, $variant:ident ) => {
@@ -53,7 +75,7 @@ macro_rules! data_mut {
 	};
 }
 
-impl<'a> Value<'a> {
+impl<'a> Object<'a> {
 	pub fn data_array(&self) -> &Vec<Reference<'a>> {
 		data!(self, Array);
 	}

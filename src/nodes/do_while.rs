@@ -38,7 +38,7 @@ impl Node for DoWhile {
 
 			if {
 				let reference = value!(self.condition.execute(engine));
-				!engine.get_cast_boolean(engine.read(reference))
+				!reference.object_ref().get_cast_boolean(engine)
 			} {
 				break;
 			}
