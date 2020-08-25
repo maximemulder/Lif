@@ -1,4 +1,5 @@
 use crate::runtime::Object;
+use crate::runtime::object::data::Data;
 
 #[derive(Clone,Copy,Eq,PartialEq)]
 pub struct Value<'a> {
@@ -6,10 +7,8 @@ pub struct Value<'a> {
 }
 
 impl<'a> Value<'a> {
-	pub fn create(object: Object<'a>) -> Self {
-		return Self {
-			object: Box::into_raw(Box::new(object)),
-		}
+	pub fn create(class: Value<'a>, data: Data<'a>) -> Self {
+		return Self::new(Box::into_raw(Box::new(Object::new(class, data))));
 	}
 
 	pub fn new(object: *mut Object<'a>) -> Self {

@@ -6,7 +6,6 @@ use super::object::data::Data;
 use super::object::callable::{ Function, Primitive };
 use super::object::instance::Instance;
 use super::object::class::Class;
-use super::object::Object;
 
 pub struct Engine<'a> {
 	pub objects: Vec<*const Value<'a>>,
@@ -106,34 +105,34 @@ impl<'a> Engine<'a> {
 
 impl<'a> Engine<'a> {
 	pub fn new_array(&mut self, elements: Vec<Reference<'a>>) -> Reference<'a> {
-		return Reference::new(Value::create(Object::new(self.environment.class, Data::Array(elements))));
+		return Reference::new(Value::create(self.environment.class, Data::Array(elements)));
 	}
 
 	pub fn new_boolean(&mut self, boolean: bool) -> Reference<'a> {
-		return Reference::new(Value::create(Object::new(self.environment.boolean, Data::Boolean(boolean))));
+		return Reference::new(Value::create(self.environment.boolean, Data::Boolean(boolean)));
 	}
 
 	pub fn new_class(&mut self) -> Reference<'a> {
-		return Reference::new(Value::create(Object::new(self.environment.class, Data::Class(Class::new(Some(self.environment.object))))));
+		return Reference::new(Value::create(self.environment.class, Data::Class(Class::new(Some(self.environment.object)))));
 	}
 
 	pub fn new_instance(&mut self, parent: Value<'a>) -> Reference<'a> {
-		return Reference::new(Value::create(Object::new(parent, Data::Instance(Instance::new()))));
+		return Reference::new(Value::create(parent, Data::Instance(Instance::new())));
 	}
 
 	pub fn new_integer(&mut self, integer: usize) -> Reference<'a> {
-		return Reference::new(Value::create(Object::new(self.environment.integer, Data::Integer(integer))));
+		return Reference::new(Value::create(self.environment.integer, Data::Integer(integer)));
 	}
 
 	pub fn new_function(&mut self, parameters: &'a Vec<Box<str>>, block: &'a Block) -> Reference<'a> {
-		return Reference::new(Value::create(Object::new(self.environment.function, Data::Callable(Box::new(Function::new(self.scope, parameters, block))))));
+		return Reference::new(Value::create(self.environment.function, Data::Callable(Box::new(Function::new(self.scope, parameters, block)))));
 	}
 
 	pub fn new_primitive(&mut self, callback: &'a dyn Fn(&mut Engine<'a>, Vec<Reference<'a>>) -> Reference<'a>) -> Reference<'a> {
-		return Reference::new(Value::create(Object::new(self.environment.function, Data::Callable(Box::new(Primitive::new(callback))))));
+		return Reference::new(Value::create(self.environment.function, Data::Callable(Box::new(Primitive::new(callback)))));
 	}
 
 	pub fn new_string(&mut self, string: String) -> Reference<'a> {
-		return Reference::new(Value::create(Object::new(self.environment.string, Data::String(string))));
+		return Reference::new(Value::create(self.environment.string, Data::String(string)));
 	}
 }

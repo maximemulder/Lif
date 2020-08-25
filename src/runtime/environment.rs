@@ -1,7 +1,6 @@
 use crate::runtime::{ Engine, Reference, Value };
 use crate::runtime::object::data::Data;
 use crate::runtime::object::class::Class;
-use crate::runtime::object::Object;
 
 pub struct Environment<'a> {
 	pub array:    Value<'a>,
@@ -31,7 +30,7 @@ impl<'a> Environment<'a> {
 
 impl<'a> Engine<'a> {
 	fn create_class(&mut self) -> Value<'a> {
-		return Value::create(Object::new(self.environment.class, Data::Class(Class::new(Some(self.environment.object)))));
+		return Value::create(self.environment.class, Data::Class(Class::new(Some(self.environment.object))));
 	}
 
 	pub fn new_variable_primitive(&mut self, name: &str, callback: &'a dyn Fn(&mut Engine<'a>, Vec<Reference<'a>>) -> Reference<'a>) {
