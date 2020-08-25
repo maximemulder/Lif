@@ -1,4 +1,4 @@
-use crate::runtime::Engine;
+use crate::runtime::engine::Engine;
 use super::{ Node, Product };
 
 pub struct Structure {
@@ -14,7 +14,7 @@ impl Structure {
 }
 
 impl Node for Structure {
-	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> Product {
+	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> Product<'a> {
 		return self.node.execute(engine);
 	}
 }

@@ -1,5 +1,5 @@
 use crate::nodes::{ Node, Product };
-use crate::runtime::Engine;
+use crate::runtime::engine::Engine;
 
 pub struct Integer {
 	integer: usize,
@@ -14,7 +14,7 @@ impl Integer {
 }
 
 impl Node for Integer {
-	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> Product {
+	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> Product<'a> {
 		return Product::new(engine.new_integer(self.integer));
 	}
 }

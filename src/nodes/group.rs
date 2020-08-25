@@ -1,4 +1,4 @@
-use crate::runtime::Engine;
+use crate::runtime::engine::Engine;
 use super::expression::Expression;
 use super::{ Node, Product };
 
@@ -15,7 +15,7 @@ impl Group {
 }
 
 impl Node for Group {
-	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> Product {
+	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> Product<'a> {
 		return self.expression.execute(engine);
 	}
 }

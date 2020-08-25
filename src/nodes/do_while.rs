@@ -1,5 +1,5 @@
 use super::expression::Expression;
-use crate::runtime::Engine;
+use crate::runtime::engine::Engine;
 use super::{ Node, Product, Control };
 
 pub struct DoWhile {
@@ -17,7 +17,7 @@ impl DoWhile {
 }
 
 impl Node for DoWhile {
-	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> Product {
+	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> Product<'a> {
 		let mut array = Vec::new();
 		loop {
 			let product = self.body.execute(engine);
@@ -38,7 +38,7 @@ impl Node for DoWhile {
 
 			if {
 				let reference = value!(self.condition.execute(engine));
-				!engine.get_cast_boolean(engine.read(reference))
+				!reference.object_ref().get_cast_boolean(engine)
 			} {
 				break;
 			}

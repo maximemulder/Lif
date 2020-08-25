@@ -1,4 +1,4 @@
-use crate::runtime::Engine;
+use crate::runtime::engine::Engine;
 use super::expression::Expression;
 use super::{ Node, Product, Control };
 
@@ -15,7 +15,7 @@ impl Loop {
 }
 
 impl Node for Loop {
-	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> Product {
+	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> Product<'a> {
 		let mut array = Vec::new();
 		loop {
 			let product = self.body.execute(engine);

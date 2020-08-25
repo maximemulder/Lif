@@ -1,12 +1,12 @@
-use crate::runtime::Reference;
+use crate::runtime::reference::Reference;
 use std::collections::HashMap;
 
-pub struct Scope {
+pub struct Scope<'a> {
 	pub parent: Option<usize>,
-	variables: HashMap<String, Reference>,
+	variables: HashMap<String, Reference<'a>>,
 }
 
-impl Scope {
+impl<'a> Scope<'a> {
 	pub fn new() -> Self {
 		return Self {
 			parent: None,
@@ -21,7 +21,7 @@ impl Scope {
 		};
 	}
 
-	pub fn get_variable(&self, name: &str) -> Option<Reference> {
+	pub fn get_variable(&self, name: &str) -> Option<Reference<'a>> {
 		if let Some(reference) = self.variables.get(name) {
 			return Some(*reference);
 		}
@@ -29,7 +29,7 @@ impl Scope {
 		return None;
 	}
 
-	pub fn add_variable(&mut self, name: &str, reference: Reference) {
+	pub fn add_variable(&mut self, name: &str, reference: Reference<'a>) {
 		self.variables.insert(name.to_string(), reference);
 	}
 }

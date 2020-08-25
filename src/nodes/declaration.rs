@@ -1,4 +1,5 @@
-use crate::runtime::Engine;
+use crate::runtime::engine::Engine;
+use crate::runtime::reference::Reference;
 use super::{ Node, Product };
 
 pub struct Declaration {
@@ -14,8 +15,8 @@ impl Declaration {
 }
 
 impl Node for Declaration {
-	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> Product {
-		let reference = engine.new_undefined();
+	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> Product<'a> {
+		let reference = Reference::new_undefined();
 		engine.new_variable(&self.identifier, reference);
 		return Product::new(reference);
 	}

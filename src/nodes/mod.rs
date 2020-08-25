@@ -37,28 +37,29 @@ pub mod r#break;
 pub mod r#continue;
 
 pub mod build;
-use crate::runtime::{ Engine, Reference };
+use crate::runtime::engine::Engine;
+use crate::runtime::reference::Reference;
 
 pub use crate::node::Node as SyntaxNode;
 
 pub trait Node {
-	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> Product;
+	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> Product<'a>;
 }
 
-pub struct Product {
-	pub reference: Reference,
+pub struct Product<'a> {
+	pub reference: Reference<'a>,
 	pub control: Option<Control>,
 }
 
-impl Product {
-	pub fn new(reference: Reference) -> Self {
+impl<'a> Product<'a> {
+	pub fn new(reference: Reference<'a>) -> Self {
 		return Self {
 			reference,
 			control: None
 		};
 	}
 
-	pub fn new_control(reference: Reference, control: Control) -> Self {
+	pub fn new_control(reference: Reference<'a>, control: Control) -> Self {
 		return Self {
 			reference,
 			control: Some(control),

@@ -1,5 +1,5 @@
 use super::expression::Expression;
-use crate::runtime::Engine;
+use crate::runtime::engine::Engine;
 use super::{ Node, Product, Control };
 
 pub struct While {
@@ -17,11 +17,11 @@ impl While {
 }
 
 impl Node for While {
-	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> Product {
+	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> Product<'a> {
 		let mut array = Vec::new();
 		while {
 			let reference = value!(self.condition.execute(engine));
-			*engine.get_cast_boolean(engine.read(reference))
+			*reference.object_ref().get_cast_boolean(engine)
 		} {
 			let product = self.body.execute(engine);
 			match &product.control {

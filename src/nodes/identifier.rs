@@ -1,5 +1,5 @@
 use crate::nodes::{ Node, Product };
-use crate::runtime::Engine;
+use crate::runtime::engine::Engine;
 
 pub struct Identifier {
 	identifier: Box<str>,
@@ -14,7 +14,7 @@ impl Identifier {
 }
 
 impl Node for Identifier {
-	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> Product {
+	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> Product<'a> {
 		return Product::new(engine.get_variable(&self.identifier));
 	}
 }

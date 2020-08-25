@@ -1,4 +1,4 @@
-use crate::runtime::Engine;
+use crate::runtime::engine::Engine;
 use super::{ Node, Product, Control };
 use super::expression::Expression;
 
@@ -19,11 +19,11 @@ impl ForIn {
 }
 
 impl Node for ForIn {
-	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> Product {
+	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> Product<'a> {
 		let mut array = Vec::new();
 		for element in {
 			let reference = value!(self.expression.execute(engine));
-			engine.get_cast_array(engine.read(reference)).clone()
+			reference.object_ref().get_cast_array(engine).clone()
 		} {
 			engine.new_variable(&self.identifier, element);
 			let product = self.body.execute(engine);
