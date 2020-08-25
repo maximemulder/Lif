@@ -31,7 +31,7 @@ impl<'a> Environment<'a> {
 
 impl<'a> Engine<'a> {
 	fn create_class(&mut self) -> Value<'a> {
-		return Value::create(self.environment.class, Data::Class(Class::new(Some(self.environment.object))));
+		return Value::new(self.environment.class, Data::Class(Class::new(Some(self.environment.object))));
 	}
 
 	pub fn new_variable_primitive(&mut self, name: &str, callback: &'a dyn Fn(&mut Engine<'a>, Vec<Reference<'a>>) -> Reference<'a>) {

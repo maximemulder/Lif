@@ -1,6 +1,5 @@
 use crate::runtime::value::Value;
 
-#[derive(Clone,Copy)]
 pub struct ReferenceObject<'a> {
 	value: Value<'a>,
 }
