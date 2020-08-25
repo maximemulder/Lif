@@ -1,21 +1,15 @@
 use crate::runtime::value::{ Value, ValueObject };
 
 #[derive(Clone,Copy)]
-pub struct Reference<'a> {
+pub struct ReferenceObject<'a> {
 	value: Value<'a>,
 }
 
-impl<'a> Reference<'a> {
+impl<'a> ReferenceObject<'a> {
 	pub fn new(value: Value<'a>) -> Self {
 		return Self {
 			value,
 		}
-	}
-
-	pub fn new_undefined() -> Self {
-		return Self {
-			value: Value::new_undefined(),
-		};
 	}
 
 	pub fn value_ref(&self) -> &Value<'a> {
