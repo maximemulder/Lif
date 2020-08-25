@@ -24,7 +24,6 @@ impl Node for Operation {
 		let mut left  = value!(self.left.execute(engine));
 		let right = value!(self.right.execute(engine));
 		if self.operator.to_string() == "=" {
-			println!("{}", self.operator);
 			*left.value_mut() = *right.value_ref();
 			return Product::new(Reference::new_undefined());
 		}
