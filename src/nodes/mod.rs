@@ -37,7 +37,8 @@ pub mod r#break;
 pub mod r#continue;
 
 pub mod build;
-use crate::runtime::{ Engine, Reference };
+use crate::runtime::engine::Engine;
+use crate::runtime::reference::Reference;
 
 pub use crate::node::Node as SyntaxNode;
 

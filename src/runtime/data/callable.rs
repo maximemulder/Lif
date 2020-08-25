@@ -1,6 +1,7 @@
 use crate::nodes::{ block::Block, Control };
 use crate::nodes::Node;
-use crate::runtime::{ Engine, Reference };
+use crate::runtime::engine::Engine;
+use crate::runtime::reference::Reference;
 
 pub trait Callable<'a> {
 	fn call(&self, engine: &mut Engine<'a>, arguments: Vec<Reference<'a>>) -> Reference<'a>;

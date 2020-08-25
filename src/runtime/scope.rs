@@ -1,4 +1,4 @@
-use crate::runtime::Reference;
+use crate::runtime::reference::Reference;
 use std::collections::HashMap;
 
 pub struct Scope<'a> {

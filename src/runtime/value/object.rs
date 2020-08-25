@@ -1,20 +1,14 @@
-pub mod callable;
-pub mod class;
-pub mod data;
-pub mod instance;
+use crate::runtime::data::{ Callable, Class, Data, Instance };
+use crate::runtime::engine::Engine;
+use crate::runtime::reference::Reference;
+use crate::runtime::value::Value;
 
-use crate::runtime::{ Engine, Reference, Value };
-use data::Data;
-use class::Class;
-use callable::Callable;
-use instance::Instance;
-
-pub struct Object<'a> {
+pub struct ValueObject<'a> {
 	pub class: Value<'a>,
 	data: Data<'a>,
 }
 
-impl<'a> Object<'a> {
+impl<'a> ValueObject<'a> {
 	pub fn new(class: Value<'a>, data: Data<'a>) -> Self {
 		return Self {
 			class,
@@ -75,7 +69,7 @@ macro_rules! data_mut {
 	};
 }
 
-impl<'a> Object<'a> {
+impl<'a> ValueObject<'a> {
 	pub fn data_array(&self) -> &Vec<Reference<'a>> {
 		data!(self, Array);
 	}

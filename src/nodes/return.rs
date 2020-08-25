@@ -1,4 +1,5 @@
-use crate::runtime::{ Engine, Reference };
+use crate::runtime::engine::Engine;
+use crate::runtime::reference::Reference;
 use super::{ Node, Product, Control };
 use super::expression::Expression;
 

@@ -1,11 +1,9 @@
 use crate::nodes::block::Block;
-use super::scope::Scope;
-use super::{ Reference, Value };
-use super::environment::Environment;
-use super::object::data::Data;
-use super::object::callable::{ Function, Primitive };
-use super::object::instance::Instance;
-use super::object::class::Class;
+use crate::runtime::data::{ Class, Data, Function, Instance, Primitive };
+use crate::runtime::environment::Environment;
+use crate::runtime::reference::Reference;
+use crate::runtime::scope::Scope;
+use crate::runtime::value::Value;
 
 pub struct Engine<'a> {
 	pub objects: Vec<*const Value<'a>>,

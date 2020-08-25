@@ -1,6 +1,7 @@
-use crate::runtime::{ Engine, Reference, Value };
-use crate::runtime::object::data::Data;
-use crate::runtime::object::class::Class;
+use crate::runtime::data::{ Class, Data };
+use crate::runtime::engine::Engine;
+use crate::runtime::reference::Reference;
+use crate::runtime::value::Value;
 
 pub struct Environment<'a> {
 	pub array:    Value<'a>,

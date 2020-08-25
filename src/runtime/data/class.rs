@@ -1,4 +1,6 @@
-use crate::runtime::{ Engine, Value, Reference };
+use crate::runtime::engine::Engine;
+use crate::runtime::reference::Reference;
+use crate::runtime::value::Value;
 use std::collections::HashMap;
 
 pub struct Class<'a> {

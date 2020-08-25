@@ -1,7 +1,12 @@
-use crate::runtime::{ Reference };
-use super::class::Class;
-use super::callable::Callable;
-use super::instance::Instance;
+mod callable;
+mod class;
+mod instance;
+
+pub use class::Class;
+pub use callable::{ Callable, Function, Primitive };
+pub use instance::Instance;
+
+use crate::runtime::reference::Reference;
 
 pub enum Data<'a> {
 	Array(Vec<Reference<'a>>),

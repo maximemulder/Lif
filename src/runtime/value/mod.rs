@@ -1,17 +1,20 @@
-use crate::runtime::Object;
-use crate::runtime::object::data::Data;
+mod object;
+
+pub use object::ValueObject;
+
+use crate::runtime::data::Data;
 
 #[derive(Clone,Copy,Eq,PartialEq)]
 pub struct Value<'a> {
-	object: *mut Object<'a>,
+	object: *mut ValueObject<'a>,
 }
 
 impl<'a> Value<'a> {
 	pub fn create(class: Value<'a>, data: Data<'a>) -> Self {
-		return Self::new(Box::into_raw(Box::new(Object::new(class, data))));
+		return Self::new(Box::into_raw(Box::new(ValueObject::new(class, data))));
 	}
 
-	pub fn new(object: *mut Object<'a>) -> Self {
+	pub fn new(object: *mut ValueObject<'a>) -> Self {
 		return Self {
 			object,
 		}
@@ -23,11 +26,11 @@ impl<'a> Value<'a> {
 		};
 	}
 
-	pub fn object_ref(&self) -> &Object<'a> {
+	pub fn object_ref(&self) -> &ValueObject<'a> {
 		return unsafe { self.object.as_ref().unwrap() };
 	}
 
-	pub fn object_mut(&mut self) -> &mut Object<'a> {
+	pub fn object_mut(&mut self) -> &mut ValueObject<'a> {
 		return unsafe { self.object.as_mut().unwrap() };
 	}
 }
