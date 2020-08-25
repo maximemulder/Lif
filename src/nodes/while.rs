@@ -21,7 +21,7 @@ impl Node for While {
 		let mut array = Vec::new();
 		while {
 			let reference = value!(self.condition.execute(engine));
-			*reference.object_ref().get_cast_boolean(engine)
+			*reference.value_ref().get_cast_boolean(engine)
 		} {
 			let product = self.body.execute(engine);
 			match &product.control {

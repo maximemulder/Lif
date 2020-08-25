@@ -24,7 +24,7 @@ impl<'a> Class<'a> {
 		}
 
 		if let Some(parent) = self.parent {
-			return parent.object_ref().data_class().get_method(engine, name);
+			return parent.data_class().get_method(engine, name);
 		}
 
 		return None;

@@ -28,6 +28,6 @@ impl Node for Operation {
 			return Product::new(Reference::new_undefined());
 		}
 
-		return Product::new(engine.call(*(left.object_ref().get_method(engine, &self.operator).unwrap()).value_ref(), vec![left, right]));
+		return Product::new(engine.call(*(left.value_ref().get_method(engine, &self.operator).unwrap()).value_ref(), vec![left, right]));
 	}
 }

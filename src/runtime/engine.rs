@@ -83,11 +83,11 @@ impl<'a> Engine<'a> {
 
 	pub fn call_method(&mut self, reference: Reference<'a>, name: &str, mut arguments: Vec<Reference<'a>>) -> Reference<'a> {
 		arguments.insert(0, reference);
-		return self.call(*reference.object_ref().get_method(self, name).unwrap().value_ref(), arguments);
+		return self.call(*reference.value_ref().get_method(self, name).unwrap().value_ref(), arguments);
 	}
 
 	pub fn call_method_self(&mut self, reference: Reference<'a>, name: &str, arguments: Vec<Reference<'a>>) -> Reference<'a> {
-		return self.call(*reference.object_ref().get_method(self, name).unwrap().value_ref(), arguments);
+		return self.call(*reference.value_ref().get_method(self, name).unwrap().value_ref(), arguments);
 	}
 
 	pub fn call(&mut self, value: Value<'a>, mut arguments: Vec<Reference<'a>>) -> Reference<'a> {
@@ -96,7 +96,7 @@ impl<'a> Engine<'a> {
 			self.this = None;
 		}
 
-		let callable = value.object_ref().data_callable().duplicate();
+		let callable = value.data_callable().duplicate();
 		return callable.call(self, arguments);
 	}
 }

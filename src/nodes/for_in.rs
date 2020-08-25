@@ -23,7 +23,7 @@ impl Node for ForIn {
 		let mut array = Vec::new();
 		for element in {
 			let reference = value!(self.expression.execute(engine));
-			reference.object_ref().get_cast_array(engine).clone()
+			reference.value_ref().get_cast_array(engine).clone()
 		} {
 			engine.new_variable(&self.identifier, element);
 			let product = self.body.execute(engine);

@@ -43,11 +43,9 @@ impl<'a> ValueObject<'a> {
 	}
 
 	pub fn get_method(&self, engine: &Engine<'a>, name: &str) -> Option<Reference<'a>> {
-		return self.class.object_ref().data_class().get_method(engine, name);
+		return self.class.data_class().get_method(engine, name);
 	}
 }
-
-
 
 macro_rules! data {
 	( $this:expr, $variant:ident ) => {

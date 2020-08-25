@@ -3,6 +3,7 @@ mod object;
 pub use object::ValueObject;
 
 use crate::runtime::data::Data;
+use std::ops::{ Deref, DerefMut };
 
 #[derive(Clone,Copy,Eq,PartialEq)]
 pub struct Value<'a> {
@@ -25,12 +26,18 @@ impl<'a> Value<'a> {
 			object: std::ptr::null_mut(),
 		};
 	}
+}
 
-	pub fn object_ref(&self) -> &ValueObject<'a> {
+impl<'a> Deref for Value<'a> {
+    type Target = ValueObject<'a>;
+
+    fn deref(&self) -> &Self::Target {
 		return unsafe { self.object.as_ref().unwrap() };
-	}
+    }
+}
 
-	pub fn object_mut(&mut self) -> &mut ValueObject<'a> {
+impl<'a> DerefMut for Value<'a> {
+    fn deref_mut(&mut self) -> &mut Self::Target {
 		return unsafe { self.object.as_mut().unwrap() };
-	}
+    }
 }
