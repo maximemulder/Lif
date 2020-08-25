@@ -7,76 +7,66 @@ use crate::runtime::value::Value;
 
 pub struct Engine<'a> {
 	pub environment: Environment<'a>,
-	pub scopes: Vec<Scope<'a>>,
-	pub scope: usize,
-	pub references: Vec<Reference<'a>>,
-	pub values: Vec<Value<'a>>,
-	pub this: Option<Reference<'a>>,
+	pub scopes:      Vec<Scope<'a>>,
+	pub references:  Vec<Reference<'a>>,
+	pub values:      Vec<Value<'a>>,
+	pub scope:       Scope<'a>,
+	pub this:        Option<Reference<'a>>,
 }
 
 impl<'a> Engine<'a> {
 	pub fn new() -> Self {
 		let mut engine = Self {
 			environment: Environment::new(),
-			scopes: Vec::new(),
-			scope: 0,
-			references: Vec::new(),
-			values: Vec::new(),
-			this: None,
+			scopes:      Vec::new(),
+			references:  Vec::new(),
+			values:      Vec::new(),
+			scope:       Scope::new(),
+			this:        None,
 		};
 
-		engine.scopes.push(Scope::new());
+		engine.scopes.push(engine.scope);
 		engine.populate();
 
 		return engine;
 	}
 
-	pub fn get_scope(&self) -> &Scope<'a> {
-		return &self.scopes[self.scope];
-	}
-
-	pub fn get_scope_mut(&mut self) -> &mut Scope<'a> {
-		return &mut self.scopes[self.scope];
-	}
-
 	pub fn push_scope(&mut self) {
-		let index = self.scope;
-		self.scopes.push(Scope::new_child(index));
-		self.scope = self.scopes.len() - 1;
+		self.scopes.push(Scope::new_child(self.scope));
+		self.scope = self.scopes[self.scopes.len() - 1];
 	}
 
 	pub fn pop_scope(&mut self) {
-		if let Some(parent) = self.scopes[self.scope].parent {
+		if let Some(parent) = self.scope.parent {
 			self.scope = parent;
 		} else {
 			panic!();
 		}
 	}
 
-	pub fn push_frame(&mut self, frame: usize) -> usize {
+	pub fn push_frame(&mut self, frame: Scope<'a>) -> Scope<'a> {
 		let scope = self.scope;
 		self.scope = frame;
 		return scope;
 	}
 
-	pub fn pop_frame(&mut self, frame: usize) {
+	pub fn pop_frame(&mut self, frame: Scope<'a>) {
 		self.scope = frame;
 	}
 
 	pub fn new_variable(&mut self, name: &str, reference: Reference<'a>) {
-		self.scopes[self.scope].add_variable(name, reference);
+		self.scope.add_variable(name, reference);
 	}
 
 	pub fn get_variable(&self, name: &str) -> Reference<'a> {
-		let index = self.scope;
-		let mut scope = &self.scopes[index];
+		let mut scope = self.scope;
 		loop {
 			if let Some(object) = scope.get_variable(name) {
 				return object;
 			}
 
 			if let Some(parent) = scope.parent {
-				scope = &self.scopes[parent];
+				scope = parent;
 			} else {
 				panic!();
 			}

@@ -2,6 +2,7 @@ use crate::nodes::{ block::Block, Control };
 use crate::nodes::Node;
 use crate::runtime::engine::Engine;
 use crate::runtime::reference::Reference;
+use crate::runtime::scope::Scope;
 
 pub trait Callable<'a> {
 	fn call(&self, engine: &mut Engine<'a>, arguments: Vec<Reference<'a>>) -> Reference<'a>;
@@ -33,13 +34,13 @@ impl<'a> Callable<'a> for Primitive<'a> {
 
 #[derive(Clone)]
 pub struct Function<'a> {
-	scope: usize,
+	scope: Scope<'a>,
 	parameters: &'a Vec<Box<str>>,
 	block: &'a Block,
 }
 
 impl<'a> Function<'a> {
-	pub fn new(scope: usize, parameters: &'a Vec<Box<str>>, block: &'a Block) -> Self {
+	pub fn new(scope: Scope<'a>, parameters: &'a Vec<Box<str>>, block: &'a Block) -> Self {
 		return Self {
 			scope,
 			parameters,

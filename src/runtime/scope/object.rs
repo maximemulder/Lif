@@ -1,12 +1,13 @@
 use crate::runtime::reference::Reference;
+use crate::runtime::scope::Scope;
 use std::collections::HashMap;
 
-pub struct Scope<'a> {
-	pub parent: Option<usize>,
+pub struct ScopeObject<'a> {
+	pub parent: Option<Scope<'a>>,
 	variables: HashMap<String, Reference<'a>>,
 }
 
-impl<'a> Scope<'a> {
+impl<'a> ScopeObject<'a> {
 	pub fn new() -> Self {
 		return Self {
 			parent: None,
@@ -14,9 +15,9 @@ impl<'a> Scope<'a> {
 		};
 	}
 
-	pub fn new_child(parent: usize) -> Self {
+	pub fn new_child(scope: Scope<'a>) -> Self {
 		return Self {
-			parent: Some(parent),
+			parent: Some(scope),
 			variables: HashMap::new(),
 		};
 	}
