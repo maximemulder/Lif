@@ -294,52 +294,31 @@ fn integer_to_string<'a>(engine: &mut Engine<'a>, arguments: Vec<Reference<'a>>)
 }
 
 fn integer_comparison<'a>(engine: &mut Engine<'a>, arguments: Vec<Reference<'a>>) -> Reference<'a> {
-	return engine.new_boolean(
-		*arguments[0].value_ref().data_integer() ==
-		*arguments[1].value_ref().data_integer()
-	);
+	return engine.new_boolean(*arguments[0].value_ref().data_integer() == *arguments[1].value_ref().data_integer());
 }
 
 fn integer_lesser<'a>(engine: &mut Engine<'a>, arguments: Vec<Reference<'a>>) -> Reference<'a> {
-	return engine.new_boolean(
-		*arguments[0].value_ref().data_integer() <
-		*arguments[1].value_ref().data_integer()
-	);
+	return engine.new_boolean(*arguments[0].value_ref().data_integer() < *arguments[1].value_ref().data_integer());
 }
 
 fn integer_addition<'a>(engine: &mut Engine<'a>, arguments: Vec<Reference<'a>>) -> Reference<'a> {
-	return engine.new_integer(
-		*arguments[0].value_ref().data_integer() +
-		*arguments[1].value_ref().data_integer()
-	);
+	return engine.new_integer(*arguments[0].value_ref().data_integer() + *arguments[1].value_ref().data_integer());
 }
 
 fn integer_subtraction<'a>(engine: &mut Engine<'a>, arguments: Vec<Reference<'a>>) -> Reference<'a> {
-	return engine.new_integer(
-		*arguments[0].value_ref().data_integer() +
-		*arguments[1].value_ref().data_integer()
-	);
+	return engine.new_integer(*arguments[0].value_ref().data_integer() + *arguments[1].value_ref().data_integer());
 }
 
 fn integer_multiplication<'a>(engine: &mut Engine<'a>, arguments: Vec<Reference<'a>>) -> Reference<'a> {
-	return engine.new_integer(
-		*arguments[0].value_ref().data_integer() +
-		*arguments[1].value_ref().data_integer()
-	);
+	return engine.new_integer(*arguments[0].value_ref().data_integer() + *arguments[1].value_ref().data_integer());
 }
 
 fn integer_division<'a>(engine: &mut Engine<'a>, arguments: Vec<Reference<'a>>) -> Reference<'a> {
-	return engine.new_integer(
-		*arguments[0].value_ref().data_integer() /
-		*arguments[1].value_ref().data_integer()
-	);
+	return engine.new_integer(*arguments[0].value_ref().data_integer() / *arguments[1].value_ref().data_integer());
 }
 
 fn integer_remainder<'a>(engine: &mut Engine<'a>, arguments: Vec<Reference<'a>>) -> Reference<'a> {
-	return engine.new_integer(
-		*arguments[0].value_ref().data_integer() %
-		*arguments[1].value_ref().data_integer()
-	);
+	return engine.new_integer(*arguments[0].value_ref().data_integer() % *arguments[1].value_ref().data_integer());
 }
 
 fn object_comparison<'a>(engine: &mut Engine<'a>, arguments: Vec<Reference<'a>>) -> Reference<'a> {
@@ -354,10 +333,7 @@ fn object_difference<'a>(engine: &mut Engine<'a>, arguments: Vec<Reference<'a>>)
 fn object_greater<'a>(engine: &mut Engine<'a>, arguments: Vec<Reference<'a>>) -> Reference<'a> {
 	let left  = engine.call_method_self(arguments[0], "<", arguments.clone());
 	let right = engine.call_method_self(arguments[0], "==", arguments.clone());
-	return engine.new_boolean(
-		!left.value_ref().data_boolean() &&
-		!right.value_ref().data_boolean()
-	);
+	return engine.new_boolean(!left.value_ref().data_boolean() && !right.value_ref().data_boolean());
 }
 
 fn object_greater_equal<'a>(engine: &mut Engine<'a>, arguments: Vec<Reference<'a>>) -> Reference<'a> {
@@ -368,10 +344,7 @@ fn object_greater_equal<'a>(engine: &mut Engine<'a>, arguments: Vec<Reference<'a
 fn object_lesser_equal<'a>(engine: &mut Engine<'a>, arguments: Vec<Reference<'a>>) -> Reference<'a> {
 	let left  = engine.call_method_self(arguments[0], "<", arguments.clone());
 	let right = engine.call_method_self(arguments[0], "==", arguments.clone());
-	return engine.new_boolean(
-		*left.value_ref().data_boolean() ||
-		*right.value_ref().data_boolean()
-	);
+	return engine.new_boolean(*left.value_ref().data_boolean() || *right.value_ref().data_boolean());
 }
 
 fn object_chain<'a>(engine: &mut Engine<'a>, arguments: Vec<Reference<'a>>) -> Reference<'a> {
@@ -391,17 +364,11 @@ fn string_to_string<'a>(_: &mut Engine<'a>, arguments: Vec<Reference<'a>>) -> Re
 }
 
 fn string_comparison<'a>(engine: &mut Engine<'a>, arguments: Vec<Reference<'a>>) -> Reference<'a> {
-	return engine.new_boolean(
-		arguments[0].value_ref().data_string() ==
-		arguments[1].value_ref().data_string()
-	);
+	return engine.new_boolean(arguments[0].value_ref().data_string() == arguments[1].value_ref().data_string());
 }
 
 fn string_concatenation<'a>(engine: &mut Engine<'a>, arguments: Vec<Reference<'a>>) -> Reference<'a> {
 	let left  = arguments[0];
 	let right = engine.call_method(arguments[1], "to_string", Vec::new());
-	return engine.new_string(format!("{}{}",
-		left.value_ref().data_string(),
-		right.value_ref().data_string()
-	));
+	return engine.new_string(format!("{}{}", left.value_ref().data_string(), right.value_ref().data_string()));
 }
