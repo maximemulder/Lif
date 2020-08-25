@@ -129,7 +129,7 @@ impl<'a> Engine<'a> {
 	}
 }
 
-fn primitive_assert<'a>(engine: &mut Engine<'a>, arguments: Vec<Reference<'a>>) -> Reference<'a> {
+fn primitive_assert<'a>(_: &mut Engine<'a>, arguments: Vec<Reference<'a>>) -> Reference<'a> {
 	if !arguments[0].object_ref().data_boolean() {
 		panic!();
 	}
@@ -178,19 +178,19 @@ fn array_copy<'a>(engine: &mut Engine<'a>, arguments: Vec<Reference<'a>>) -> Ref
 	return engine.new_array(arguments[0].object_ref().data_array().clone());
 }
 
-fn array_append<'a>(engine: &mut Engine<'a>, mut arguments: Vec<Reference<'a>>) -> Reference<'a> {
+fn array_append<'a>(_: &mut Engine<'a>, mut arguments: Vec<Reference<'a>>) -> Reference<'a> {
 	let reference = arguments[1].clone();
 	arguments[0].object_mut().data_array_mut().push(reference);
 	return Reference::new_undefined();
 }
 
-fn array_prepend<'a>(engine: &mut Engine<'a>, mut arguments: Vec<Reference<'a>>) -> Reference<'a> {
+fn array_prepend<'a>(_: &mut Engine<'a>, mut arguments: Vec<Reference<'a>>) -> Reference<'a> {
 	let reference = arguments[1].clone();
 	arguments[0].object_mut().data_array_mut().insert(0, reference);
 	return Reference::new_undefined();
 }
 
-fn array_insert<'a>(engine: &mut Engine<'a>, mut arguments: Vec<Reference<'a>>) -> Reference<'a> {
+fn array_insert<'a>(_: &mut Engine<'a>, mut arguments: Vec<Reference<'a>>) -> Reference<'a> {
 	let index = *arguments[1].object_ref().data_integer();
 	let element = arguments[2].clone();
 	arguments[0].object_mut().data_array_mut().insert(index, element);
@@ -198,13 +198,13 @@ fn array_insert<'a>(engine: &mut Engine<'a>, mut arguments: Vec<Reference<'a>>) 
 	return Reference::new_undefined();
 }
 
-fn array_remove<'a>(engine: &mut Engine<'a>, mut arguments: Vec<Reference<'a>>) -> Reference<'a> {
+fn array_remove<'a>(_: &mut Engine<'a>, mut arguments: Vec<Reference<'a>>) -> Reference<'a> {
 	let index = *arguments[1].object_ref().data_integer();
 	arguments[0].object_mut().data_array_mut().remove(index);
 	return Reference::new_undefined();
 }
 
-fn array_access<'a>(engine: &mut Engine<'a>, arguments: Vec<Reference<'a>>) -> Reference<'a> {
+fn array_access<'a>(_: &mut Engine<'a>, arguments: Vec<Reference<'a>>) -> Reference<'a> {
 	return arguments[0].object_ref().data_array()[*arguments[1].object_ref().data_integer()];
 }
 
