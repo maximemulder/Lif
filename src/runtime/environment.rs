@@ -31,7 +31,7 @@ impl<'a> Environment<'a> {
 
 impl<'a> Engine<'a> {
 	fn create_class(&mut self) -> Value<'a> {
-		return Value::new(self.environment.class, Data::Class(Class::new(Some(self.environment.object))));
+		return self.new_value(self.environment.class, Data::Class(Class::new(Some(self.environment.object))));
 	}
 
 	pub fn new_variable_primitive(&mut self, name: &str, callback: &'a dyn Fn(&mut Engine<'a>, Vec<Reference<'a>>) -> Reference<'a>) {
@@ -40,7 +40,8 @@ impl<'a> Engine<'a> {
 	}
 
 	pub fn new_variable_value(&mut self, name: &str, value: Value<'a>) {
-		self.new_variable(name, Reference::new(value));
+		let reference = self.new_reference(value);
+		self.new_variable(name, reference);
 	}
 
 	fn new_method_primitive(&mut self, mut value: Value<'a>, name: &str, callback: &'a dyn Fn(&mut Engine<'a>, Vec<Reference<'a>>) -> Reference<'a>) {
@@ -129,12 +130,12 @@ impl<'a> Engine<'a> {
 	}
 }
 
-fn primitive_assert<'a>(_: &mut Engine<'a>, arguments: Vec<Reference<'a>>) -> Reference<'a> {
+fn primitive_assert<'a>(engine: &mut Engine<'a>, arguments: Vec<Reference<'a>>) -> Reference<'a> {
 	if !arguments[0].value_ref().data_boolean() {
 		panic!();
 	}
 
-	return Reference::new_undefined();
+	return engine.new_undefined();
 }
 
 fn primitive_error<'a>(engine: &mut Engine<'a>, arguments: Vec<Reference<'a>>) -> Reference<'a> {
@@ -154,7 +155,7 @@ fn primitive_new<'a>(engine: &mut Engine<'a>, arguments: Vec<Reference<'a>>) -> 
 fn primitive_print<'a>(engine: &mut Engine<'a>, arguments: Vec<Reference<'a>>) -> Reference<'a> {
 	let reference = engine.call_method(arguments[0], "to_string", Vec::new());
 	println!("{}", reference.value_ref().data_string());
-	return Reference::new_undefined();
+	return engine.new_undefined();
 }
 
 fn array_to_string<'a>(engine: &mut Engine<'a>, arguments: Vec<Reference<'a>>) -> Reference<'a> {
@@ -178,30 +179,30 @@ fn array_copy<'a>(engine: &mut Engine<'a>, arguments: Vec<Reference<'a>>) -> Ref
 	return engine.new_array(arguments[0].value_ref().data_array().clone());
 }
 
-fn array_append<'a>(_: &mut Engine<'a>, mut arguments: Vec<Reference<'a>>) -> Reference<'a> {
+fn array_append<'a>(engine: &mut Engine<'a>, mut arguments: Vec<Reference<'a>>) -> Reference<'a> {
 	let reference = arguments[1].clone();
 	arguments[0].value_mut().data_array_mut().push(reference);
-	return Reference::new_undefined();
+	return engine.new_undefined();
 }
 
-fn array_prepend<'a>(_: &mut Engine<'a>, mut arguments: Vec<Reference<'a>>) -> Reference<'a> {
+fn array_prepend<'a>(engine: &mut Engine<'a>, mut arguments: Vec<Reference<'a>>) -> Reference<'a> {
 	let reference = arguments[1].clone();
 	arguments[0].value_mut().data_array_mut().insert(0, reference);
-	return Reference::new_undefined();
+	return engine.new_undefined();
 }
 
-fn array_insert<'a>(_: &mut Engine<'a>, mut arguments: Vec<Reference<'a>>) -> Reference<'a> {
+fn array_insert<'a>(engine: &mut Engine<'a>, mut arguments: Vec<Reference<'a>>) -> Reference<'a> {
 	let index = *arguments[1].value_ref().data_integer();
 	let element = arguments[2].clone();
 	arguments[0].value_mut().data_array_mut().insert(index, element);
 
-	return Reference::new_undefined();
+	return engine.new_undefined();
 }
 
-fn array_remove<'a>(_: &mut Engine<'a>, mut arguments: Vec<Reference<'a>>) -> Reference<'a> {
+fn array_remove<'a>(engine: &mut Engine<'a>, mut arguments: Vec<Reference<'a>>) -> Reference<'a> {
 	let index = *arguments[1].value_ref().data_integer();
 	arguments[0].value_mut().data_array_mut().remove(index);
-	return Reference::new_undefined();
+	return engine.new_undefined();
 }
 
 fn array_access<'a>(_: &mut Engine<'a>, arguments: Vec<Reference<'a>>) -> Reference<'a> {
@@ -228,7 +229,7 @@ fn class_chain<'a>(engine: &mut Engine<'a>, mut arguments: Vec<Reference<'a>>) -
 		return method;
 	}
 
-	let member = Reference::new_undefined();
+	let member = engine.new_undefined();
 	let class = this.data_class_mut();
 	return if let Some(&member) = class.statics.get(&name) {
 		member
@@ -239,7 +240,7 @@ fn class_chain<'a>(engine: &mut Engine<'a>, mut arguments: Vec<Reference<'a>>) -
 }
 
 fn class_access<'a>(engine: &mut Engine<'a>, _: Vec<Reference<'a>>) -> Reference<'a> {
-	return Reference::new(engine.environment.array);
+	return engine.new_reference(engine.environment.array);
 }
 
 fn function_to_string<'a>(engine: &mut Engine<'a>, _: Vec<Reference<'a>>) -> Reference<'a> {
@@ -277,7 +278,7 @@ fn instance_chain<'a>(engine: &mut Engine<'a>, mut arguments: Vec<Reference<'a>>
 		return method;
 	}
 
-	let member = Reference::new_undefined();
+	let member = engine.new_undefined();
 	let instance = this.data_instance_mut();
 	return if let Some(&member) = instance.attributes.get(&name) {
 		member

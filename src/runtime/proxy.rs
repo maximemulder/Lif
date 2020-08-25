@@ -4,23 +4,28 @@ use std::cmp::{ Eq, PartialEq };
 use std::marker::Copy;
 
 pub struct Proxy<T> {
-	pointer: *mut T,
-	flag: bool,
+	pointer: *mut Object<T>,
 }
 
 impl<T> Proxy<T> {
-	pub fn alloc(value: T) -> Self {
+	pub fn alloc(object: T) -> Self {
 		return Self {
-			pointer: Box::into_raw(Box::new(value)),
-			flag: true,
+			pointer: Box::into_raw(Box::new(Object::new(object))),
 		};
 	}
 
 	pub fn null() -> Self {
 		return Self {
 			pointer: std::ptr::null_mut(),
-			flag: true,
 		};
+	}
+
+	pub fn mark(proxy: &mut Proxy<T>) {
+		unsafe { proxy.pointer.as_mut().unwrap() }.flag = true;
+	}
+
+	pub fn reset(proxy: &mut Proxy<T>) {
+		unsafe { proxy.pointer.as_mut().unwrap() }.flag = false;
 	}
 }
 
@@ -28,13 +33,13 @@ impl<T> Deref for Proxy<T> {
     type Target = T;
 
     fn deref(&self) -> &Self::Target {
-		return unsafe { self.pointer.as_ref().unwrap() };
+		return &unsafe { self.pointer.as_ref().unwrap() }.object;
     }
 }
 
 impl<T> DerefMut for Proxy<T> {
     fn deref_mut(&mut self) -> &mut Self::Target {
-		return unsafe { self.pointer.as_mut().unwrap() };
+		return &mut unsafe { self.pointer.as_mut().unwrap() }.object;
     }
 }
 
@@ -50,9 +55,22 @@ impl<T> Clone for Proxy<T> {
     fn clone(&self) -> Self {
 		return Self {
 			pointer: self.pointer,
-			flag: true,
 		};
     }
 }
 
 impl<T> Copy for Proxy<T> {}
+
+struct Object<T> {
+	object: T,
+	flag: bool,
+}
+
+impl<T> Object<T> {
+	pub fn new(object: T) -> Self {
+		return Self {
+			object,
+			flag: false,
+		};
+	}
+}

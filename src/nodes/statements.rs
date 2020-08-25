@@ -1,5 +1,4 @@
 use crate::runtime::engine::Engine;
-use crate::runtime::reference::Reference;
 use super::statement::Statement;
 use super::{ Node, Product };
 
@@ -21,6 +20,6 @@ impl Node for Statements {
 			value!(statement.execute(engine));
 		}
 
-		return Product::new(Reference::new_undefined());
+		return Product::new(engine.new_undefined());
 	}
 }

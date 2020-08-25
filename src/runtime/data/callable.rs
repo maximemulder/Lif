@@ -62,7 +62,7 @@ impl<'a> Callable<'a> for Function<'a> {
 				Control::Break | Control::Continue => panic!(),
 				Control::Return => product.reference,
 			},
-			None => Reference::new_undefined(),
+			None => engine.new_undefined(),
 		};
 
 		engine.pop_frame(frame);

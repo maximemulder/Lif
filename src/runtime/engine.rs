@@ -6,21 +6,23 @@ use crate::runtime::scope::Scope;
 use crate::runtime::value::Value;
 
 pub struct Engine<'a> {
-	pub objects: Vec<*const Value<'a>>,
 	pub environment: Environment<'a>,
-	pub this: Option<Reference<'a>>,
 	pub scopes: Vec<Scope<'a>>,
 	pub scope: usize,
+	pub references: Vec<Reference<'a>>,
+	pub values: Vec<Value<'a>>,
+	pub this: Option<Reference<'a>>,
 }
 
 impl<'a> Engine<'a> {
 	pub fn new() -> Self {
 		let mut engine = Self {
-			objects: Vec::new(),
 			environment: Environment::new(),
-			this: None,
 			scopes: Vec::new(),
 			scope: 0,
+			references: Vec::new(),
+			values: Vec::new(),
+			this: None,
 		};
 
 		engine.scopes.push(Scope::new());
@@ -102,35 +104,60 @@ impl<'a> Engine<'a> {
 }
 
 impl<'a> Engine<'a> {
+	pub fn new_value(&mut self, class: Value<'a>, data: Data<'a>) -> Value<'a> {
+		let value = Value::new(class, data);
+		self.values.push(value);
+		return value;
+	}
+
+	pub fn new_undefined(&mut self) -> Reference<'a> {
+		let reference = Reference::new_undefined();
+		self.references.push(reference);
+		return reference;
+	}
+
+	pub fn new_reference(&mut self, value: Value<'a>) -> Reference<'a> {
+		let reference = Reference::new(value);
+		self.references.push(reference);
+		return reference;
+	}
+
+	pub fn new_reference_value(&mut self, class: Value<'a>, data: Data<'a>) -> Reference<'a> {
+		let value = self.new_value(class, data);
+		return self.new_reference(value);
+	}
+}
+
+impl<'a> Engine<'a> {
 	pub fn new_array(&mut self, elements: Vec<Reference<'a>>) -> Reference<'a> {
-		return Reference::new(Value::new(self.environment.class, Data::Array(elements)));
+		return self.new_reference_value(self.environment.class, Data::Array(elements));
 	}
 
 	pub fn new_boolean(&mut self, boolean: bool) -> Reference<'a> {
-		return Reference::new(Value::new(self.environment.boolean, Data::Boolean(boolean)));
+		return self.new_reference_value(self.environment.boolean, Data::Boolean(boolean));
 	}
 
 	pub fn new_class(&mut self) -> Reference<'a> {
-		return Reference::new(Value::new(self.environment.class, Data::Class(Class::new(Some(self.environment.object)))));
+		return self.new_reference_value(self.environment.class, Data::Class(Class::new(Some(self.environment.object))));
 	}
 
 	pub fn new_instance(&mut self, parent: Value<'a>) -> Reference<'a> {
-		return Reference::new(Value::new(parent, Data::Instance(Instance::new())));
+		return self.new_reference_value(parent, Data::Instance(Instance::new()));
 	}
 
 	pub fn new_integer(&mut self, integer: usize) -> Reference<'a> {
-		return Reference::new(Value::new(self.environment.integer, Data::Integer(integer)));
+		return self.new_reference_value(self.environment.integer, Data::Integer(integer));
 	}
 
 	pub fn new_function(&mut self, parameters: &'a Vec<Box<str>>, block: &'a Block) -> Reference<'a> {
-		return Reference::new(Value::new(self.environment.function, Data::Callable(Box::new(Function::new(self.scope, parameters, block)))));
+		return self.new_reference_value(self.environment.function, Data::Callable(Box::new(Function::new(self.scope, parameters, block))));
 	}
 
 	pub fn new_primitive(&mut self, callback: &'a dyn Fn(&mut Engine<'a>, Vec<Reference<'a>>) -> Reference<'a>) -> Reference<'a> {
-		return Reference::new(Value::new(self.environment.function, Data::Callable(Box::new(Primitive::new(callback)))));
+		return self.new_reference_value(self.environment.function, Data::Callable(Box::new(Primitive::new(callback))));
 	}
 
 	pub fn new_string(&mut self, string: String) -> Reference<'a> {
-		return Reference::new(Value::new(self.environment.string, Data::String(string)));
+		return self.new_reference_value(self.environment.string, Data::String(string));
 	}
 }

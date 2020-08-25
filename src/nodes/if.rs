@@ -1,5 +1,4 @@
 use crate::runtime::engine::Engine;
-use crate::runtime::reference::Reference;
 use super::expression::Expression;
 use super::{ Node, Product };
 
@@ -29,7 +28,7 @@ impl Node for If {
 		} else if let Some(r#else) = &self.r#else {
 			r#else.execute(engine)
 		} else {
-			return Product::new(Reference::new_undefined());
+			return Product::new(engine.new_undefined());
 		}
 	}
 }

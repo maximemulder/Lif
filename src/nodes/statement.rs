@@ -1,5 +1,4 @@
 use crate::runtime::engine::Engine;
-use crate::runtime::reference::Reference;
 use super::expression::Expression;
 use super::{ Node, Product };
 
@@ -18,6 +17,6 @@ impl Statement {
 impl Node for Statement {
 	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> Product<'a> {
 		value!(self.expression.execute(engine));
-		return Product::new(Reference::new_undefined());
+		return Product::new(engine.new_undefined());
 	}
 }

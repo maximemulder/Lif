@@ -1,5 +1,4 @@
 use crate::runtime::engine::Engine;
-use crate::runtime::reference::Reference;
 use super::expression::Expression;
 use super::statements::Statements;
 use super::{ Node, Product };
@@ -25,7 +24,7 @@ impl Node for Block {
 		let product = Product::new(if let Some(expression) = &self.expression {
 			value!(expression.execute(engine))
 		} else {
-			Reference::new_undefined()
+			engine.new_undefined()
 		});
 
 		engine.pop_scope();
