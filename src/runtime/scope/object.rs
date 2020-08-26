@@ -36,7 +36,7 @@ impl<'a> ScopeObject<'a> {
 	}
 }
 
-impl Visitable for Scope<'_> {
+impl Visitable for ScopeObject<'_> {
 	fn visit(&mut self) {
 		if let Some(parent) = &mut self.parent {
 			parent.visit();

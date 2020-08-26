@@ -15,7 +15,6 @@ impl Expression {
 
 impl Node for Expression {
 	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> Product<'a> {
-		engine.collect();
 		return self.node.execute(engine);
 	}
 }

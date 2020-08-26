@@ -16,6 +16,7 @@ impl Statement {
 
 impl Node for Statement {
 	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> Product<'a> {
+		engine.collect();
 		value!(self.expression.execute(engine));
 		return Product::new(engine.new_undefined());
 	}
