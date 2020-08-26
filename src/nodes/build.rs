@@ -101,7 +101,7 @@ fn block(node: &SyntaxNode) -> Block {
 }
 
 fn r#if(node: &SyntaxNode) -> If {
-	return If::new(expression(&node.children()[0]), then(&node.children()[1]), if let Some(child) = node.children().get(2) {
+	return If::new(expression(&node.children()[1]), then(&node.children()[2]), if let Some(child) = node.children().get(3) {
 		Some(r#else(child))
 	} else {
 		None
