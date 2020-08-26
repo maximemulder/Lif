@@ -1,5 +1,6 @@
 use crate::runtime::data::{ Class, Data };
 use crate::runtime::engine::Engine;
+use crate::runtime::proxy::Visitable;
 use crate::runtime::reference::Reference;
 use crate::runtime::value::Value;
 
@@ -29,8 +30,8 @@ impl<'a> Environment<'a> {
 	}
 }
 
-impl Environment<'_> {
-	pub fn visit(&mut self) {
+impl Visitable for Environment<'_> {
+	fn visit(&mut self) {
 		for class in [self.array, self.boolean, self.class, self.function, self.instance, self.integer, self.object, self.string].iter_mut() {
 			class.visit();
 		}

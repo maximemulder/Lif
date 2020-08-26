@@ -1,13 +1,13 @@
 use crate::nodes::{ block::Block, Control };
 use crate::nodes::Node;
 use crate::runtime::engine::Engine;
+use crate::runtime::proxy::Visitable;
 use crate::runtime::reference::Reference;
 use crate::runtime::scope::Scope;
 
-pub trait Callable<'a> {
+pub trait Callable<'a>: Visitable {
 	fn call(&self, engine: &mut Engine<'a>, arguments: Vec<Reference<'a>>) -> Reference<'a>;
 	fn duplicate(&self) -> Box<dyn Callable<'a> + 'a>;
-	fn visit(&mut self);
 }
 
 #[derive(Clone)]
@@ -31,7 +31,9 @@ impl<'a> Callable<'a> for Primitive<'a> {
 	fn duplicate(&self) -> Box<dyn Callable<'a> + 'a> {
 		return Box::new(self.clone());
 	}
+}
 
+impl Visitable for Primitive<'_> {
 	fn visit(&mut self) {}
 }
 
@@ -76,7 +78,9 @@ impl<'a> Callable<'a> for Function<'a> {
 	fn duplicate(&self) -> Box<dyn Callable<'a> + 'a> {
 		return Box::new(self.clone());
 	}
+}
 
+impl Visitable for Function<'_> {
 	fn visit(&mut self) {
 		self.scope.visit();
 	}

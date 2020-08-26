@@ -6,6 +6,7 @@ pub use class::Class;
 pub use callable::{ Callable, Function, Primitive };
 pub use instance::Instance;
 
+use crate::runtime::proxy::Visitable;
 use crate::runtime::reference::Reference;
 
 pub enum Data<'a> {
@@ -19,8 +20,8 @@ pub enum Data<'a> {
 	Null,
 }
 
-impl<'a> Data<'a> {
-	pub fn visit(&mut self) {
+impl Visitable for Data<'_> {
+	fn visit(&mut self) {
 		match self {
 			Data::Array(references)  => for reference in references.iter_mut() {
 				reference.visit();

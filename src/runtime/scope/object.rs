@@ -1,3 +1,4 @@
+use crate::runtime::proxy::Visitable;
 use crate::runtime::reference::Reference;
 use crate::runtime::scope::Scope;
 use std::collections::HashMap;
@@ -33,8 +34,10 @@ impl<'a> ScopeObject<'a> {
 	pub fn add_variable(&mut self, name: &str, reference: Reference<'a>) {
 		self.variables.insert(name.to_string(), reference);
 	}
+}
 
-	pub fn visit(&mut self) {
+impl Visitable for Scope<'_> {
+	fn visit(&mut self) {
 		if let Some(parent) = &mut self.parent {
 			parent.visit();
 		}

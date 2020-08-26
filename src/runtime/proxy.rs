@@ -3,6 +3,24 @@ use std::clone::Clone;
 use std::cmp::{ Eq, PartialEq };
 use std::marker::Copy;
 
+pub trait Visitable {
+	fn visit(&mut self);
+}
+
+struct Object<T> {
+	object: T,
+	flag: bool,
+}
+
+impl<T> Object<T> {
+	pub fn new(object: T) -> Self {
+		return Self {
+			object,
+			flag: false,
+		};
+	}
+}
+
 pub struct Proxy<T> {
 	pointer: *mut Object<T>,
 }
@@ -42,8 +60,15 @@ impl<T> Proxy<T> {
 				true
 			}
 		}
+	}
+}
 
-		// return unsafe { proxy.pointer.as_ref().unwrap() }.flag;
+impl<T: Visitable> Visitable for Proxy<T> {
+	fn visit(&mut self) {
+		if !Proxy::get_flag(self) {
+			Proxy::mark(self);
+			self.deref_mut().visit();
+		}
 	}
 }
 
@@ -78,17 +103,3 @@ impl<T> Clone for Proxy<T> {
 }
 
 impl<T> Copy for Proxy<T> {}
-
-struct Object<T> {
-	object: T,
-	flag: bool,
-}
-
-impl<T> Object<T> {
-	pub fn new(object: T) -> Self {
-		return Self {
-			object,
-			flag: false,
-		};
-	}
-}

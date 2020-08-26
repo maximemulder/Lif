@@ -1,5 +1,6 @@
 use crate::runtime::data::{ Callable, Class, Data, Instance };
 use crate::runtime::engine::Engine;
+use crate::runtime::proxy::Visitable;
 use crate::runtime::reference::Reference;
 use crate::runtime::value::Value;
 
@@ -45,8 +46,10 @@ impl<'a> ValueObject<'a> {
 	pub fn get_method(&self, engine: &Engine<'a>, name: &str) -> Option<Reference<'a>> {
 		return self.class.data_class().get_method(engine, name);
 	}
+}
 
-	pub fn visit(&mut self) {
+impl Visitable for ValueObject<'_> {
+	fn visit(&mut self) {
 		self.class.visit();
 		self.data.visit();
 	}

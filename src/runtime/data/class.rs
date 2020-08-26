@@ -1,4 +1,5 @@
 use crate::runtime::engine::Engine;
+use crate::runtime::proxy::Visitable;
 use crate::runtime::reference::Reference;
 use crate::runtime::value::Value;
 use std::collections::HashMap;
@@ -29,8 +30,10 @@ impl<'a> Class<'a> {
 
 		return None;
 	}
+}
 
-	pub fn visit(&mut self) {
+impl Visitable for Class<'_> {
+	fn visit(&mut self) {
 		if let Some(parent) = &mut self.parent {
 			parent.visit();
 		}

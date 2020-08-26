@@ -1,3 +1,4 @@
+use crate::runtime::proxy::Visitable;
 use crate::runtime::reference::Reference;
 use std::collections::HashMap;
 
@@ -11,8 +12,10 @@ impl Instance<'_> {
 			attributes: HashMap::new(),
 		};
 	}
+}
 
-	pub fn visit(&mut self) {
+impl Visitable for Instance<'_> {
+	fn visit(&mut self) {
 		for attribute in self.attributes.values_mut() {
 			attribute.visit();
 		}

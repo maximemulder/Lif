@@ -1,3 +1,4 @@
+use crate::runtime::proxy::Visitable;
 use crate::runtime::value::Value;
 
 pub struct ReferenceObject<'a> {
@@ -18,8 +19,10 @@ impl<'a> ReferenceObject<'a> {
 	pub fn value_mut(&mut self) -> &mut Value<'a> {
 		return &mut self.value;
 	}
+}
 
-	pub fn visit(&mut self) {
+impl Visitable for ReferenceObject<'_> {
+	fn visit(&mut self) {
 		self.value.visit();
 	}
 }

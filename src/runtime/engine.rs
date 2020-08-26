@@ -1,7 +1,7 @@
 use crate::nodes::block::Block;
 use crate::runtime::data::{ Class, Data, Function, Instance, Primitive };
 use crate::runtime::environment::Environment;
-use crate::runtime::proxy::Proxy;
+use crate::runtime::proxy::{ Proxy, Visitable };
 use crate::runtime::reference::Reference;
 use crate::runtime::scope::Scope;
 use crate::runtime::value::Value;
@@ -93,14 +93,6 @@ impl<'a> Engine<'a> {
 		return callable.call(self, arguments);
 	}
 
-	pub fn visit(&mut self) {
-		self.environment.visit();
-		self.scope.visit();
-		if let Some(this) = &mut self.this {
-			this.visit();
-		}
-	}
-
 	pub fn collect(&mut self) {
 		self.visit();
 
@@ -115,6 +107,16 @@ impl<'a> Engine<'a> {
 		self.values.drain_filter(|value| {
 			!Proxy::collect(value)
 		});
+	}
+}
+
+impl Visitable for Engine<'_> {
+	fn visit(&mut self) {
+		self.environment.visit();
+		self.scope.visit();
+		if let Some(this) = &mut self.this {
+			this.visit();
+		}
 	}
 }
 
