@@ -33,4 +33,14 @@ impl<'a> ScopeObject<'a> {
 	pub fn add_variable(&mut self, name: &str, reference: Reference<'a>) {
 		self.variables.insert(name.to_string(), reference);
 	}
+
+	pub fn visit(&mut self) {
+		if let Some(parent) = &mut self.parent {
+			parent.visit();
+		}
+
+		for variable in self.variables.values_mut() {
+			variable.visit();
+		}
+	}
 }

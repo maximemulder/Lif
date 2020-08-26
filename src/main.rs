@@ -3,6 +3,7 @@
 #![feature(new_uninit)]
 #![feature(maybe_uninit_ref)]
 #![feature(unsize)]
+#![feature(drain_filter)]
 
 mod element;
 mod elements;

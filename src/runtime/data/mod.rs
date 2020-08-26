@@ -18,3 +18,17 @@ pub enum Data<'a> {
 	String(String),
 	Null,
 }
+
+impl<'a> Data<'a> {
+	pub fn visit(&mut self) {
+		match self {
+			Data::Array(references)  => for reference in references.iter_mut() {
+				reference.visit();
+			},
+			Data::Callable(callable) => callable.visit(),
+			Data::Class(class)       => class.visit(),
+			Data::Instance(instance) => instance.visit(),
+			_ => (),
+		}
+	}
+}

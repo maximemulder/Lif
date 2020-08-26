@@ -29,4 +29,18 @@ impl<'a> Class<'a> {
 
 		return None;
 	}
+
+	pub fn visit(&mut self) {
+		if let Some(parent) = &mut self.parent {
+			parent.visit();
+		}
+
+		for r#static in self.statics.values_mut() {
+			r#static.visit();
+		}
+
+		for method in self.methods.values_mut() {
+			method.visit();
+		}
+	}
 }

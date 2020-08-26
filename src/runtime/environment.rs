@@ -29,6 +29,14 @@ impl<'a> Environment<'a> {
 	}
 }
 
+impl Environment<'_> {
+	pub fn visit(&mut self) {
+		for class in [self.array, self.boolean, self.class, self.function, self.instance, self.integer, self.object, self.string].iter_mut() {
+			class.visit();
+		}
+	}
+}
+
 impl<'a> Engine<'a> {
 	fn create_class(&mut self) -> Value<'a> {
 		return self.new_value(self.environment.class, Data::Class(Class::new(Some(self.environment.object))));

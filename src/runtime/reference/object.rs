@@ -18,4 +18,8 @@ impl<'a> ReferenceObject<'a> {
 	pub fn value_mut(&mut self) -> &mut Value<'a> {
 		return &mut self.value;
 	}
+
+	pub fn visit(&mut self) {
+		self.value.visit();
+	}
 }

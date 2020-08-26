@@ -7,6 +7,7 @@ use crate::runtime::scope::Scope;
 pub trait Callable<'a> {
 	fn call(&self, engine: &mut Engine<'a>, arguments: Vec<Reference<'a>>) -> Reference<'a>;
 	fn duplicate(&self) -> Box<dyn Callable<'a> + 'a>;
+	fn visit(&mut self);
 }
 
 #[derive(Clone)]
@@ -30,6 +31,8 @@ impl<'a> Callable<'a> for Primitive<'a> {
 	fn duplicate(&self) -> Box<dyn Callable<'a> + 'a> {
 		return Box::new(self.clone());
 	}
+
+	fn visit(&mut self) {}
 }
 
 #[derive(Clone)]
@@ -72,5 +75,9 @@ impl<'a> Callable<'a> for Function<'a> {
 
 	fn duplicate(&self) -> Box<dyn Callable<'a> + 'a> {
 		return Box::new(self.clone());
+	}
+
+	fn visit(&mut self) {
+		self.scope.visit();
 	}
 }

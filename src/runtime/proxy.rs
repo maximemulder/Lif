@@ -24,8 +24,26 @@ impl<T> Proxy<T> {
 		unsafe { proxy.pointer.as_mut().unwrap() }.flag = true;
 	}
 
-	pub fn reset(proxy: &mut Proxy<T>) {
-		unsafe { proxy.pointer.as_mut().unwrap() }.flag = false;
+	pub fn collect(proxy: &mut Proxy<T>) -> bool {
+		if Self::get_flag(proxy) {
+			unsafe { proxy.pointer.as_mut().unwrap() }.flag = false;
+			return true;
+		} else {
+			unsafe { Box::from_raw(proxy.pointer); };
+			return false;
+		}
+	}
+
+	pub fn get_flag(proxy: &Proxy<T>) -> bool {
+		unsafe {
+			return if let Some(thing) = proxy.pointer.as_ref() {
+				thing.flag
+			} else {
+				true
+			}
+		}
+
+		// return unsafe { proxy.pointer.as_ref().unwrap() }.flag;
 	}
 }
 

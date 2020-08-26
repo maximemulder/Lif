@@ -45,6 +45,11 @@ impl<'a> ValueObject<'a> {
 	pub fn get_method(&self, engine: &Engine<'a>, name: &str) -> Option<Reference<'a>> {
 		return self.class.data_class().get_method(engine, name);
 	}
+
+	pub fn visit(&mut self) {
+		self.class.visit();
+		self.data.visit();
+	}
 }
 
 macro_rules! data {
