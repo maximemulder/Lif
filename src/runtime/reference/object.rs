@@ -12,6 +12,10 @@ impl<'a> ReferenceObject<'a> {
 		}
 	}
 
+	pub fn value(&self) -> Value<'a> {
+		return self.value;
+	}
+
 	pub fn value_ref(&self) -> &Value<'a> {
 		return &self.value;
 	}

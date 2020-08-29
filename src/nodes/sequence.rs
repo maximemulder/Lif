@@ -23,12 +23,12 @@ impl Sequence {
 
 impl Node for Sequence {
 	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> Reference<'a> {
-		let reference = execute!(engine, &self.expression);
+		let value = execute!(engine, &self.expression).value();
 		let mut arguments = Vec::new();
 		for argument in self.expressions.iter() {
-			arguments.push(execute!(engine, argument));
+			arguments.push(execute!(engine, argument).value());
 		}
 
-		return engine.call(*reference.value_ref(), arguments);
+		return engine.call(value, arguments);
 	}
 }

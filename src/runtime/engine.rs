@@ -21,7 +21,7 @@ pub struct Engine<'a> {
 	pub values:      Vec<Value<'a>>,
 	pub scope:       Scope<'a>,
 	pub registries:  Vec<Vec<Reference<'a>>>,
-	pub this:        Option<Reference<'a>>,
+	pub this:        Option<Value<'a>>,
 	pub control:     Option<Control>,
 }
 
@@ -87,16 +87,16 @@ impl<'a> Engine<'a> {
 		}
 	}
 
-	pub fn call_method(&mut self, reference: Reference<'a>, name: &str, mut arguments: Vec<Reference<'a>>) -> Reference<'a> {
-		arguments.insert(0, reference);
-		return self.call(*reference.value_ref().get_method(self, name).unwrap().value_ref(), arguments);
+	pub fn call_method(&mut self, value: Value<'a>, name: &str, mut arguments: Vec<Value<'a>>) -> Reference<'a> {
+		arguments.insert(0, value);
+		return self.call(*value.get_method(self, name).unwrap().value_ref(), arguments);
 	}
 
-	pub fn call_method_self(&mut self, reference: Reference<'a>, name: &str, arguments: Vec<Reference<'a>>) -> Reference<'a> {
-		return self.call(*reference.value_ref().get_method(self, name).unwrap().value_ref(), arguments);
+	pub fn call_method_self(&mut self, value: Value<'a>, name: &str, arguments: Vec<Value<'a>>) -> Reference<'a> {
+		return self.call(*value.get_method(self, name).unwrap().value_ref(), arguments);
 	}
 
-	pub fn call(&mut self, value: Value<'a>, mut arguments: Vec<Reference<'a>>) -> Reference<'a> {
+	pub fn call(&mut self, value: Value<'a>, mut arguments: Vec<Value<'a>>) -> Reference<'a> {
 		if let Some(this) = self.this {
 			arguments.insert(0, this);
 			self.this = None;
@@ -198,7 +198,7 @@ impl<'a> Engine<'a> {
 		return self.new_reference_value(self.environment.function, Data::Callable(Box::new(Function::new(self.scope, parameters, block))));
 	}
 
-	pub fn new_primitive(&mut self, callback: &'a dyn Fn(&mut Engine<'a>, Vec<Reference<'a>>) -> Reference<'a>) -> Reference<'a> {
+	pub fn new_primitive(&mut self, callback: &'a dyn Fn(&mut Engine<'a>, Vec<Value<'a>>) -> Reference<'a>) -> Reference<'a> {
 		return self.new_reference_value(self.environment.function, Data::Callable(Box::new(Primitive::new(callback))));
 	}
 
