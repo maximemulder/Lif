@@ -107,12 +107,10 @@ impl<'a> Engine<'a> {
 	}
 
 	pub fn collect(&mut self) {
-		let count = self.scopes.len() + self.references.len() + self.values.len();
 		self.visit();
 		self.scopes.drain_filter(|scope| !scope.collect());
 		self.references.drain_filter(|reference| !reference.collect());
 		self.values.drain_filter(|value| !value.collect());
-		println!("{} {}", count, self.scopes.len() + self.references.len() + self.values.len());
 	}
 
 	pub fn execute(&mut self, node: &'a dyn Node) -> Reference<'a> {
