@@ -1,6 +1,7 @@
-use crate::runtime::engine::Engine;
-use super::{ Node, Product, Control };
-use super::expression::Expression;
+use crate::nodes::Node;
+use crate::nodes::expression::Expression;
+use crate::runtime::engine::{ Control, Engine };
+use crate::runtime::reference::Reference;
 
 pub struct Break {
 	expression: Option<Expression>
@@ -15,11 +16,7 @@ impl Break {
 }
 
 impl Node for Break {
-	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> Product<'a> {
-		return Product::new_control(if let Some(expression) = &self.expression {
-			value!(expression.execute(engine))
-		} else {
-			engine.new_undefined()
-		}, Control::Break);
+	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> Reference<'a> {
+		return engine.new_control(Control::Break, &self.expression);
 	}
 }

@@ -1,5 +1,6 @@
+use crate::nodes::Node;
 use crate::runtime::engine::Engine;
-use super::{ Node, Product };
+use crate::runtime::reference::Reference;
 
 pub struct Expression {
 	node: Box<dyn Node>,
@@ -14,7 +15,8 @@ impl Expression {
 }
 
 impl Node for Expression {
-	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> Product<'a> {
-		return self.node.execute(engine);
+	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> Reference<'a> {
+		engine.collect();
+		return execute!(engine, self.node.as_ref());
 	}
 }

@@ -1,6 +1,7 @@
+use crate::nodes::Node;
+use crate::nodes::block::Block;
 use crate::runtime::engine::Engine;
-use super::{ Node, Product };
-use super::block::Block;
+use crate::runtime::reference::Reference;
 
 pub struct Function {
 	parameters: Vec<Box<str>>,
@@ -17,7 +18,7 @@ impl Function {
 }
 
 impl Node for Function {
-	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> Product<'a> {
-		return Product::new(engine.new_function(&self.parameters, &self.block));
+	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> Reference<'a> {
+		return engine.new_function(&self.parameters, &self.block);
 	}
 }

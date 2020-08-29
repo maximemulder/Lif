@@ -1,6 +1,6 @@
-use crate::nodes::{ block::Block, Control };
 use crate::nodes::Node;
-use crate::runtime::engine::Engine;
+use crate::nodes::block::Block;
+use crate::runtime::engine::{ Control, Engine };
 use crate::runtime::proxy::Visitable;
 use crate::runtime::reference::Reference;
 use crate::runtime::scope::Scope;
@@ -62,11 +62,11 @@ impl<'a> Callable<'a> for Function<'a> {
 			engine.new_variable(&parameter, reference);
 		}
 
-		let product = self.block.execute(engine);
-		let reference = match &product.control {
+		let mut reference = self.block.execute(engine);
+		reference = match &engine.control {
 			Some(control) => match control {
 				Control::Break | Control::Continue => panic!(),
-				Control::Return => product.reference,
+				Control::Return => reference,
 			},
 			None => engine.new_undefined(),
 		};

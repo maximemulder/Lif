@@ -1,7 +1,8 @@
+use crate::nodes::Node;
+use crate::nodes::expression::Expression;
+use crate::nodes::statements::Statements;
 use crate::runtime::engine::Engine;
-use super::expression::Expression;
-use super::statements::Statements;
-use super::{ Node, Product };
+use crate::runtime::reference::Reference;
 
 pub struct Block {
 	statements: Statements,
@@ -18,16 +19,16 @@ impl Block {
 }
 
 impl Node for Block {
-	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> Product<'a> {
+	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> Reference<'a> {
 		engine.push_scope();
-		value!(self.statements.execute(engine));
-		let product = Product::new(if let Some(expression) = &self.expression {
-			value!(expression.execute(engine))
+		execute!(engine, &self.statements);
+		let reference = if let Some(expression) = &self.expression {
+			execute!(engine, expression)
 		} else {
 			engine.new_undefined()
-		});
+		};
 
 		engine.pop_scope();
-		return product;
+		return reference;
 	}
 }

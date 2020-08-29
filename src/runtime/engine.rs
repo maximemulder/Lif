@@ -1,10 +1,18 @@
+use crate::nodes::Node;
 use crate::nodes::block::Block;
+use crate::nodes::expression::Expression;
 use crate::runtime::data::{ Class, Data, Function, Instance, Primitive };
 use crate::runtime::environment::Environment;
-use crate::runtime::proxy::{ Proxy, Visitable };
+use crate::runtime::proxy::Visitable;
 use crate::runtime::reference::Reference;
 use crate::runtime::scope::Scope;
 use crate::runtime::value::Value;
+
+pub enum Control {
+	Return,
+	Break,
+	Continue,
+}
 
 pub struct Engine<'a> {
 	pub environment: Environment<'a>,
@@ -12,7 +20,9 @@ pub struct Engine<'a> {
 	pub references:  Vec<Reference<'a>>,
 	pub values:      Vec<Value<'a>>,
 	pub scope:       Scope<'a>,
+	pub registries:  Vec<Vec<Reference<'a>>>,
 	pub this:        Option<Reference<'a>>,
+	pub control:     Option<Control>,
 }
 
 impl<'a> Engine<'a> {
@@ -23,10 +33,13 @@ impl<'a> Engine<'a> {
 			references:  Vec::new(),
 			values:      Vec::new(),
 			scope:       Scope::new(),
+			registries:  Vec::new(),
 			this:        None,
+			control:     None,
 		};
 
 		engine.scopes.push(engine.scope);
+		engine.registries.push(Vec::new());
 		engine.populate();
 
 		return engine;
@@ -94,19 +107,30 @@ impl<'a> Engine<'a> {
 	}
 
 	pub fn collect(&mut self) {
+		let count = self.scopes.len() + self.references.len() + self.values.len();
 		self.visit();
+		self.scopes.drain_filter(|scope| !scope.collect());
+		self.references.drain_filter(|reference| !reference.collect());
+		self.values.drain_filter(|value| !value.collect());
+		println!("{} {}", count, self.scopes.len() + self.references.len() + self.values.len());
+	}
 
-		self.scopes.drain_filter(|scope| {
-			!Proxy::collect(scope)
-		});
+	pub fn execute(&mut self, node: &'a dyn Node) -> Reference<'a> {
+		self.registries.push(Vec::new());
+		let reference = node.execute(self);
+		let index = self.registries.len() - 2;
+		self.registries[index].push(reference);
+		self.registries.pop();
+		return reference;
+	}
 
-		self.references.drain_filter(|reference| {
-			!Proxy::collect(reference)
-		});
-
-		self.values.drain_filter(|value| {
-			!Proxy::collect(value)
-		});
+	pub fn new_control(&mut self, control: Control, node: &'a Option<Expression>) -> Reference<'a> {
+		self.control = Some(control);
+		return if let Some(node) = node {
+			self.execute(node)
+		} else {
+			self.new_undefined()
+		};
 	}
 }
 
@@ -114,6 +138,12 @@ impl Visitable for Engine<'_> {
 	fn visit(&mut self) {
 		self.environment.visit();
 		self.scope.visit();
+		for registries in self.registries.iter_mut() {
+			for registry in registries.iter_mut() {
+				registry.visit();
+			}
+		}
+
 		if let Some(this) = &mut self.this {
 			this.visit();
 		}

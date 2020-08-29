@@ -1,5 +1,6 @@
-use crate::nodes::{ Node, Product };
+use crate::nodes::Node;
 use crate::runtime::engine::Engine;
+use crate::runtime::reference::Reference;
 
 pub struct Identifier {
 	identifier: Box<str>,
@@ -14,7 +15,7 @@ impl Identifier {
 }
 
 impl Node for Identifier {
-	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> Product<'a> {
-		return Product::new(engine.get_variable(&self.identifier));
+	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> Reference<'a> {
+		return engine.get_variable(&self.identifier);
 	}
 }

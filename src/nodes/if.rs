@@ -1,6 +1,7 @@
+use crate::nodes::Node;
+use crate::nodes::expression::Expression;
 use crate::runtime::engine::Engine;
-use super::expression::Expression;
-use super::{ Node, Product };
+use crate::runtime::reference::Reference;
 
 pub struct If {
 	condition: Expression,
@@ -19,16 +20,16 @@ impl If {
 }
 
 impl Node for If {
-	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> Product<'a> {
+	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> Reference<'a> {
 		return if {
-			let reference = value!(self.condition.execute(engine));
+			let reference = execute!(engine, &self.condition);
 			*reference.value_ref().get_cast_boolean(engine)
 		} {
-			self.then.execute(engine)
+			execute!(engine, &self.then)
 		} else if let Some(r#else) = &self.r#else {
-			r#else.execute(engine)
+			execute!(engine, r#else)
 		} else {
-			return Product::new(engine.new_undefined());
+			return engine.new_undefined();
 		}
 	}
 }

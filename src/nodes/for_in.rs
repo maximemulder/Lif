@@ -1,6 +1,7 @@
-use crate::runtime::engine::Engine;
-use super::{ Node, Product, Control };
-use super::expression::Expression;
+use crate::nodes::Node;
+use crate::nodes::expression::Expression;
+use crate::runtime::engine::{ Control, Engine };
+use crate::runtime::reference::Reference;
 
 pub struct ForIn {
 	identifier: Box<str>,
@@ -19,30 +20,32 @@ impl ForIn {
 }
 
 impl Node for ForIn {
-	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> Product<'a> {
+	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> Reference<'a> {
 		let mut array = Vec::new();
 		for element in {
-			let reference = value!(self.expression.execute(engine));
+			let reference = execute!(engine, &self.expression);
 			reference.value_ref().get_cast_array(engine).clone()
 		} {
 			engine.new_variable(&self.identifier, element);
-			let product = self.body.execute(engine);
-			match &product.control {
+			let reference = engine.execute(&self.body);
+			match &engine.control {
 				Some(control) => match control {
-					Control::Return => return product,
+					Control::Return => return reference,
 					Control::Continue => {
-						array.push(product.reference);
+						engine.control = None;
+						array.push(reference);
 						continue;
 					},
 					Control::Break => {
-						array.push(product.reference);
+						engine.control = None;
+						array.push(reference);
 						break
 					},
 				},
-				None => array.push(product.reference),
+				None => array.push(reference),
 			}
 		}
 
-		return Product::new(engine.new_array(array));
+		return engine.new_array(array);
 	}
 }

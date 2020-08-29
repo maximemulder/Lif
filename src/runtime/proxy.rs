@@ -10,6 +10,7 @@ pub trait Visitable {
 struct Object<T> {
 	object: T,
 	flag: bool,
+	// deleted: bool,
 }
 
 impl<T> Object<T> {
@@ -17,6 +18,7 @@ impl<T> Object<T> {
 		return Self {
 			object,
 			flag: false,
+			// deleted: false,
 		};
 	}
 }
@@ -38,35 +40,34 @@ impl<T> Proxy<T> {
 		};
 	}
 
-	pub fn mark(proxy: &mut Proxy<T>) {
-		unsafe { proxy.pointer.as_mut().unwrap() }.flag = true;
+	pub fn mark(&mut self) {
+		unsafe { self.pointer.as_mut().unwrap() }.flag = true;
 	}
 
-	pub fn collect(proxy: &mut Proxy<T>) -> bool {
-		if Self::get_flag(proxy) {
-			unsafe { proxy.pointer.as_mut().unwrap() }.flag = false;
+	pub fn collect(&mut self) -> bool {
+		if self.flag() {
+			unsafe { self.pointer.as_mut().unwrap() }.flag = false;
 			return true;
 		} else {
-			unsafe { Box::from_raw(proxy.pointer); };
+			// unsafe { self.pointer.as_mut().unwrap() }.deleted = true;
+			unsafe { Box::from_raw(self.pointer); };
 			return false;
 		}
 	}
 
-	pub fn get_flag(proxy: &Proxy<T>) -> bool {
-		unsafe {
-			return if let Some(thing) = proxy.pointer.as_ref() {
-				thing.flag
-			} else {
-				true
-			}
-		}
+	pub fn flag(&self) -> bool {
+		return if let Some(thing) = unsafe { self.pointer.as_ref() } {
+			thing.flag
+		} else {
+			true
+		};
 	}
 }
 
 impl<T: Visitable> Visitable for Proxy<T> {
 	fn visit(&mut self) {
-		if !Proxy::get_flag(self) {
-			Proxy::mark(self);
+		if !self.flag() {
+			self.mark();
 			self.deref_mut().visit();
 		}
 	}
@@ -76,12 +77,20 @@ impl<T> Deref for Proxy<T> {
     type Target = T;
 
     fn deref(&self) -> &Self::Target {
+		/* if unsafe { self.pointer.as_ref().unwrap() }.deleted {
+			panic!();
+		} */
+
 		return &unsafe { self.pointer.as_ref().unwrap() }.object;
     }
 }
 
 impl<T> DerefMut for Proxy<T> {
     fn deref_mut(&mut self) -> &mut Self::Target {
+		/* if unsafe { self.pointer.as_ref().unwrap() }.deleted {
+			panic!();
+		} */
+
 		return &mut unsafe { self.pointer.as_mut().unwrap() }.object;
     }
 }

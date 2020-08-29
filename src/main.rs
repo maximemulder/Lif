@@ -16,7 +16,6 @@ mod nodes;
 mod runtime;
 
 use runtime::engine::Engine;
-use nodes::Node;
 use std::env;
 use std::fs;
 
@@ -42,6 +41,8 @@ fn main() {
     if let Some(tree) = parser2::nodes::run(&tokens) {
         printer::tree(&tree);
 		let program = nodes::build::program(&tree);
-		program.execute(&mut Engine::new());
+		let mut engine = Engine::new();
+		engine.execute(&program);
+		engine.collect();
 	}
 }
