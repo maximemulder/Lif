@@ -1,29 +1,28 @@
 use crate::runtime::data::{ Callable, Class, Data, Instance };
 use crate::runtime::engine::Engine;
-use crate::runtime::proxy::Visitable;
+use crate::runtime::gc::{ GcRef, GcTraceable };
 use crate::runtime::reference::Reference;
-use crate::runtime::value::Value;
 
-pub struct ValueObject<'a> {
-	pub class: Value<'a>,
+pub struct Value<'a> {
+	pub class: GcRef<Value<'a>>,
 	data: Data<'a>,
 }
 
-impl<'a> ValueObject<'a> {
-	pub fn new(class: Value<'a>, data: Data<'a>) -> Self {
+impl<'a> Value<'a> {
+	pub fn new(class: GcRef<Value<'a>>, data: Data<'a>) -> Self {
 		return Self {
 			class,
 			data,
 		};
 	}
 
-	pub fn cast(&self, class: Value<'a>) {
+	pub fn cast(&self, class: GcRef<Value<'a>>) {
 		if self.class != class {
 			panic!();
 		}
 	}
 
-	pub fn get_cast_array(&self, engine: &Engine<'a>) -> &Vec<Reference<'a>> {
+	pub fn get_cast_array(&self, engine: &Engine<'a>) -> &Vec<GcRef<Reference<'a>>> {
 		self.cast(engine.environment.array);
 		return self.data_array();
 	}
@@ -43,15 +42,15 @@ impl<'a> ValueObject<'a> {
 		return self.data_string();
 	}
 
-	pub fn get_method(&self, engine: &Engine<'a>, name: &str) -> Option<Reference<'a>> {
+	pub fn get_method(&self, engine: &Engine<'a>, name: &str) -> Option<GcRef<Reference<'a>>> {
 		return self.class.data_class().get_method(engine, name);
 	}
 }
 
-impl Visitable for ValueObject<'_> {
-	fn visit(&mut self) {
-		self.class.visit();
-		self.data.visit();
+impl GcTraceable for Value<'_> {
+	fn trace(&mut self) {
+		self.class.trace();
+		self.data.trace();
 	}
 }
 
@@ -75,12 +74,12 @@ macro_rules! data_mut {
 	};
 }
 
-impl<'a> ValueObject<'a> {
-	pub fn data_array(&self) -> &Vec<Reference<'a>> {
+impl<'a> Value<'a> {
+	pub fn data_array(&self) -> &Vec<GcRef<Reference<'a>>> {
 		data!(self, Array);
 	}
 
-	pub fn data_array_mut(&mut self) -> &mut Vec<Reference<'a>> {
+	pub fn data_array_mut(&mut self) -> &mut Vec<GcRef<Reference<'a>>> {
 		data_mut!(self, Array);
 	}
 

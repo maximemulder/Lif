@@ -1,23 +1,23 @@
 use crate::nodes::Node;
 use crate::nodes::block::Block;
 use crate::runtime::engine::{ Control, Engine };
-use crate::runtime::proxy::Visitable;
+use crate::runtime::gc::{ GcRef, GcTraceable };
 use crate::runtime::reference::Reference;
 use crate::runtime::scope::Scope;
 use crate::runtime::value::Value;
 
-pub trait Callable<'a>: Visitable {
-	fn call(&self, engine: &mut Engine<'a>, arguments: Vec<Value<'a>>) -> Reference<'a>;
+pub trait Callable<'a>: GcTraceable {
+	fn call(&self, engine: &mut Engine<'a>, arguments: Vec<GcRef<Value<'a>>>) -> GcRef<Reference<'a>>;
 	fn duplicate(&self) -> Box<dyn Callable<'a> + 'a>;
 }
 
 #[derive(Clone)]
 pub struct Primitive<'a> {
-	callback: &'a dyn Fn(&mut Engine<'a>, Vec<Value<'a>>) -> Reference<'a>,
+	callback: &'a dyn Fn(&mut Engine<'a>, Vec<GcRef<Value<'a>>>) -> GcRef<Reference<'a>>,
 }
 
 impl<'a> Primitive<'a> {
-	pub fn new(callback: &'a dyn Fn(&mut Engine<'a>, Vec<Value<'a>>) -> Reference<'a>) -> Self {
+	pub fn new(callback: &'a dyn Fn(&mut Engine<'a>, Vec<GcRef<Value<'a>>>) -> GcRef<Reference<'a>>) -> Self {
 		return Self {
 			callback,
 		};
@@ -25,7 +25,7 @@ impl<'a> Primitive<'a> {
 }
 
 impl<'a> Callable<'a> for Primitive<'a> {
-	fn call(&self, engine: &mut Engine<'a>, arguments: Vec<Value<'a>>) -> Reference<'a> {
+	fn call(&self, engine: &mut Engine<'a>, arguments: Vec<GcRef<Value<'a>>>) -> GcRef<Reference<'a>> {
 		return (self.callback)(engine, arguments);
 	}
 
@@ -34,19 +34,19 @@ impl<'a> Callable<'a> for Primitive<'a> {
 	}
 }
 
-impl Visitable for Primitive<'_> {
-	fn visit(&mut self) {}
+impl GcTraceable for Primitive<'_> {
+	fn trace(&mut self) {}
 }
 
 #[derive(Clone)]
 pub struct Function<'a> {
-	scope: Scope<'a>,
+	scope: GcRef<Scope<'a>>,
 	parameters: &'a Vec<Box<str>>,
 	block: &'a Block,
 }
 
 impl<'a> Function<'a> {
-	pub fn new(scope: Scope<'a>, parameters: &'a Vec<Box<str>>, block: &'a Block) -> Self {
+	pub fn new(scope: GcRef<Scope<'a>>, parameters: &'a Vec<Box<str>>, block: &'a Block) -> Self {
 		return Self {
 			scope,
 			parameters,
@@ -56,10 +56,11 @@ impl<'a> Function<'a> {
 }
 
 impl<'a> Callable<'a> for Function<'a> {
-	fn call(&self, engine: &mut Engine<'a>, arguments: Vec<Value<'a>>) -> Reference<'a> {
+	fn call(&self, engine: &mut Engine<'a>, arguments: Vec<GcRef<Value<'a>>>) -> GcRef<Reference<'a>> {
 		let frame = engine.push_frame(self.scope);
 		for (parameter, argument) in self.parameters.iter().zip(arguments) {
-			engine.new_variable(&parameter, Reference::new(argument.clone()));
+			let reference = engine.new_reference(argument);
+			engine.new_variable(&parameter, reference);
 		}
 
 		let mut reference = self.block.execute(engine);
@@ -80,8 +81,8 @@ impl<'a> Callable<'a> for Function<'a> {
 	}
 }
 
-impl Visitable for Function<'_> {
-	fn visit(&mut self) {
-		self.scope.visit();
+impl GcTraceable for Function<'_> {
+	fn trace(&mut self) {
+		self.scope.trace();
 	}
 }

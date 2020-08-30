@@ -1,9 +1,9 @@
-use crate::runtime::proxy::Visitable;
+use crate::runtime::gc::{ GcRef, GcTraceable };
 use crate::runtime::reference::Reference;
 use std::collections::HashMap;
 
 pub struct Instance<'a> {
-	pub attributes: HashMap<String, Reference<'a>>,
+	pub attributes: HashMap<String, GcRef<Reference<'a>>>,
 }
 
 impl Instance<'_> {
@@ -14,10 +14,10 @@ impl Instance<'_> {
 	}
 }
 
-impl Visitable for Instance<'_> {
-	fn visit(&mut self) {
+impl GcTraceable for Instance<'_> {
+	fn trace(&mut self) {
 		for attribute in self.attributes.values_mut() {
-			attribute.visit();
+			attribute.trace();
 		}
 	}
 }

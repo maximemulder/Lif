@@ -1,6 +1,7 @@
 use crate::nodes::Node;
 use crate::nodes::expression::Expression;
 use crate::runtime::engine::{ Control, Engine };
+use crate::runtime::gc::GcRef;
 use crate::runtime::reference::Reference;
 
 pub struct ForIn {
@@ -20,11 +21,11 @@ impl ForIn {
 }
 
 impl Node for ForIn {
-	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> Reference<'a> {
+	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> GcRef<Reference<'a>> {
 		let mut array = Vec::new();
 		for element in {
 			let reference = execute!(engine, &self.expression);
-			reference.value_ref().get_cast_array(engine).clone()
+			reference.read().get_cast_array(engine).clone()
 		} {
 			engine.new_variable(&self.identifier, element);
 			let reference = engine.execute(&self.body);

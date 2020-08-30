@@ -1,6 +1,7 @@
 use crate::nodes::Node;
 use crate::nodes::expression::Expression;
 use crate::runtime::engine::Engine;
+use crate::runtime::gc::GcRef;
 use crate::runtime::reference::Reference;
 
 pub struct Operation {
@@ -20,17 +21,17 @@ impl Operation {
 }
 
 impl Node for Operation {
-	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> Reference<'a> {
+	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> GcRef<Reference<'a>> {
 		if self.operator.to_string() == "=" {
 			let mut left  = execute!(engine, &self.left);
-			let right = execute!(engine, &self.right).value();
-			*left.value_mut() = right;
+			let right = execute!(engine, &self.right).read();
+			left.write(right);
 			return engine.new_undefined();
 		}
 
-		let left  = execute!(engine, &self.left).value();
-		let right = execute!(engine, &self.right).value();
+		let left  = execute!(engine, &self.left).read();
+		let right = execute!(engine, &self.right).read();
 
-		return engine.call((left.get_method(engine, &self.operator).unwrap()).value(), vec![left, right]);
+		return engine.call((left.get_method(engine, &self.operator).unwrap()).read(), vec![left, right]);
 	}
 }

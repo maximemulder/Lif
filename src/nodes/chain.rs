@@ -1,6 +1,7 @@
 use crate::nodes::Node;
 use crate::nodes::expression::Expression;
 use crate::runtime::engine::Engine;
+use crate::runtime::gc::GcRef;
 use crate::runtime::reference::Reference;
 
 pub struct Chain {
@@ -18,9 +19,9 @@ impl Chain {
 }
 
 impl Node for Chain {
-	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> Reference<'a> {
-		let value = execute!(engine, &self.expression).value();
-		let name = engine.new_string(self.member.to_string()).value();
+	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> GcRef<Reference<'a>> {
+		let value = execute!(engine, &self.expression).read();
+		let name = engine.new_string(self.member.to_string()).read();
 		return engine.call_method(value, ".", vec![name]);
 	}
 }
