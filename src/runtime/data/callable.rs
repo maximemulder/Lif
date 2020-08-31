@@ -63,17 +63,19 @@ impl<'a> Callable<'a> for Function<'a> {
 			engine.add_variable(&parameter, reference);
 		}
 
-		let mut reference = self.block.execute(engine);
-		reference = match &engine.control {
+		let reference = self.block.execute(engine);
+		engine.pop_frame(frame);
+
+		return match &engine.control {
 			Some(control) => match control {
 				Control::Break | Control::Continue => panic!(),
-				Control::Return => reference,
+				Control::Return => {
+					engine.control = None;
+					engine.new_reference(Some(reference.read()), false)
+				},
 			},
 			None => engine.new_undefined(),
 		};
-
-		engine.pop_frame(frame);
-		return reference;
 	}
 
 	fn duplicate(&self) -> Box<dyn Callable<'a> + 'a> {
