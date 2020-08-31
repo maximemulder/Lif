@@ -41,7 +41,7 @@ impl RuleFilter {
 impl<'a> Rule<'a> for RuleFilter {
 	fn rule<'b>(&self, parser: &mut Parser<'a, 'b, '_>) -> Option<Vec<Node<'a, 'b>>> {
 		if let Some(nodes) = parser.rule(self.rule) {
-			return Some(parser.filter(self.filter, nodes));
+			return parser.filter(self.filter, nodes);
 		}
 
 		return None;

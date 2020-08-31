@@ -12,7 +12,7 @@ use rules::Rule;
 use filters::Filter;
 
 pub struct Parser<'a, 'b, 'c> {
-	tokens: &'c Vec<Node<'a, 'b>>,
+	pub tokens: &'c Vec<Node<'a, 'b>>,
 	rules: &'c Arena<dyn Rule<'a> + 'c>,
 	filters: &'c Arena<dyn Filter<'a> + 'c>,
 	cursor: usize,
@@ -52,7 +52,13 @@ impl<'a, 'b, 'c> Parser<'a, 'b, 'c> {
 		return nodes;
 	}
 
-	fn filter(&mut self, index: usize, nodes: Vec<Node<'a, 'b>>) -> Vec<Node<'a, 'b>> {
-		return self.filters.get(index).filter(self, nodes);
+	fn filter(&mut self, index: usize, nodes: Vec<Node<'a, 'b>>) -> Option<Vec<Node<'a, 'b>>> {
+		let cursor = self.cursor;
+		let nodes = self.filters.get(index).filter(self, nodes);
+		if nodes.is_none() {
+			self.cursor = cursor;
+		}
+
+		return nodes;
 	}
 }

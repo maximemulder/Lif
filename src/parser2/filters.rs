@@ -3,7 +3,7 @@ use crate::parser2::Parser;
 use crate::node::Node;
 
 pub trait Filter<'a> {
-	fn filter<'b>(&self, parser: &mut Parser<'a, 'b, '_>, nodes: Vec<Node<'a, 'b>>) -> Vec<Node<'a, 'b>>;
+	fn filter<'b>(&self, parser: &mut Parser<'a, 'b, '_>, nodes: Vec<Node<'a, 'b>>) -> Option<Vec<Node<'a, 'b>>>;
 }
 
 pub struct FilterList {
@@ -19,12 +19,16 @@ impl FilterList {
 }
 
 impl<'a> Filter<'a> for FilterList {
-	fn filter<'b>(&self, parser: &mut Parser<'a, 'b, '_>, mut nodes: Vec<Node<'a, 'b>>) -> Vec<Node<'a, 'b>> {
+	fn filter<'b>(&self, parser: &mut Parser<'a, 'b, '_>, mut nodes: Vec<Node<'a, 'b>>) -> Option<Vec<Node<'a, 'b>>> {
 		for filter in self.filters.iter().rev() {
-			nodes = parser.filter(*filter, nodes);
+			if let Some(others) = parser.filter(*filter, nodes) {
+				nodes = others;
+			} else {
+				return None;
+			}
 		}
 
-		return nodes;
+		return Some(nodes);
 	}
 }
 
@@ -43,13 +47,13 @@ impl FilterExtension {
 }
 
 impl<'a> Filter<'a> for FilterExtension {
-	fn filter<'b>(&self, parser: &mut Parser<'a, 'b, '_>, mut nodes: Vec<Node<'a, 'b>>) -> Vec<Node<'a, 'b>> {
+	fn filter<'b>(&self, parser: &mut Parser<'a, 'b, '_>, mut nodes: Vec<Node<'a, 'b>>) -> Option<Vec<Node<'a, 'b>>> {
 		if let Some(children) = parser.rule(self.rule) {
 			nodes.extend(children);
 			return parser.filter(self.filter, nodes);
 		}
 
-		return nodes;
+		return Some(nodes);
 	}
 }
 
@@ -66,7 +70,7 @@ impl<'a> FilterElement<'a> {
 }
 
 impl<'a> Filter<'a> for FilterElement<'a> {
-	fn filter<'b>(&self, parser: &mut Parser<'a, 'b, '_>, nodes: Vec<Node<'a, 'b>>) -> Vec<Node<'a, 'b>> {
-		return vec![Node::new_production(self.element, nodes)];
+	fn filter<'b>(&self, parser: &mut Parser<'a, 'b, '_>, nodes: Vec<Node<'a, 'b>>) -> Option<Vec<Node<'a, 'b>>> {
+		return Some(vec![Node::new_production(self.element, nodes)]);
 	}
 }
