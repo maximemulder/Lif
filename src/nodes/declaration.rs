@@ -16,8 +16,8 @@ impl Declaration {
 
 impl Node for Declaration {
 	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> GcReference<'a> {
-		let reference = engine.new_undefined();
-		engine.new_variable(&self.identifier, reference);
+		let reference = engine.new_reference(None, true);
+		engine.add_variable(&self.identifier, reference);
 		return reference;
 	}
 }

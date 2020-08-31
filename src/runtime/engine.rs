@@ -68,7 +68,7 @@ impl<'a> Engine<'a> {
 		self.scope = frame;
 	}
 
-	pub fn new_variable(&mut self, name: &str, reference: GcReference<'a>) {
+	pub fn add_variable(&mut self, name: &str, reference: GcReference<'a>) {
 		self.scope.add_variable(name, reference);
 	}
 
@@ -156,53 +156,51 @@ impl<'a> Engine<'a> {
 	}
 
 	pub fn new_undefined(&mut self) -> GcReference<'a> {
-		let reference = GcRef::alloc(Reference::new_undefined());
+		return self.new_reference(None, false);
+	}
+
+	pub fn new_reference(&mut self, value: Option<GcValue<'a>>, variable: bool) -> GcReference<'a> {
+		let reference = GcRef::alloc(Reference::new(value, variable));
 		self.references.push(reference);
 		return reference;
 	}
 
-	pub fn new_reference(&mut self, value: GcValue<'a>) -> GcReference<'a> {
-		let reference = GcRef::alloc(Reference::new(value));
-		self.references.push(reference);
-		return reference;
-	}
-
-	pub fn new_reference_value(&mut self, class: GcValue<'a>, data: Data<'a>) -> GcReference<'a> {
+	pub fn new_constant_value(&mut self, class: GcValue<'a>, data: Data<'a>) -> GcReference<'a> {
 		let value = self.new_value(class, data);
-		return self.new_reference(value);
+		return self.new_reference(Some(value), false);
 	}
 }
 
 impl<'a> Engine<'a> {
 	pub fn new_array(&mut self, elements: Vec<GcReference<'a>>) -> GcReference<'a> {
-		return self.new_reference_value(self.environment.class, Data::Array(elements));
+		return self.new_constant_value(self.environment.class, Data::Array(elements));
 	}
 
 	pub fn new_boolean(&mut self, boolean: bool) -> GcReference<'a> {
-		return self.new_reference_value(self.environment.boolean, Data::Boolean(boolean));
+		return self.new_constant_value(self.environment.boolean, Data::Boolean(boolean));
 	}
 
 	pub fn new_class(&mut self) -> GcReference<'a> {
-		return self.new_reference_value(self.environment.class, Data::Class(Class::new(Some(self.environment.object))));
+		return self.new_constant_value(self.environment.class, Data::Class(Class::new(Some(self.environment.object))));
 	}
 
 	pub fn new_instance(&mut self, parent: GcValue<'a>) -> GcReference<'a> {
-		return self.new_reference_value(parent, Data::Instance(Instance::new()));
+		return self.new_constant_value(parent, Data::Instance(Instance::new()));
 	}
 
 	pub fn new_integer(&mut self, integer: usize) -> GcReference<'a> {
-		return self.new_reference_value(self.environment.integer, Data::Integer(integer));
+		return self.new_constant_value(self.environment.integer, Data::Integer(integer));
 	}
 
 	pub fn new_function(&mut self, parameters: &'a Vec<Box<str>>, block: &'a Block) -> GcReference<'a> {
-		return self.new_reference_value(self.environment.function, Data::Callable(Box::new(Function::new(self.scope, parameters, block))));
+		return self.new_constant_value(self.environment.function, Data::Callable(Box::new(Function::new(self.scope, parameters, block))));
 	}
 
 	pub fn new_primitive(&mut self, callback: &'a dyn Fn(&mut Engine<'a>, Vec<GcValue<'a>>) -> GcReference<'a>) -> GcReference<'a> {
-		return self.new_reference_value(self.environment.function, Data::Callable(Box::new(Primitive::new(callback))));
+		return self.new_constant_value(self.environment.function, Data::Callable(Box::new(Primitive::new(callback))));
 	}
 
 	pub fn new_string(&mut self, string: String) -> GcReference<'a> {
-		return self.new_reference_value(self.environment.string, Data::String(string));
+		return self.new_constant_value(self.environment.string, Data::String(string));
 	}
 }

@@ -5,18 +5,14 @@ pub type GcReference<'a> = GcRef<Reference<'a>>;
 
 pub struct Reference<'a> {
 	value: Option<GcValue<'a>>,
+	variable: bool,
 }
 
 impl<'a> Reference<'a> {
-	pub fn new(value: GcValue<'a>) -> Self {
+	pub fn new(value: Option<GcValue<'a>>, variable: bool) -> Self {
 		return Self {
-			value: Some(value),
-		};
-	}
-
-	pub fn new_undefined() -> Self {
-		return Self {
-			value: None,
+			value,
+			variable,
 		};
 	}
 
@@ -29,7 +25,11 @@ impl<'a> Reference<'a> {
 	}
 
 	pub fn write(&mut self, value: GcValue<'a>) {
-		self.value = Some(value);
+		if self.variable || self.value.is_none(){
+			self.value = Some(value);
+		} else {
+			panic!();
+		}
 	}
 }
 

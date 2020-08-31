@@ -43,17 +43,17 @@ impl<'a> Engine<'a> {
 		return self.new_value(self.environment.class, Data::Class(Class::new(Some(self.environment.object))));
 	}
 
-	pub fn new_variable_primitive(&mut self, name: &str, callback: &'a dyn Fn(&mut Engine<'a>, Vec<GcValue<'a>>) -> GcReference<'a>) {
+	fn add_constant_primitive(&mut self, name: &str, callback: &'a dyn Fn(&mut Engine<'a>, Vec<GcValue<'a>>) -> GcReference<'a>) {
 		let primitive = self.new_primitive(callback);
-		self.new_variable(name, primitive);
+		self.add_variable(name, primitive);
 	}
 
-	pub fn new_variable_value(&mut self, name: &str, value: GcValue<'a>) {
-		let reference = self.new_reference(value);
-		self.new_variable(name, reference);
+	fn add_constant_value(&mut self, name: &str, value: GcValue<'a>) {
+		let reference = self.new_reference(Some(value), false);
+		self.add_variable(name, reference);
 	}
 
-	fn new_method_primitive(&mut self, mut value: GcValue<'a>, name: &str, callback: &'a dyn Fn(&mut Engine<'a>, Vec<GcValue<'a>>) -> GcReference<'a>) {
+	fn add_method_primitive(&mut self, mut value: GcValue<'a>, name: &str, callback: &'a dyn Fn(&mut Engine<'a>, Vec<GcValue<'a>>) -> GcReference<'a>) {
 		let primitive = self.new_primitive(callback);
 		value.data_class_mut().methods.insert(name.to_string(), primitive);
 	}
@@ -73,11 +73,11 @@ impl<'a> Engine<'a> {
 		self.environment.class.data_class_mut().parent = Some(self.environment.object);
 		self.environment.object.data_class_mut().parent = None;
 
-		self.new_variable_primitive("assert", &primitive_assert);
-		self.new_variable_primitive("error",  &primitive_error);
-		self.new_variable_primitive("exit",   &primitive_exit);
-		self.new_variable_primitive("new",    &primitive_new);
-		self.new_variable_primitive("print",  &primitive_print);
+		self.add_constant_primitive("assert", &primitive_assert);
+		self.add_constant_primitive("error",  &primitive_error);
+		self.add_constant_primitive("exit",   &primitive_exit);
+		self.add_constant_primitive("new",    &primitive_new);
+		self.add_constant_primitive("print",  &primitive_print);
 
 		let array    = self.environment.array;
 		let boolean  = self.environment.boolean;
@@ -88,54 +88,54 @@ impl<'a> Engine<'a> {
 		let object   = self.environment.object;
 		let string   = self.environment.string;
 
-		self.new_variable_value("Array",    array);
-		self.new_variable_value("Boolean",  boolean);
-		self.new_variable_value("Class",    class);
-		self.new_variable_value("Function", function);
-		self.new_variable_value("Instance", instance);
-		self.new_variable_value("Integer",  integer);
-		self.new_variable_value("Object",   object);
-		self.new_variable_value("String",   string);
+		self.add_constant_value("Array",    array);
+		self.add_constant_value("Boolean",  boolean);
+		self.add_constant_value("Class",    class);
+		self.add_constant_value("Function", function);
+		self.add_constant_value("Instance", instance);
+		self.add_constant_value("Integer",  integer);
+		self.add_constant_value("Object",   object);
+		self.add_constant_value("String",   string);
 
-		self.new_method_primitive(array, "to_string", &array_to_string);
-		self.new_method_primitive(array, "copy",      &array_copy);
-		self.new_method_primitive(array, "append",    &array_append);
-		self.new_method_primitive(array, "prepend",   &array_prepend);
-		self.new_method_primitive(array, "insert",    &array_insert);
-		self.new_method_primitive(array, "remove",    &array_remove);
-		self.new_method_primitive(array, "[]",        &array_access);
+		self.add_method_primitive(array, "to_string", &array_to_string);
+		self.add_method_primitive(array, "copy",      &array_copy);
+		self.add_method_primitive(array, "append",    &array_append);
+		self.add_method_primitive(array, "prepend",   &array_prepend);
+		self.add_method_primitive(array, "insert",    &array_insert);
+		self.add_method_primitive(array, "remove",    &array_remove);
+		self.add_method_primitive(array, "[]",        &array_access);
 
-		self.new_method_primitive(boolean, "to_string", &boolean_to_string);
-		self.new_method_primitive(boolean, "==",        &boolean_comparison);
+		self.add_method_primitive(boolean, "to_string", &boolean_to_string);
+		self.add_method_primitive(boolean, "==",        &boolean_comparison);
 
-		self.new_method_primitive(class, "to_string", &class_to_string);
-		self.new_method_primitive(class, ".",         &class_chain);
+		self.add_method_primitive(class, "to_string", &class_to_string);
+		self.add_method_primitive(class, ".",         &class_chain);
 
-		self.new_method_primitive(function, "to_string", &function_to_string);
-		self.new_method_primitive(function, "()",        &function_call);
+		self.add_method_primitive(function, "to_string", &function_to_string);
+		self.add_method_primitive(function, "()",        &function_call);
 
-		self.new_method_primitive(instance, "to_string", &instance_to_string);
-		self.new_method_primitive(instance, ".",         &instance_chain);
+		self.add_method_primitive(instance, "to_string", &instance_to_string);
+		self.add_method_primitive(instance, ".",         &instance_chain);
 
-		self.new_method_primitive(integer, "to_string", &integer_to_string);
-		self.new_method_primitive(integer, "==",        &integer_comparison);
-		self.new_method_primitive(integer, "<",         &integer_lesser);
-		self.new_method_primitive(integer, "+",         &integer_addition);
-		self.new_method_primitive(integer, "-",         &integer_subtraction);
-		self.new_method_primitive(integer, "*",         &integer_multiplication);
-		self.new_method_primitive(integer, "/",         &integer_division);
-		self.new_method_primitive(integer, "%",         &integer_remainder);
+		self.add_method_primitive(integer, "to_string", &integer_to_string);
+		self.add_method_primitive(integer, "==",        &integer_comparison);
+		self.add_method_primitive(integer, "<",         &integer_lesser);
+		self.add_method_primitive(integer, "+",         &integer_addition);
+		self.add_method_primitive(integer, "-",         &integer_subtraction);
+		self.add_method_primitive(integer, "*",         &integer_multiplication);
+		self.add_method_primitive(integer, "/",         &integer_division);
+		self.add_method_primitive(integer, "%",         &integer_remainder);
 
-		self.new_method_primitive(object, "==", &object_comparison);
-		self.new_method_primitive(object, "!=", &object_difference);
-		self.new_method_primitive(object, ">",  &object_greater);
-		self.new_method_primitive(object, "<=", &object_lesser_equal);
-		self.new_method_primitive(object, ">=", &object_greater_equal);
-		self.new_method_primitive(object, ".",  &object_chain);
+		self.add_method_primitive(object, "==", &object_comparison);
+		self.add_method_primitive(object, "!=", &object_difference);
+		self.add_method_primitive(object, ">",  &object_greater);
+		self.add_method_primitive(object, "<=", &object_lesser_equal);
+		self.add_method_primitive(object, ">=", &object_greater_equal);
+		self.add_method_primitive(object, ".",  &object_chain);
 
-		self.new_method_primitive(string, "to_string", &string_to_string);
-		self.new_method_primitive(string, "==",        &string_comparison);
-		self.new_method_primitive(string, "+",         &string_concatenation);
+		self.add_method_primitive(string, "to_string", &string_to_string);
+		self.add_method_primitive(string, "==",        &string_comparison);
+		self.add_method_primitive(string, "+",         &string_concatenation);
 	}
 }
 
@@ -189,20 +189,20 @@ fn array_copy<'a>(engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> GcRef
 }
 
 fn array_append<'a>(engine: &mut Engine<'a>, mut arguments: Vec<GcValue<'a>>) -> GcReference<'a> {
-	let reference = engine.new_reference(arguments[1]);
+	let reference = engine.new_reference(Some(arguments[1]), true);
 	arguments[0].data_array_mut().push(reference);
 	return engine.new_undefined();
 }
 
 fn array_prepend<'a>(engine: &mut Engine<'a>, mut arguments: Vec<GcValue<'a>>) -> GcReference<'a> {
-	let reference = engine.new_reference(arguments[1]);
+	let reference = engine.new_reference(Some(arguments[1]), true);
 	arguments[0].data_array_mut().insert(0, reference);
 	return engine.new_undefined();
 }
 
 fn array_insert<'a>(engine: &mut Engine<'a>, mut arguments: Vec<GcValue<'a>>) -> GcReference<'a> {
 	let index = *arguments[1].data_integer();
-	let reference = engine.new_reference(arguments[2]);
+	let reference = engine.new_reference(Some(arguments[2]), true);
 	arguments[0].data_array_mut().insert(index, reference);
 	return engine.new_undefined();
 }
@@ -248,7 +248,7 @@ fn class_chain<'a>(engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> GcRe
 }
 
 fn class_access<'a>(engine: &mut Engine<'a>, _: Vec<GcValue<'a>>) -> GcReference<'a> {
-	return engine.new_reference(engine.environment.array);
+	return engine.new_reference(Some(engine.environment.array), false);
 }
 
 fn function_to_string<'a>(engine: &mut Engine<'a>, _: Vec<GcValue<'a>>) -> GcReference<'a> {
@@ -366,7 +366,7 @@ fn object_chain<'a>(engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> GcR
 }
 
 fn string_to_string<'a>(engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> GcReference<'a> {
-	return engine.new_reference(arguments[0]);
+	return engine.new_reference(Some(arguments[0]), false);
 }
 
 fn string_comparison<'a>(engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> GcReference<'a> {

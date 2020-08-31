@@ -59,8 +59,8 @@ impl<'a> Callable<'a> for Function<'a> {
 	fn call(&self, engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> GcReference<'a> {
 		let frame = engine.push_frame(self.scope);
 		for (parameter, argument) in self.parameters.iter().zip(arguments) {
-			let reference = engine.new_reference(argument);
-			engine.new_variable(&parameter, reference);
+			let reference = engine.new_reference(Some(argument), true);
+			engine.add_variable(&parameter, reference);
 		}
 
 		let mut reference = self.block.execute(engine);

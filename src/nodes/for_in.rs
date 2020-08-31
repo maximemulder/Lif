@@ -26,7 +26,7 @@ impl Node for ForIn {
 			let reference = execute!(engine, &self.expression);
 			reference.read().get_cast_array(engine).clone()
 		} {
-			engine.new_variable(&self.identifier, element);
+			engine.add_variable(&self.identifier, element);
 			let reference = engine.execute(&self.body);
 			match &engine.control {
 				Some(control) => match control {
