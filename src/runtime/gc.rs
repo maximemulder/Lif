@@ -7,13 +7,35 @@ pub trait GcTraceable {
 	fn trace(&mut self);
 }
 
+pub struct Gc<T> {
+	refs: Vec<GcRef<T>>,
+}
+
+impl<T> Gc<T> {
+	pub fn new() -> Self {
+		return Self {
+			refs: Vec::new(),
+		};
+	}
+
+	pub fn alloc(&mut self, object: T) -> GcRef<T> {
+		let r#ref = GcRef::alloc(object);
+		self.refs.push(r#ref);
+		return r#ref;
+	}
+
+	pub fn collect(&mut self) {
+		self.refs.drain_filter(|r#ref| !r#ref.collect());
+	}
+}
+
 struct GcObject<T> {
 	object: T,
 	flag: bool,
 }
 
 impl<T> GcObject<T> {
-	pub fn new(object: T) -> Self {
+	fn new(object: T) -> Self {
 		return Self {
 			object,
 			flag: false,
@@ -26,23 +48,23 @@ pub struct GcRef<T> {
 }
 
 impl<T> GcRef<T> {
-	pub fn alloc(object: T) -> Self {
-		return Self {
-			pointer: Box::into_raw(Box::new(GcObject::new(object))),
-		};
-	}
-
 	pub fn null() -> Self {
 		return Self {
 			pointer: std::ptr::null_mut(),
 		};
 	}
 
-	pub fn mark(&mut self) {
+	fn alloc(object: T) -> Self {
+		return Self {
+			pointer: Box::into_raw(Box::new(GcObject::new(object))),
+		};
+	}
+
+	fn mark(&mut self) {
 		unsafe { self.pointer.as_mut().unwrap() }.flag = true;
 	}
 
-	pub fn collect(&mut self) -> bool {
+	fn collect(&mut self) -> bool {
 		if self.flag() {
 			unsafe { self.pointer.as_mut().unwrap() }.flag = false;
 			return true;
@@ -52,7 +74,7 @@ impl<T> GcRef<T> {
 		}
 	}
 
-	pub fn flag(&self) -> bool {
+	fn flag(&self) -> bool {
 		return if let Some(thing) = unsafe { self.pointer.as_ref() } {
 			thing.flag
 		} else {

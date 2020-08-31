@@ -3,7 +3,7 @@ use crate::nodes::block::Block;
 use crate::nodes::expression::Expression;
 use crate::runtime::data::{ Class, Data, Function, Instance, Primitive };
 use crate::runtime::environment::Environment;
-use crate::runtime::gc::{ GcRef, GcTraceable };
+use crate::runtime::gc::{ Gc, GcRef, GcTraceable };
 use crate::runtime::reference::{ GcReference, Reference };
 use crate::runtime::scope::{ GcScope, Scope };
 use crate::runtime::value::{ GcValue, Value };
@@ -16,9 +16,9 @@ pub enum Control {
 
 pub struct Engine<'a> {
 	pub environment: Environment<'a>,
-	pub scopes:      Vec<GcScope<'a>>,
-	pub references:  Vec<GcReference<'a>>,
-	pub values:      Vec<GcValue<'a>>,
+	pub scopes:      Gc<Scope<'a>>,
+	pub references:  Gc<Reference<'a>>,
+	pub values:      Gc<Value<'a>>,
 	pub scope:       GcScope<'a>,
 	pub registries:  Vec<Vec<GcReference<'a>>>,
 	pub this:        Option<GcValue<'a>>,
@@ -29,16 +29,16 @@ impl<'a> Engine<'a> {
 	pub fn new() -> Self {
 		let mut engine = Self {
 			environment: Environment::new(),
-			scopes:      Vec::new(),
-			references:  Vec::new(),
-			values:      Vec::new(),
-			scope:       GcRef::alloc(Scope::new()),
+			scopes:      Gc::new(),
+			references:  Gc::new(),
+			values:      Gc::new(),
+			scope:       GcRef::null(),
 			registries:  Vec::new(),
 			this:        None,
 			control:     None,
 		};
 
-		engine.scopes.push(engine.scope);
+		engine.scope = engine.scopes.alloc(Scope::new());
 		engine.registries.push(Vec::new());
 		engine.populate();
 
@@ -46,8 +46,7 @@ impl<'a> Engine<'a> {
 	}
 
 	pub fn push_scope(&mut self) {
-		self.scopes.push(GcRef::alloc(Scope::new_child(self.scope)));
-		self.scope = self.scopes[self.scopes.len() - 1];
+		self.scope = self.scopes.alloc(Scope::new_child(self.scope));
 	}
 
 	pub fn pop_scope(&mut self) {
@@ -108,9 +107,9 @@ impl<'a> Engine<'a> {
 
 	pub fn collect(&mut self) {
 		self.trace();
-		self.scopes.drain_filter(|scope| !scope.collect());
-		self.references.drain_filter(|reference| !reference.collect());
-		self.values.drain_filter(|value| !value.collect());
+		self.scopes.collect();
+		self.references.collect();
+		self.values.collect();
 	}
 
 	pub fn execute(&mut self, node: &'a dyn Node) -> GcReference<'a> {
@@ -150,9 +149,7 @@ impl GcTraceable for Engine<'_> {
 
 impl<'a> Engine<'a> {
 	pub fn new_value(&mut self, class: GcValue<'a>, data: Data<'a>) -> GcValue<'a> {
-		let value = GcRef::alloc(Value::new(class, data));
-		self.values.push(value);
-		return value;
+		return self.values.alloc(Value::new(class, data));
 	}
 
 	pub fn new_undefined(&mut self) -> GcReference<'a> {
@@ -160,9 +157,7 @@ impl<'a> Engine<'a> {
 	}
 
 	pub fn new_reference(&mut self, value: Option<GcValue<'a>>, variable: bool) -> GcReference<'a> {
-		let reference = GcRef::alloc(Reference::new(value, variable));
-		self.references.push(reference);
-		return reference;
+		return self.references.alloc(Reference::new(value, variable));
 	}
 
 	pub fn new_constant_value(&mut self, class: GcValue<'a>, data: Data<'a>) -> GcReference<'a> {
