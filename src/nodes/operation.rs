@@ -1,8 +1,7 @@
 use crate::nodes::Node;
 use crate::nodes::expression::Expression;
 use crate::runtime::engine::Engine;
-use crate::runtime::gc::GcRef;
-use crate::runtime::reference::Reference;
+use crate::runtime::reference::GcReference;
 
 pub struct Operation {
 	left:     Expression,
@@ -21,7 +20,7 @@ impl Operation {
 }
 
 impl Node for Operation {
-	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> GcRef<Reference<'a>> {
+	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> GcReference<'a> {
 		if self.operator.to_string() == "=" {
 			let mut left  = execute!(engine, &self.left);
 			let right = execute!(engine, &self.right).read();

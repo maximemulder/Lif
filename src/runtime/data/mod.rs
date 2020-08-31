@@ -6,11 +6,11 @@ pub use class::Class;
 pub use callable::{ Callable, Function, Primitive };
 pub use instance::Instance;
 
-use crate::runtime::gc::{ GcRef, GcTraceable };
-use crate::runtime::reference::Reference;
+use crate::runtime::gc::GcTraceable;
+use crate::runtime::reference::GcReference;
 
 pub enum Data<'a> {
-	Array(Vec<GcRef<Reference<'a>>>),
+	Array(Vec<GcReference<'a>>),
 	Boolean(bool),
 	Callable(Box<dyn Callable<'a> + 'a>),
 	Class(Class<'a>),

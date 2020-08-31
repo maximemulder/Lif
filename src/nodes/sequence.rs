@@ -1,8 +1,7 @@
 use crate::nodes::Node;
 use crate::nodes::expression::Expression;
 use crate::runtime::engine::Engine;
-use crate::runtime::gc::GcRef;
-use crate::runtime::reference::Reference;
+use crate::runtime::reference::GcReference;
 
 pub struct Sequence {
 	expression:  Expression,
@@ -23,7 +22,7 @@ impl Sequence {
 }
 
 impl Node for Sequence {
-	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> GcRef<Reference<'a>> {
+	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> GcReference<'a> {
 		let value = execute!(engine, &self.expression).read();
 		let mut arguments = Vec::new();
 		for argument in self.expressions.iter() {

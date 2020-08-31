@@ -1,12 +1,14 @@
 use crate::runtime::gc::{ GcRef, GcTraceable };
-use crate::runtime::value::Value;
+use crate::runtime::value::GcValue;
+
+pub type GcReference<'a> = GcRef<Reference<'a>>;
 
 pub struct Reference<'a> {
-	value: Option<GcRef<Value<'a>>>,
+	value: Option<GcValue<'a>>,
 }
 
 impl<'a> Reference<'a> {
-	pub fn new(value: GcRef<Value<'a>>) -> Self {
+	pub fn new(value: GcValue<'a>) -> Self {
 		return Self {
 			value: Some(value),
 		};
@@ -18,7 +20,7 @@ impl<'a> Reference<'a> {
 		};
 	}
 
-	pub fn read(&self) -> GcRef<Value<'a>> {
+	pub fn read(&self) -> GcValue<'a> {
 		if let Some(value) = self.value {
 			return value;
 		}
@@ -26,7 +28,7 @@ impl<'a> Reference<'a> {
 		panic!();
 	}
 
-	pub fn write(&mut self, value: GcRef<Value<'a>>) {
+	pub fn write(&mut self, value: GcValue<'a>) {
 		self.value = Some(value);
 	}
 }

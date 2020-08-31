@@ -1,8 +1,7 @@
 use crate::nodes::Node;
 use crate::nodes::statement::Statement;
 use crate::runtime::engine::Engine;
-use crate::runtime::gc::GcRef;
-use crate::runtime::reference::Reference;
+use crate::runtime::reference::GcReference;
 
 pub struct Statements {
 	statements: Vec<Statement>,
@@ -17,7 +16,7 @@ impl Statements {
 }
 
 impl Node for Statements {
-	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> GcRef<Reference<'a>> {
+	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> GcReference<'a> {
 		for statement in self.statements.iter() {
 			execute!(engine, statement);
 		}

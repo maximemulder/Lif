@@ -1,18 +1,18 @@
 use crate::runtime::data::{ Class, Data };
 use crate::runtime::engine::Engine;
 use crate::runtime::gc::{ GcRef, GcTraceable };
-use crate::runtime::reference::Reference;
-use crate::runtime::value::Value;
+use crate::runtime::reference::GcReference;
+use crate::runtime::value::GcValue;
 
 pub struct Environment<'a> {
-	pub array:    GcRef<Value<'a>>,
-	pub boolean:  GcRef<Value<'a>>,
-	pub class:    GcRef<Value<'a>>,
-	pub function: GcRef<Value<'a>>,
-	pub instance: GcRef<Value<'a>>,
-	pub integer:  GcRef<Value<'a>>,
-	pub object:   GcRef<Value<'a>>,
-	pub string:   GcRef<Value<'a>>,
+	pub array:    GcValue<'a>,
+	pub boolean:  GcValue<'a>,
+	pub class:    GcValue<'a>,
+	pub function: GcValue<'a>,
+	pub instance: GcValue<'a>,
+	pub integer:  GcValue<'a>,
+	pub object:   GcValue<'a>,
+	pub string:   GcValue<'a>,
 }
 
 impl<'a> Environment<'a> {
@@ -39,21 +39,21 @@ impl GcTraceable for Environment<'_> {
 }
 
 impl<'a> Engine<'a> {
-	fn create_class(&mut self) -> GcRef<Value<'a>> {
+	fn create_class(&mut self) -> GcValue<'a> {
 		return self.new_value(self.environment.class, Data::Class(Class::new(Some(self.environment.object))));
 	}
 
-	pub fn new_variable_primitive(&mut self, name: &str, callback: &'a dyn Fn(&mut Engine<'a>, Vec<GcRef<Value<'a>>>) -> GcRef<Reference<'a>>) {
+	pub fn new_variable_primitive(&mut self, name: &str, callback: &'a dyn Fn(&mut Engine<'a>, Vec<GcValue<'a>>) -> GcReference<'a>) {
 		let primitive = self.new_primitive(callback);
 		self.new_variable(name, primitive);
 	}
 
-	pub fn new_variable_value(&mut self, name: &str, value: GcRef<Value<'a>>) {
+	pub fn new_variable_value(&mut self, name: &str, value: GcValue<'a>) {
 		let reference = self.new_reference(value);
 		self.new_variable(name, reference);
 	}
 
-	fn new_method_primitive(&mut self, mut value: GcRef<Value<'a>>, name: &str, callback: &'a dyn Fn(&mut Engine<'a>, Vec<GcRef<Value<'a>>>) -> GcRef<Reference<'a>>) {
+	fn new_method_primitive(&mut self, mut value: GcValue<'a>, name: &str, callback: &'a dyn Fn(&mut Engine<'a>, Vec<GcValue<'a>>) -> GcReference<'a>) {
 		let primitive = self.new_primitive(callback);
 		value.data_class_mut().methods.insert(name.to_string(), primitive);
 	}
@@ -139,7 +139,7 @@ impl<'a> Engine<'a> {
 	}
 }
 
-fn primitive_assert<'a>(engine: &mut Engine<'a>, arguments: Vec<GcRef<Value<'a>>>) -> GcRef<Reference<'a>> {
+fn primitive_assert<'a>(engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> GcReference<'a> {
 	if !arguments[0].data_boolean() {
 		panic!();
 	}
@@ -147,27 +147,27 @@ fn primitive_assert<'a>(engine: &mut Engine<'a>, arguments: Vec<GcRef<Value<'a>>
 	return engine.new_undefined();
 }
 
-fn primitive_error<'a>(engine: &mut Engine<'a>, arguments: Vec<GcRef<Value<'a>>>) -> GcRef<Reference<'a>> {
+fn primitive_error<'a>(engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> GcReference<'a> {
 	let reference = engine.call_method(arguments[0], "to_string", Vec::new());
 	println!("{}", reference.read().data_string());
 	panic!();
 }
 
-fn primitive_exit<'a>(_: &mut Engine<'a>, _: Vec<GcRef<Value<'a>>>) -> GcRef<Reference<'a>> {
+fn primitive_exit<'a>(_: &mut Engine<'a>, _: Vec<GcValue<'a>>) -> GcReference<'a> {
 	panic!();
 }
 
-fn primitive_new<'a>(engine: &mut Engine<'a>, arguments: Vec<GcRef<Value<'a>>>) -> GcRef<Reference<'a>> {
+fn primitive_new<'a>(engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> GcReference<'a> {
 	return engine.new_instance(arguments[0]);
 }
 
-fn primitive_print<'a>(engine: &mut Engine<'a>, arguments: Vec<GcRef<Value<'a>>>) -> GcRef<Reference<'a>> {
+fn primitive_print<'a>(engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> GcReference<'a> {
 	let reference = engine.call_method(arguments[0], "to_string", Vec::new());
 	println!("{}", reference.read().data_string());
 	return engine.new_undefined();
 }
 
-fn array_to_string<'a>(engine: &mut Engine<'a>, arguments: Vec<GcRef<Value<'a>>>) -> GcRef<Reference<'a>> {
+fn array_to_string<'a>(engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> GcReference<'a> {
 	let mut string = String::from("[");
 	let elements = arguments[0].data_array().clone();
 	for element in elements.iter() {
@@ -184,52 +184,52 @@ fn array_to_string<'a>(engine: &mut Engine<'a>, arguments: Vec<GcRef<Value<'a>>>
 	return engine.new_string(string);
 }
 
-fn array_copy<'a>(engine: &mut Engine<'a>, arguments: Vec<GcRef<Value<'a>>>) -> GcRef<Reference<'a>> {
+fn array_copy<'a>(engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> GcReference<'a> {
 	return engine.new_array(arguments[0].data_array().clone());
 }
 
-fn array_append<'a>(engine: &mut Engine<'a>, mut arguments: Vec<GcRef<Value<'a>>>) -> GcRef<Reference<'a>> {
+fn array_append<'a>(engine: &mut Engine<'a>, mut arguments: Vec<GcValue<'a>>) -> GcReference<'a> {
 	let reference = engine.new_reference(arguments[1]);
 	arguments[0].data_array_mut().push(reference);
 	return engine.new_undefined();
 }
 
-fn array_prepend<'a>(engine: &mut Engine<'a>, mut arguments: Vec<GcRef<Value<'a>>>) -> GcRef<Reference<'a>> {
+fn array_prepend<'a>(engine: &mut Engine<'a>, mut arguments: Vec<GcValue<'a>>) -> GcReference<'a> {
 	let reference = engine.new_reference(arguments[1]);
 	arguments[0].data_array_mut().insert(0, reference);
 	return engine.new_undefined();
 }
 
-fn array_insert<'a>(engine: &mut Engine<'a>, mut arguments: Vec<GcRef<Value<'a>>>) -> GcRef<Reference<'a>> {
+fn array_insert<'a>(engine: &mut Engine<'a>, mut arguments: Vec<GcValue<'a>>) -> GcReference<'a> {
 	let index = *arguments[1].data_integer();
 	let reference = engine.new_reference(arguments[2]);
 	arguments[0].data_array_mut().insert(index, reference);
 	return engine.new_undefined();
 }
 
-fn array_remove<'a>(engine: &mut Engine<'a>, mut arguments: Vec<GcRef<Value<'a>>>) -> GcRef<Reference<'a>> {
+fn array_remove<'a>(engine: &mut Engine<'a>, mut arguments: Vec<GcValue<'a>>) -> GcReference<'a> {
 	let index = *arguments[1].data_integer();
 	arguments[0].data_array_mut().remove(index);
 	return engine.new_undefined();
 }
 
-fn array_access<'a>(_: &mut Engine<'a>, arguments: Vec<GcRef<Value<'a>>>) -> GcRef<Reference<'a>> {
+fn array_access<'a>(_: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> GcReference<'a> {
 	return arguments[0].data_array()[*arguments[1].data_integer()];
 }
 
-fn boolean_to_string<'a>(engine: &mut Engine<'a>, arguments: Vec<GcRef<Value<'a>>>) -> GcRef<Reference<'a>> {
+fn boolean_to_string<'a>(engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> GcReference<'a> {
 	return engine.new_string(arguments[0].data_boolean().to_string());
 }
 
-fn boolean_comparison<'a>(engine: &mut Engine<'a>, arguments: Vec<GcRef<Value<'a>>>) -> GcRef<Reference<'a>> {
+fn boolean_comparison<'a>(engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> GcReference<'a> {
 	return engine.new_boolean(arguments[0].data_boolean() == arguments[1].data_boolean());
 }
 
-fn class_to_string<'a>(engine: &mut Engine<'a>, _: Vec<GcRef<Value<'a>>>) -> GcRef<Reference<'a>> {
+fn class_to_string<'a>(engine: &mut Engine<'a>, _: Vec<GcValue<'a>>) -> GcReference<'a> {
 	return engine.new_string("CLASS".to_string());
 }
 
-fn class_chain<'a>(engine: &mut Engine<'a>, arguments: Vec<GcRef<Value<'a>>>) -> GcRef<Reference<'a>> {
+fn class_chain<'a>(engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> GcReference<'a> {
 	let name = arguments[1].data_string().clone();
 	let mut this = arguments[0];
 	if let Some(method) = this.get_method(engine, &name) {
@@ -247,19 +247,19 @@ fn class_chain<'a>(engine: &mut Engine<'a>, arguments: Vec<GcRef<Value<'a>>>) ->
 	};
 }
 
-fn class_access<'a>(engine: &mut Engine<'a>, _: Vec<GcRef<Value<'a>>>) -> GcRef<Reference<'a>> {
+fn class_access<'a>(engine: &mut Engine<'a>, _: Vec<GcValue<'a>>) -> GcReference<'a> {
 	return engine.new_reference(engine.environment.array);
 }
 
-fn function_to_string<'a>(engine: &mut Engine<'a>, _: Vec<GcRef<Value<'a>>>) -> GcRef<Reference<'a>> {
+fn function_to_string<'a>(engine: &mut Engine<'a>, _: Vec<GcValue<'a>>) -> GcReference<'a> {
 	return engine.new_string("FUNCTION".to_string());
 }
 
-fn function_call<'a>(engine: &mut Engine<'a>, arguments: Vec<GcRef<Value<'a>>>) -> GcRef<Reference<'a>> {
+fn function_call<'a>(engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> GcReference<'a> {
 	return arguments[0].data_callable().duplicate().call(engine, arguments[1..].to_vec());
 }
 
-fn instance_to_string<'a>(engine: &mut Engine<'a>, arguments: Vec<GcRef<Value<'a>>>) -> GcRef<Reference<'a>> {
+fn instance_to_string<'a>(engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> GcReference<'a> {
 	let mut string = String::from("{");
 	let attributes = &arguments[0].data_instance().attributes.clone();
 	for (name, attribute) in attributes {
@@ -278,7 +278,7 @@ fn instance_to_string<'a>(engine: &mut Engine<'a>, arguments: Vec<GcRef<Value<'a
 	return engine.new_string(string);
 }
 
-fn instance_chain<'a>(engine: &mut Engine<'a>, arguments: Vec<GcRef<Value<'a>>>) -> GcRef<Reference<'a>> {
+fn instance_chain<'a>(engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> GcReference<'a> {
 	let name = arguments[1].data_string().clone();
 	let mut this = arguments[0];
 	if let Some(method) = this.get_method(engine, &name) {
@@ -296,65 +296,65 @@ fn instance_chain<'a>(engine: &mut Engine<'a>, arguments: Vec<GcRef<Value<'a>>>)
 	}
 }
 
-fn integer_to_string<'a>(engine: &mut Engine<'a>, arguments: Vec<GcRef<Value<'a>>>) -> GcRef<Reference<'a>> {
+fn integer_to_string<'a>(engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> GcReference<'a> {
 	return engine.new_string(arguments[0].data_integer().to_string());
 }
 
-fn integer_comparison<'a>(engine: &mut Engine<'a>, arguments: Vec<GcRef<Value<'a>>>) -> GcRef<Reference<'a>> {
+fn integer_comparison<'a>(engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> GcReference<'a> {
 	return engine.new_boolean(*arguments[0].data_integer() == *arguments[1].data_integer());
 }
 
-fn integer_lesser<'a>(engine: &mut Engine<'a>, arguments: Vec<GcRef<Value<'a>>>) -> GcRef<Reference<'a>> {
+fn integer_lesser<'a>(engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> GcReference<'a> {
 	return engine.new_boolean(*arguments[0].data_integer() < *arguments[1].data_integer());
 }
 
-fn integer_addition<'a>(engine: &mut Engine<'a>, arguments: Vec<GcRef<Value<'a>>>) -> GcRef<Reference<'a>> {
+fn integer_addition<'a>(engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> GcReference<'a> {
 	return engine.new_integer(*arguments[0].data_integer() + *arguments[1].data_integer());
 }
 
-fn integer_subtraction<'a>(engine: &mut Engine<'a>, arguments: Vec<GcRef<Value<'a>>>) -> GcRef<Reference<'a>> {
+fn integer_subtraction<'a>(engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> GcReference<'a> {
 	return engine.new_integer(*arguments[0].data_integer() + *arguments[1].data_integer());
 }
 
-fn integer_multiplication<'a>(engine: &mut Engine<'a>, arguments: Vec<GcRef<Value<'a>>>) -> GcRef<Reference<'a>> {
+fn integer_multiplication<'a>(engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> GcReference<'a> {
 	return engine.new_integer(*arguments[0].data_integer() + *arguments[1].data_integer());
 }
 
-fn integer_division<'a>(engine: &mut Engine<'a>, arguments: Vec<GcRef<Value<'a>>>) -> GcRef<Reference<'a>> {
+fn integer_division<'a>(engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> GcReference<'a> {
 	return engine.new_integer(*arguments[0].data_integer() / *arguments[1].data_integer());
 }
 
-fn integer_remainder<'a>(engine: &mut Engine<'a>, arguments: Vec<GcRef<Value<'a>>>) -> GcRef<Reference<'a>> {
+fn integer_remainder<'a>(engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> GcReference<'a> {
 	return engine.new_integer(*arguments[0].data_integer() % *arguments[1].data_integer());
 }
 
-fn object_comparison<'a>(engine: &mut Engine<'a>, arguments: Vec<GcRef<Value<'a>>>) -> GcRef<Reference<'a>> {
+fn object_comparison<'a>(engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> GcReference<'a> {
 	return engine.new_boolean(arguments[0] == arguments[1]);
 }
 
-fn object_difference<'a>(engine: &mut Engine<'a>, arguments: Vec<GcRef<Value<'a>>>) -> GcRef<Reference<'a>> {
+fn object_difference<'a>(engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> GcReference<'a> {
 	let reference = engine.call_method_self(arguments[0], "==", arguments);
 	return engine.new_boolean(!reference.read().data_boolean());
 }
 
-fn object_greater<'a>(engine: &mut Engine<'a>, arguments: Vec<GcRef<Value<'a>>>) -> GcRef<Reference<'a>> {
+fn object_greater<'a>(engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> GcReference<'a> {
 	let left  = engine.call_method_self(arguments[0], "<", arguments.clone());
 	let right = engine.call_method_self(arguments[0], "==", arguments.clone());
 	return engine.new_boolean(!left.read().data_boolean() && !right.read().data_boolean());
 }
 
-fn object_greater_equal<'a>(engine: &mut Engine<'a>, arguments: Vec<GcRef<Value<'a>>>) -> GcRef<Reference<'a>> {
+fn object_greater_equal<'a>(engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> GcReference<'a> {
 	let reference = engine.call_method_self(arguments[0], "<", arguments);
 	return engine.new_boolean(!reference.read().data_boolean());
 }
 
-fn object_lesser_equal<'a>(engine: &mut Engine<'a>, arguments: Vec<GcRef<Value<'a>>>) -> GcRef<Reference<'a>> {
+fn object_lesser_equal<'a>(engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> GcReference<'a> {
 	let left  = engine.call_method_self(arguments[0], "<", arguments.clone());
 	let right = engine.call_method_self(arguments[0], "==", arguments.clone());
 	return engine.new_boolean(*left.read().data_boolean() || *right.read().data_boolean());
 }
 
-fn object_chain<'a>(engine: &mut Engine<'a>, arguments: Vec<GcRef<Value<'a>>>) -> GcRef<Reference<'a>> {
+fn object_chain<'a>(engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> GcReference<'a> {
 	let name = arguments[1].data_string();
 	let this = arguments[0];
 	if let Some(method) = this.get_method(engine, name) {
@@ -365,15 +365,15 @@ fn object_chain<'a>(engine: &mut Engine<'a>, arguments: Vec<GcRef<Value<'a>>>) -
 	panic!();
 }
 
-fn string_to_string<'a>(engine: &mut Engine<'a>, arguments: Vec<GcRef<Value<'a>>>) -> GcRef<Reference<'a>> {
+fn string_to_string<'a>(engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> GcReference<'a> {
 	return engine.new_reference(arguments[0]);
 }
 
-fn string_comparison<'a>(engine: &mut Engine<'a>, arguments: Vec<GcRef<Value<'a>>>) -> GcRef<Reference<'a>> {
+fn string_comparison<'a>(engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> GcReference<'a> {
 	return engine.new_boolean(arguments[0].data_string() == arguments[1].data_string());
 }
 
-fn string_concatenation<'a>(engine: &mut Engine<'a>, arguments: Vec<GcRef<Value<'a>>>) -> GcRef<Reference<'a>> {
+fn string_concatenation<'a>(engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> GcReference<'a> {
 	let right = engine.call_method(arguments[1], "to_string", Vec::new());
 	return engine.new_string(format!("{}{}", arguments[0].data_string(), right.read().data_string()));
 }

@@ -37,11 +37,10 @@ pub mod r#continue;
 
 pub mod build;
 use crate::runtime::engine::Engine;
-use crate::runtime::gc::GcRef;
-use crate::runtime::reference::Reference;
+use crate::runtime::reference::GcReference;
 
 pub use crate::node::Node as SyntaxNode;
 
 pub trait Node {
-	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> GcRef<Reference<'a>>;
+	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> GcReference<'a>;
 }

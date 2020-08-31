@@ -1,9 +1,9 @@
-use crate::runtime::gc::{ GcRef, GcTraceable };
-use crate::runtime::reference::Reference;
+use crate::runtime::gc::GcTraceable;
+use crate::runtime::reference::GcReference;
 use std::collections::HashMap;
 
 pub struct Instance<'a> {
-	pub attributes: HashMap<String, GcRef<Reference<'a>>>,
+	pub attributes: HashMap<String, GcReference<'a>>,
 }
 
 impl Instance<'_> {

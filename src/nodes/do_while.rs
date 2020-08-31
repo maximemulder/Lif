@@ -1,8 +1,7 @@
 use crate::nodes::Node;
 use crate::nodes::expression::Expression;
 use crate::runtime::engine::{ Control, Engine };
-use crate::runtime::gc::GcRef;
-use crate::runtime::reference::Reference;
+use crate::runtime::reference::GcReference;
 
 pub struct DoWhile {
 	body:      Expression,
@@ -19,7 +18,7 @@ impl DoWhile {
 }
 
 impl Node for DoWhile {
-	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> GcRef<Reference<'a>> {
+	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> GcReference<'a> {
 		let mut array = Vec::new();
 		loop {
 			let reference = engine.execute(&self.body);

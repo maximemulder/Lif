@@ -1,7 +1,6 @@
 use crate::nodes::Node;
 use crate::runtime::engine::Engine;
-use crate::runtime::gc::GcRef;
-use crate::runtime::reference::Reference;
+use crate::runtime::reference::GcReference;
 
 pub struct Structure {
 	node: Box<dyn Node>,
@@ -16,7 +15,7 @@ impl Structure {
 }
 
 impl Node for Structure {
-	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> GcRef<Reference<'a>> {
+	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> GcReference<'a> {
 		return execute!(engine, self.node.as_ref());
 	}
 }

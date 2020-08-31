@@ -1,8 +1,7 @@
 use crate::nodes::Node;
 use crate::nodes::expression::Expression;
 use crate::runtime::engine::Engine;
-use crate::runtime::gc::GcRef;
-use crate::runtime::reference::Reference;
+use crate::runtime::reference::GcReference;
 
 pub struct Statement {
 	expression: Expression,
@@ -17,7 +16,7 @@ impl Statement {
 }
 
 impl Node for Statement {
-	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> GcRef<Reference<'a>> {
+	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> GcReference<'a> {
 		execute!(engine, &self.expression);
 		return engine.new_undefined();
 	}

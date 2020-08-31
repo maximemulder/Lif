@@ -1,10 +1,12 @@
 use crate::runtime::gc::{ GcRef, GcTraceable };
-use crate::runtime::reference::Reference;
+use crate::runtime::reference::GcReference;
 use std::collections::HashMap;
 
+pub type GcScope<'a> = GcRef<Scope<'a>>;
+
 pub struct Scope<'a> {
-	pub parent: Option<GcRef<Scope<'a>>>,
-	variables: HashMap<String, GcRef<Reference<'a>>>,
+	pub parent: Option<GcScope<'a>>,
+	variables: HashMap<String, GcReference<'a>>,
 }
 
 impl<'a> Scope<'a> {
@@ -15,14 +17,14 @@ impl<'a> Scope<'a> {
 		};
 	}
 
-	pub fn new_child(scope: GcRef<Scope<'a>>) -> Self {
+	pub fn new_child(scope: GcScope<'a>) -> Self {
 		return Self {
 			parent: Some(scope),
 			variables: HashMap::new(),
 		};
 	}
 
-	pub fn get_variable(&self, name: &str) -> Option<GcRef<Reference<'a>>> {
+	pub fn get_variable(&self, name: &str) -> Option<GcReference<'a>> {
 		if let Some(reference) = self.variables.get(name) {
 			return Some(*reference);
 		}
@@ -30,7 +32,7 @@ impl<'a> Scope<'a> {
 		return None;
 	}
 
-	pub fn add_variable(&mut self, name: &str, reference: GcRef<Reference<'a>>) {
+	pub fn add_variable(&mut self, name: &str, reference: GcReference<'a>) {
 		self.variables.insert(name.to_string(), reference);
 	}
 }

@@ -1,23 +1,23 @@
 use crate::nodes::Node;
 use crate::nodes::block::Block;
 use crate::runtime::engine::{ Control, Engine };
-use crate::runtime::gc::{ GcRef, GcTraceable };
-use crate::runtime::reference::Reference;
-use crate::runtime::scope::Scope;
-use crate::runtime::value::Value;
+use crate::runtime::gc::GcTraceable;
+use crate::runtime::reference::GcReference;
+use crate::runtime::scope::GcScope;
+use crate::runtime::value::GcValue;
 
 pub trait Callable<'a>: GcTraceable {
-	fn call(&self, engine: &mut Engine<'a>, arguments: Vec<GcRef<Value<'a>>>) -> GcRef<Reference<'a>>;
+	fn call(&self, engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> GcReference<'a>;
 	fn duplicate(&self) -> Box<dyn Callable<'a> + 'a>;
 }
 
 #[derive(Clone)]
 pub struct Primitive<'a> {
-	callback: &'a dyn Fn(&mut Engine<'a>, Vec<GcRef<Value<'a>>>) -> GcRef<Reference<'a>>,
+	callback: &'a dyn Fn(&mut Engine<'a>, Vec<GcValue<'a>>) -> GcReference<'a>,
 }
 
 impl<'a> Primitive<'a> {
-	pub fn new(callback: &'a dyn Fn(&mut Engine<'a>, Vec<GcRef<Value<'a>>>) -> GcRef<Reference<'a>>) -> Self {
+	pub fn new(callback: &'a dyn Fn(&mut Engine<'a>, Vec<GcValue<'a>>) -> GcReference<'a>) -> Self {
 		return Self {
 			callback,
 		};
@@ -25,7 +25,7 @@ impl<'a> Primitive<'a> {
 }
 
 impl<'a> Callable<'a> for Primitive<'a> {
-	fn call(&self, engine: &mut Engine<'a>, arguments: Vec<GcRef<Value<'a>>>) -> GcRef<Reference<'a>> {
+	fn call(&self, engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> GcReference<'a> {
 		return (self.callback)(engine, arguments);
 	}
 
@@ -40,13 +40,13 @@ impl GcTraceable for Primitive<'_> {
 
 #[derive(Clone)]
 pub struct Function<'a> {
-	scope: GcRef<Scope<'a>>,
+	scope: GcScope<'a>,
 	parameters: &'a Vec<Box<str>>,
 	block: &'a Block,
 }
 
 impl<'a> Function<'a> {
-	pub fn new(scope: GcRef<Scope<'a>>, parameters: &'a Vec<Box<str>>, block: &'a Block) -> Self {
+	pub fn new(scope: GcScope<'a>, parameters: &'a Vec<Box<str>>, block: &'a Block) -> Self {
 		return Self {
 			scope,
 			parameters,
@@ -56,7 +56,7 @@ impl<'a> Function<'a> {
 }
 
 impl<'a> Callable<'a> for Function<'a> {
-	fn call(&self, engine: &mut Engine<'a>, arguments: Vec<GcRef<Value<'a>>>) -> GcRef<Reference<'a>> {
+	fn call(&self, engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> GcReference<'a> {
 		let frame = engine.push_frame(self.scope);
 		for (parameter, argument) in self.parameters.iter().zip(arguments) {
 			let reference = engine.new_reference(argument);

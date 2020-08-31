@@ -1,7 +1,6 @@
 use crate::nodes::Node;
 use crate::runtime::engine::Engine;
-use crate::runtime::gc::GcRef;
-use crate::runtime::reference::Reference;
+use crate::runtime::reference::GcReference;
 
 pub struct Declaration {
 	identifier: Box<str>,
@@ -16,7 +15,7 @@ impl Declaration {
 }
 
 impl Node for Declaration {
-	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> GcRef<Reference<'a>> {
+	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> GcReference<'a> {
 		let reference = engine.new_undefined();
 		engine.new_variable(&self.identifier, reference);
 		return reference;
