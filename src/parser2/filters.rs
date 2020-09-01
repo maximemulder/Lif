@@ -74,3 +74,21 @@ impl<'a> Filter<'a> for FilterElement<'a> {
 		return Some(vec![Node::new_production(self.element, nodes)]);
 	}
 }
+
+pub struct FilterCustom {
+	callback: &'static dyn for<'a, 'b> Fn(&mut Parser<'a, 'b, '_>, Vec<Node<'a, 'b>>) -> Option<Vec<Node<'a, 'b>>>,
+}
+
+impl FilterCustom {
+	pub fn new(callback: &'static dyn for<'a, 'b> Fn(&mut Parser<'a, 'b, '_>, Vec<Node<'a, 'b>>) -> Option<Vec<Node<'a, 'b>>>) -> Self {
+		return Self {
+			callback,
+		};
+	}
+}
+
+impl<'a> Filter<'a> for FilterCustom {
+	fn filter<'b>(&self, parser: &mut Parser<'a, 'b, '_>, nodes: Vec<Node<'a, 'b>>) -> Option<Vec<Node<'a, 'b>>> {
+		return (self.callback)(parser, nodes);
+	}
+}

@@ -116,8 +116,12 @@ fn then(node: &SyntaxNode) -> Expression {
 	};
 }
 
-fn r#else(node: &SyntaxNode) -> Expression {
-	return expression(&node.children()[1]);
+fn r#else(node: &SyntaxNode) -> Box<dyn Node> {
+	if node.children()[1].element == &elements::productions::EXPRESSION {
+		return Box::new(expression(&node.children()[1]));
+	} else {
+		return Box::new(block(&node.children()[1]));
+	}
 }
 
 fn r#do(node: &SyntaxNode) -> Expression {

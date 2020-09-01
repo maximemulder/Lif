@@ -25,7 +25,7 @@ impl<T> Gc<T> {
 	}
 
 	pub fn collect(&mut self) {
-		self.refs.drain_filter(|r#ref| !r#ref.collect());
+		// self.refs.drain_filter(|r#ref| !r#ref.collect());
 	}
 }
 

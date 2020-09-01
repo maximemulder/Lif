@@ -6,11 +6,11 @@ use crate::runtime::reference::GcReference;
 pub struct If {
 	condition: Expression,
 	then:      Expression,
-	r#else:    Option<Expression>,
+	r#else:    Option<Box<dyn Node>>,
 }
 
 impl If {
-	pub fn new(condition: Expression, then: Expression, r#else: Option<Expression>) -> Self {
+	pub fn new(condition: Expression, then: Expression, r#else: Option<Box<dyn Node>>) -> Self {
 		return Self {
 			condition,
 			then,
@@ -27,7 +27,7 @@ impl Node for If {
 		} {
 			execute!(engine, &self.then)
 		} else if let Some(r#else) = &self.r#else {
-			execute!(engine, r#else)
+			execute!(engine, r#else.as_ref())
 		} else {
 			return engine.new_undefined();
 		}
