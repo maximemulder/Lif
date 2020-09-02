@@ -101,51 +101,27 @@ fn block(node: &SyntaxNode) -> Block {
 }
 
 fn r#if(node: &SyntaxNode) -> If {
-	return If::new(expression(&node.children()[1]), then(&node.children()[2]), if let Some(child) = node.children().get(3) {
-		Some(r#else(child))
+	return If::new(expression(&node.children()[1]), block(&node.children()[2]), if let Some(child) = node.children().get(4) {
+		Some(block(child))
 	} else {
 		None
 	});
 }
 
-fn then(node: &SyntaxNode) -> Expression {
-	return if node.children().len() == 1 {
-		Expression::new(Box::new(block(&node.children()[0])))
-	} else {
-		expression(&node.children()[1])
-	};
-}
-
-fn r#else(node: &SyntaxNode) -> Box<dyn Node> {
-	if node.children()[1].element == &elements::productions::EXPRESSION {
-		return Box::new(expression(&node.children()[1]));
-	} else {
-		return Box::new(block(&node.children()[1]));
-	}
-}
-
-fn r#do(node: &SyntaxNode) -> Expression {
-	return if node.children().len() == 1 {
-		Expression::new(Box::new(block(&node.children()[0])))
-	} else {
-		expression(&node.children()[1])
-	};
-}
-
 fn r#loop(node: &SyntaxNode) -> Loop {
-	return Loop::new(expression(&node.children()[1]));
+	return Loop::new(block(&node.children()[1]));
 }
 
 fn r#while(node: &SyntaxNode) -> While {
-	return While::new(expression(&node.children()[1]), r#do(&node.children()[2]));
+	return While::new(expression(&node.children()[1]), block(&node.children()[2]));
 }
 
 fn do_while(node: &SyntaxNode) -> DoWhile {
-	return DoWhile::new(expression(&node.children()[1]), expression(&node.children()[3]));
+	return DoWhile::new(block(&node.children()[1]), expression(&node.children()[3]));
 }
 
 fn for_in(node: &SyntaxNode) -> ForIn {
-	return ForIn::new(token(&node.children()[1]), expression(&node.children()[3]), r#do(&node.children()[4]));
+	return ForIn::new(token(&node.children()[1]), expression(&node.children()[3]), block(&node.children()[4]));
 }
 
 fn declaration(node: &SyntaxNode) -> Declaration {

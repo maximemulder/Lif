@@ -1,15 +1,16 @@
 use crate::nodes::Node;
+use crate::nodes::block::Block;
 use crate::nodes::expression::Expression;
 use crate::runtime::engine::{ Control, Engine };
 use crate::runtime::reference::GcReference;
 
 pub struct DoWhile {
-	body:      Expression,
+	body:      Block,
 	condition: Expression,
 }
 
 impl DoWhile {
-	pub fn new(body: Expression, condition: Expression) -> Self {
+	pub fn new(body: Block, condition: Expression) -> Self {
 		return Self {
 			body,
 			condition,

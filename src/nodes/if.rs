@@ -1,16 +1,17 @@
 use crate::nodes::Node;
+use crate::nodes::block::Block;
 use crate::nodes::expression::Expression;
 use crate::runtime::engine::Engine;
 use crate::runtime::reference::GcReference;
 
 pub struct If {
 	condition: Expression,
-	then:      Expression,
-	r#else:    Option<Box<dyn Node>>,
+	then:      Block,
+	r#else:    Option<Block>,
 }
 
 impl If {
-	pub fn new(condition: Expression, then: Expression, r#else: Option<Box<dyn Node>>) -> Self {
+	pub fn new(condition: Expression, then: Block, r#else: Option<Block>) -> Self {
 		return Self {
 			condition,
 			then,
@@ -27,7 +28,7 @@ impl Node for If {
 		} {
 			execute!(engine, &self.then)
 		} else if let Some(r#else) = &self.r#else {
-			execute!(engine, r#else.as_ref())
+			execute!(engine, r#else)
 		} else {
 			return engine.new_undefined();
 		}

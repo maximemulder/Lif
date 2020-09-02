@@ -1,14 +1,14 @@
 use crate::nodes::Node;
-use crate::nodes::expression::Expression;
+use crate::nodes::block::Block;
 use crate::runtime::engine::{ Control, Engine };
 use crate::runtime::reference::GcReference;
 
 pub struct Loop {
-	body: Expression,
+	body: Block,
 }
 
 impl Loop {
-	pub fn new(body: Expression) -> Self {
+	pub fn new(body: Block) -> Self {
 		return Self {
 			body,
 		};

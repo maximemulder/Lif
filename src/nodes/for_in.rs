@@ -1,4 +1,5 @@
 use crate::nodes::Node;
+use crate::nodes::block::Block;
 use crate::nodes::expression::Expression;
 use crate::runtime::engine::{ Control, Engine };
 use crate::runtime::reference::GcReference;
@@ -6,11 +7,11 @@ use crate::runtime::reference::GcReference;
 pub struct ForIn {
 	identifier: Box<str>,
 	expression: Expression,
-	body:       Expression,
+	body:       Block,
 }
 
 impl ForIn {
-	pub fn new(	identifier: Box<str>, expression: Expression, body: Expression) -> Self {
+	pub fn new(	identifier: Box<str>, expression: Expression, body: Block) -> Self {
 		return Self {
 			identifier,
 			expression,
