@@ -198,18 +198,13 @@ pub fn run<'a, 'b>(tokens: &Vec<Node<'a, 'b>>) -> Option<Node<'a, 'b>> {
 		filters.create(FilterElement::new(&elements::structures::WHILE))
 	));
 
-	let do_while = rules.create(RuleFilter::new(
-		rules.create(RuleSequence::new(vec![keyword_do, block, keyword_while, expression])),
-		filters.create(FilterElement::new(&elements::structures::DO_WHILE))
-	));
-
 	let for_in = rules.create(RuleFilter::new(
 		rules.create(RuleSequence::new(vec![keyword_for, variable_identifier, keyword_in, expression, block])),
 		filters.create(FilterElement::new(&elements::structures::FOR_IN))
 	));
 
 	let structure = rules.create(RuleFilter::new(
-		rules.create(RuleChoice::new(vec![block, r#if, r#loop, r#while, do_while, for_in])),
+		rules.create(RuleChoice::new(vec![block, r#if, r#loop, r#while, for_in])),
 		filters.create(FilterElement::new(&elements::structures::STRUCTURE))
 	));
 
@@ -282,55 +277,7 @@ pub fn run<'a, 'b>(tokens: &Vec<Node<'a, 'b>>) -> Option<Node<'a, 'b>> {
 
 	let statement = rules.create(RuleFilter::new(
 		rules.create(RuleChoice::new(vec![
-			rules.create(RuleFilter::new(expression, filters.create(FilterCustom::new(&|parser, nodes| {
-				let structure = &nodes[0].children()[0];
-				if structure.element == &elements::structures::STRUCTURE {
-					let node = &structure.children()[0];
-					if node.element == &elements::structures::IF {
-						if let Some(token) = parser.tokens.get(parser.cursor) {
-							if token.element != &elements::symbols::SEMICOLON {
-								return Some(nodes);
-							}
-						} else {
-							return Some(nodes);
-						}
-					} else if node.element == &elements::structures::LOOP {
-						if let Some(token) = parser.tokens.get(parser.cursor) {
-							if token.element != &elements::symbols::SEMICOLON {
-								return Some(nodes);
-							}
-						} else {
-							return Some(nodes);
-						}
-					} else if node.element == &elements::structures::WHILE {
-						if let Some(token) = parser.tokens.get(parser.cursor) {
-							if token.element != &elements::symbols::SEMICOLON {
-								return Some(nodes);
-							}
-						} else {
-							return Some(nodes);
-						}
-					} else if node.element == &elements::structures::FOR_IN {
-						if let Some(token) = parser.tokens.get(parser.cursor) {
-							if token.element != &elements::symbols::SEMICOLON {
-								return Some(nodes);
-							}
-						} else {
-							return Some(nodes);
-						}
-					} else if node.element == &elements::structures::BLOCK {
-						if let Some(token) = parser.tokens.get(parser.cursor) {
-							if token.element != &elements::symbols::SEMICOLON {
-								return Some(nodes);
-							}
-						} else {
-							return Some(nodes);
-						}
-					}
-				}
-
-				return None;
-			})))),
+			rules.create(RuleSequence::new(vec![structure, rules.create(RuleOption::new(symbol_semicolon))])),
 			rules.create(RuleSequence::new(vec![expression, symbol_semicolon])),
 		])),
 		filters.create(FilterElement::new(&elements::productions::STATEMENT))

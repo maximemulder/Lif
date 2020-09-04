@@ -1,23 +1,22 @@
 use crate::nodes::Node;
-use crate::nodes::expression::Expression;
 use crate::runtime::engine::Engine;
 use crate::runtime::reference::GcReference;
 
 pub struct Statement {
-	expression: Expression,
+	node: Box<dyn Node>,
 }
 
 impl Statement {
-	pub fn new(expression: Expression) -> Self {
+	pub fn new(node: Box<dyn Node>) -> Self {
 		return Self {
-			expression,
+			node,
 		};
 	}
 }
 
 impl Node for Statement {
 	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> GcReference<'a> {
-		execute!(engine, &self.expression);
+		execute!(engine, self.node.as_ref());
 		return engine.new_undefined();
 	}
 }

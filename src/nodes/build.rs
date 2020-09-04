@@ -38,7 +38,12 @@ fn statements(node: &SyntaxNode) -> Statements {
 }
 
 fn statement(node: &SyntaxNode) -> Statement {
-	return Statement::new(expression(&node.children()[0]));
+	let child = &node.children()[0];
+	return Statement::new(match child.element {
+		&elements::productions::EXPRESSION => Box::new(expression(child)),
+		&elements::structures::STRUCTURE   => Box::new(structure(child)),
+		_ => panic!(),
+	});
 }
 
 fn expression(node: &SyntaxNode) -> Expression {
