@@ -113,10 +113,9 @@ pub fn run<'a, 'b>(tokens: &Vec<Node<'a, 'b>>) -> Option<Node<'a, 'b>> {
 		}
 	}
 
-	macro_rules! create_operation {
+	macro_rules! create_operation_filter {
 		( $child:expr, $tokens:expr ) => {{
 			let filter = filters.declare();
-
 			filters.define(filter, FilterExtension::new(
 				rules.create(RuleSequence::new(vec![
 					rules.create(RuleChoice::new($tokens)),
@@ -129,7 +128,26 @@ pub fn run<'a, 'b>(tokens: &Vec<Node<'a, 'b>>) -> Option<Node<'a, 'b>> {
 				]))
 			));
 
-			rules.create(RuleFilter::new($child, filter))
+			filter
+		}}
+	}
+
+	macro_rules! create_operation {
+		( $child:expr, $tokens:expr ) => {{
+			rules.create(RuleFilter::new($child, create_operation_filter!($child, $tokens)))
+		}}
+	}
+
+	macro_rules! create_list {
+		( $element:expr, $separator:expr ) => {{
+			rules.create(RuleOption::new(
+				rules.create(RuleSequence::new(vec![
+					$element,
+					rules.create(RuleList::new(
+						rules.create(RuleSequence::new(vec![$separator, $element]))
+					))
+				]))
+			))
 		}}
 	}
 
@@ -167,7 +185,7 @@ pub fn run<'a, 'b>(tokens: &Vec<Node<'a, 'b>>) -> Option<Node<'a, 'b>> {
 			keyword_function,
 			symbol_parenthesis_l,
 			rules.create(RuleFilter::new(
-				rules.create(RuleList::new(variable_identifier, symbol_comma)),
+				create_list!(variable_identifier, symbol_comma),
 				filters.create(FilterElement::new(&elements::productions::PARAMETERS))
 			)),
 			symbol_parenthesis_r,
@@ -214,7 +232,7 @@ pub fn run<'a, 'b>(tokens: &Vec<Node<'a, 'b>>) -> Option<Node<'a, 'b>> {
 	));
 
 	let expressions = rules.create(RuleFilter::new(
-		rules.create(RuleList::new(expression, symbol_comma)),
+		create_list!(expression, symbol_comma),
 		filters.create(FilterElement::new(&elements::productions::EXPRESSIONS))
 	));
 
@@ -261,7 +279,24 @@ pub fn run<'a, 'b>(tokens: &Vec<Node<'a, 'b>>) -> Option<Node<'a, 'b>> {
 
 	let operation_6  = create_operation!(operation_5,  vec![symbol_pipe]);
 
-	let operation_7  = create_operation!(operation_6,  vec![symbol_guillemet_l, symbol_guillemet_r, symbol_guillemet_l_eq, symbol_guillemet_l_eq]);
+	let operation_7_l = create_operation_filter!(operation_6, vec![symbol_guillemet_l, symbol_guillemet_l_eq]);
+
+	let operation_7_r = create_operation_filter!(operation_6, vec![symbol_guillemet_r, symbol_guillemet_r_eq]);
+
+	let operation_7 = rules.create(RuleChoice::new(vec![
+		rules.create(RuleSequence::new(vec![
+			rules.create(RuleFilter::new(operation_6, operation_7_l)),
+			rules.create(RulePredicateNot::new(
+				rules.create(RuleChoice::new(vec![symbol_guillemet_r, symbol_guillemet_r_eq]))
+			)),
+		])),
+		rules.create(RuleSequence::new(vec![
+			rules.create(RuleFilter::new(operation_6, operation_7_r)),
+			rules.create(RulePredicateNot::new(
+				rules.create(RuleChoice::new(vec![symbol_guillemet_l, symbol_guillemet_l_eq]))
+			)),
+		])),
+	]));
 
 	let operation_8  = create_operation!(operation_7,  vec![symbol_equal_d, symbol_exclamation_eq]);
 
@@ -337,7 +372,7 @@ pub fn run<'a, 'b>(tokens: &Vec<Node<'a, 'b>>) -> Option<Node<'a, 'b>> {
 	));
 
 	rules.define(statements, RuleFilter::new(
-		rules.create(RuleList::new(statement, rules.create(RuleNone::new()))),
+		rules.create(RuleList::new(statement)),
 		filters.create(FilterElement::new(&elements::productions::STATEMENTS))
 	));
 

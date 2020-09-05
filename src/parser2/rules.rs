@@ -100,15 +100,13 @@ impl<'a> Rule<'a> for RuleSequence {
 }
 
 pub struct RuleList {
-	element:   usize,
-	separator: usize,
+	rule:   usize,
 }
 
 impl RuleList {
-	pub fn new(element: usize, separator: usize) -> Self {
+	pub fn new(rule: usize) -> Self {
 		return Self {
-			element,
-			separator,
+			rule,
 		};
 	}
 }
@@ -116,20 +114,8 @@ impl RuleList {
 impl<'a> Rule<'a> for RuleList {
 	fn rule<'b>(&self, parser: &mut Parser<'a, 'b, '_>) -> Option<Vec<Node<'a, 'b>>> {
 		let mut nodes = Vec::new();
-		if let Some(first) = parser.rule(self.element) {
-			nodes.extend(first);
-		}
-
-		loop {
-			if let Some(separator) = parser.rule(self.separator) {
-				if let Some(element) = parser.rule(self.element) {
-					nodes.extend(separator);
-					nodes.extend(element);
-					continue;
-				}
-			}
-
-			break;
+		while let Some(children) = parser.rule(self.rule) {
+			nodes.extend(children);
 		}
 
 		return Some(nodes);
@@ -159,6 +145,50 @@ impl<'a> Rule<'a> for RuleOption {
 	}
 }
 
+pub struct RulePredicateAnd {
+	rule: usize,
+}
+
+impl RulePredicateAnd {
+	pub fn new(rule: usize) -> Self {
+		return Self {
+			rule,
+		};
+	}
+}
+
+impl<'a> Rule<'a> for RulePredicateAnd {
+	fn rule<'b>(&self, parser: &mut Parser<'a, 'b, '_>) -> Option<Vec<Node<'a, 'b>>> {
+		return if parser.rule_predicate(self.rule) {
+			Some(Vec::new())
+		} else {
+			None
+		};
+	}
+}
+
+pub struct RulePredicateNot {
+	rule: usize,
+}
+
+impl RulePredicateNot {
+	pub fn new(rule: usize) -> Self {
+		return Self {
+			rule,
+		};
+	}
+}
+
+impl<'a> Rule<'a> for RulePredicateNot {
+	fn rule<'b>(&self, parser: &mut Parser<'a, 'b, '_>) -> Option<Vec<Node<'a, 'b>>> {
+		return if parser.rule_predicate(self.rule) {
+			None
+		} else {
+			Some(Vec::new())
+		};
+	}
+}
+
 pub struct RuleToken<'a> {
 	element: &'a Element,
 }
@@ -180,19 +210,5 @@ impl<'a> Rule<'a> for RuleToken<'a> {
 		}
 
 		return None;
-	}
-}
-
-pub struct RuleNone;
-
-impl RuleNone {
-	pub fn new() -> Self {
-		return Self;
-	}
-}
-
-impl<'a> Rule<'a> for RuleNone {
-	fn rule<'b>(&self, parser: &mut Parser<'a, 'b, '_>) -> Option<Vec<Node<'a, 'b>>> {
-		return Some(Vec::new());
 	}
 }

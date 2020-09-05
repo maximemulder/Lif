@@ -52,6 +52,13 @@ impl<'a, 'b, 'c> Parser<'a, 'b, 'c> {
 		return nodes;
 	}
 
+	fn rule_predicate(&mut self, index: usize) -> bool {
+		let cursor = self.cursor;
+		let nodes = self.rules.get(index).rule(self);
+		self.cursor = cursor;
+		return nodes.is_some();
+	}
+
 	fn filter(&mut self, index: usize, nodes: Vec<Node<'a, 'b>>) -> Option<Vec<Node<'a, 'b>>> {
 		let cursor = self.cursor;
 		let nodes = self.filters.get(index).filter(self, nodes);
@@ -60,5 +67,12 @@ impl<'a, 'b, 'c> Parser<'a, 'b, 'c> {
 		}
 
 		return nodes;
+	}
+
+	fn filter_predicate(&mut self, index: usize, nodes: Vec<Node<'a, 'b>>) -> bool {
+		let cursor = self.cursor;
+		let nodes = self.filters.get(index).filter(self, nodes);
+		self.cursor = cursor;
+		return nodes.is_some();
 	}
 }
