@@ -31,7 +31,7 @@ impl<'a, 'b> Node<'a, 'b> {
 	pub fn children(&self) -> &Vec<Node<'a, 'b>> {
 		return match &self.content {
 			Content::Production(content) => &content,
-			Content::Token(_) => { println!("{}", self.element.name); panic!() },
+			Content::Token(_) => panic!(),
 		};
 	}
 

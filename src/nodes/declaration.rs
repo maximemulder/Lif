@@ -1,15 +1,18 @@
 use crate::nodes::Node;
+use crate::nodes::expression::Expression;
 use crate::runtime::engine::Engine;
 use crate::runtime::reference::GcReference;
 
 pub struct Declaration {
 	identifier: Box<str>,
+	r#type: Option<Expression>,
 }
 
 impl Declaration {
-	pub fn new(identifier: Box<str>) -> Self {
+	pub fn new(identifier: Box<str>, r#type: Option<Expression>) -> Self {
 		return Self {
 			identifier,
+			r#type,
 		};
 	}
 }

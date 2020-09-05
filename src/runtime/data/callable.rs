@@ -1,5 +1,6 @@
 use crate::nodes::Node;
 use crate::nodes::block::Block;
+use crate::nodes::declaration::Declaration;
 use crate::runtime::engine::{ Control, Engine };
 use crate::runtime::gc::GcTraceable;
 use crate::runtime::reference::GcReference;
@@ -41,15 +42,17 @@ impl GcTraceable for Primitive<'_> {
 #[derive(Clone)]
 pub struct Function<'a> {
 	scope: GcScope<'a>,
-	parameters: &'a Vec<Box<str>>,
+	parameters: &'a Vec<Declaration>,
+	r#type: Option<GcValue<'a>>,
 	block: &'a Block,
 }
 
 impl<'a> Function<'a> {
-	pub fn new(scope: GcScope<'a>, parameters: &'a Vec<Box<str>>, block: &'a Block) -> Self {
+	pub fn new(scope: GcScope<'a>, parameters: &'a Vec<Declaration>, r#type: Option<GcValue<'a>>, block: &'a Block) -> Self {
 		return Self {
 			scope,
 			parameters,
+			r#type,
 			block,
 		};
 	}
@@ -59,8 +62,8 @@ impl<'a> Callable<'a> for Function<'a> {
 	fn call(&self, engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> GcReference<'a> {
 		let frame = engine.push_frame(self.scope);
 		for (parameter, argument) in self.parameters.iter().zip(arguments) {
-			let reference = engine.new_reference(Some(argument), true);
-			engine.add_variable(&parameter, reference);
+			let mut reference = parameter.execute(engine);
+			reference.write(argument);
 		}
 
 		let reference = self.block.execute(engine);

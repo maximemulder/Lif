@@ -40,7 +40,7 @@ fn statements(node: &SyntaxNode) -> Statements {
 fn statement(node: &SyntaxNode) -> Statement {
 	let child = &node.children()[0];
 	return Statement::new(match child.element {
-		&elements::productions::EXPRESSION => Box::new(expression(child)),
+		&elements::expressions::EXPRESSION => Box::new(expression(child)),
 		&elements::structures::STRUCTURE   => Box::new(structure(child)),
 		_ => panic!(),
 	});
@@ -51,7 +51,7 @@ fn expression(node: &SyntaxNode) -> Expression {
 	return Expression::new(match child.element {
 		&elements::expressions::LITERAL     => literal(child),
 		&elements::structures::STRUCTURE    => Box::new(structure(child)),
-		&elements::expressions::DECLARATION => Box::new(declaration(child)),
+		&elements::expressions::LET         => Box::new(r#let(child)),
 		&elements::controls::CONTROL        => control(child),
 		&elements::expressions::FUNCTION    => Box::new(function(child)),
 		&elements::expressions::GROUP       => Box::new(group(child)),
@@ -106,11 +106,7 @@ fn block(node: &SyntaxNode) -> Block {
 }
 
 fn r#if(node: &SyntaxNode) -> If {
-	return If::new(expression(&node.children()[1]), block(&node.children()[2]), if let Some(child) = node.children().get(4) {
-		Some(block(child))
-	} else {
-		None
-	});
+	return If::new(expression(&node.children()[1]), block(&node.children()[2]), node.children().get(4).map(|child| block(child)));
 }
 
 fn r#loop(node: &SyntaxNode) -> Loop {
@@ -129,8 +125,12 @@ fn for_in(node: &SyntaxNode) -> ForIn {
 	return ForIn::new(token(&node.children()[1]), expression(&node.children()[3]), block(&node.children()[4]));
 }
 
+fn r#let(node: &SyntaxNode) -> Declaration {
+	return declaration(&node.children()[1]);
+}
+
 fn declaration(node: &SyntaxNode) -> Declaration {
-	return Declaration::new(token(&node.children()[1]));
+	return Declaration::new(token(&node.children()[0]), node.children().get(3).map(|child| expression(child)));
 }
 
 fn control(node: &SyntaxNode) -> Box<dyn Node> {
@@ -144,41 +144,29 @@ fn control(node: &SyntaxNode) -> Box<dyn Node> {
 }
 
 fn r#return(node: &SyntaxNode) -> Return {
-	return Return::new(if let Some(child) = node.children().get(1) {
-		Some(expression(child))
-	} else {
-		None
-	});
+	return Return::new(node.children().get(1).map(|child| expression(child)));
 }
 
 fn r#break(node: &SyntaxNode) -> Break {
-	return Break::new(if let Some(child) = node.children().get(1) {
-		Some(expression(child))
-	} else {
-		None
-	});
+	return Break::new(node.children().get(1).map(|child| expression(child)));
 }
 
 fn r#continue(node: &SyntaxNode) -> Continue {
-	return Continue::new(if let Some(child) = node.children().get(1) {
-		Some(expression(child))
-	} else {
-		None
-	});
+	return Continue::new(node.children().get(1).map(|child| expression(child)));
 }
 
 fn function(node: &SyntaxNode) -> Function {
-	return Function::new(parameters(&node.children()[2]), block(&node.children()[4]));
+	return Function::new(parameters(&node.children()[2]), node.children().get(5).map(|child| expression(child)), block(&node.children().last().unwrap()));
 }
 
-fn parameters(node: &SyntaxNode) -> Vec<Box<str>> {
+fn parameters(node: &SyntaxNode) -> Vec<Declaration> {
 	let mut identifiers = Vec::new();
 	for (i, child) in node.children().iter().enumerate()  {
 		if i % 2 == 1 {
 			continue;
 		}
 
-		identifiers.push(token(child));
+		identifiers.push(declaration(child));
 	}
 
 	return identifiers;

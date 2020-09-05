@@ -5,7 +5,7 @@ use crate::node::Node;
 use super::super::productions::parameter::parameter;
 
 pub fn declaration<'a, 'b>(parser: &mut Parser<'a, 'b, '_>) -> Result<Node<'a, 'b>, ()> {
-	return Ok(Node::new_production(&elements::expressions::DECLARATION, vec![
+	return Ok(Node::new_production(&elements::expressions::LET, vec![
 		parser.token(&elements::keywords::LET)?,
 		parameter(parser)?,
 	]));

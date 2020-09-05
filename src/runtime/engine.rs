@@ -1,5 +1,6 @@
 use crate::nodes::Node;
 use crate::nodes::block::Block;
+use crate::nodes::declaration::Declaration;
 use crate::nodes::expression::Expression;
 use crate::runtime::data::{ Class, Data, Function, Instance, Primitive };
 use crate::runtime::environment::Environment;
@@ -187,8 +188,8 @@ impl<'a> Engine<'a> {
 		return self.new_constant_value(self.environment.integer, Data::Integer(integer));
 	}
 
-	pub fn new_function(&mut self, parameters: &'a Vec<Box<str>>, block: &'a Block) -> GcReference<'a> {
-		return self.new_constant_value(self.environment.function, Data::Callable(Box::new(Function::new(self.scope, parameters, block))));
+	pub fn new_function(&mut self, parameters: &'a Vec<Declaration>, r#type: Option<GcValue<'a>>, block: &'a Block) -> GcReference<'a> {
+		return self.new_constant_value(self.environment.function, Data::Callable(Box::new(Function::new(self.scope, parameters, r#type, block))));
 	}
 
 	pub fn new_primitive(&mut self, callback: &'a dyn Fn(&mut Engine<'a>, Vec<GcValue<'a>>) -> GcReference<'a>) -> GcReference<'a> {
