@@ -49,7 +49,7 @@ impl<'a> Engine<'a> {
 	}
 
 	fn add_constant_value(&mut self, name: &str, value: GcValue<'a>) {
-		let reference = self.new_reference(Some(value), false);
+		let reference = self.new_constant(Some(value));
 		self.add_variable(name, reference);
 	}
 
@@ -189,20 +189,20 @@ fn array_copy<'a>(engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> GcRef
 }
 
 fn array_append<'a>(engine: &mut Engine<'a>, mut arguments: Vec<GcValue<'a>>) -> GcReference<'a> {
-	let reference = engine.new_reference(Some(arguments[1]), true);
+	let reference = engine.new_variable(Some(arguments[1]), engine.environment.object);
 	arguments[0].data_array_mut().push(reference);
 	return engine.new_undefined();
 }
 
 fn array_prepend<'a>(engine: &mut Engine<'a>, mut arguments: Vec<GcValue<'a>>) -> GcReference<'a> {
-	let reference = engine.new_reference(Some(arguments[1]), true);
+	let reference = engine.new_variable(Some(arguments[1]), engine.environment.object);
 	arguments[0].data_array_mut().insert(0, reference);
 	return engine.new_undefined();
 }
 
 fn array_insert<'a>(engine: &mut Engine<'a>, mut arguments: Vec<GcValue<'a>>) -> GcReference<'a> {
 	let index = *arguments[1].data_integer();
-	let reference = engine.new_reference(Some(arguments[2]), true);
+	let reference = engine.new_variable(Some(arguments[2]), engine.environment.object);
 	arguments[0].data_array_mut().insert(index, reference);
 	return engine.new_undefined();
 }
@@ -248,7 +248,7 @@ fn class_chain<'a>(engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> GcRe
 }
 
 fn class_access<'a>(engine: &mut Engine<'a>, _: Vec<GcValue<'a>>) -> GcReference<'a> {
-	return engine.new_reference(Some(engine.environment.array), false);
+	return engine.new_constant(Some(engine.environment.array));
 }
 
 fn function_to_string<'a>(engine: &mut Engine<'a>, _: Vec<GcValue<'a>>) -> GcReference<'a> {
@@ -366,7 +366,7 @@ fn object_chain<'a>(engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> GcR
 }
 
 fn string_to_string<'a>(engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> GcReference<'a> {
-	return engine.new_reference(Some(arguments[0]), false);
+	return engine.new_constant(Some(arguments[0]));
 }
 
 fn string_comparison<'a>(engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> GcReference<'a> {

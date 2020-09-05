@@ -154,16 +154,20 @@ impl<'a> Engine<'a> {
 	}
 
 	pub fn new_undefined(&mut self) -> GcReference<'a> {
-		return self.new_reference(None, false);
+		return self.new_constant(None);
 	}
 
-	pub fn new_reference(&mut self, value: Option<GcValue<'a>>, variable: bool) -> GcReference<'a> {
-		return self.references.alloc(Reference::new(value, variable));
+	pub fn new_variable(&mut self, value: Option<GcValue<'a>>, r#type: GcValue<'a>) -> GcReference<'a> {
+		return self.references.alloc(Reference::new_variable(value, r#type));
+	}
+
+	pub fn new_constant(&mut self, value: Option<GcValue<'a>>) -> GcReference<'a> {
+		return self.references.alloc(Reference::new_constant(value));
 	}
 
 	pub fn new_constant_value(&mut self, class: GcValue<'a>, data: Data<'a>) -> GcReference<'a> {
 		let value = self.new_value(class, data);
-		return self.new_reference(Some(value), false);
+		return self.new_constant(Some(value));
 	}
 }
 

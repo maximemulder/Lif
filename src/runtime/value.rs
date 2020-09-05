@@ -18,8 +18,25 @@ impl<'a> Value<'a> {
 		};
 	}
 
-	pub fn cast(&self, class: GcValue<'a>) {
-		if self.class != class {
+	pub fn isa(&self, other: GcValue<'a>) -> bool {
+		let mut class = self.class;
+		loop {
+			if class == other {
+				return true;
+			}
+
+			if let Some(parent) = class.data_class().parent {
+				class = parent;
+			} else {
+				break;
+			}
+		}
+
+		return false;
+	}
+
+	pub fn cast(&self, other: GcValue<'a>) {
+		if !self.isa(other) {
 			panic!();
 		}
 	}

@@ -5,14 +5,26 @@ pub type GcReference<'a> = GcRef<Reference<'a>>;
 
 pub struct Reference<'a> {
 	value: Option<GcValue<'a>>,
-	variable: bool,
+	r#type: Type<'a>,
+}
+
+enum Type<'a> {
+	Variable(GcValue<'a>),
+	Constant,
 }
 
 impl<'a> Reference<'a> {
-	pub fn new(value: Option<GcValue<'a>>, variable: bool) -> Self {
+	pub fn new_variable(value: Option<GcValue<'a>>, r#type: GcValue<'a>) -> Self {
 		return Self {
 			value,
-			variable,
+			r#type: Type::Variable(r#type),
+		};
+	}
+
+	pub fn new_constant(value: Option<GcValue<'a>>) -> Self {
+		return Self {
+			value,
+			r#type: Type::Constant,
 		};
 	}
 
@@ -25,10 +37,17 @@ impl<'a> Reference<'a> {
 	}
 
 	pub fn write(&mut self, value: GcValue<'a>) {
-		if self.variable || self.value.is_none(){
-			self.value = Some(value);
-		} else {
-			panic!();
+		match self.r#type {
+			Type::Variable(r#type) => if value.isa(r#type) {
+				self.value = Some(value);
+			} else {
+				panic!();
+			},
+			Type::Constant => if self.value.is_none() {
+				self.value = Some(value);
+			} else {
+				panic!();
+			},
 		}
 	}
 }

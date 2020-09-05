@@ -130,7 +130,7 @@ fn r#let(node: &SyntaxNode) -> Declaration {
 }
 
 fn declaration(node: &SyntaxNode) -> Declaration {
-	return Declaration::new(token(&node.children()[0]), node.children().get(3).map(|child| expression(child)));
+	return Declaration::new(token(&node.children()[0]), node.children().get(2).map(|child| expression(child)));
 }
 
 fn control(node: &SyntaxNode) -> Box<dyn Node> {

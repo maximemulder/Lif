@@ -19,7 +19,15 @@ impl Declaration {
 
 impl Node for Declaration {
 	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> GcReference<'a> {
-		let reference = engine.new_reference(None, true);
+		let r#type = if let Some(r#type) = &self.r#type {
+			let value = execute!(engine, r#type).read();
+			value.cast(engine.environment.class);
+			value
+		} else {
+			engine.environment.object
+		};
+
+		let reference = engine.new_variable(None, r#type);
 		engine.add_variable(&self.identifier, reference);
 		return reference;
 	}

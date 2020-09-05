@@ -74,7 +74,12 @@ impl<'a> Callable<'a> for Function<'a> {
 				Control::Break | Control::Continue => panic!(),
 				Control::Return => {
 					engine.control = None;
-					engine.new_reference(Some(reference.read()), false)
+					let value = reference.read();
+					if let Some(r#type) = self.r#type {
+						value.cast(r#type);
+					}
+
+					engine.new_constant(Some(value))
 				},
 			},
 			None => engine.new_undefined(),

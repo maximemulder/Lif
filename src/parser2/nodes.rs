@@ -100,6 +100,8 @@ pub fn run<'a, 'b>(tokens: &Vec<Node<'a, 'b>>) -> Option<Node<'a, 'b>> {
 
 	let expression = rules.declare();
 
+	let expression_no_assign = rules.declare();
+
 	let expression_option = rules.declare();
 
 	let extension = filters.declare();
@@ -154,7 +156,7 @@ pub fn run<'a, 'b>(tokens: &Vec<Node<'a, 'b>>) -> Option<Node<'a, 'b>> {
 	let r#type = rules.create(RuleOption::new(
 		rules.create(RuleSequence::new(vec![
 			symbol_colon,
-			expression,
+			expression_no_assign,
 		]))
 	));
 
@@ -320,6 +322,8 @@ pub fn run<'a, 'b>(tokens: &Vec<Node<'a, 'b>>) -> Option<Node<'a, 'b>> {
 	]);
 
 	rules.define(expression, RuleAlias::new(operation_12));
+
+	rules.define(expression_no_assign, RuleAlias::new(operation_11));
 
 	rules.define(expression_option, RuleOption::new(expression));
 
