@@ -5,6 +5,7 @@
 #![feature(unsize)]
 #![feature(drain_filter)]
 
+mod ast;
 mod element;
 mod elements;
 mod lexer;
