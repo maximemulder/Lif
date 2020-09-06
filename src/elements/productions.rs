@@ -9,5 +9,4 @@ pub const ELSE:        Element = Element::new("ELSE");
 pub const DECLARATION: Element = Element::new("DECLARATION");
 pub const EXPRESSIONS: Element = Element::new("EXPRESSIONS");
 pub const PARAMETERS:  Element = Element::new("PARAMETERS");
-pub const GENERICS:    Element = Element::new("GENERICS");
 pub const TYPE:        Element = Element::new("TYPE");

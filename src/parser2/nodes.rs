@@ -200,23 +200,9 @@ pub fn run<'a, 'b>(tokens: &Vec<Node<'a, 'b>>) -> Option<Node<'a, 'b>> {
 		&elements::structures::BLOCK
 	));
 
-	let generics = descents.create(DescentOption::new(
-		descents.create(DescentSequence::new(vec![
-			symbol_guillemet_l,
-			descents.create(DescentElement::new(
-				descents.create(DescentOneOrMore::new(
-					create_list!(variable_identifier, symbol_comma)
-				)),
-				&elements::productions::GENERICS
-			)),
-			symbol_guillemet_r,
-		]))
-	));
-
 	let function = descents.create(DescentElement::new(
 		descents.create(DescentSequence::new(vec![
 			keyword_function,
-			generics,
 			symbol_parenthesis_l,
 			descents.create(DescentElement::new(
 				create_list_option!(declaration, symbol_comma),
