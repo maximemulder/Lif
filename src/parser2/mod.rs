@@ -1,29 +1,29 @@
 #![allow(unused_variables)]
 #![allow(dead_code)]
 
-pub mod rules;
-pub mod filters;
+pub mod descent;
+pub mod ascent;
 pub mod nodes;
 pub mod arena;
 
 use crate::node::Node;
 use arena::Arena;
-use rules::Rule;
-use filters::Filter;
+use descent::Descent;
+use ascent::Ascent;
 
 pub struct Parser<'a, 'b, 'c> {
 	pub tokens: &'c Vec<Node<'a, 'b>>,
-	rules: &'c Arena<dyn Rule<'a> + 'c>,
-	filters: &'c Arena<dyn Filter<'a> + 'c>,
+	descents: &'c Arena<dyn Descent<'a> + 'c>,
+	ascents: &'c Arena<dyn Ascent<'a> + 'c>,
 	cursor: usize,
 }
 
 impl<'a, 'b, 'c> Parser<'a, 'b, 'c> {
-	fn new(tokens: &'c Vec<Node<'a, 'b>>, rules: &'c Arena<dyn Rule<'a> + 'c>, filters: &'c Arena<dyn Filter<'a> + 'c>) -> Self {
+	fn new(tokens: &'c Vec<Node<'a, 'b>>, descents: &'c Arena<dyn Descent<'a> + 'c>, ascents: &'c Arena<dyn Ascent<'a> + 'c>) -> Self {
 		return Self {
 			tokens,
-			rules,
-			filters,
+			descents,
+			ascents,
 			cursor: 0,
 		};
 	}
@@ -42,9 +42,9 @@ impl<'a, 'b, 'c> Parser<'a, 'b, 'c> {
 		return None;
 	}
 
-	fn rule(&mut self, index: usize) -> Option<Vec<Node<'a, 'b>>> {
+	fn descent(&mut self, index: usize) -> Option<Vec<Node<'a, 'b>>> {
 		let cursor = self.cursor;
-		let nodes = self.rules.get(index).rule(self);
+		let nodes = self.descents.get(index).descent(self);
 		if nodes.is_none() {
 			self.cursor = cursor;
 		}
@@ -52,16 +52,16 @@ impl<'a, 'b, 'c> Parser<'a, 'b, 'c> {
 		return nodes;
 	}
 
-	fn rule_predicate(&mut self, index: usize) -> bool {
+	fn descent_predicate(&mut self, index: usize) -> bool {
 		let cursor = self.cursor;
-		let nodes = self.rules.get(index).rule(self);
+		let nodes = self.descents.get(index).descent(self);
 		self.cursor = cursor;
 		return nodes.is_some();
 	}
 
-	fn filter(&mut self, index: usize, nodes: Vec<Node<'a, 'b>>) -> Option<Vec<Node<'a, 'b>>> {
+	fn ascent(&mut self, index: usize, nodes: Vec<Node<'a, 'b>>) -> Option<Vec<Node<'a, 'b>>> {
 		let cursor = self.cursor;
-		let nodes = self.filters.get(index).filter(self, nodes);
+		let nodes = self.ascents.get(index).ascent(self, nodes);
 		if nodes.is_none() {
 			self.cursor = cursor;
 		}
@@ -69,9 +69,9 @@ impl<'a, 'b, 'c> Parser<'a, 'b, 'c> {
 		return nodes;
 	}
 
-	fn filter_predicate(&mut self, index: usize, nodes: Vec<Node<'a, 'b>>) -> bool {
+	fn ascent_predicate(&mut self, index: usize, nodes: Vec<Node<'a, 'b>>) -> bool {
 		let cursor = self.cursor;
-		let nodes = self.filters.get(index).filter(self, nodes);
+		let nodes = self.ascents.get(index).ascent(self, nodes);
 		self.cursor = cursor;
 		return nodes.is_some();
 	}
