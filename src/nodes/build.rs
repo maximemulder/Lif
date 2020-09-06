@@ -156,7 +156,18 @@ fn r#continue(node: &SyntaxNode) -> Continue {
 }
 
 fn function(node: &SyntaxNode) -> Function {
-	return Function::new(parameters(&node.children()[2]), node.children().get(5).map(|child| expression(child)), block(&node.children().last().unwrap()));
+	let children = node.children();
+	let r#type = if children[children.len() - 2].element == &elements::expressions::EXPRESSION {
+		Some(expression(&children[children.len() - 2]))
+	} else {
+		None
+	};
+
+	return Function::new(parameters(&children[if children.len() < 8 {
+		2
+	} else {
+		5
+	}]), r#type, block(&children.last().unwrap()));
 }
 
 fn parameters(node: &SyntaxNode) -> Vec<Declaration> {

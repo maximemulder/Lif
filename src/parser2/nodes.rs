@@ -100,7 +100,7 @@ pub fn run<'a, 'b>(tokens: &Vec<Node<'a, 'b>>) -> Option<Node<'a, 'b>> {
 
 	let expression = rules.declare();
 
-	let expression_no_assign = rules.declare();
+	let expression_base = rules.declare();
 
 	let expression_option = rules.declare();
 
@@ -142,13 +142,19 @@ pub fn run<'a, 'b>(tokens: &Vec<Node<'a, 'b>>) -> Option<Node<'a, 'b>> {
 
 	macro_rules! create_list {
 		( $element:expr, $separator:expr ) => {{
+			rules.create(RuleSequence::new(vec![
+				$element,
+				rules.create(RuleZeroOrMore::new(
+					rules.create(RuleSequence::new(vec![$separator, $element]))
+				))
+			]))
+		}}
+	}
+
+	macro_rules! create_list_option {
+		( $element:expr, $separator:expr ) => {{
 			rules.create(RuleOption::new(
-				rules.create(RuleSequence::new(vec![
-					$element,
-					rules.create(RuleList::new(
-						rules.create(RuleSequence::new(vec![$separator, $element]))
-					))
-				]))
+				create_list!($element, $separator)
 			))
 		}}
 	}
@@ -156,7 +162,7 @@ pub fn run<'a, 'b>(tokens: &Vec<Node<'a, 'b>>) -> Option<Node<'a, 'b>> {
 	let r#type = rules.create(RuleOption::new(
 		rules.create(RuleSequence::new(vec![
 			symbol_colon,
-			expression_no_assign,
+			expression_base,
 		]))
 	));
 
@@ -194,12 +200,26 @@ pub fn run<'a, 'b>(tokens: &Vec<Node<'a, 'b>>) -> Option<Node<'a, 'b>> {
 		filters.create(FilterElement::new(&elements::structures::BLOCK))
 	));
 
+	let generics = rules.create(RuleOption::new(
+		rules.create(RuleSequence::new(vec![
+			symbol_guillemet_l,
+			rules.create(RuleFilter::new(
+				rules.create(RuleOneOrMore::new(
+					create_list!(variable_identifier, symbol_comma)
+				)),
+				filters.create(FilterElement::new(&elements::productions::GENERICS))
+			)),
+			symbol_guillemet_r,
+		]))
+	));
+
 	let function = rules.create(RuleFilter::new(
 		rules.create(RuleSequence::new(vec![
 			keyword_function,
+			generics,
 			symbol_parenthesis_l,
 			rules.create(RuleFilter::new(
-				create_list!(declaration, symbol_comma),
+				create_list_option!(declaration, symbol_comma),
 				filters.create(FilterElement::new(&elements::productions::PARAMETERS))
 			)),
 			symbol_parenthesis_r,
@@ -242,7 +262,7 @@ pub fn run<'a, 'b>(tokens: &Vec<Node<'a, 'b>>) -> Option<Node<'a, 'b>> {
 	));
 
 	let expressions = rules.create(RuleFilter::new(
-		create_list!(expression, symbol_comma),
+		create_list_option!(expression, symbol_comma),
 		filters.create(FilterElement::new(&elements::productions::EXPRESSIONS))
 	));
 
@@ -269,7 +289,7 @@ pub fn run<'a, 'b>(tokens: &Vec<Node<'a, 'b>>) -> Option<Node<'a, 'b>> {
 
 	filters.define(extension, FilterList::new(vec![chain, sequence]));
 
-	let expression_base = rules.create(RuleFilter::new(
+	rules.define(expression_base, RuleFilter::new(
 		rules.create(RuleChoice::new(vec![function, structure, r#let, control, group, literal])),
 		filters.create(FilterElement::new(&elements::expressions::EXPRESSION))
 	));
@@ -323,8 +343,6 @@ pub fn run<'a, 'b>(tokens: &Vec<Node<'a, 'b>>) -> Option<Node<'a, 'b>> {
 
 	rules.define(expression, RuleAlias::new(operation_12));
 
-	rules.define(expression_no_assign, RuleAlias::new(operation_11));
-
 	rules.define(expression_option, RuleOption::new(expression));
 
 	let statement = rules.create(RuleFilter::new(
@@ -336,7 +354,7 @@ pub fn run<'a, 'b>(tokens: &Vec<Node<'a, 'b>>) -> Option<Node<'a, 'b>> {
 	));
 
 	rules.define(statements, RuleFilter::new(
-		rules.create(RuleList::new(statement)),
+		rules.create(RuleZeroOrMore::new(statement)),
 		filters.create(FilterElement::new(&elements::productions::STATEMENTS))
 	));
 

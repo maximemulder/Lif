@@ -99,11 +99,11 @@ impl<'a> Rule<'a> for RuleSequence {
 	}
 }
 
-pub struct RuleList {
+pub struct RuleZeroOrMore {
 	rule:   usize,
 }
 
-impl RuleList {
+impl RuleZeroOrMore {
 	pub fn new(rule: usize) -> Self {
 		return Self {
 			rule,
@@ -111,7 +111,7 @@ impl RuleList {
 	}
 }
 
-impl<'a> Rule<'a> for RuleList {
+impl<'a> Rule<'a> for RuleZeroOrMore {
 	fn rule<'b>(&self, parser: &mut Parser<'a, 'b, '_>) -> Option<Vec<Node<'a, 'b>>> {
 		let mut nodes = Vec::new();
 		while let Some(children) = parser.rule(self.rule) {
@@ -119,6 +119,33 @@ impl<'a> Rule<'a> for RuleList {
 		}
 
 		return Some(nodes);
+	}
+}
+
+pub struct RuleOneOrMore {
+	rule:   usize,
+}
+
+impl RuleOneOrMore {
+	pub fn new(rule: usize) -> Self {
+		return Self {
+			rule,
+		};
+	}
+}
+
+impl<'a> Rule<'a> for RuleOneOrMore {
+	fn rule<'b>(&self, parser: &mut Parser<'a, 'b, '_>) -> Option<Vec<Node<'a, 'b>>> {
+		let mut nodes = Vec::new();
+		while let Some(children) = parser.rule(self.rule) {
+			nodes.extend(children);
+		}
+
+		return if !nodes.is_empty() {
+			Some(nodes)
+		} else {
+			None
+		};
 	}
 }
 
