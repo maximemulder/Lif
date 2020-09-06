@@ -10,7 +10,6 @@ mod element;
 mod elements;
 mod lexer;
 mod node;
-mod parser;
 mod parser2;
 mod printer;
 mod nodes;
