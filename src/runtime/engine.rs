@@ -20,8 +20,9 @@ pub struct Engine<'a> {
 	pub scopes:      Gc<Scope<'a>>,
 	pub references:  Gc<Reference<'a>>,
 	pub values:      Gc<Value<'a>>,
-	pub scope:       GcScope<'a>,
 	pub registries:  Vec<Vec<GcReference<'a>>>,
+	pub frames:      Vec<GcScope<'a>>,
+	pub scope:       GcScope<'a>,
 	pub this:        Option<GcValue<'a>>,
 	pub control:     Option<Control>,
 }
@@ -33,8 +34,9 @@ impl<'a> Engine<'a> {
 			scopes:      Gc::new(),
 			references:  Gc::new(),
 			values:      Gc::new(),
-			scope:       GcRef::null(),
 			registries:  Vec::new(),
+			frames:      Vec::new(),
+			scope:       GcRef::null(),
 			this:        None,
 			control:     None,
 		};
@@ -58,14 +60,13 @@ impl<'a> Engine<'a> {
 		}
 	}
 
-	pub fn push_frame(&mut self, frame: GcScope<'a>) -> GcScope<'a> {
-		let scope = self.scope;
+	pub fn push_frame(&mut self, frame: GcScope<'a>) {
+		self.frames.push(self.scope);
 		self.scope = frame;
-		return scope;
 	}
 
-	pub fn pop_frame(&mut self, frame: GcScope<'a>) {
-		self.scope = frame;
+	pub fn pop_frame(&mut self) {
+		self.scope = self.frames.pop().unwrap();
 	}
 
 	pub fn add_variable(&mut self, name: &str, reference: GcReference<'a>) {
@@ -140,6 +141,10 @@ impl GcTraceable for Engine<'_> {
 			for registry in registries.iter_mut() {
 				registry.trace();
 			}
+		}
+
+		for frame in self.frames.iter_mut() {
+			frame.trace();
 		}
 
 		if let Some(this) = &mut self.this {
