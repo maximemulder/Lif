@@ -349,17 +349,6 @@ pub fn run<'a, 'b>(tokens: &Vec<Node<'a, 'b>>) -> Option<Node<'a, 'b>> {
 		&elements::productions::PROGRAM
 	));
 
-	let program = &descents.get(program);
 	let mut parser = Parser::new(tokens, &descents, &ascents);
-	let node = if let Some(mut nodes) = program.descent(&mut parser) {
-		nodes.pop()
-	} else {
-		return None;
-	};
-
-	return if parser.done() {
-		node
-	} else {
-		None
-	};
+	return parser.parse(program);
 }
