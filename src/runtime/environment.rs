@@ -256,7 +256,7 @@ fn function_to_string<'a>(engine: &mut Engine<'a>, _: Vec<GcValue<'a>>) -> GcRef
 }
 
 fn function_call<'a>(engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> GcReference<'a> {
-	return arguments[0].data_callable().duplicate().call(engine, arguments[1..].to_vec());
+	return arguments[0].data_callable().duplicate().call(engine, arguments[1 ..].to_vec());
 }
 
 fn instance_to_string<'a>(engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> GcReference<'a> {

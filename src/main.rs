@@ -14,7 +14,9 @@ mod parser2;
 mod printer;
 mod nodes;
 mod runtime;
+mod code;
 
+use code::Code;
 use runtime::engine::Engine;
 use std::env;
 use std::fs;
@@ -33,14 +35,15 @@ fn main() {
 	}
 
     let text = fs::read_to_string(&args[1]).expect("");
-    let tokens = lexer::lex(&text);
-    printer::tokens(&tokens);
+	let tokens = lexer::lex(&text);
+	let code = Code::new(&text);
+    printer::tokens(&code, &tokens);
 
     println!("=====");
 
-    if let Some(tree) = parser2::nodes::run(&tokens) {
+    if let Some(tree) = parser2::nodes::run(&code, &tokens) {
         printer::tree(&tree);
-		let program = nodes::build::program(&tree);
+		let program = nodes::build::program(&text, &tree);
 		let mut engine = Engine::new();
 		engine.execute(&program);
 		engine.collect();

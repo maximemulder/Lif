@@ -3,7 +3,7 @@ use crate::element::Element;
 use crate::parser2::Parser;
 
 pub trait Descent<'a> {
-	fn descent<'b>(&self, parser: &mut Parser<'a, 'b, '_>) -> Option<Vec<Node<'a, 'b>>>;
+	fn descent(&self, parser: &mut Parser<'a, '_>) -> Option<Vec<Node<'a>>>;
 }
 
 pub struct DescentAlias {
@@ -19,7 +19,7 @@ impl DescentAlias {
 }
 
 impl<'a> Descent<'a> for DescentAlias {
-	fn descent<'b>(&self, parser: &mut Parser<'a, 'b, '_>) -> Option<Vec<Node<'a, 'b>>> {
+	fn descent(&self, parser: &mut Parser<'a, '_>) -> Option<Vec<Node<'a>>> {
 		return parser.descent(self.descent);
 	}
 }
@@ -39,7 +39,7 @@ impl DescentAscent {
 }
 
 impl<'a> Descent<'a> for DescentAscent {
-	fn descent<'b>(&self, parser: &mut Parser<'a, 'b, '_>) -> Option<Vec<Node<'a, 'b>>> {
+	fn descent(&self, parser: &mut Parser<'a, '_>) -> Option<Vec<Node<'a>>> {
 		if let Some(nodes) = parser.descent(self.descent) {
 			return parser.ascent(self.ascent, nodes);
 		}
@@ -61,7 +61,7 @@ impl DescentChoice {
 }
 
 impl<'a> Descent<'a> for DescentChoice {
-	fn descent<'b>(&self, parser: &mut Parser<'a, 'b, '_>) -> Option<Vec<Node<'a, 'b>>> {
+	fn descent(&self, parser: &mut Parser<'a, '_>) -> Option<Vec<Node<'a>>> {
 		for descent in self.descents.iter() {
 			if let Some(nodes) = parser.descent(*descent) {
 				return Some(nodes);
@@ -85,7 +85,7 @@ impl DescentSequence {
 }
 
 impl<'a> Descent<'a> for DescentSequence {
-	fn descent<'b>(&self, parser: &mut Parser<'a, 'b, '_>) -> Option<Vec<Node<'a, 'b>>> {
+	fn descent(&self, parser: &mut Parser<'a, '_>) -> Option<Vec<Node<'a>>> {
 		let mut nodes = Vec::new();
 		for descent in self.descents.iter() {
 			if let Some(children) = parser.descent(*descent) {
@@ -112,7 +112,7 @@ impl DescentZeroOrMore {
 }
 
 impl<'a> Descent<'a> for DescentZeroOrMore {
-	fn descent<'b>(&self, parser: &mut Parser<'a, 'b, '_>) -> Option<Vec<Node<'a, 'b>>> {
+	fn descent(&self, parser: &mut Parser<'a, '_>) -> Option<Vec<Node<'a>>> {
 		let mut nodes = Vec::new();
 		while let Some(children) = parser.descent(self.descent) {
 			nodes.extend(children);
@@ -135,7 +135,7 @@ impl DescentOneOrMore {
 }
 
 impl<'a> Descent<'a> for DescentOneOrMore {
-	fn descent<'b>(&self, parser: &mut Parser<'a, 'b, '_>) -> Option<Vec<Node<'a, 'b>>> {
+	fn descent(&self, parser: &mut Parser<'a, '_>) -> Option<Vec<Node<'a>>> {
 		let mut nodes = Vec::new();
 		while let Some(children) = parser.descent(self.descent) {
 			nodes.extend(children);
@@ -162,7 +162,7 @@ impl DescentOption {
 }
 
 impl<'a> Descent<'a> for DescentOption {
-	fn descent<'b>(&self, parser: &mut Parser<'a, 'b, '_>) -> Option<Vec<Node<'a, 'b>>> {
+	fn descent(&self, parser: &mut Parser<'a, '_>) -> Option<Vec<Node<'a>>> {
 		let nodes = parser.descent(self.descent);
 		if nodes.is_some() {
 			return nodes;
@@ -185,7 +185,7 @@ impl DescentPredicateAnd {
 }
 
 impl<'a> Descent<'a> for DescentPredicateAnd {
-	fn descent<'b>(&self, parser: &mut Parser<'a, 'b, '_>) -> Option<Vec<Node<'a, 'b>>> {
+	fn descent(&self, parser: &mut Parser<'a, '_>) -> Option<Vec<Node<'a>>> {
 		return if parser.descent_predicate(self.descent) {
 			Some(Vec::new())
 		} else {
@@ -207,7 +207,7 @@ impl DescentPredicateNot {
 }
 
 impl<'a> Descent<'a> for DescentPredicateNot {
-	fn descent<'b>(&self, parser: &mut Parser<'a, 'b, '_>) -> Option<Vec<Node<'a, 'b>>> {
+	fn descent(&self, parser: &mut Parser<'a, '_>) -> Option<Vec<Node<'a>>> {
 		return if parser.descent_predicate(self.descent) {
 			None
 		} else {
@@ -231,7 +231,7 @@ impl<'a> DescentElement<'a> {
 }
 
 impl<'a> Descent<'a> for DescentElement<'a> {
-	fn descent<'b>(&self, parser: &mut Parser<'a, 'b, '_>) -> Option<Vec<Node<'a, 'b>>> {
+	fn descent(&self, parser: &mut Parser<'a, '_>) -> Option<Vec<Node<'a>>> {
 		return if let Some(nodes) = parser.descent(self.descent) {
 			Some(vec![Node::new_production(self.element, nodes)])
 		} else {
@@ -253,7 +253,7 @@ impl<'a> DescentToken<'a> {
 }
 
 impl<'a> Descent<'a> for DescentToken<'a> {
-	fn descent<'b>(&self, parser: &mut Parser<'a, 'b, '_>) -> Option<Vec<Node<'a, 'b>>> {
+	fn descent(&self, parser: &mut Parser<'a, '_>) -> Option<Vec<Node<'a>>> {
 		if let Some(token) = parser.next() {
 			if token.element == self.element {
 				return Some(vec![token]);
