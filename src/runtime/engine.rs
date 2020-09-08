@@ -23,7 +23,8 @@ pub struct Engine<'a> {
 	pub registries:  Vec<Vec<GcReference<'a>>>,
 	pub frames:      Vec<GcScope<'a>>,
 	pub scope:       GcScope<'a>,
-	pub this:        Option<GcValue<'a>>,
+	register:        GcReference<'a>,
+	this:            Option<GcValue<'a>>,
 	pub control:     Option<Control>,
 }
 
@@ -37,6 +38,7 @@ impl<'a> Engine<'a> {
 			registries:  Vec::new(),
 			frames:      Vec::new(),
 			scope:       GcRef::null(),
+			register:    GcRef::null(),
 			this:        None,
 			control:     None,
 		};
@@ -44,10 +46,33 @@ impl<'a> Engine<'a> {
 		engine.scope = engine.scopes.alloc(Scope::new());
 		engine.registries.push(Vec::new());
 		engine.populate();
-
 		return engine;
 	}
+}
 
+impl<'a> Engine<'a> {
+	pub fn set_register(&mut self, reference: GcReference<'a>) {
+		self.register = reference;
+	}
+
+	pub fn get_register(&mut self) -> GcReference<'a> {
+		let reference = self.register;
+		self.register = self.new_undefined();
+		return reference;
+	}
+
+	pub fn set_this(&mut self, this: GcValue<'a>) {
+		self.this = Some(this);
+	}
+
+	pub fn get_this(&mut self) -> Option<GcValue<'a>> {
+		let this = self.this;
+		self.this = None;
+		return this;
+	}
+}
+
+impl<'a> Engine<'a> {
 	pub fn push_scope(&mut self) {
 		self.scope = self.scopes.alloc(Scope::new_child(self.scope));
 	}
@@ -68,7 +93,9 @@ impl<'a> Engine<'a> {
 	pub fn pop_frame(&mut self) {
 		self.scope = self.frames.pop().unwrap();
 	}
+}
 
+impl<'a> Engine<'a> {
 	pub fn add_variable(&mut self, name: &str, reference: GcReference<'a>) {
 		self.scope.add_variable(name, reference);
 	}
@@ -98,13 +125,12 @@ impl<'a> Engine<'a> {
 	}
 
 	pub fn call(&mut self, value: GcValue<'a>, mut arguments: Vec<GcValue<'a>>) -> GcReference<'a> {
-		if let Some(this) = self.this {
+		if let Some(this) = self.get_this() {
 			arguments.insert(0, this);
-			self.this = None;
 		}
 
 		let callable = value.data_callable().duplicate();
-		return callable.call(self, arguments);
+		return callable.execute(self, arguments);
 	}
 
 	pub fn collect(&mut self) {
@@ -137,6 +163,7 @@ impl GcTraceable for Engine<'_> {
 	fn trace(&mut self) {
 		self.environment.trace();
 		self.scope.trace();
+		self.register.trace();
 		for registries in self.registries.iter_mut() {
 			for registry in registries.iter_mut() {
 				registry.trace();

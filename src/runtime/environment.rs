@@ -233,7 +233,7 @@ fn class_chain<'a>(engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> GcRe
 	let name = arguments[1].data_string().clone();
 	let mut this = arguments[0];
 	if let Some(method) = this.get_method(engine, &name) {
-		engine.this = Some(this);
+		engine.set_this(this);
 		return method;
 	}
 
@@ -256,7 +256,7 @@ fn function_to_string<'a>(engine: &mut Engine<'a>, _: Vec<GcValue<'a>>) -> GcRef
 }
 
 fn function_call<'a>(engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> GcReference<'a> {
-	return arguments[0].data_callable().duplicate().call(engine, arguments[1 ..].to_vec());
+	return arguments[0].data_callable().duplicate().execute(engine, arguments[1 ..].to_vec());
 }
 
 fn instance_to_string<'a>(engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> GcReference<'a> {
@@ -282,7 +282,7 @@ fn instance_chain<'a>(engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> G
 	let name = arguments[1].data_string().clone();
 	let mut this = arguments[0];
 	if let Some(method) = this.get_method(engine, &name) {
-		engine.this = Some(this);
+		engine.set_this(this);
 		return method;
 	}
 
@@ -358,7 +358,7 @@ fn object_chain<'a>(engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> GcR
 	let name = arguments[1].data_string();
 	let this = arguments[0];
 	if let Some(method) = this.get_method(engine, name) {
-		engine.this = Some(this);
+		engine.set_this(this);
 		return method;
 	}
 

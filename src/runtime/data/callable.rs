@@ -8,8 +8,18 @@ use crate::runtime::scope::GcScope;
 use crate::runtime::value::GcValue;
 
 pub trait Callable<'a>: GcTraceable {
-	fn call(&self, engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> GcReference<'a>;
+	fn execute(&self, engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> GcReference<'a>;
 	fn duplicate(&self) -> Box<dyn Callable<'a> + 'a>;
+}
+
+impl<'a> dyn Callable<'a> {
+	pub fn call(&mut self, engine: &mut Engine<'a>, mut arguments: Vec<GcValue<'a>>) -> GcReference<'a> {
+		if let Some(this) = engine.get_this() {
+			arguments.insert(0, this);
+		}
+
+		return self.duplicate().execute(engine, arguments);
+	}
 }
 
 #[derive(Clone)]
@@ -26,7 +36,7 @@ impl<'a> Primitive<'a> {
 }
 
 impl<'a> Callable<'a> for Primitive<'a> {
-	fn call(&self, engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> GcReference<'a> {
+	fn execute(&self, engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> GcReference<'a> {
 		return (self.callback)(engine, arguments);
 	}
 
@@ -59,7 +69,7 @@ impl<'a> Function<'a> {
 }
 
 impl<'a> Callable<'a> for Function<'a> {
-	fn call(&self, engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> GcReference<'a> {
+	fn execute(&self, engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> GcReference<'a> {
 		engine.push_frame(self.scope);
 		for (parameter, argument) in self.parameters.iter().zip(arguments) {
 			let mut reference = parameter.execute(engine);
