@@ -11,6 +11,7 @@ use crate::node::Node;
 use arena::Arena;
 use ascent::Ascent;
 use descent::Descent;
+use std::cmp::min;
 
 pub struct Parser<'a, 'b> {
 	code: &'b Code,
@@ -98,11 +99,13 @@ impl<'a, 'b> Parser<'a, 'b> {
 		} else {
 			let token = &self.tokens[self.reach];
 			println!("PARSING ERROR, LINE {}, POSITION {}, UNEXPECTED TOKEN: {:?} - {}\n\n{}\n{}{}",
-				self.code.node_y(token), self.code.node_x(token),
-				self.code.node_str(token), token.element.name,
+				self.code.node_y(token),
+				self.code.node_x(token),
+				self.code.node_str(token),
+				token.element.name,
 				self.code.node_line(token),
-				" ".repeat(self.code.node_x(token) - 1),
-				"^".repeat(self.code.node_str(token).len())
+				" ".repeat(self.code.node_shift_left(token)),
+				"^".repeat(min(self.code.node_str(token).len(), self.code.node_shift_right(token)))
 			);
 
 			None
