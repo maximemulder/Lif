@@ -6,13 +6,14 @@ pub mod ascent;
 pub mod nodes;
 pub mod arena;
 
+use crate::code::Code;
 use crate::node::Node;
 use arena::Arena;
-use descent::Descent;
 use ascent::Ascent;
+use descent::Descent;
 
 pub struct Parser<'a, 'b> {
-	text: &'b str,
+	code: &'b Code,
 	tokens: &'b Vec<Node<'a>>,
 	descents: &'b Arena<dyn Descent<'a> + 'b>,
 	ascents: &'b Arena<dyn Ascent<'a> + 'b>,
@@ -21,9 +22,9 @@ pub struct Parser<'a, 'b> {
 }
 
 impl<'a, 'b> Parser<'a, 'b> {
-	fn new(text: &'b str, tokens: &'b Vec<Node<'a>>, descents: &'b Arena<dyn Descent<'a> + 'b>, ascents: &'b Arena<dyn Ascent<'a> + 'b>) -> Self {
+	fn new(code: &'b Code, tokens: &'b Vec<Node<'a>>, descents: &'b Arena<dyn Descent<'a> + 'b>, ascents: &'b Arena<dyn Ascent<'a> + 'b>) -> Self {
 		return Self {
-			text,
+			code,
 			tokens,
 			descents,
 			ascents,
@@ -96,7 +97,14 @@ impl<'a, 'b> Parser<'a, 'b> {
 			node
 		} else {
 			let token = &self.tokens[self.reach];
-			println!("PARSING ERROR, UNEXPECTED TOKEN: {:?} - {}", &self.text[token.left()..token.right()], token.element.name);
+			println!("PARSING ERROR, LINE {}, POSITION {}, UNEXPECTED TOKEN: {:?} - {}\n\n{}\n{}{}",
+				self.code.node_y(token), self.code.node_x(token),
+				self.code.node_str(token), token.element.name,
+				self.code.node_line(token),
+				" ".repeat(self.code.node_x(token) - 1),
+				"^".repeat(self.code.node_str(token).len())
+			);
+
 			None
 		};
 	}

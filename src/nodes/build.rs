@@ -73,7 +73,7 @@ fn literal(text: &str, node: &SyntaxNode) -> Box<dyn Node> {
 }
 
 fn integer(text: &str, node: &SyntaxNode) -> Integer {
-	return Integer::new(text[node.left()..node.right()].parse::<usize>().unwrap());
+	return Integer::new(text[node.left() .. node.right()].parse::<usize>().unwrap());
 }
 
 fn string(text: &str, node: &SyntaxNode) -> String {
@@ -81,7 +81,7 @@ fn string(text: &str, node: &SyntaxNode) -> String {
 }
 
 fn identifier(text: &str, node: &SyntaxNode) -> Identifier {
-	return Identifier::new(Box::from(&text[node.left()..node.right()]));
+	return Identifier::new(Box::from(&text[node.left() .. node.right()]));
 }
 
 fn structure(text: &str, node: &SyntaxNode) -> Structure {	let child = &node.children()[0];
@@ -201,5 +201,5 @@ fn operation(text: &str, node: &SyntaxNode) -> Operation {
 }
 
 fn token(text: &str, node: &SyntaxNode) -> Box<str> {
-	return Box::from(&text[node.left()..node.right()]);
+	return Box::from(&text[node.left() .. node.right()]);
 }
