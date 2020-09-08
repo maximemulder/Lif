@@ -12,16 +12,6 @@ pub trait Callable<'a>: GcTraceable {
 	fn duplicate(&self) -> Box<dyn Callable<'a> + 'a>;
 }
 
-impl<'a> dyn Callable<'a> {
-	pub fn call(&mut self, engine: &mut Engine<'a>, mut arguments: Vec<GcValue<'a>>) -> GcReference<'a> {
-		if let Some(this) = engine.get_this() {
-			arguments.insert(0, this);
-		}
-
-		return self.duplicate().execute(engine, arguments);
-	}
-}
-
 #[derive(Clone)]
 pub struct Primitive<'a> {
 	callback: &'a dyn Fn(&mut Engine<'a>, Vec<GcValue<'a>>) -> GcReference<'a>,

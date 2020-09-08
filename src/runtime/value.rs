@@ -51,7 +51,7 @@ impl<'a> Value<'a> {
 		return self.data_boolean();
 	}
 
-	pub fn get_cast_callable(&self, engine: &Engine<'a>) -> &Box<dyn Callable<'a> + 'a> {
+	pub fn get_cast_callable(&self, engine: &Engine<'a>) -> &dyn Callable<'a> {
 		self.cast(engine.environment.function);
 		return self.data_callable();
 	}
@@ -110,14 +110,6 @@ impl<'a> Value<'a> {
 		data_mut!(self, Boolean);
 	}
 
-	pub fn data_callable(&self) -> &Box<dyn Callable<'a> + 'a> {
-		data!(self, Callable);
-	}
-
-	pub fn data_callable_mut(&mut self) -> &mut Box<dyn Callable<'a> + 'a> {
-		data_mut!(self, Callable);
-	}
-
 	pub fn data_class(&self) -> &Class<'a> {
 		data!(self, Class);
 	}
@@ -148,5 +140,21 @@ impl<'a> Value<'a> {
 
 	pub fn data_string_mut(&mut self) -> &mut String {
 		data_mut!(self, String);
+	}
+
+	pub fn data_callable(&self) -> &dyn Callable<'a> {
+		if let Data::Callable(callable) = &self.data {
+			return callable.as_ref();
+		}
+
+		panic!();
+	}
+
+	pub fn data_callable_mut(&mut self) -> &mut dyn Callable<'a> {
+		if let Data::Callable(callable) = &mut self.data {
+			return callable.as_mut();
+		}
+
+		panic!();
 	}
 }
