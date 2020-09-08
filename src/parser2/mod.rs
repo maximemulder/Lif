@@ -11,17 +11,19 @@ use arena::Arena;
 use descent::Descent;
 use ascent::Ascent;
 
-pub struct Parser<'a, 'b, 'c> {
-	tokens: &'c Vec<Node<'a, 'b>>,
-	descents: &'c Arena<dyn Descent<'a> + 'c>,
-	ascents: &'c Arena<dyn Ascent<'a> + 'c>,
+pub struct Parser<'a, 'b> {
+	text: &'b str,
+	tokens: &'b Vec<Node<'a>>,
+	descents: &'b Arena<dyn Descent<'a> + 'b>,
+	ascents: &'b Arena<dyn Ascent<'a> + 'b>,
 	cursor: usize,
 	reach: usize,
 }
 
-impl<'a, 'b, 'c> Parser<'a, 'b, 'c> {
-	fn new(tokens: &'c Vec<Node<'a, 'b>>, descents: &'c Arena<dyn Descent<'a> + 'c>, ascents: &'c Arena<dyn Ascent<'a> + 'c>) -> Self {
+impl<'a, 'b> Parser<'a, 'b> {
+	fn new(text: &'b str, tokens: &'b Vec<Node<'a>>, descents: &'b Arena<dyn Descent<'a> + 'b>, ascents: &'b Arena<dyn Ascent<'a> + 'b>) -> Self {
 		return Self {
+			text,
 			tokens,
 			descents,
 			ascents,
@@ -34,7 +36,7 @@ impl<'a, 'b, 'c> Parser<'a, 'b, 'c> {
 		return self.cursor == self.tokens.len();
 	}
 
-	fn next(&mut self) -> Option<Node<'a, 'b>> {
+	fn next(&mut self) -> Option<Node<'a>> {
 		let option = self.tokens.get(self.cursor);
 		if let Some(token) = option {
 			if self.reach < self.cursor {
@@ -48,7 +50,7 @@ impl<'a, 'b, 'c> Parser<'a, 'b, 'c> {
 		return None;
 	}
 
-	fn descent(&mut self, index: usize) -> Option<Vec<Node<'a, 'b>>> {
+	fn descent(&mut self, index: usize) -> Option<Vec<Node<'a>>> {
 		let cursor = self.cursor;
 		let nodes = self.descents.get(index).descent(self);
 		if nodes.is_none() {
@@ -65,7 +67,7 @@ impl<'a, 'b, 'c> Parser<'a, 'b, 'c> {
 		return nodes.is_some();
 	}
 
-	fn ascent(&mut self, index: usize, nodes: Vec<Node<'a, 'b>>) -> Option<Vec<Node<'a, 'b>>> {
+	fn ascent(&mut self, index: usize, nodes: Vec<Node<'a>>) -> Option<Vec<Node<'a>>> {
 		let cursor = self.cursor;
 		let nodes = self.ascents.get(index).ascent(self, nodes);
 		if nodes.is_none() {
@@ -75,14 +77,14 @@ impl<'a, 'b, 'c> Parser<'a, 'b, 'c> {
 		return nodes;
 	}
 
-	fn ascent_predicate(&mut self, index: usize, nodes: Vec<Node<'a, 'b>>) -> bool {
+	fn ascent_predicate(&mut self, index: usize, nodes: Vec<Node<'a>>) -> bool {
 		let cursor = self.cursor;
 		let nodes = self.ascents.get(index).ascent(self, nodes);
 		self.cursor = cursor;
 		return nodes.is_some();
 	}
 
-	pub fn parse(&mut self, program: usize) -> Option<Node<'a, 'b>> {
+	pub fn parse(&mut self, program: usize) -> Option<Node<'a>> {
 		let node = if let Some(mut nodes) = self.descents.get(program).descent(self) {
 			nodes.pop()
 		} else {
@@ -94,7 +96,7 @@ impl<'a, 'b, 'c> Parser<'a, 'b, 'c> {
 			node
 		} else {
 			let token = &self.tokens[self.reach];
-			println!("PARSING ERROR, UNEXPECTED TOKEN: {:?} - {}", token.text(), token.element.name);
+			println!("PARSING ERROR, UNEXPECTED TOKEN: {:?} - {}", &self.text[token.left()..token.right()], token.element.name);
 			None
 		};
 	}

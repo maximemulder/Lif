@@ -5,7 +5,7 @@ use crate::parser2::ascent::*;
 use crate::parser2::descent::*;
 use crate::parser2::Parser;
 
-pub fn run<'a, 'b>(tokens: &Vec<Node<'a, 'b>>) -> Option<Node<'a, 'b>> {
+pub fn run<'a>(text: &str, tokens: &Vec<Node<'a>>) -> Option<Node<'a>> {
 	let descents = Arena::<dyn Descent>::new();
 	let ascents = Arena::<dyn Ascent>::new();
 
@@ -349,6 +349,6 @@ pub fn run<'a, 'b>(tokens: &Vec<Node<'a, 'b>>) -> Option<Node<'a, 'b>> {
 		&elements::productions::PROGRAM
 	));
 
-	let mut parser = Parser::new(tokens, &descents, &ascents);
+	let mut parser = Parser::new(text, tokens, &descents, &ascents);
 	return parser.parse(program);
 }

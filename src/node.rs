@@ -1,44 +1,50 @@
 use crate::element::Element;
 
 #[derive(Clone)]
-pub enum Content<'a, 'b> {
-	Token(&'b str),
-	Production(Vec<Node<'a, 'b>>)
+pub enum Type<'a> {
+	Production(Vec<Node<'a>>),
+	Token(usize, usize),
 }
 
 #[derive(Clone)]
-pub struct Node<'a, 'b> {
+pub struct Node<'a> {
 	pub element: &'a Element,
-	pub content: Content<'a, 'b>,
+	pub r#type: Type<'a>,
 }
 
-impl<'a, 'b> Node<'a, 'b> {
-	fn new(element: &'a Element, content: Content<'a, 'b>) -> Self {
+impl<'a> Node<'a> {
+	pub fn new_token(element: &'a Element, delimiters: (usize, usize)) -> Self {
 		return Self {
 			element,
-			content,
+			r#type: Type::Token(delimiters.0, delimiters.1),
 		};
 	}
 
-	pub fn new_token(element: &'a Element, string: &'b str) -> Self {
-		return Self::new(element, Content::Token(string));
-	}
-
-	pub fn new_production(element: &'a Element, children: Vec<Node<'a, 'b>>) -> Self {
-		return Self::new(element, Content::Production(children));
-	}
-
-	pub fn children(&self) -> &Vec<Node<'a, 'b>> {
-		return match &self.content {
-			Content::Production(content) => &content,
-			Content::Token(_) => panic!(),
+	pub fn new_production(element: &'a Element, children: Vec<Node<'a>>) -> Self {
+		return Self {
+			element,
+			r#type: Type::Production(children),
 		};
 	}
 
-	pub fn text(&self) -> &str {
-		return match &self.content {
-			Content::Production(_) => panic!(),
-			Content::Token(content) => content,
+	pub fn children(&self) -> &Vec<Node<'a>> {
+		return match &self.r#type {
+			Type::Production(children) => children,
+			Type::Token(_, _) => panic!(),
+		};
+	}
+
+	pub fn left(&self) -> usize {
+		return match &self.r#type {
+			Type::Production(children) => children.first().unwrap().left(),
+			Type::Token(left, _) => *left,
+		};
+	}
+
+	pub fn right(&self) -> usize {
+		return match &self.r#type {
+			Type::Production(children) => children.last().unwrap().right(),
+			Type::Token(_, right) => *right,
 		};
 	}
 }
