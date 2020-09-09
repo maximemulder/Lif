@@ -39,16 +39,20 @@ impl<'a> Reference<'a> {
 	pub fn write(&mut self, value: GcValue<'a>) {
 		match self.r#type {
 			Type::Variable(r#type) => if value.isa(r#type) {
-				self.value = Some(value);
+				self.set_value(value);
 			} else {
 				panic!();
 			},
 			Type::Constant => if self.value.is_none() {
-				self.value = Some(value);
+				self.set_value(value);
 			} else {
 				panic!();
 			},
 		}
+	}
+
+	fn set_value(&mut self, value: GcValue<'a>) {
+		self.value = Some(value);
 	}
 }
 
