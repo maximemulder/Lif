@@ -23,7 +23,6 @@ pub struct Engine<'a> {
 	pub registries:  Vec<Vec<GcReference<'a>>>,
 	pub frames:      Vec<GcScope<'a>>,
 	pub scope:       GcScope<'a>,
-	register:        GcReference<'a>,
 	this:            Option<GcValue<'a>>,
 	pub control:     Option<Control>,
 }
@@ -38,7 +37,6 @@ impl<'a> Engine<'a> {
 			registries:  Vec::new(),
 			frames:      Vec::new(),
 			scope:       GcRef::null(),
-			register:    GcRef::null(),
 			this:        None,
 			control:     None,
 		};
@@ -51,16 +49,6 @@ impl<'a> Engine<'a> {
 }
 
 impl<'a> Engine<'a> {
-	pub fn set_register(&mut self, reference: GcReference<'a>) {
-		self.register = reference;
-	}
-
-	pub fn get_register(&mut self) -> GcReference<'a> {
-		let reference = self.register;
-		self.register = self.new_undefined();
-		return reference;
-	}
-
 	pub fn set_this(&mut self, this: GcValue<'a>) {
 		self.this = Some(this);
 	}
@@ -163,7 +151,6 @@ impl GcTraceable for Engine<'_> {
 	fn trace(&mut self) {
 		self.environment.trace();
 		self.scope.trace();
-		self.register.trace();
 		for registries in self.registries.iter_mut() {
 			for registry in registries.iter_mut() {
 				registry.trace();
