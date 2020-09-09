@@ -2,11 +2,11 @@
 
 macro_rules! execute {
 	( $engine:expr, $node:expr ) => {{
-		let reference = $engine.execute($node);
+		let reference = $engine.execute($node)?;
 		if $engine.control.is_none() {
 			reference
 		} else {
-			return reference;
+			return Ok(reference);
 		}
 	}}
 }
@@ -37,10 +37,11 @@ pub mod r#continue;
 
 pub mod build;
 use crate::runtime::engine::Engine;
+use crate::runtime::error::Error;
 use crate::runtime::reference::GcReference;
 
 pub use crate::node::Node as SyntaxNode;
 
 pub trait Node {
-	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> GcReference<'a>;
+	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> Result<GcReference<'a>, Error>;
 }

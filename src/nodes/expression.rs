@@ -1,5 +1,6 @@
 use crate::nodes::Node;
 use crate::runtime::engine::Engine;
+use crate::runtime::error::Error;
 use crate::runtime::reference::GcReference;
 
 pub struct Expression {
@@ -15,8 +16,8 @@ impl Expression {
 }
 
 impl Node for Expression {
-	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> GcReference<'a> {
+	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> Result<GcReference<'a>, Error> {
 		engine.collect();
-		return execute!(engine, self.node.as_ref());
+		return engine.execute(self.node.as_ref());
 	}
 }

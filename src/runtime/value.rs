@@ -1,5 +1,6 @@
 use crate::runtime::data::{ Callable, Class, Data, Instance };
 use crate::runtime::engine::Engine;
+use crate::runtime::error::Error;
 use crate::runtime::gc::{ GcRef, GcTraceable };
 use crate::runtime::reference::GcReference;
 
@@ -35,30 +36,32 @@ impl<'a> Value<'a> {
 		return false;
 	}
 
-	pub fn cast(&self, other: GcValue<'a>) {
-		if !self.isa(other) {
-			panic!();
-		}
+	pub fn cast(&self, other: GcValue<'a>) -> Result<(), Error> {
+		return if self.isa(other) {
+			Ok(())
+		} else {
+			Err(Error::new_runtime("Value is not of the required type."))
+		};
 	}
 
-	pub fn get_cast_array(&self, engine: &Engine<'a>) -> &Vec<GcReference<'a>> {
-		self.cast(engine.environment.array);
-		return self.data_array();
+	pub fn get_cast_array(&self, engine: &Engine<'a>) -> Result<&Vec<GcReference<'a>>, Error> {
+		self.cast(engine.environment.array)?;
+		return Ok(self.data_array());
 	}
 
-	pub fn get_cast_boolean(&self, engine: &Engine<'a>) -> &bool {
-		self.cast(engine.environment.boolean);
-		return self.data_boolean();
+	pub fn get_cast_boolean(&self, engine: &Engine<'a>) -> Result<&bool, Error> {
+		self.cast(engine.environment.boolean)?;
+		return Ok(self.data_boolean());
 	}
 
-	pub fn get_cast_callable(&self, engine: &Engine<'a>) -> &dyn Callable<'a> {
-		self.cast(engine.environment.function);
-		return self.data_callable();
+	pub fn get_cast_callable(&self, engine: &Engine<'a>) -> Result<&dyn Callable<'a>, Error> {
+		self.cast(engine.environment.function)?;
+		return Ok(self.data_callable());
 	}
 
-	pub fn get_cast_string(&self, engine: &Engine<'a>) -> &String {
-		self.cast(engine.environment.string);
-		return self.data_string();
+	pub fn get_cast_string(&self, engine: &Engine<'a>) -> Result<&String, Error> {
+		self.cast(engine.environment.string)?;
+		return Ok(self.data_string());
 	}
 
 	pub fn get_method(&self, engine: &Engine<'a>, name: &str) -> Option<GcReference<'a>> {

@@ -2,6 +2,7 @@ use crate::nodes::Node;
 use crate::nodes::block::Block;
 use crate::nodes::expression::Expression;
 use crate::runtime::engine::{ Control, Engine };
+use crate::runtime::error::Error;
 use crate::runtime::reference::GcReference;
 
 pub struct While {
@@ -19,16 +20,16 @@ impl While {
 }
 
 impl Node for While {
-	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> GcReference<'a> {
+	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> Result<GcReference<'a>, Error> {
 		let mut array = Vec::new();
 		while {
 			let reference = execute!(engine, &self.condition);
-			*reference.read().get_cast_boolean(engine)
+			*reference.read()?.get_cast_boolean(engine)?
 		} {
-			let reference = engine.execute(&self.body);
+			let reference = engine.execute(&self.body)?;
 			match &engine.control {
 				Some(control) => match control {
-					Control::Return => return reference,
+					Control::Return => return Ok(reference),
 					Control::Continue => {
 						engine.control = None;
 						array.push(reference);
@@ -44,6 +45,6 @@ impl Node for While {
 			}
 		}
 
-		return engine.new_array(array);
+		return Ok(engine.new_array(array));
 	}
 }

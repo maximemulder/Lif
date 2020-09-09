@@ -1,6 +1,7 @@
 use crate::nodes::Node;
 use crate::nodes::block::Block;
 use crate::runtime::engine::{ Control, Engine };
+use crate::runtime::error::Error;
 use crate::runtime::reference::GcReference;
 
 pub struct Loop {
@@ -16,13 +17,13 @@ impl Loop {
 }
 
 impl Node for Loop {
-	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> GcReference<'a> {
+	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> Result<GcReference<'a>, Error> {
 		let mut array = Vec::new();
 		loop {
-			let reference = self.body.execute(engine);
+			let reference = engine.execute(&self.body)?;
 			match &engine.control {
 				Some(control) => match control {
-					Control::Return => return reference,
+					Control::Return => return Ok(reference),
 					Control::Continue => {
 						engine.control = None;
 						array.push(reference);
@@ -38,6 +39,6 @@ impl Node for Loop {
 			}
 		}
 
-		return engine.new_array(array);
+		return Ok(engine.new_array(array));
 	}
 }

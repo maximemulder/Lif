@@ -1,5 +1,6 @@
 use crate::nodes::Node;
 use crate::runtime::engine::Engine;
+use crate::runtime::error::Error;
 use crate::runtime::reference::GcReference;
 
 pub struct Identifier {
@@ -15,7 +16,7 @@ impl Identifier {
 }
 
 impl Node for Identifier {
-	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> GcReference<'a> {
+	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> Result<GcReference<'a>, Error> {
 		return engine.get_variable(&self.identifier);
 	}
 }
