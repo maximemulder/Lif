@@ -1,24 +1,26 @@
-use crate::nodes::Node;
+use crate::nodes::{ Node, SyntaxNode };
 use crate::nodes::block::Block;
 use crate::nodes::expression::Expression;
 use crate::runtime::ReturnReference;
 use crate::runtime::engine::{ Control, Engine };
 
-pub struct DoWhile {
-	body:      Block,
-	condition: Expression,
+pub struct DoWhile<'a, 'b> {
+	node: &'b SyntaxNode<'a>,
+	body:      Block<'a, 'b>,
+	condition: Expression<'a, 'b>,
 }
 
-impl DoWhile {
-	pub fn new(body: Block, condition: Expression) -> Self {
+impl<'a, 'b> DoWhile<'a, 'b> {
+	pub fn new(node: &'b SyntaxNode<'a>, body: Block<'a, 'b>, condition: Expression<'a, 'b>) -> Self {
 		return Self {
+			node,
 			body,
 			condition,
 		};
 	}
 }
 
-impl Node for DoWhile {
+impl Node for DoWhile<'_, '_> {
 	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> ReturnReference<'a> {
 		let mut array = Vec::new();
 		loop {
@@ -49,5 +51,9 @@ impl Node for DoWhile {
 		}
 
 		return Ok(engine.new_array(array));
+	}
+
+	fn get_syntax_node(&self) -> &SyntaxNode {
+		return self.node;
 	}
 }

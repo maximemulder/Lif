@@ -1,22 +1,28 @@
-use crate::nodes::Node;
+use crate::nodes::{ Node, SyntaxNode };
 use crate::nodes::expression::Expression;
 use crate::runtime::ReturnReference;
 use crate::runtime::engine::{ Control, Engine };
 
-pub struct Break {
-	expression: Option<Expression>
+pub struct Break<'a, 'b> {
+	node: &'b SyntaxNode<'a>,
+	expression: Option<Expression<'a, 'b>>,
 }
 
-impl Break {
-	pub fn new(expression: Option<Expression>) -> Self {
+impl<'a, 'b> Break<'a, 'b> {
+	pub fn new(node: &'b SyntaxNode<'a>, expression: Option<Expression<'a, 'b>>) -> Self {
 		return Self {
+			node,
 			expression,
 		};
 	}
 }
 
-impl Node for Break {
+impl Node for Break<'_, '_> {
 	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> ReturnReference<'a> {
 		return engine.new_control(Control::Break, &self.expression);
+	}
+
+	fn get_syntax_node(&self) -> &SyntaxNode {
+		return self.node;
 	}
 }
