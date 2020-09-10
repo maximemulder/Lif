@@ -1,8 +1,8 @@
 use crate::nodes::Node;
 use crate::nodes::block::Block;
 use crate::nodes::expression::Expression;
+use crate::runtime::ReturnReference;
 use crate::runtime::engine::Engine;
-use crate::runtime::reference::GcReference;
 
 pub struct If {
 	condition: Expression,
@@ -21,16 +21,16 @@ impl If {
 }
 
 impl Node for If {
-	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> GcReference<'a> {
+	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> ReturnReference<'a> {
 		return if {
 			let reference = execute!(engine, &self.condition);
-			*reference.read().get_cast_boolean(engine)
+			*reference.read()?.get_cast_boolean(engine)?
 		} {
-			execute!(engine, &self.then)
-		} else if let Some(r#else) = &self.r#else {
-			execute!(engine, r#else)
+			engine.execute(&self.then)
+		} else if let Some(r#else) = self.r#else.as_ref() {
+			engine.execute(r#else)
 		} else {
-			return engine.new_undefined();
+			Ok(engine.new_undefined())
 		}
 	}
 }

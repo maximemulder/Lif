@@ -1,24 +1,25 @@
 use crate::nodes::Node;
 use crate::nodes::block::Block;
 use crate::nodes::declaration::Declaration;
+use crate::runtime::ReturnReference;
 use crate::runtime::engine::{ Control, Engine };
+use crate::runtime::error::Error;
 use crate::runtime::gc::GcTraceable;
-use crate::runtime::reference::GcReference;
 use crate::runtime::scope::GcScope;
 use crate::runtime::value::GcValue;
 
 pub trait Callable<'a>: GcTraceable {
-	fn call(&self, engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> GcReference<'a>;
+	fn execute(&self, engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> ReturnReference<'a>;
 	fn duplicate(&self) -> Box<dyn Callable<'a> + 'a>;
 }
 
 #[derive(Clone)]
 pub struct Primitive<'a> {
-	callback: &'a dyn Fn(&mut Engine<'a>, Vec<GcValue<'a>>) -> GcReference<'a>,
+	callback: &'a dyn Fn(&mut Engine<'a>, Vec<GcValue<'a>>) -> ReturnReference<'a>,
 }
 
 impl<'a> Primitive<'a> {
-	pub fn new(callback: &'a dyn Fn(&mut Engine<'a>, Vec<GcValue<'a>>) -> GcReference<'a>) -> Self {
+	pub fn new(callback: &'a dyn Fn(&mut Engine<'a>, Vec<GcValue<'a>>) -> ReturnReference<'a>) -> Self {
 		return Self {
 			callback,
 		};
@@ -26,7 +27,7 @@ impl<'a> Primitive<'a> {
 }
 
 impl<'a> Callable<'a> for Primitive<'a> {
-	fn call(&self, engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> GcReference<'a> {
+	fn execute(&self, engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> ReturnReference<'a> {
 		return (self.callback)(engine, arguments);
 	}
 
@@ -59,30 +60,30 @@ impl<'a> Function<'a> {
 }
 
 impl<'a> Callable<'a> for Function<'a> {
-	fn call(&self, engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> GcReference<'a> {
+	fn execute(&self, engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> ReturnReference<'a> {
 		engine.push_frame(self.scope);
 		for (parameter, argument) in self.parameters.iter().zip(arguments) {
-			let mut reference = parameter.execute(engine);
-			reference.write(argument);
+			let mut reference = parameter.execute(engine)?;
+			reference.write(argument)?;
 		}
 
-		let reference = self.block.execute(engine);
+		let reference = self.block.execute(engine)?;
 		engine.pop_frame();
 
 		return match &engine.control {
 			Some(control) => match control {
-				Control::Break | Control::Continue => panic!(),
+				Control::Break | Control::Continue => Err(Error::new_runtime("Trying to loop control out of a function.")),
 				Control::Return => {
 					engine.control = None;
-					let value = reference.read();
+					let value = reference.read()?;
 					if let Some(r#type) = self.r#type {
-						value.cast(r#type);
+						value.cast(r#type)?;
 					}
 
-					engine.new_constant(Some(value))
+					Ok(engine.new_constant(Some(value)))
 				},
 			},
-			None => engine.new_undefined(),
+			None => Ok(engine.new_undefined()),
 		};
 	}
 

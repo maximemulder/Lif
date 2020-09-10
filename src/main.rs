@@ -26,7 +26,7 @@ fn cheat<T>(value: &T) -> &mut T {
 }
 
 fn main() {
-	println!("Leaf compiler.");
+	// println!("Leaf compiler.");
 
     let args: Vec<String> = env::args().collect();
     if args.len() != 2 {
@@ -37,15 +37,18 @@ fn main() {
     let text = fs::read_to_string(&args[1]).expect("");
 	let tokens = lexer::lex(&text);
 	let code = Code::new(&text);
-    printer::tokens(&code, &tokens);
+    // printer::tokens(&code, &tokens);
 
-    println!("=====");
+    // println!("=====");
 
     if let Some(tree) = parser2::nodes::run(&code, &tokens) {
-        printer::tree(&tree);
+        // printer::tree(&tree);
 		let program = nodes::build::program(&text, &tree);
 		let mut engine = Engine::new();
-		engine.execute(&program);
+		let result = engine.execute(&program);
 		engine.collect();
+		if let Err(error) = result {
+			println!("{}", error.message);
+		}
 	}
 }

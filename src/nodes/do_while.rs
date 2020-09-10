@@ -1,8 +1,8 @@
 use crate::nodes::Node;
 use crate::nodes::block::Block;
 use crate::nodes::expression::Expression;
+use crate::runtime::ReturnReference;
 use crate::runtime::engine::{ Control, Engine };
-use crate::runtime::reference::GcReference;
 
 pub struct DoWhile {
 	body:      Block,
@@ -19,13 +19,13 @@ impl DoWhile {
 }
 
 impl Node for DoWhile {
-	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> GcReference<'a> {
+	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> ReturnReference<'a> {
 		let mut array = Vec::new();
 		loop {
-			let reference = engine.execute(&self.body);
+			let reference = engine.execute(&self.body)?;
 			match &engine.control {
 				Some(control) => match control {
-					Control::Return => return reference,
+					Control::Return => return Ok(reference),
 					Control::Continue => {
 						engine.control = None;
 						array.push(reference);
@@ -42,12 +42,12 @@ impl Node for DoWhile {
 
 			if {
 				let reference = execute!(engine, &self.condition);
-				!reference.read().get_cast_boolean(engine)
+				!*reference.read()?.get_cast_boolean(engine)?
 			} {
 				break;
 			}
 		}
 
-		return engine.new_array(array);
+		return Ok(engine.new_array(array));
 	}
 }
