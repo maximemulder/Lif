@@ -200,7 +200,7 @@ impl<'a> Engine<'a> {
 
 impl<'a> Engine<'a> {
 	pub fn new_array(&mut self, elements: Vec<GcReference<'a>>) -> GcReference<'a> {
-		return self.new_constant_value(self.environment.class, Data::Array(elements));
+		return self.new_constant_value(self.environment.array, Data::Array(elements));
 	}
 
 	pub fn new_boolean(&mut self, boolean: bool) -> GcReference<'a> {
