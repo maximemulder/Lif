@@ -2,13 +2,13 @@ use crate::nodes::{ Node, SyntaxNode };
 use crate::runtime::ReturnReference;
 use crate::runtime::engine::Engine;
 
-pub struct Integer<'a, 'b> {
-	node: &'b SyntaxNode<'a>,
+pub struct Integer<'a> {
+	node: &'a SyntaxNode<'a>,
 	integer: usize,
 }
 
-impl<'a, 'b> Integer<'a, 'b> {
-	pub fn new(node: &'b SyntaxNode<'a>, integer: usize) -> Self {
+impl<'a> Integer<'a> {
+	pub fn new(node: &'a SyntaxNode<'a>, integer: usize) -> Self {
 		return Self {
 			node,
 			integer,
@@ -16,7 +16,7 @@ impl<'a, 'b> Integer<'a, 'b> {
 	}
 }
 
-impl Node for Integer<'_, '_> {
+impl Node for Integer<'_> {
 	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> ReturnReference<'a> {
 		return Ok(engine.new_integer(self.integer));
 	}

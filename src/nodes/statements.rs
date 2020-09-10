@@ -3,13 +3,13 @@ use crate::nodes::statement::Statement;
 use crate::runtime::ReturnReference;
 use crate::runtime::engine::Engine;
 
-pub struct Statements<'a, 'b> {
-	node: &'b SyntaxNode<'a>,
-	statements: Vec<Statement<'a, 'b>>,
+pub struct Statements<'a> {
+	node: &'a SyntaxNode<'a>,
+	statements: Vec<Statement<'a>>,
 }
 
-impl<'a, 'b> Statements<'a, 'b> {
-	pub fn new(node: &'b SyntaxNode<'a>, statements: Vec<Statement<'a, 'b>>) -> Self {
+impl<'a> Statements<'a> {
+	pub fn new(node: &'a SyntaxNode<'a>, statements: Vec<Statement<'a>>) -> Self {
 		return Self {
 			node,
 			statements,
@@ -17,7 +17,7 @@ impl<'a, 'b> Statements<'a, 'b> {
 	}
 }
 
-impl Node for Statements<'_, '_> {
+impl Node for Statements<'_> {
 	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> ReturnReference<'a> {
 		for statement in self.statements.iter() {
 			execute!(engine, statement);

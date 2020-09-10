@@ -10,14 +10,16 @@ mod element;
 mod elements;
 mod lexer;
 mod node;
+mod nodes;
 mod parser2;
 mod printer;
-mod nodes;
 mod runtime;
 mod code;
 
 use code::Code;
+use node::Node;
 use runtime::engine::Engine;
+use std::cmp::min;
 use std::env;
 use std::fs;
 
@@ -49,6 +51,14 @@ fn main() {
 		engine.collect();
 		if let Err(error) = result {
 			println!("{}", error.message);
+			if let Some(delimiters) = error.delimiters {
+				let node = Node::new_token(&elements::productions::PROGRAM, delimiters);
+				println!("\n{}\n{}{}",
+					code.node_line(&node),
+					" ".repeat(code.node_shift_left(&node)),
+					"^".repeat(min(code.node_str(&node).len(), code.node_shift_right(&node)))
+				);
+			}
 		}
 	}
 }

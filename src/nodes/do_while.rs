@@ -4,14 +4,14 @@ use crate::nodes::expression::Expression;
 use crate::runtime::ReturnReference;
 use crate::runtime::engine::{ Control, Engine };
 
-pub struct DoWhile<'a, 'b> {
-	node: &'b SyntaxNode<'a>,
-	body:      Block<'a, 'b>,
-	condition: Expression<'a, 'b>,
+pub struct DoWhile<'a> {
+	node: &'a SyntaxNode<'a>,
+	body:      Block<'a>,
+	condition: Expression<'a>,
 }
 
-impl<'a, 'b> DoWhile<'a, 'b> {
-	pub fn new(node: &'b SyntaxNode<'a>, body: Block<'a, 'b>, condition: Expression<'a, 'b>) -> Self {
+impl<'a> DoWhile<'a> {
+	pub fn new(node: &'a SyntaxNode<'a>, body: Block<'a>, condition: Expression<'a>) -> Self {
 		return Self {
 			node,
 			body,
@@ -20,7 +20,7 @@ impl<'a, 'b> DoWhile<'a, 'b> {
 	}
 }
 
-impl Node for DoWhile<'_, '_> {
+impl Node for DoWhile<'_> {
 	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> ReturnReference<'a> {
 		let mut array = Vec::new();
 		loop {

@@ -3,13 +3,13 @@ use crate::nodes::expression::Expression;
 use crate::runtime::ReturnReference;
 use crate::runtime::engine::{ Control, Engine };
 
-pub struct Break<'a, 'b> {
-	node: &'b SyntaxNode<'a>,
-	expression: Option<Expression<'a, 'b>>,
+pub struct Break<'a> {
+	node: &'a SyntaxNode<'a>,
+	expression: Option<Expression<'a>>,
 }
 
-impl<'a, 'b> Break<'a, 'b> {
-	pub fn new(node: &'b SyntaxNode<'a>, expression: Option<Expression<'a, 'b>>) -> Self {
+impl<'a> Break<'a> {
+	pub fn new(node: &'a SyntaxNode<'a>, expression: Option<Expression<'a>>) -> Self {
 		return Self {
 			node,
 			expression,
@@ -17,7 +17,7 @@ impl<'a, 'b> Break<'a, 'b> {
 	}
 }
 
-impl Node for Break<'_, '_> {
+impl Node for Break<'_> {
 	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> ReturnReference<'a> {
 		return engine.new_control(Control::Break, &self.expression);
 	}

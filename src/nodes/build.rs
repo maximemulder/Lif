@@ -24,11 +24,11 @@ use crate::nodes::r#return::Return;
 use crate::nodes::r#break::Break;
 use crate::nodes::r#continue::Continue;
 
-pub fn program<'a, 'b>(text: &str, node: &'b SyntaxNode<'a>) -> Program<'a, 'b> {
+pub fn program<'a>(text: &str, node: &'a SyntaxNode<'a>) -> Program<'a> {
 	return Program::new(node, statements(text, &node.children()[0]));
 }
 
-fn statements<'a, 'b>(text: &str, node: &'b SyntaxNode<'a>) -> Statements<'a, 'b> {
+fn statements<'a>(text: &str, node: &'a SyntaxNode<'a>) -> Statements<'a> {
 	let mut statements = Vec::new();
 	for child in node.children() {
 		statements.push(statement(text, child));
@@ -37,7 +37,7 @@ fn statements<'a, 'b>(text: &str, node: &'b SyntaxNode<'a>) -> Statements<'a, 'b
 	return Statements::new(node, statements);
 }
 
-fn statement<'a, 'b>(text: &str, node: &'b SyntaxNode<'a>) -> Statement<'a, 'b> {
+fn statement<'a>(text: &str, node: &'a SyntaxNode<'a>) -> Statement<'a> {
 	let child = &node.children()[0];
 	return Statement::new(node, match child.element {
 		&elements::expressions::EXPRESSION => Box::new(expression(text, child)),
@@ -46,7 +46,7 @@ fn statement<'a, 'b>(text: &str, node: &'b SyntaxNode<'a>) -> Statement<'a, 'b> 
 	});
 }
 
-fn expression<'a, 'b>(text: &str, node: &'b SyntaxNode<'a>) -> Expression<'a, 'b> {
+fn expression<'a>(text: &str, node: &'a SyntaxNode<'a>) -> Expression<'a> {
 	let child = &node.children()[0];
 	return Expression::new(node, match child.element {
 		&elements::expressions::LITERAL     => literal(text, child),
@@ -62,7 +62,7 @@ fn expression<'a, 'b>(text: &str, node: &'b SyntaxNode<'a>) -> Expression<'a, 'b
 	});
 }
 
-fn literal<'a, 'b>(text: &str, node: &'b SyntaxNode<'a>) -> Box<dyn Node + 'b> {
+fn literal<'a>(text: &str, node: &'a SyntaxNode<'a>) -> Box<dyn Node + 'a> {
 	let child = &node.children()[0];
 	return match child.element {
 		&elements::variables::NUMBER     => Box::new(integer(text, child)),
@@ -72,19 +72,19 @@ fn literal<'a, 'b>(text: &str, node: &'b SyntaxNode<'a>) -> Box<dyn Node + 'b> {
 	};
 }
 
-fn integer<'a, 'b>(text: &str, node: &'b SyntaxNode<'a>) -> Integer<'a, 'b> {
+fn integer<'a>(text: &str, node: &'a SyntaxNode<'a>) -> Integer<'a> {
 	return Integer::new(node, text[node.left() .. node.right()].parse::<usize>().unwrap());
 }
 
-fn string<'a, 'b>(text: &str, node: &'b SyntaxNode<'a>) -> String<'a, 'b> {
+fn string<'a>(text: &str, node: &'a SyntaxNode<'a>) -> String<'a> {
 	return String::new(node, Box::from(&text[node.left() + 1 .. node.right() - 1]));
 }
 
-fn identifier<'a, 'b>(text: &str, node: &'b SyntaxNode<'a>) -> Identifier<'a, 'b> {
+fn identifier<'a>(text: &str, node: &'a SyntaxNode<'a>) -> Identifier<'a> {
 	return Identifier::new(node, Box::from(&text[node.left() .. node.right()]));
 }
 
-fn structure<'a, 'b>(text: &str, node: &'b SyntaxNode<'a>) -> Structure<'a, 'b> {	let child = &node.children()[0];
+fn structure<'a>(text: &str, node: &'a SyntaxNode<'a>) -> Structure<'a> {	let child = &node.children()[0];
 	return Structure::new(node, match child.element {
 		&elements::structures::BLOCK    => Box::new(block(text, child)),
 		&elements::structures::IF       => Box::new(r#if(text, child)),
@@ -96,7 +96,7 @@ fn structure<'a, 'b>(text: &str, node: &'b SyntaxNode<'a>) -> Structure<'a, 'b> 
 	});
 }
 
-fn block<'a, 'b>(text: &str, node: &'b SyntaxNode<'a>) -> Block<'a, 'b> {
+fn block<'a>(text: &str, node: &'a SyntaxNode<'a>) -> Block<'a> {
 	return Block::new(node, statements(text, &node.children()[1]), if node.children().len() == 4 {
 		Some(expression(text, &node.children()[2]))
 	} else {
@@ -104,35 +104,35 @@ fn block<'a, 'b>(text: &str, node: &'b SyntaxNode<'a>) -> Block<'a, 'b> {
 	});
 }
 
-fn r#if<'a, 'b>(text: &str, node: &'b SyntaxNode<'a>) -> If<'a, 'b> {
+fn r#if<'a>(text: &str, node: &'a SyntaxNode<'a>) -> If<'a> {
 	return If::new(node, expression(text, &node.children()[1]), block(text, &node.children()[2]), node.children().get(4).map(|child| block(text, child)));
 }
 
-fn r#loop<'a, 'b>(text: &str, node: &'b SyntaxNode<'a>) -> Loop<'a, 'b> {
+fn r#loop<'a>(text: &str, node: &'a SyntaxNode<'a>) -> Loop<'a> {
 	return Loop::new(node, block(text, &node.children()[1]));
 }
 
-fn r#while<'a, 'b>(text: &str, node: &'b SyntaxNode<'a>) -> While<'a, 'b> {
+fn r#while<'a>(text: &str, node: &'a SyntaxNode<'a>) -> While<'a> {
 	return While::new(node, expression(text, &node.children()[1]), block(text, &node.children()[2]));
 }
 
-fn do_while<'a, 'b>(text: &str, node: &'b SyntaxNode<'a>) -> DoWhile<'a, 'b> {
+fn do_while<'a>(text: &str, node: &'a SyntaxNode<'a>) -> DoWhile<'a> {
 	return DoWhile::new(node, block(text, &node.children()[1]), expression(text, &node.children()[3]));
 }
 
-fn for_in<'a, 'b>(text: &str, node: &'b SyntaxNode<'a>) -> ForIn<'a, 'b> {
+fn for_in<'a>(text: &str, node: &'a SyntaxNode<'a>) -> ForIn<'a> {
 	return ForIn::new(node, token(text, &node.children()[1]), expression(text, &node.children()[3]), block(text, &node.children()[4]));
 }
 
-fn r#let<'a, 'b>(text: &str, node: &'b SyntaxNode<'a>) -> Declaration<'a, 'b> {
+fn r#let<'a>(text: &str, node: &'a SyntaxNode<'a>) -> Declaration<'a> {
 	return declaration(text, &node.children()[1]);
 }
 
-fn declaration<'a, 'b>(text: &str, node: &'b SyntaxNode<'a>) -> Declaration<'a, 'b> {
+fn declaration<'a>(text: &str, node: &'a SyntaxNode<'a>) -> Declaration<'a> {
 	return Declaration::new(node, token(text, &node.children()[0]), node.children().get(2).map(|child| expression(text, child)));
 }
 
-fn control<'a, 'b>(text: &str, node: &'b SyntaxNode<'a>) -> Box<dyn Node + 'b> {
+fn control<'a>(text: &str, node: &'a SyntaxNode<'a>) -> Box<dyn Node + 'a> {
 	let child = &node.children()[0];
 	return match child.element {
 		&elements::controls::RETURN   => Box::new(r#return(text, child)),
@@ -142,23 +142,23 @@ fn control<'a, 'b>(text: &str, node: &'b SyntaxNode<'a>) -> Box<dyn Node + 'b> {
 	};
 }
 
-fn r#return<'a, 'b>(text: &str, node: &'b SyntaxNode<'a>) -> Return<'a, 'b> {
+fn r#return<'a>(text: &str, node: &'a SyntaxNode<'a>) -> Return<'a> {
 	return Return::new(node, node.children().get(1).map(|child| expression(text, child)));
 }
 
-fn r#break<'a, 'b>(text: &str, node: &'b SyntaxNode<'a>) -> Break<'a, 'b> {
+fn r#break<'a>(text: &str, node: &'a SyntaxNode<'a>) -> Break<'a> {
 	return Break::new(node, node.children().get(1).map(|child| expression(text, child)));
 }
 
-fn r#continue<'a, 'b>(text: &str, node: &'b SyntaxNode<'a>) -> Continue<'a, 'b> {
+fn r#continue<'a>(text: &str, node: &'a SyntaxNode<'a>) -> Continue<'a> {
 	return Continue::new(node, node.children().get(1).map(|child| expression(text, child)));
 }
 
-fn function<'a, 'b>(text: &str, node: &'b SyntaxNode<'a>) -> Function<'a, 'b> {
+fn function<'a>(text: &str, node: &'a SyntaxNode<'a>) -> Function<'a> {
 	return Function::new(node, parameters(text, &node.children()[2]), node.children().get(5).map(|child| expression(text, child)), block(text, &node.children().last().unwrap()));
 }
 
-fn parameters<'a, 'b>(text: &str, node: &'b SyntaxNode<'a>) -> Vec<Declaration<'a, 'b>> {
+fn parameters<'a>(text: &str, node: &'a SyntaxNode<'a>) -> Vec<Declaration<'a>> {
 	let mut identifiers = Vec::new();
 	for (i, child) in node.children().iter().enumerate()  {
 		if i % 2 == 1 {
@@ -171,19 +171,19 @@ fn parameters<'a, 'b>(text: &str, node: &'b SyntaxNode<'a>) -> Vec<Declaration<'
 	return identifiers;
 }
 
-fn group<'a, 'b>(text: &str, node: &'b SyntaxNode<'a>) -> Group<'a, 'b> {
+fn group<'a>(text: &str, node: &'a SyntaxNode<'a>) -> Group<'a> {
 	return Group::new(node, expression(text, &node.children()[node.children().len() - 1]));
 }
 
-fn chain<'a, 'b>(text: &str, node: &'b SyntaxNode<'a>) -> Chain<'a, 'b> {
+fn chain<'a>(text: &str, node: &'a SyntaxNode<'a>) -> Chain<'a> {
 	return Chain::new(node, expression(text, &node.children()[0]), token(text, &node.children()[2]));
 }
 
-fn sequence<'a, 'b>(text: &str, node: &'b SyntaxNode<'a>) -> Sequence<'a, 'b> {
+fn sequence<'a>(text: &str, node: &'a SyntaxNode<'a>) -> Sequence<'a> {
 	return Sequence::new(node, expression(text, &node.children()[0]), token(text, &node.children()[1]), expressions(text, &node.children()[2]), token(text, &node.children()[3]));
 }
 
-fn expressions<'a, 'b>(text: &str, node: &'b SyntaxNode<'a>) -> Vec<Expression<'a, 'b>> {
+fn expressions<'a>(text: &str, node: &'a SyntaxNode<'a>) -> Vec<Expression<'a>> {
 	let mut expressions = Vec::new();
 	for (i, child) in node.children().iter().enumerate()  {
 		if i % 2 == 1 {
@@ -196,10 +196,10 @@ fn expressions<'a, 'b>(text: &str, node: &'b SyntaxNode<'a>) -> Vec<Expression<'
 	return expressions;
 }
 
-fn operation<'a, 'b>(text: &str, node: &'b SyntaxNode<'a>) -> Operation<'a, 'b> {
+fn operation<'a>(text: &str, node: &'a SyntaxNode<'a>) -> Operation<'a> {
 	return Operation::new(node, expression(text, &node.children()[0]), expression(text, &node.children()[2]), token(text, &node.children()[1]));
 }
 
-fn token<'a, 'b>(text: &str, node: &'b SyntaxNode<'a>) -> Box<str> {
+fn token<'a>(text: &str, node: &'a SyntaxNode<'a>) -> Box<str> {
 	return Box::from(&text[node.left() .. node.right()]);
 }

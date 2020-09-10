@@ -128,7 +128,17 @@ impl<'a> Engine<'a> {
 
 	pub fn execute(&mut self, node: &'a dyn Node) -> ReturnReference<'a> {
 		self.registries.push(Vec::new());
-		let reference = node.execute(self)?;
+		let reference = match node.execute(self) {
+			Ok(reference) => reference,
+			Err(mut error) => {
+				if error.delimiters.is_none() {
+					error.delimiters = Some((node.get_syntax_node().left(), node.get_syntax_node().right()));
+				}
+
+				return Err(error);
+			},
+		};
+
 		let index = self.registries.len() - 2;
 		self.registries[index].push(reference);
 		self.registries.pop();

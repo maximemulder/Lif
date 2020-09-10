@@ -4,15 +4,15 @@ use crate::nodes::expression::Expression;
 use crate::runtime::ReturnReference;
 use crate::runtime::engine::{ Control, Engine };
 
-pub struct ForIn<'a, 'b> {
-	node: &'b SyntaxNode<'a>,
+pub struct ForIn<'a> {
+	node: &'a SyntaxNode<'a>,
 	identifier: Box<str>,
-	expression: Expression<'a, 'b>,
-	body:       Block<'a, 'b>,
+	expression: Expression<'a>,
+	body:       Block<'a>,
 }
 
-impl<'a, 'b> ForIn<'a, 'b> {
-	pub fn new(node: &'b SyntaxNode<'a>, identifier: Box<str>, expression: Expression<'a, 'b>, body: Block<'a, 'b>) -> Self {
+impl<'a> ForIn<'a> {
+	pub fn new(node: &'a SyntaxNode<'a>, identifier: Box<str>, expression: Expression<'a>, body: Block<'a>) -> Self {
 		return Self {
 			node,
 			identifier,
@@ -22,7 +22,7 @@ impl<'a, 'b> ForIn<'a, 'b> {
 	}
 }
 
-impl Node for ForIn<'_, '_> {
+impl Node for ForIn<'_> {
 	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> ReturnReference<'a> {
 		let mut array = Vec::new();
 		for element in {

@@ -3,14 +3,14 @@ use crate::nodes::expression::Expression;
 use crate::runtime::ReturnReference;
 use crate::runtime::engine::Engine;
 
-pub struct Declaration<'a, 'b> {
-	node: &'b SyntaxNode<'a>,
+pub struct Declaration<'a> {
+	node: &'a SyntaxNode<'a>,
 	identifier: Box<str>,
-	r#type: Option<Expression<'a, 'b>>,
+	r#type: Option<Expression<'a>>,
 }
 
-impl<'a, 'b> Declaration<'a, 'b> {
-	pub fn new(node: &'b SyntaxNode<'a>, identifier: Box<str>, r#type: Option<Expression<'a, 'b>>) -> Self {
+impl<'a> Declaration<'a> {
+	pub fn new(node: &'a SyntaxNode<'a>, identifier: Box<str>, r#type: Option<Expression<'a>>) -> Self {
 		return Self {
 			node,
 			identifier,
@@ -19,7 +19,7 @@ impl<'a, 'b> Declaration<'a, 'b> {
 	}
 }
 
-impl Node for Declaration<'_, '_> {
+impl Node for Declaration<'_> {
 	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> ReturnReference<'a> {
 		let r#type = if let Some(r#type) = &self.r#type {
 			let value = execute!(engine, r#type).read()?;

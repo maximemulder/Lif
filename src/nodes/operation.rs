@@ -3,15 +3,15 @@ use crate::nodes::expression::Expression;
 use crate::runtime::ReturnReference;
 use crate::runtime::engine::Engine;
 
-pub struct Operation<'a, 'b> {
-	node: &'b SyntaxNode<'a>,
-	left:     Expression<'a, 'b>,
-	right:    Expression<'a, 'b>,
+pub struct Operation<'a> {
+	node: &'a SyntaxNode<'a>,
+	left:     Expression<'a>,
+	right:    Expression<'a>,
 	operator: Box<str>,
 }
 
-impl<'a, 'b> Operation<'a, 'b> {
-	pub fn new(node: &'b SyntaxNode<'a>, left: Expression<'a, 'b>, right: Expression<'a, 'b>, operator: Box<str>) -> Self {
+impl<'a> Operation<'a> {
+	pub fn new(node: &'a SyntaxNode<'a>, left: Expression<'a>, right: Expression<'a>, operator: Box<str>) -> Self {
 		return Self {
 			node,
 			left,
@@ -21,7 +21,7 @@ impl<'a, 'b> Operation<'a, 'b> {
 	}
 }
 
-impl Node for Operation<'_, '_> {
+impl Node for Operation<'_> {
 	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> ReturnReference<'a> {
 		if self.operator.to_string() == "=" {
 			let mut left  = execute!(engine, &self.left);

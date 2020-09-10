@@ -5,15 +5,15 @@ use crate::nodes::expression::Expression;
 use crate::runtime::ReturnReference;
 use crate::runtime::engine::Engine;
 
-pub struct Function<'a, 'b> {
-	node: &'b SyntaxNode<'a>,
-	parameters: Vec<Declaration<'a, 'b>>,
-	r#type: Option<Expression<'a, 'b>>,
-	block: Block<'a, 'b>,
+pub struct Function<'a> {
+	node: &'a SyntaxNode<'a>,
+	parameters: Vec<Declaration<'a>>,
+	r#type: Option<Expression<'a>>,
+	block: Block<'a>,
 }
 
-impl<'a, 'b> Function<'a, 'b> {
-	pub fn new(node: &'b SyntaxNode<'a>, parameters: Vec<Declaration<'a, 'b>>, r#type: Option<Expression<'a, 'b>>, block: Block<'a, 'b>) -> Self {
+impl<'a> Function<'a> {
+	pub fn new(node: &'a SyntaxNode<'a>, parameters: Vec<Declaration<'a>>, r#type: Option<Expression<'a>>, block: Block<'a>) -> Self {
 		return Self {
 			node,
 			parameters,
@@ -23,7 +23,7 @@ impl<'a, 'b> Function<'a, 'b> {
 	}
 }
 
-impl Node for Function<'_, '_> {
+impl Node for Function<'_> {
 	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> ReturnReference<'a> {
 		let r#type = if let Some(r#type) = self.r#type.as_ref() {
 			Some(r#type.execute(engine)?.read()?)

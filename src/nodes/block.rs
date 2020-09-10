@@ -4,14 +4,14 @@ use crate::nodes::statements::Statements;
 use crate::runtime::ReturnReference;
 use crate::runtime::engine::Engine;
 
-pub struct Block<'a, 'b> {
-	node: &'b SyntaxNode<'a>,
-	statements: Statements<'a, 'b>,
-	expression: Option<Expression<'a, 'b>>,
+pub struct Block<'a> {
+	node: &'a SyntaxNode<'a>,
+	statements: Statements<'a>,
+	expression: Option<Expression<'a>>,
 }
 
-impl<'a, 'b> Block<'a, 'b> {
-	pub fn new(node: &'b SyntaxNode<'a>, statements: Statements<'a, 'b>, expression: Option<Expression<'a, 'b>>) -> Self {
+impl<'a> Block<'a> {
+	pub fn new(node: &'a SyntaxNode<'a>, statements: Statements<'a>, expression: Option<Expression<'a>>) -> Self {
 		return Self {
 			node,
 			statements,
@@ -20,7 +20,7 @@ impl<'a, 'b> Block<'a, 'b> {
 	}
 }
 
-impl Node for Block<'_, '_> {
+impl Node for Block<'_> {
 	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> ReturnReference<'a> {
 		engine.push_scope();
 		execute!(engine, &self.statements);

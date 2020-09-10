@@ -3,16 +3,16 @@ use crate::nodes::expression::Expression;
 use crate::runtime::ReturnReference;
 use crate::runtime::engine::Engine;
 
-pub struct Sequence<'a, 'b> {
-	node: &'b SyntaxNode<'a>,
-	expression:  Expression<'a, 'b>,
+pub struct Sequence<'a> {
+	node: &'a SyntaxNode<'a>,
+	expression:  Expression<'a>,
 	open:        Box<str>,
-	expressions: Vec<Expression<'a, 'b>>,
+	expressions: Vec<Expression<'a>>,
 	close:       Box<str>,
 }
 
-impl<'a, 'b> Sequence<'a, 'b> {
-	pub fn new(node: &'b SyntaxNode<'a>, expression:  Expression<'a, 'b>, open: Box<str>, expressions: Vec<Expression<'a, 'b>>, close: Box<str>) -> Self {
+impl<'a> Sequence<'a> {
+	pub fn new(node: &'a SyntaxNode<'a>, expression:  Expression<'a>, open: Box<str>, expressions: Vec<Expression<'a>>, close: Box<str>) -> Self {
 		return Self {
 			node,
 			expression,
@@ -23,7 +23,7 @@ impl<'a, 'b> Sequence<'a, 'b> {
 	}
 }
 
-impl Node for Sequence<'_, '_> {
+impl Node for Sequence<'_> {
 	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> ReturnReference<'a> {
 		let value = execute!(engine, &self.expression).read()?;
 		let mut arguments = Vec::new();

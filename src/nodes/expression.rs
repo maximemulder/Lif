@@ -2,13 +2,13 @@ use crate::nodes::{ Node, SyntaxNode };
 use crate::runtime::ReturnReference;
 use crate::runtime::engine::Engine;
 
-pub struct Expression<'a, 'b> {
-	node: &'b SyntaxNode<'a>,
-	exe: Box<dyn Node + 'b>,
+pub struct Expression<'a> {
+	node: &'a SyntaxNode<'a>,
+	exe: Box<dyn Node + 'a>,
 }
 
-impl<'a, 'b> Expression<'a, 'b> {
-	pub fn new(node: &'b SyntaxNode<'a>, exe: Box<dyn Node + 'b>) -> Self {
+impl<'a> Expression<'a> {
+	pub fn new(node: &'a SyntaxNode<'a>, exe: Box<dyn Node + 'a>) -> Self {
 		return Self {
 			node,
 			exe,
@@ -16,7 +16,7 @@ impl<'a, 'b> Expression<'a, 'b> {
 	}
 }
 
-impl Node for Expression<'_, '_> {
+impl Node for Expression<'_> {
 	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> ReturnReference<'a> {
 		engine.collect();
 		return engine.execute(self.exe.as_ref());

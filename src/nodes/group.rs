@@ -3,13 +3,13 @@ use crate::nodes::expression::Expression;
 use crate::runtime::ReturnReference;
 use crate::runtime::engine::Engine;
 
-pub struct Group<'a, 'b> {
-	node: &'b SyntaxNode<'a>,
-	expression: Expression<'a, 'b>,
+pub struct Group<'a> {
+	node: &'a SyntaxNode<'a>,
+	expression: Expression<'a>,
 }
 
-impl<'a, 'b> Group<'a, 'b> {
-	pub fn new(node: &'b SyntaxNode<'a>, expression: Expression<'a, 'b>) -> Self {
+impl<'a> Group<'a> {
+	pub fn new(node: &'a SyntaxNode<'a>, expression: Expression<'a>) -> Self {
 		return Self {
 			node,
 			expression,
@@ -17,7 +17,7 @@ impl<'a, 'b> Group<'a, 'b> {
 	}
 }
 
-impl Node for Group<'_, '_> {
+impl Node for Group<'_> {
 	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> ReturnReference<'a> {
 		return engine.execute(&self.expression);
 	}

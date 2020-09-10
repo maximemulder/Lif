@@ -4,15 +4,15 @@ use crate::nodes::expression::Expression;
 use crate::runtime::ReturnReference;
 use crate::runtime::engine::Engine;
 
-pub struct If<'a, 'b> {
-	node: &'b SyntaxNode<'a>,
-	condition: Expression<'a, 'b>,
-	then:      Block<'a, 'b>,
-	r#else:    Option<Block<'a, 'b>>,
+pub struct If<'a> {
+	node: &'a SyntaxNode<'a>,
+	condition: Expression<'a>,
+	then:      Block<'a>,
+	r#else:    Option<Block<'a>>,
 }
 
-impl<'a, 'b> If<'a, 'b> {
-	pub fn new(node: &'b SyntaxNode<'a>, condition: Expression<'a, 'b>, then: Block<'a, 'b>, r#else: Option<Block<'a, 'b>>) -> Self {
+impl<'a> If<'a> {
+	pub fn new(node: &'a SyntaxNode<'a>, condition: Expression<'a>, then: Block<'a>, r#else: Option<Block<'a>>) -> Self {
 		return Self {
 			node,
 			condition,
@@ -22,7 +22,7 @@ impl<'a, 'b> If<'a, 'b> {
 	}
 }
 
-impl Node for If<'_, '_> {
+impl Node for If<'_> {
 	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> ReturnReference<'a> {
 		return if {
 			let reference = execute!(engine, &self.condition);

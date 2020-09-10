@@ -3,13 +3,13 @@ use crate::nodes::block::Block;
 use crate::runtime::ReturnReference;
 use crate::runtime::engine::{ Control, Engine };
 
-pub struct Loop<'a, 'b> {
-	node: &'b SyntaxNode<'a>,
-	body: Block<'a, 'b>,
+pub struct Loop<'a> {
+	node: &'a SyntaxNode<'a>,
+	body: Block<'a>,
 }
 
-impl<'a, 'b> Loop<'a, 'b> {
-	pub fn new(node: &'b SyntaxNode<'a>, body: Block<'a, 'b>) -> Self {
+impl<'a> Loop<'a> {
+	pub fn new(node: &'a SyntaxNode<'a>, body: Block<'a>) -> Self {
 		return Self {
 			node,
 			body,
@@ -17,7 +17,7 @@ impl<'a, 'b> Loop<'a, 'b> {
 	}
 }
 
-impl Node for Loop<'_, '_> {
+impl Node for Loop<'_> {
 	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> ReturnReference<'a> {
 		let mut array = Vec::new();
 		loop {
