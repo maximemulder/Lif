@@ -1,23 +1,25 @@
-use crate::nodes::Node;
+use crate::nodes::{ Node, SyntaxNode };
 use crate::nodes::expression::Expression;
 use crate::runtime::ReturnReference;
 use crate::runtime::engine::Engine;
 
-pub struct Declaration {
+pub struct Declaration<'a> {
+	node: &'a SyntaxNode<'a>,
 	identifier: Box<str>,
-	r#type: Option<Expression>,
+	r#type: Option<Expression<'a>>,
 }
 
-impl Declaration {
-	pub fn new(identifier: Box<str>, r#type: Option<Expression>) -> Self {
+impl<'a> Declaration<'a> {
+	pub fn new(node: &'a SyntaxNode<'a>, identifier: Box<str>, r#type: Option<Expression<'a>>) -> Self {
 		return Self {
+			node,
 			identifier,
 			r#type,
 		};
 	}
 }
 
-impl Node for Declaration {
+impl Node for Declaration<'_> {
 	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> ReturnReference<'a> {
 		let r#type = if let Some(r#type) = &self.r#type {
 			let value = execute!(engine, r#type).read()?;
@@ -30,5 +32,9 @@ impl Node for Declaration {
 		let reference = engine.new_variable(None, r#type);
 		engine.add_variable(&self.identifier, reference);
 		return Ok(reference);
+	}
+
+	fn get_syntax_node(&self) -> &SyntaxNode {
+		return self.node;
 	}
 }

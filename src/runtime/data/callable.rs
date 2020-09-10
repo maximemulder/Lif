@@ -43,9 +43,9 @@ impl GcTraceable for Primitive<'_> {
 #[derive(Clone)]
 pub struct Function<'a> {
 	scope: GcScope<'a>,
-	parameters: &'a Vec<Declaration>,
+	parameters: &'a Vec<Declaration<'a>>,
 	r#type: Option<GcValue<'a>>,
-	block: &'a Block,
+	block: &'a Block<'a>,
 }
 
 impl<'a> Function<'a> {

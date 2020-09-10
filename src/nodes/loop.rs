@@ -1,21 +1,23 @@
-use crate::nodes::Node;
+use crate::nodes::{ Node, SyntaxNode };
 use crate::nodes::block::Block;
 use crate::runtime::ReturnReference;
 use crate::runtime::engine::{ Control, Engine };
 
-pub struct Loop {
-	body: Block,
+pub struct Loop<'a> {
+	node: &'a SyntaxNode<'a>,
+	body: Block<'a>,
 }
 
-impl Loop {
-	pub fn new(body: Block) -> Self {
+impl<'a> Loop<'a> {
+	pub fn new(node: &'a SyntaxNode<'a>, body: Block<'a>) -> Self {
 		return Self {
+			node,
 			body,
 		};
 	}
 }
 
-impl Node for Loop {
+impl Node for Loop<'_> {
 	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> ReturnReference<'a> {
 		let mut array = Vec::new();
 		loop {
@@ -39,5 +41,9 @@ impl Node for Loop {
 		}
 
 		return Ok(engine.new_array(array));
+	}
+
+	fn get_syntax_node(&self) -> &SyntaxNode {
+		return self.node;
 	}
 }

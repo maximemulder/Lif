@@ -1,26 +1,32 @@
-use crate::nodes::Node;
+use crate::nodes::{ Node, SyntaxNode };
 use crate::nodes::expression::Expression;
 use crate::runtime::ReturnReference;
 use crate::runtime::engine::Engine;
 
-pub struct Chain {
-	expression: Expression,
+pub struct Chain<'a> {
+	node: &'a SyntaxNode<'a>,
+	expression: Expression<'a>,
 	member:     Box<str>,
 }
 
-impl Chain {
-	pub fn new(expression: Expression, member: Box<str>) -> Self {
+impl<'a> Chain<'a> {
+	pub fn new(node: &'a SyntaxNode<'a>, expression: Expression<'a>, member: Box<str>) -> Self {
 		return Self {
+			node,
 			expression,
 			member,
 		};
 	}
 }
 
-impl Node for Chain {
+impl Node for Chain<'_> {
 	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> ReturnReference<'a> {
 		let value = execute!(engine, &self.expression).read()?;
 		let name = engine.new_string(self.member.to_string()).read()?;
 		return engine.call_method(value, ".", vec![name]);
+	}
+
+	fn get_syntax_node(&self) -> &SyntaxNode {
+		return self.node;
 	}
 }

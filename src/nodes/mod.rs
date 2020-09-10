@@ -8,8 +8,8 @@ macro_rules! execute {
 		} else {
 			return Ok(reference);
 		}
-	}}
-}
+	}
+}}
 
 pub mod program;
 pub mod statements;
@@ -43,4 +43,5 @@ pub use crate::node::Node as SyntaxNode;
 
 pub trait Node {
 	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> ReturnReference<'a>;
+	fn get_syntax_node(&self) -> &SyntaxNode;
 }

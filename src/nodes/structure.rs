@@ -1,21 +1,27 @@
-use crate::nodes::Node;
+use crate::nodes::{ Node, SyntaxNode };
 use crate::runtime::ReturnReference;
 use crate::runtime::engine::Engine;
 
-pub struct Structure {
-	node: Box<dyn Node>,
+pub struct Structure<'a> {
+	node: &'a SyntaxNode<'a>,
+	exe: Box<dyn Node + 'a>,
 }
 
-impl Structure {
-	pub fn new(node: Box<dyn Node>) -> Self {
+impl<'a> Structure<'a> {
+	pub fn new(node: &'a SyntaxNode<'a>, exe: Box<dyn Node + 'a>) -> Self {
 		return Self {
 			node,
+			exe,
 		};
 	}
 }
 
-impl Node for Structure {
+impl Node for Structure<'_> {
 	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> ReturnReference<'a> {
-		return engine.execute(self.node.as_ref());
+		return engine.execute(self.exe.as_ref());
+	}
+
+	fn get_syntax_node(&self) -> &SyntaxNode {
+		return self.node;
 	}
 }

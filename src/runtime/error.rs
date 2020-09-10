@@ -1,5 +1,6 @@
 pub struct Error {
 	pub message: String,
+	pub delimiters: Option<(usize, usize)>,
 }
 
 impl Error {
@@ -8,6 +9,7 @@ impl Error {
 		message.push_str(error);
 		return Self {
 			message,
+			delimiters: None,
 		};
 	}
 }

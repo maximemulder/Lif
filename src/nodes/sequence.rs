@@ -1,18 +1,20 @@
-use crate::nodes::Node;
+use crate::nodes::{ Node, SyntaxNode };
 use crate::nodes::expression::Expression;
 use crate::runtime::ReturnReference;
 use crate::runtime::engine::Engine;
 
-pub struct Sequence {
-	expression:  Expression,
+pub struct Sequence<'a> {
+	node: &'a SyntaxNode<'a>,
+	expression:  Expression<'a>,
 	open:        Box<str>,
-	expressions: Vec<Expression>,
+	expressions: Vec<Expression<'a>>,
 	close:       Box<str>,
 }
 
-impl Sequence {
-	pub fn new(expression:  Expression, open: Box<str>, expressions: Vec<Expression>, close: Box<str>) -> Self {
+impl<'a> Sequence<'a> {
+	pub fn new(node: &'a SyntaxNode<'a>, expression:  Expression<'a>, open: Box<str>, expressions: Vec<Expression<'a>>, close: Box<str>) -> Self {
 		return Self {
+			node,
 			expression,
 			open,
 			expressions,
@@ -21,7 +23,7 @@ impl Sequence {
 	}
 }
 
-impl Node for Sequence {
+impl Node for Sequence<'_> {
 	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> ReturnReference<'a> {
 		let value = execute!(engine, &self.expression).read()?;
 		let mut arguments = Vec::new();
@@ -30,5 +32,9 @@ impl Node for Sequence {
 		}
 
 		return engine.call(value, arguments);
+	}
+
+	fn get_syntax_node(&self) -> &SyntaxNode {
+		return self.node;
 	}
 }
