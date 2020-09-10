@@ -1,8 +1,7 @@
 use crate::nodes::Node;
 use crate::nodes::expression::Expression;
+use crate::runtime::ReturnReference;
 use crate::runtime::engine::Engine;
-use crate::runtime::error::Error;
-use crate::runtime::reference::GcReference;
 
 pub struct Group {
 	expression: Expression,
@@ -17,7 +16,7 @@ impl Group {
 }
 
 impl Node for Group {
-	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> Result<GcReference<'a>, Error> {
+	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> ReturnReference<'a> {
 		return engine.execute(&self.expression);
 	}
 }

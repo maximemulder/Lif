@@ -2,6 +2,7 @@ use crate::nodes::Node;
 use crate::nodes::block::Block;
 use crate::nodes::declaration::Declaration;
 use crate::nodes::expression::Expression;
+use crate::runtime::ReturnReference;
 use crate::runtime::data::{ Class, Data, Function, Instance, Primitive };
 use crate::runtime::environment::Environment;
 use crate::runtime::error::Error;
@@ -85,7 +86,7 @@ impl<'a> Engine<'a> {
 		self.scope.add_variable(name, reference);
 	}
 
-	pub fn get_variable(&self, name: &str) -> Result<GcReference<'a>, Error> {
+	pub fn get_variable(&self, name: &str) -> ReturnReference<'a> {
 		let mut scope = self.scope;
 		loop {
 			if let Some(object) = scope.get_variable(name) {
@@ -100,16 +101,16 @@ impl<'a> Engine<'a> {
 		}
 	}
 
-	pub fn call_method(&mut self, value: GcValue<'a>, name: &str, mut arguments: Vec<GcValue<'a>>) -> Result<GcReference<'a>, Error> {
+	pub fn call_method(&mut self, value: GcValue<'a>, name: &str, mut arguments: Vec<GcValue<'a>>) -> ReturnReference<'a> {
 		arguments.insert(0, value);
 		return self.call(value.get_method(self, name).unwrap().read()?, arguments);
 	}
 
-	pub fn call_method_self(&mut self, value: GcValue<'a>, name: &str, arguments: Vec<GcValue<'a>>) -> Result<GcReference<'a>, Error> {
+	pub fn call_method_self(&mut self, value: GcValue<'a>, name: &str, arguments: Vec<GcValue<'a>>) -> ReturnReference<'a> {
 		return self.call(value.get_method(self, name).unwrap().read()?, arguments);
 	}
 
-	pub fn call(&mut self, value: GcValue<'a>, mut arguments: Vec<GcValue<'a>>) -> Result<GcReference<'a>, Error> {
+	pub fn call(&mut self, value: GcValue<'a>, mut arguments: Vec<GcValue<'a>>) -> ReturnReference<'a> {
 		if let Some(this) = self.get_this() {
 			arguments.insert(0, this);
 		}
@@ -125,7 +126,7 @@ impl<'a> Engine<'a> {
 		self.values.collect();
 	}
 
-	pub fn execute(&mut self, node: &'a dyn Node) -> Result<GcReference<'a>, Error> {
+	pub fn execute(&mut self, node: &'a dyn Node) -> ReturnReference<'a> {
 		self.registries.push(Vec::new());
 		let reference = node.execute(self)?;
 		let index = self.registries.len() - 2;
@@ -134,7 +135,7 @@ impl<'a> Engine<'a> {
 		return Ok(reference);
 	}
 
-	pub fn new_control(&mut self, control: Control, node: &'a Option<Expression>) -> Result<GcReference<'a>, Error> {
+	pub fn new_control(&mut self, control: Control, node: &'a Option<Expression>) -> ReturnReference<'a> {
 		self.control = Some(control);
 		return if let Some(node) = node {
 			self.execute(node)
@@ -212,7 +213,7 @@ impl<'a> Engine<'a> {
 		return self.new_constant_value(self.environment.function, Data::Callable(Box::new(Function::new(self.scope, parameters, r#type, block))));
 	}
 
-	pub fn new_primitive(&mut self, callback: &'a dyn Fn(&mut Engine<'a>, Vec<GcValue<'a>>) -> Result<GcReference<'a>, Error>) -> GcReference<'a> {
+	pub fn new_primitive(&mut self, callback: &'a dyn Fn(&mut Engine<'a>, Vec<GcValue<'a>>) -> ReturnReference<'a>) -> GcReference<'a> {
 		return self.new_constant_value(self.environment.function, Data::Callable(Box::new(Primitive::new(callback))));
 	}
 

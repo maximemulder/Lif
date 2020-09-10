@@ -1,25 +1,25 @@
 use crate::nodes::Node;
 use crate::nodes::block::Block;
 use crate::nodes::declaration::Declaration;
+use crate::runtime::ReturnReference;
 use crate::runtime::engine::{ Control, Engine };
 use crate::runtime::error::Error;
 use crate::runtime::gc::GcTraceable;
-use crate::runtime::reference::GcReference;
 use crate::runtime::scope::GcScope;
 use crate::runtime::value::GcValue;
 
 pub trait Callable<'a>: GcTraceable {
-	fn execute(&self, engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> Result<GcReference<'a>, Error>;
+	fn execute(&self, engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> ReturnReference<'a>;
 	fn duplicate(&self) -> Box<dyn Callable<'a> + 'a>;
 }
 
 #[derive(Clone)]
 pub struct Primitive<'a> {
-	callback: &'a dyn Fn(&mut Engine<'a>, Vec<GcValue<'a>>) -> Result<GcReference<'a>, Error>,
+	callback: &'a dyn Fn(&mut Engine<'a>, Vec<GcValue<'a>>) -> ReturnReference<'a>,
 }
 
 impl<'a> Primitive<'a> {
-	pub fn new(callback: &'a dyn Fn(&mut Engine<'a>, Vec<GcValue<'a>>) -> Result<GcReference<'a>, Error>) -> Self {
+	pub fn new(callback: &'a dyn Fn(&mut Engine<'a>, Vec<GcValue<'a>>) -> ReturnReference<'a>) -> Self {
 		return Self {
 			callback,
 		};
@@ -27,7 +27,7 @@ impl<'a> Primitive<'a> {
 }
 
 impl<'a> Callable<'a> for Primitive<'a> {
-	fn execute(&self, engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> Result<GcReference<'a>, Error> {
+	fn execute(&self, engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> ReturnReference<'a> {
 		return (self.callback)(engine, arguments);
 	}
 
@@ -60,7 +60,7 @@ impl<'a> Function<'a> {
 }
 
 impl<'a> Callable<'a> for Function<'a> {
-	fn execute(&self, engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> Result<GcReference<'a>, Error> {
+	fn execute(&self, engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> ReturnReference<'a> {
 		engine.push_frame(self.scope);
 		for (parameter, argument) in self.parameters.iter().zip(arguments) {
 			let mut reference = parameter.execute(engine)?;

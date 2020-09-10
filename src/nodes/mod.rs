@@ -36,12 +36,11 @@ pub mod r#break;
 pub mod r#continue;
 
 pub mod build;
+use crate::runtime::ReturnReference;
 use crate::runtime::engine::Engine;
-use crate::runtime::error::Error;
-use crate::runtime::reference::GcReference;
 
 pub use crate::node::Node as SyntaxNode;
 
 pub trait Node {
-	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> Result<GcReference<'a>, Error>;
+	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> ReturnReference<'a>;
 }

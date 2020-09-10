@@ -1,3 +1,4 @@
+use crate::runtime::Return;
 use crate::runtime::error::Error;
 use crate::runtime::gc::{ GcRef, GcTraceable };
 use crate::runtime::value::GcValue;
@@ -29,11 +30,11 @@ impl<'a> Reference<'a> {
 		};
 	}
 
-	pub fn read(&self) -> Result<GcValue<'a>, Error> {
+	pub fn read(&self) -> Return<GcValue<'a>> {
 		return self.value.ok_or_else(|| Error::new_runtime("Trying to read an undefined value."));
 	}
 
-	pub fn write(&mut self, value: GcValue<'a>) -> Result<(), Error> {
+	pub fn write(&mut self, value: GcValue<'a>) -> Return<()> {
 		match self.r#type {
 			Type::Variable(r#type) => if value.isa(r#type) {
 				self.set_value(value);

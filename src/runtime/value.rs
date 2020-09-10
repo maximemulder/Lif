@@ -1,3 +1,4 @@
+use crate::runtime::Return;
 use crate::runtime::data::{ Callable, Class, Data, Instance };
 use crate::runtime::engine::Engine;
 use crate::runtime::error::Error;
@@ -36,7 +37,7 @@ impl<'a> Value<'a> {
 		return false;
 	}
 
-	pub fn cast(&self, other: GcValue<'a>) -> Result<(), Error> {
+	pub fn cast(&self, other: GcValue<'a>) -> Return<()> {
 		return if self.isa(other) {
 			Ok(())
 		} else {
@@ -44,22 +45,22 @@ impl<'a> Value<'a> {
 		};
 	}
 
-	pub fn get_cast_array(&self, engine: &Engine<'a>) -> Result<&Vec<GcReference<'a>>, Error> {
+	pub fn get_cast_array(&self, engine: &Engine<'a>) -> Return<&Vec<GcReference<'a>>> {
 		self.cast(engine.environment.array)?;
 		return Ok(self.data_array());
 	}
 
-	pub fn get_cast_boolean(&self, engine: &Engine<'a>) -> Result<&bool, Error> {
+	pub fn get_cast_boolean(&self, engine: &Engine<'a>) -> Return<&bool> {
 		self.cast(engine.environment.boolean)?;
 		return Ok(self.data_boolean());
 	}
 
-	pub fn get_cast_callable(&self, engine: &Engine<'a>) -> Result<&dyn Callable<'a>, Error> {
+	pub fn get_cast_callable(&self, engine: &Engine<'a>) -> Return<&dyn Callable<'a>> {
 		self.cast(engine.environment.function)?;
 		return Ok(self.data_callable());
 	}
 
-	pub fn get_cast_string(&self, engine: &Engine<'a>) -> Result<&String, Error> {
+	pub fn get_cast_string(&self, engine: &Engine<'a>) -> Return<&String> {
 		self.cast(engine.environment.string)?;
 		return Ok(self.data_string());
 	}

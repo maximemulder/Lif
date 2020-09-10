@@ -1,8 +1,7 @@
 use crate::nodes::Node;
 use crate::nodes::block::Block;
+use crate::runtime::ReturnReference;
 use crate::runtime::engine::{ Control, Engine };
-use crate::runtime::error::Error;
-use crate::runtime::reference::GcReference;
 
 pub struct Loop {
 	body: Block,
@@ -17,7 +16,7 @@ impl Loop {
 }
 
 impl Node for Loop {
-	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> Result<GcReference<'a>, Error> {
+	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> ReturnReference<'a> {
 		let mut array = Vec::new();
 		loop {
 			let reference = engine.execute(&self.body)?;
