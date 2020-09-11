@@ -146,12 +146,17 @@ impl<'a> Engine<'a> {
 	}
 
 	pub fn new_control(&mut self, control: Control, node: &'a Option<Expression>) -> ReturnReference<'a> {
-		self.control = Some(control);
-		return if let Some(node) = node {
-			self.execute(node)
+		let reference = if let Some(node) = node {
+			self.execute(node)?
 		} else {
-			Ok(self.new_undefined())
+			self.new_undefined()
 		};
+
+		if self.control.is_none() {
+			self.control = Some(control);
+		}
+
+		return Ok(reference);
 	}
 }
 
