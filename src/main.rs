@@ -24,10 +24,6 @@ use std::cmp::min;
 use std::env;
 use std::fs;
 
-fn cheat<T>(value: &T) -> &mut T {
-	return unsafe { (value as *const T as *mut T).as_mut().unwrap() };
-}
-
 fn main() {
 	// println!("Leaf compiler.");
 
