@@ -314,11 +314,11 @@ fn integer_addition<'a>(engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) ->
 }
 
 fn integer_subtraction<'a>(engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> ReturnReference<'a> {
-	return Ok(engine.new_integer(*arguments[0].data_integer() + *arguments[1].data_integer()));
+	return Ok(engine.new_integer(*arguments[0].data_integer() - *arguments[1].data_integer()));
 }
 
 fn integer_multiplication<'a>(engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> ReturnReference<'a> {
-	return Ok(engine.new_integer(*arguments[0].data_integer() + *arguments[1].data_integer()));
+	return Ok(engine.new_integer(*arguments[0].data_integer() * *arguments[1].data_integer()));
 }
 
 fn integer_division<'a>(engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> ReturnReference<'a> {
