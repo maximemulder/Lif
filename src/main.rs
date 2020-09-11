@@ -2,6 +2,7 @@
 #![feature(const_fn)]
 #![feature(new_uninit)]
 #![feature(maybe_uninit_ref)]
+#![feature(maybe_uninit_extra)]
 #![feature(unsize)]
 #![feature(drain_filter)]
 

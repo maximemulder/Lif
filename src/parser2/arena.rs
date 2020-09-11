@@ -30,10 +30,10 @@ impl<T: ?Sized> Arena<T> {
 	}
 
 	pub fn get(&self, index: usize) -> Ref<Box<T>> {
-		return Ref::map(self.elements.borrow(), |elements| unsafe { elements[index].get_ref() });
+		return Ref::map(self.elements.borrow(), |elements| unsafe { elements[index].as_ptr().as_ref().unwrap() });
 	}
 
 	pub fn get_mut(&self, index: usize) -> RefMut<Box<T>> {
-		return RefMut::map(self.elements.borrow_mut(), |elements| unsafe { elements[index].get_mut() });
+		return RefMut::map(self.elements.borrow_mut(), |elements| unsafe { elements[index].as_mut_ptr().as_mut().unwrap() });
 	}
 }
