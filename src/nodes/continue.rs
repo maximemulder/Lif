@@ -18,7 +18,7 @@ impl<'a> Continue<'a> {
 
 impl Node for Continue<'_> {
 	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> ReturnReference<'a> {
-		return engine.new_control(Control::Continue, &self.expression);
+		return engine.control_new(Control::Continue, &self.expression);
 	}
 
 	fn get_syntax_node(&self) -> &SyntaxNode {

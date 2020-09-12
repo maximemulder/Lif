@@ -19,7 +19,7 @@ impl<'a> Break<'a> {
 
 impl Node for Break<'_> {
 	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> ReturnReference<'a> {
-		return engine.new_control(Control::Break, &self.expression);
+		return engine.control_new(Control::Break, &self.expression);
 	}
 
 	fn get_syntax_node(&self) -> &SyntaxNode {

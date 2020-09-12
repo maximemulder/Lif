@@ -22,21 +22,17 @@ impl Node for Loop<'_> {
 		let mut array = Vec::new();
 		loop {
 			let reference = engine.execute(&self.body)?;
-			match &engine.control {
-				Some(control) => match control {
-					Control::Return => return Ok(reference),
-					Control::Continue => {
-						engine.control = None;
-						array.push(reference);
-						continue;
-					},
-					Control::Break => {
-						engine.control = None;
-						array.push(reference);
-						break
-					},
-				},
-				None => array.push(reference),
+			if engine.control_is(Control::Return) {
+				return Ok(reference);
+			}
+
+			array.push(reference);
+			if engine.control_consume(Control::Break) {
+				break;
+			}
+
+			if engine.control_consume(Control::Continue) {
+				continue;
 			}
 		}
 

@@ -11,6 +11,7 @@ use crate::runtime::reference::{ GcReference, Reference };
 use crate::runtime::scope::{ GcScope, Scope };
 use crate::runtime::value::{ GcValue, Value };
 
+#[derive(PartialEq, Eq)]
 pub enum Control {
 	Return,
 	Break,
@@ -26,7 +27,7 @@ pub struct Engine<'a> {
 	pub frames:      Vec<GcScope<'a>>,
 	pub scope:       GcScope<'a>,
 	this:            Option<GcValue<'a>>,
-	pub control:     Option<Control>,
+	control:         Option<Control>,
 }
 
 impl<'a> Engine<'a> {
@@ -144,8 +145,10 @@ impl<'a> Engine<'a> {
 		self.registries.pop();
 		return Ok(reference);
 	}
+}
 
-	pub fn new_control(&mut self, control: Control, node: &'a Option<Expression>) -> ReturnReference<'a> {
+impl<'a> Engine<'a> {
+	pub fn control_new(&mut self, control: Control, node: &'a Option<Expression>) -> ReturnReference<'a> {
 		let reference = if let Some(node) = node {
 			self.execute(node)?
 		} else {
@@ -157,6 +160,29 @@ impl<'a> Engine<'a> {
 		}
 
 		return Ok(reference);
+	}
+
+	pub fn control_any(&mut self) -> bool {
+		return self.control.is_some();
+	}
+
+	pub fn control_is(&mut self, other: Control) -> bool {
+		if let Some(control) = &self.control {
+			if *control == other {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	pub fn control_consume(&mut self, control: Control) -> bool {
+		if self.control_is(control) {
+			self.control = None;
+			return true;
+		}
+
+		return false;
 	}
 }
 

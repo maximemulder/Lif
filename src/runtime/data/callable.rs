@@ -70,21 +70,20 @@ impl<'a> Callable<'a> for Function<'a> {
 		let reference = self.block.execute(engine)?;
 		engine.pop_frame();
 
-		return match &engine.control {
-			Some(control) => match control {
-				Control::Break | Control::Continue => Err(Error::new_runtime("Trying to loop control out of a function.")),
-				Control::Return => {
-					engine.control = None;
-					let value = reference.read()?;
-					if let Some(r#type) = self.r#type {
-						value.cast(r#type)?;
-					}
+		if engine.control_is(Control::Break) || engine.control_is(Control::Continue) {
+			return Err(Error::new_runtime("Trying to loop control out of a function."));
+		}
 
-					Ok(engine.new_constant(Some(value)))
-				},
-			},
-			None => Ok(engine.new_undefined()),
-		};
+		if engine.control_consume(Control::Return) {
+			let value = reference.read()?;
+			if let Some(r#type) = self.r#type {
+				value.cast(r#type)?;
+			}
+
+			return Ok(engine.new_constant(Some(value)));
+		}
+
+		return Ok(engine.new_undefined());
 	}
 
 	fn duplicate(&self) -> Box<dyn Callable<'a> + 'a> {

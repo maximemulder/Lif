@@ -18,7 +18,7 @@ impl<'a> Return<'a> {
 
 impl Node for Return<'_> {
 	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> ReturnReference<'a> {
-		return engine.new_control(Control::Return, &self.expression);
+		return engine.control_new(Control::Return, &self.expression);
 	}
 
 	fn get_syntax_node(&self) -> &SyntaxNode {
