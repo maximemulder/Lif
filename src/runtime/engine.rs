@@ -20,12 +20,12 @@ pub enum Control {
 
 pub struct Engine<'a> {
 	pub environment: Environment<'a>,
-	pub scopes:      Gc<Scope<'a>>,
-	pub references:  Gc<Reference<'a>>,
-	pub values:      Gc<Value<'a>>,
-	pub registries:  Vec<Vec<GcReference<'a>>>,
-	pub frames:      Vec<GcScope<'a>>,
-	pub scope:       GcScope<'a>,
+	scopes:          Gc<Scope<'a>>,
+	references:      Gc<Reference<'a>>,
+	values:          Gc<Value<'a>>,
+	registries:      Vec<Vec<GcReference<'a>>>,
+	frames:          Vec<GcScope<'a>>,
+	scope:           GcScope<'a>,
 	undefined:       GcReference<'a>,
 	this:            Option<GcValue<'a>>,
 	control:         Option<Control>,
