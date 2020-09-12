@@ -30,7 +30,7 @@ impl Node for DoWhile<'_> {
 			}
 
 			if reference.is_defined() {
-				array.push(engine.new_constant(Some(reference.get_value())));
+				array.push(engine.new_constant(reference.get_value()));
 			}
 
 			if engine.control_consume(Control::Break) {

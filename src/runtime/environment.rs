@@ -50,7 +50,7 @@ impl<'a> Engine<'a> {
 	}
 
 	fn add_constant_value(&mut self, name: &str, value: GcValue<'a>) {
-		let reference = self.new_constant(Some(value));
+		let reference = self.new_constant(value);
 		self.add_variable(name, reference);
 	}
 
@@ -145,7 +145,7 @@ fn primitive_assert<'a>(engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) ->
 		panic!();
 	}
 
-	return Ok(engine.new_undefined());
+	return Ok(engine.undefined());
 }
 
 fn primitive_error<'a>(engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> ReturnReference<'a> {
@@ -165,7 +165,7 @@ fn primitive_new<'a>(engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> Re
 fn primitive_print<'a>(engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> ReturnReference<'a> {
 	let reference = engine.call_method(arguments[0], "to_string", Vec::new())?;
 	println!("{}", reference.read()?.data_string());
-	return Ok(engine.new_undefined());
+	return Ok(engine.undefined());
 }
 
 fn array_to_string<'a>(engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> ReturnReference<'a> {
@@ -192,26 +192,26 @@ fn array_copy<'a>(engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> Retur
 fn array_append<'a>(engine: &mut Engine<'a>, mut arguments: Vec<GcValue<'a>>) -> ReturnReference<'a> {
 	let reference = engine.new_variable(Some(arguments[1]), engine.environment.object);
 	arguments[0].data_array_mut().push(reference);
-	return Ok(engine.new_undefined());
+	return Ok(engine.undefined());
 }
 
 fn array_prepend<'a>(engine: &mut Engine<'a>, mut arguments: Vec<GcValue<'a>>) -> ReturnReference<'a> {
 	let reference = engine.new_variable(Some(arguments[1]), engine.environment.object);
 	arguments[0].data_array_mut().insert(0, reference);
-	return Ok(engine.new_undefined());
+	return Ok(engine.undefined());
 }
 
 fn array_insert<'a>(engine: &mut Engine<'a>, mut arguments: Vec<GcValue<'a>>) -> ReturnReference<'a> {
 	let index = *arguments[1].data_integer();
 	let reference = engine.new_variable(Some(arguments[2]), engine.environment.object);
 	arguments[0].data_array_mut().insert(index, reference);
-	return Ok(engine.new_undefined());
+	return Ok(engine.undefined());
 }
 
 fn array_remove<'a>(engine: &mut Engine<'a>, mut arguments: Vec<GcValue<'a>>) -> ReturnReference<'a> {
 	let index = *arguments[1].data_integer();
 	arguments[0].data_array_mut().remove(index);
-	return Ok(engine.new_undefined());
+	return Ok(engine.undefined());
 }
 
 fn array_access<'a>(_: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> ReturnReference<'a> {
@@ -238,7 +238,7 @@ fn class_chain<'a>(engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> Retu
 		return Ok(method);
 	}
 
-	let member = engine.new_undefined();
+	let member = engine.undefined();
 	let class = this.data_class_mut();
 	return Ok(if let Some(&member) = class.statics.get(&name) {
 		member
@@ -249,7 +249,7 @@ fn class_chain<'a>(engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> Retu
 }
 
 fn class_access<'a>(engine: &mut Engine<'a>, _: Vec<GcValue<'a>>) -> ReturnReference<'a> {
-	return Ok(engine.new_constant(Some(engine.environment.array)));
+	return Ok(engine.new_constant(engine.environment.array));
 }
 
 fn function_to_string<'a>(engine: &mut Engine<'a>, _: Vec<GcValue<'a>>) -> ReturnReference<'a> {
@@ -287,7 +287,7 @@ fn instance_chain<'a>(engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> R
 		return Ok(method);
 	}
 
-	let member = engine.new_undefined();
+	let member = engine.undefined();
 	let instance = this.data_instance_mut();
 	return Ok(if let Some(&member) = instance.attributes.get(&name) {
 		member
@@ -367,7 +367,7 @@ fn object_chain<'a>(engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> Ret
 }
 
 fn string_to_string<'a>(engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> ReturnReference<'a> {
-	return Ok(engine.new_constant(Some(arguments[0])));
+	return Ok(engine.new_constant(arguments[0]));
 }
 
 fn string_comparison<'a>(engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> ReturnReference<'a> {

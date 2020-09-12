@@ -27,7 +27,7 @@ impl Node for Block<'_> {
 		let reference = if let Some(expression) = &self.expression {
 			execute!(engine, expression)
 		} else {
-			engine.new_undefined()
+			engine.undefined()
 		};
 
 		engine.pop_scope();

@@ -78,15 +78,15 @@ impl<'a> Callable<'a> for Function<'a> {
 			if let Some(r#type) = self.r#type {
 				let value = reference.read()?;
 				value.cast(r#type)?;
-				return Ok(engine.new_constant(Some(value)));
+				return Ok(engine.new_constant(value));
 			}
 
 			if reference.is_defined() {
-				return Ok(engine.new_constant(Some(reference.get_value())));
+				return Ok(engine.new_constant(reference.get_value()));
 			}
 		}
 
-		return Ok(engine.new_undefined());
+		return Ok(engine.undefined());
 	}
 
 	fn duplicate(&self) -> Box<dyn Callable<'a> + 'a> {

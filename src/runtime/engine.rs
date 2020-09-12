@@ -26,6 +26,7 @@ pub struct Engine<'a> {
 	pub registries:  Vec<Vec<GcReference<'a>>>,
 	pub frames:      Vec<GcScope<'a>>,
 	pub scope:       GcScope<'a>,
+	undefined:       GcReference<'a>,
 	this:            Option<GcValue<'a>>,
 	control:         Option<Control>,
 }
@@ -40,6 +41,7 @@ impl<'a> Engine<'a> {
 			registries:  Vec::new(),
 			frames:      Vec::new(),
 			scope:       GcRef::null(),
+			undefined:   GcRef::alloc(Reference::new_constant(None)),
 			this:        None,
 			control:     None,
 		};
@@ -151,9 +153,9 @@ impl<'a> Engine<'a> {
 	pub fn control_new(&mut self, control: Control, node: &'a Option<Expression>) -> ReturnReference<'a> {
 		let reference = if let Some(node) = node {
 			let value = self.execute(node)?.read()?;
-			self.new_constant(Some(value))
+			self.new_constant(value)
 		} else {
-			self.new_undefined()
+			self.undefined()
 		};
 
 		if self.control.is_none() {
@@ -191,6 +193,7 @@ impl GcTraceable for Engine<'_> {
 	fn trace(&mut self) {
 		self.environment.trace();
 		self.scope.trace();
+		self.undefined.trace();
 		for registries in self.registries.iter_mut() {
 			for registry in registries.iter_mut() {
 				registry.trace();
@@ -212,21 +215,21 @@ impl<'a> Engine<'a> {
 		return self.values.alloc(Value::new(class, data));
 	}
 
-	pub fn new_undefined(&mut self) -> GcReference<'a> {
-		return self.new_constant(None);
-	}
-
 	pub fn new_variable(&mut self, value: Option<GcValue<'a>>, r#type: GcValue<'a>) -> GcReference<'a> {
 		return self.references.alloc(Reference::new_variable(value, r#type));
 	}
 
-	pub fn new_constant(&mut self, value: Option<GcValue<'a>>) -> GcReference<'a> {
-		return self.references.alloc(Reference::new_constant(value));
+	pub fn new_constant(&mut self, value: GcValue<'a>) -> GcReference<'a> {
+		return self.references.alloc(Reference::new_constant(Some(value)));
 	}
 
 	pub fn new_constant_value(&mut self, class: GcValue<'a>, data: Data<'a>) -> GcReference<'a> {
 		let value = self.new_value(class, data);
-		return self.new_constant(Some(value));
+		return self.new_constant(value);
+	}
+
+	pub fn undefined(&mut self) -> GcReference<'a> {
+		return self.undefined;
 	}
 }
 

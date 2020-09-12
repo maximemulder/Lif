@@ -24,8 +24,15 @@ impl<T> Gc<T> {
 		return r#ref;
 	}
 
-	pub fn collect(&mut self) {
-		self.refs.drain_filter(|r#ref| !r#ref.collect());
+	pub fn collect(&mut self) -> usize {
+		let mut i = 0;
+		self.refs.drain_filter(|r#ref| if !r#ref.collect() {
+			i += 1;
+			true
+		} else {
+			false
+		});
+		return i;
 	}
 }
 
@@ -54,7 +61,7 @@ impl<T> GcRef<T> {
 		};
 	}
 
-	fn alloc(object: T) -> Self {
+	pub fn alloc(object: T) -> Self {
 		return Self {
 			pointer: Box::into_raw(Box::new(GcObject::new(object))),
 		};

@@ -19,7 +19,7 @@ impl<'a> Statement<'a> {
 impl Node for Statement<'_> {
 	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> ReturnReference<'a> {
 		execute!(engine, self.exe.as_ref());
-		return Ok(engine.new_undefined());
+		return Ok(engine.undefined());
 	}
 
 	fn get_syntax_node(&self) -> &SyntaxNode {

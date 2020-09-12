@@ -32,7 +32,7 @@ impl Node for If<'_> {
 		} else if let Some(r#else) = self.r#else.as_ref() {
 			engine.execute(r#else)
 		} else {
-			Ok(engine.new_undefined())
+			Ok(engine.undefined())
 		}
 	}
 

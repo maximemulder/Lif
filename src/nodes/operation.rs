@@ -27,7 +27,7 @@ impl Node for Operation<'_> {
 			let mut left  = execute!(engine, &self.left);
 			let right = execute!(engine, &self.right).read()?;
 			left.write(right)?;
-			return Ok(engine.new_undefined());
+			return Ok(engine.undefined());
 		}
 
 		let left  = execute!(engine, &self.left).read()?;

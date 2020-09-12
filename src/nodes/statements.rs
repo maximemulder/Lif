@@ -23,7 +23,7 @@ impl Node for Statements<'_> {
 			execute!(engine, statement);
 		}
 
-		return Ok(engine.new_undefined());
+		return Ok(engine.undefined());
 	}
 
 	fn get_syntax_node(&self) -> &SyntaxNode {
