@@ -51,7 +51,19 @@ impl<'a> Reference<'a> {
 		return Ok(());
 	}
 
-	fn set_value(&mut self, value: GcValue<'a>) {
+	pub fn is_defined(&self) -> bool {
+		return self.value.is_some();
+	}
+
+	pub fn is_undefined(&self) -> bool {
+		return !self.is_defined();
+	}
+
+	pub fn get_value(&self) -> GcValue<'a> {
+		return self.value.unwrap();
+	}
+
+	pub fn set_value(&mut self, value: GcValue<'a>) {
 		self.value = Some(value);
 	}
 }

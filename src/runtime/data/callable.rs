@@ -75,12 +75,15 @@ impl<'a> Callable<'a> for Function<'a> {
 		}
 
 		if engine.control_consume(Control::Return) {
-			let value = reference.read()?;
 			if let Some(r#type) = self.r#type {
+				let value = reference.read()?;
 				value.cast(r#type)?;
+				return Ok(engine.new_constant(Some(value)));
 			}
 
-			return Ok(engine.new_constant(Some(value)));
+			if reference.is_defined() {
+				return Ok(engine.new_constant(Some(reference.get_value())));
+			}
 		}
 
 		return Ok(engine.new_undefined());

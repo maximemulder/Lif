@@ -35,7 +35,10 @@ impl Node for ForIn<'_> {
 				return Ok(reference);
 			}
 
-			array.push(reference);
+			if reference.is_defined() {
+				array.push(engine.new_constant(Some(reference.get_value())));
+			}
+
 			if engine.control_consume(Control::Break) {
 				break;
 			}

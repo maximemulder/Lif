@@ -150,7 +150,8 @@ impl<'a> Engine<'a> {
 impl<'a> Engine<'a> {
 	pub fn control_new(&mut self, control: Control, node: &'a Option<Expression>) -> ReturnReference<'a> {
 		let reference = if let Some(node) = node {
-			self.execute(node)?
+			let value = self.execute(node)?.read()?;
+			self.new_constant(Some(value))
 		} else {
 			self.new_undefined()
 		};
