@@ -10,7 +10,7 @@ use crate::runtime::value::GcValue;
 
 pub trait Callable<'a>: GcTraceable {
 	fn execute(&self, engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> ReturnReference<'a>;
-	fn duplicate(&self) -> Box<dyn Callable<'a> + 'a>;
+	fn duplicate<'slf>(&'slf self) -> Box<dyn Callable<'a> + 'slf>;
 }
 
 #[derive(Clone)]
@@ -31,7 +31,7 @@ impl<'a> Callable<'a> for Primitive<'a> {
 		return (self.callback)(engine, arguments);
 	}
 
-	fn duplicate(&self) -> Box<dyn Callable<'a> + 'a> {
+	fn duplicate<'slf>(&'slf self) -> Box<dyn Callable<'a> + 'slf> {
 		return Box::new(self.clone());
 	}
 }
@@ -89,7 +89,7 @@ impl<'a> Callable<'a> for Function<'a> {
 		return Ok(engine.undefined());
 	}
 
-	fn duplicate(&self) -> Box<dyn Callable<'a> + 'a> {
+	fn duplicate<'slf>(&'slf self) -> Box<dyn Callable<'a> + 'slf> {
 		return Box::new(self.clone());
 	}
 }
