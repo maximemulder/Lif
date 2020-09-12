@@ -162,8 +162,8 @@ impl<'a> Engine<'a> {
 		return Ok(reference);
 	}
 
-	pub fn control_any(&mut self) -> bool {
-		return self.control.is_some();
+	pub fn control_none(&mut self) -> bool {
+		return self.control.is_none();
 	}
 
 	pub fn control_is(&mut self, other: Control) -> bool {

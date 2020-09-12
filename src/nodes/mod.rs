@@ -3,7 +3,7 @@
 macro_rules! execute {
 	( $engine:expr, $node:expr ) => {{
 		let reference = $engine.execute($node)?;
-		if $engine.control_any() {
+		if $engine.control_none() {
 			reference
 		} else {
 			return Ok(reference);
