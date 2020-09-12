@@ -216,6 +216,10 @@ impl<'a> Engine<'a> {
 		return self.values.alloc(Value::new(class, data));
 	}
 
+	pub fn new_reference(&mut self, value: GcValue<'a>) -> GcReference<'a> {
+		return self.references.alloc(Reference::new_variable(Some(value), self.environment.object));
+	}
+
 	pub fn new_variable(&mut self, value: Option<GcValue<'a>>, r#type: GcValue<'a>) -> GcReference<'a> {
 		return self.references.alloc(Reference::new_variable(value, r#type));
 	}

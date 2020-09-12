@@ -31,7 +31,10 @@ impl Node for Sequence<'_> {
 			arguments.push(execute!(engine, argument).read()?);
 		}
 
-		return engine.call(value, arguments);
+		let mut name = String::new();
+		name.push_str(&self.open);
+		name.push_str(&self.close);
+		return engine.call_method(value, &name, arguments);
 	}
 
 	fn get_syntax_node(&self) -> &SyntaxNode {

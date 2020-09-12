@@ -190,20 +190,20 @@ fn array_copy<'a>(engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> Retur
 }
 
 fn array_append<'a>(engine: &mut Engine<'a>, mut arguments: Vec<GcValue<'a>>) -> ReturnReference<'a> {
-	let reference = engine.new_variable(Some(arguments[1]), engine.environment.object);
+	let reference = engine.new_reference(arguments[1]);
 	arguments[0].data_array_mut().push(reference);
 	return Ok(engine.undefined());
 }
 
 fn array_prepend<'a>(engine: &mut Engine<'a>, mut arguments: Vec<GcValue<'a>>) -> ReturnReference<'a> {
-	let reference = engine.new_variable(Some(arguments[1]), engine.environment.object);
+	let reference = engine.new_reference(arguments[1]);
 	arguments[0].data_array_mut().insert(0, reference);
 	return Ok(engine.undefined());
 }
 
 fn array_insert<'a>(engine: &mut Engine<'a>, mut arguments: Vec<GcValue<'a>>) -> ReturnReference<'a> {
+	let reference = engine.new_reference(arguments[1]);
 	let index = *arguments[1].data_integer();
-	let reference = engine.new_variable(Some(arguments[2]), engine.environment.object);
 	arguments[0].data_array_mut().insert(index, reference);
 	return Ok(engine.undefined());
 }
