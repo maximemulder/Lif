@@ -61,7 +61,7 @@ impl<T> GcRef<T> {
 		};
 	}
 
-	pub fn alloc(object: T) -> Self {
+	fn alloc(object: T) -> Self {
 		return Self {
 			pointer: Box::into_raw(Box::new(GcObject::new(object))),
 		};

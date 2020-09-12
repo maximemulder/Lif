@@ -41,12 +41,13 @@ impl<'a> Engine<'a> {
 			registries:  Vec::new(),
 			frames:      Vec::new(),
 			scope:       GcRef::null(),
-			undefined:   GcRef::alloc(Reference::new_constant(None)),
+			undefined:   GcRef::null(),
 			this:        None,
 			control:     None,
 		};
 
 		engine.scope = engine.scopes.alloc(Scope::new());
+		engine.undefined = engine.references.alloc(Reference::new_constant(None));
 		engine.registries.push(Vec::new());
 		engine.populate();
 		return engine;
