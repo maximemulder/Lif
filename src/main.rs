@@ -18,7 +18,7 @@ mod runtime;
 mod code;
 
 use code::Code;
-use node::Node;
+// use node::Node;
 use runtime::engine::Engine;
 use std::cmp::min;
 use std::env;
@@ -48,8 +48,7 @@ fn main() {
 		engine.collect();
 		if let Err(error) = result {
 			println!("{}", error.message);
-			if let Some(delimiters) = error.delimiters {
-				let node = Node::new_token(&elements::productions::PROGRAM, delimiters);
+			if let Some(node) = error.node {
 				println!("\n{}\n{}{}",
 					code.node_line(&node),
 					" ".repeat(code.node_shift_left(&node)),

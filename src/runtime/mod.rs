@@ -10,6 +10,6 @@ pub mod value;
 use error::Error;
 use reference::GcReference;
 
-pub type Return<T> = Result<T, Error>;
+pub type Return<'a, T> = Result<T, Error<'a>>;
 
-pub type ReturnReference<'a> = Return<GcReference<'a>>;
+pub type ReturnReference<'a> = Return<'a, GcReference<'a>>;

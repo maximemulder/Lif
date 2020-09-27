@@ -20,8 +20,8 @@ impl<'a> While<'a> {
 	}
 }
 
-impl Node for While<'_> {
-	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> ReturnReference<'a> {
+impl<'a> Node<'a> for While<'a> {
+	fn execute(&self, engine: &mut Engine<'a>) -> ReturnReference<'a> {
 		let mut array = Vec::new();
 		while {
 			let reference = execute!(engine, &self.condition);
@@ -48,7 +48,7 @@ impl Node for While<'_> {
 		return Ok(engine.new_array(array));
 	}
 
-	fn get_syntax_node(&self) -> &SyntaxNode {
+	fn get_syntax_node(&self) -> &'a SyntaxNode<'a> {
 		return self.node;
 	}
 }

@@ -22,8 +22,8 @@ impl<'a> If<'a> {
 	}
 }
 
-impl Node for If<'_> {
-	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> ReturnReference<'a> {
+impl<'a> Node<'a> for If<'a> {
+	fn execute(&self, engine: &mut Engine<'a>) -> ReturnReference<'a> {
 		return if {
 			let reference = execute!(engine, &self.condition);
 			*reference.read()?.get_cast_boolean(engine)?
@@ -36,7 +36,7 @@ impl Node for If<'_> {
 		}
 	}
 
-	fn get_syntax_node(&self) -> &SyntaxNode {
+	fn get_syntax_node(&self) -> &'a SyntaxNode<'a> {
 		return self.node;
 	}
 }

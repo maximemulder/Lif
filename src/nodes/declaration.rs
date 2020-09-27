@@ -19,8 +19,8 @@ impl<'a> Declaration<'a> {
 	}
 }
 
-impl Node for Declaration<'_> {
-	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> ReturnReference<'a> {
+impl<'a> Node<'a> for Declaration<'a> {
+	fn execute(&self, engine: &mut Engine<'a>) -> ReturnReference<'a> {
 		let r#type = if let Some(r#type) = &self.r#type {
 			let value = execute!(engine, r#type).read()?;
 			value.cast(engine.environment.class)?;
@@ -34,7 +34,7 @@ impl Node for Declaration<'_> {
 		return Ok(reference);
 	}
 
-	fn get_syntax_node(&self) -> &SyntaxNode {
+	fn get_syntax_node(&self) -> &'a SyntaxNode<'a> {
 		return self.node;
 	}
 }

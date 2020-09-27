@@ -17,12 +17,12 @@ impl<'a> Group<'a> {
 	}
 }
 
-impl Node for Group<'_> {
-	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> ReturnReference<'a> {
+impl<'a> Node<'a> for Group<'a> {
+	fn execute(&self, engine: &mut Engine<'a>) -> ReturnReference<'a> {
 		return engine.execute(&self.expression);
 	}
 
-	fn get_syntax_node(&self) -> &SyntaxNode {
+	fn get_syntax_node(&self) -> &'a SyntaxNode<'a> {
 		return self.node;
 	}
 }

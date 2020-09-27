@@ -17,8 +17,8 @@ impl<'a> Loop<'a> {
 	}
 }
 
-impl Node for Loop<'_> {
-	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> ReturnReference<'a> {
+impl<'a> Node<'a> for Loop<'a> {
+	fn execute(&self, engine: &mut Engine<'a>) -> ReturnReference<'a> {
 		let mut array = Vec::new();
 		loop {
 			let reference = engine.execute(&self.body)?;
@@ -42,7 +42,7 @@ impl Node for Loop<'_> {
 		return Ok(engine.new_array(array));
 	}
 
-	fn get_syntax_node(&self) -> &SyntaxNode {
+	fn get_syntax_node(&self) -> &'a SyntaxNode<'a> {
 		return self.node;
 	}
 }

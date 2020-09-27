@@ -22,8 +22,8 @@ impl<'a> ForIn<'a> {
 	}
 }
 
-impl Node for ForIn<'_> {
-	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> ReturnReference<'a> {
+impl<'a> Node<'a> for ForIn<'a> {
+	fn execute(&self, engine: &mut Engine<'a>) -> ReturnReference<'a> {
 		let mut array = Vec::new();
 		for element in {
 			let reference = execute!(engine, &self.expression);
@@ -51,7 +51,7 @@ impl Node for ForIn<'_> {
 		return Ok(engine.new_array(array));
 	}
 
-	fn get_syntax_node(&self) -> &SyntaxNode {
+	fn get_syntax_node(&self) -> &'a SyntaxNode<'a> {
 		return self.node;
 	}
 }

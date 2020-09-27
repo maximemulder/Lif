@@ -17,8 +17,8 @@ impl<'a> Statements<'a> {
 	}
 }
 
-impl Node for Statements<'_> {
-	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> ReturnReference<'a> {
+impl<'a> Node<'a> for Statements<'a> {
+	fn execute(&self, engine: &mut Engine<'a>) -> ReturnReference<'a> {
 		for statement in self.statements.iter() {
 			execute!(engine, statement);
 		}
@@ -26,7 +26,7 @@ impl Node for Statements<'_> {
 		return Ok(engine.undefined());
 	}
 
-	fn get_syntax_node(&self) -> &SyntaxNode {
+	fn get_syntax_node(&self) -> &'a SyntaxNode<'a> {
 		return self.node;
 	}
 }

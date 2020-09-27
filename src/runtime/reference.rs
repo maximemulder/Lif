@@ -30,11 +30,11 @@ impl<'a> Reference<'a> {
 		};
 	}
 
-	pub fn read(&self) -> Return<GcValue<'a>> {
+	pub fn read(&self) -> Return<'a, GcValue<'a>> {
 		return self.value.ok_or_else(|| Error::new_runtime("Trying to read an undefined value."));
 	}
 
-	pub fn write(&mut self, value: GcValue<'a>) -> Return<()> {
+	pub fn write(&mut self, value: GcValue<'a>) -> Return<'a, ()> {
 		match self.r#type {
 			Type::Variable(r#type) => if value.isa(r#type) {
 				self.set_value(value);

@@ -37,7 +37,7 @@ impl<'a> Value<'a> {
 		return false;
 	}
 
-	pub fn cast(&self, other: GcValue<'a>) -> Return<()> {
+	pub fn cast(&self, other: GcValue<'a>) -> Return<'a, ()> {
 		return if self.isa(other) {
 			Ok(())
 		} else {
@@ -45,22 +45,22 @@ impl<'a> Value<'a> {
 		};
 	}
 
-	pub fn get_cast_array(&self, engine: &Engine<'a>) -> Return<&Vec<GcReference<'a>>> {
+	pub fn get_cast_array(&self, engine: &Engine<'a>) -> Return<'a, &Vec<GcReference<'a>>> {
 		self.cast(engine.environment.array)?;
 		return Ok(self.data_array());
 	}
 
-	pub fn get_cast_boolean(&self, engine: &Engine<'a>) -> Return<&bool> {
+	pub fn get_cast_boolean(&self, engine: &Engine<'a>) -> Return<'a, &bool> {
 		self.cast(engine.environment.boolean)?;
 		return Ok(self.data_boolean());
 	}
 
-	pub fn get_cast_callable(&self, engine: &Engine<'a>) -> Return<&dyn Callable<'a>> {
+	pub fn get_cast_callable(&self, engine: &Engine<'a>) -> Return<'a, &dyn Callable<'a>> {
 		self.cast(engine.environment.function)?;
 		return Ok(self.data_callable());
 	}
 
-	pub fn get_cast_string(&self, engine: &Engine<'a>) -> Return<&String> {
+	pub fn get_cast_string(&self, engine: &Engine<'a>) -> Return<'a, &String> {
 		self.cast(engine.environment.string)?;
 		return Ok(self.data_string());
 	}

@@ -23,8 +23,8 @@ impl<'a> Sequence<'a> {
 	}
 }
 
-impl Node for Sequence<'_> {
-	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> ReturnReference<'a> {
+impl<'a> Node<'a> for Sequence<'a> {
+	fn execute(&self, engine: &mut Engine<'a>) -> ReturnReference<'a> {
 		let value = execute!(engine, &self.expression).read()?;
 		let mut arguments = Vec::new();
 		for argument in self.expressions.iter() {
@@ -37,7 +37,7 @@ impl Node for Sequence<'_> {
 		return engine.call_method(value, &name, arguments);
 	}
 
-	fn get_syntax_node(&self) -> &SyntaxNode {
+	fn get_syntax_node(&self) -> &'a SyntaxNode<'a> {
 		return self.node;
 	}
 }

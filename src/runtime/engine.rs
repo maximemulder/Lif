@@ -130,13 +130,13 @@ impl<'a> Engine<'a> {
 		self.values.collect();
 	}
 
-	pub fn execute(&mut self, node: &'a dyn Node) -> ReturnReference<'a> {
+	pub fn execute(&mut self, node: &dyn Node<'a>) -> ReturnReference<'a> {
 		self.registries.push(Vec::new());
 		let reference = match node.execute(self) {
 			Ok(reference) => reference,
 			Err(mut error) => {
-				if error.delimiters.is_none() {
-					error.delimiters = Some((node.get_syntax_node().left(), node.get_syntax_node().right()));
+				if error.node.is_none() {
+					error.node = Some(node.get_syntax_node());
 				}
 
 				return Err(error);
@@ -151,7 +151,7 @@ impl<'a> Engine<'a> {
 }
 
 impl<'a> Engine<'a> {
-	pub fn control_new(&mut self, control: Control, node: &'a Option<Expression>) -> ReturnReference<'a> {
+	pub fn control_new(&mut self, control: Control, node: &Option<Expression<'a>>) -> ReturnReference<'a> {
 		let reference = if let Some(node) = node {
 			let value = self.execute(node)?.read()?;
 			self.new_constant(value)
@@ -259,7 +259,7 @@ impl<'a> Engine<'a> {
 		return self.new_constant_value(self.environment.integer, Data::Integer(integer));
 	}
 
-	pub fn new_function(&mut self, parameters: &'a Vec<Declaration>, r#type: Option<GcValue<'a>>, block: &'a Block) -> GcReference<'a> {
+	pub fn new_function(&mut self, parameters: *const Vec<Declaration<'a>>, r#type: Option<GcValue<'a>>, block: *const Block<'a>) -> GcReference<'a> {
 		return self.new_constant_value(self.environment.function, Data::Callable(Box::new(Function::new(self.scope, parameters, r#type, block))));
 	}
 

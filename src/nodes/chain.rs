@@ -19,14 +19,14 @@ impl<'a> Chain<'a> {
 	}
 }
 
-impl Node for Chain<'_> {
-	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> ReturnReference<'a> {
+impl<'a> Node<'a> for Chain<'a> {
+	fn execute(&self, engine: &mut Engine<'a>) -> ReturnReference<'a> {
 		let value = execute!(engine, &self.expression).read()?;
 		let name = engine.new_string(self.member.to_string()).read()?;
 		return engine.call_method(value, ".", vec![name]);
 	}
 
-	fn get_syntax_node(&self) -> &SyntaxNode {
+	fn get_syntax_node(&self) -> &'a SyntaxNode<'a> {
 		return self.node;
 	}
 }

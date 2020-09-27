@@ -4,11 +4,11 @@ use crate::runtime::engine::Engine;
 
 pub struct Statement<'a> {
 	node: &'a SyntaxNode<'a>,
-	exe: Box<dyn Node + 'a>,
+	exe: Box<dyn Node<'a> + 'a>,
 }
 
 impl<'a> Statement<'a> {
-	pub fn new(node: &'a SyntaxNode<'a>, exe: Box<dyn Node + 'a>) -> Self {
+	pub fn new(node: &'a SyntaxNode<'a>, exe: Box<dyn Node<'a> + 'a>) -> Self {
 		return Self {
 			node,
 			exe,
@@ -16,13 +16,13 @@ impl<'a> Statement<'a> {
 	}
 }
 
-impl Node for Statement<'_> {
-	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> ReturnReference<'a> {
+impl<'a> Node<'a> for Statement<'a> {
+	fn execute(&self, engine: &mut Engine<'a>) -> ReturnReference<'a> {
 		execute!(engine, self.exe.as_ref());
 		return Ok(engine.undefined());
 	}
 
-	fn get_syntax_node(&self) -> &SyntaxNode {
+	fn get_syntax_node(&self) -> &'a SyntaxNode<'a> {
 		return self.node;
 	}
 }

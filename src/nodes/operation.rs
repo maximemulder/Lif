@@ -21,8 +21,8 @@ impl<'a> Operation<'a> {
 	}
 }
 
-impl Node for Operation<'_> {
-	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> ReturnReference<'a> {
+impl<'a> Node<'a> for Operation<'a> {
+	fn execute(&self, engine: &mut Engine<'a>) -> ReturnReference<'a> {
 		if self.operator.to_string() == "=" {
 			let mut left  = execute!(engine, &self.left);
 			let right = execute!(engine, &self.right).read()?;
@@ -36,7 +36,7 @@ impl Node for Operation<'_> {
 		return engine.call((left.get_method(engine, &self.operator).unwrap()).read()?, vec![left, right]);
 	}
 
-	fn get_syntax_node(&self) -> &SyntaxNode {
+	fn get_syntax_node(&self) -> &'a SyntaxNode<'a> {
 		return self.node;
 	}
 }

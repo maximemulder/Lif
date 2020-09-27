@@ -43,13 +43,13 @@ impl GcTraceable for Primitive<'_> {
 #[derive(Clone)]
 pub struct Function<'a> {
 	scope: GcScope<'a>,
-	parameters: &'a Vec<Declaration<'a>>,
+	parameters: *const Vec<Declaration<'a>>,
 	r#type: Option<GcValue<'a>>,
-	block: &'a Block<'a>,
+	block: *const Block<'a>,
 }
 
 impl<'a> Function<'a> {
-	pub fn new(scope: GcScope<'a>, parameters: &'a Vec<Declaration>, r#type: Option<GcValue<'a>>, block: &'a Block) -> Self {
+	pub fn new(scope: GcScope<'a>, parameters: *const Vec<Declaration<'a>>, r#type: Option<GcValue<'a>>, block: *const Block<'a>) -> Self {
 		return Self {
 			scope,
 			parameters,
@@ -62,12 +62,12 @@ impl<'a> Function<'a> {
 impl<'a> Callable<'a> for Function<'a> {
 	fn execute(&self, engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> ReturnReference<'a> {
 		engine.push_frame(self.scope);
-		for (parameter, argument) in self.parameters.iter().zip(arguments) {
+		for (parameter, argument) in unsafe { self.parameters.as_ref() }.unwrap().iter().zip(arguments) {
 			let mut reference = parameter.execute(engine)?;
 			reference.write(argument)?;
 		}
 
-		let reference = self.block.execute(engine)?;
+		let reference = unsafe { self.block.as_ref() }.unwrap().execute(engine)?;
 		engine.pop_frame();
 
 		if engine.control_is(Control::Break) || engine.control_is(Control::Continue) {

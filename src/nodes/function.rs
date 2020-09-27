@@ -23,8 +23,8 @@ impl<'a> Function<'a> {
 	}
 }
 
-impl Node for Function<'_> {
-	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> ReturnReference<'a> {
+impl<'a> Node<'a> for Function<'a> {
+	fn execute(&self, engine: &mut Engine<'a>) -> ReturnReference<'a> {
 		let r#type = if let Some(r#type) = self.r#type.as_ref() {
 			Some(r#type.execute(engine)?.read()?)
 		} else {
@@ -34,7 +34,7 @@ impl Node for Function<'_> {
 		return Ok(engine.new_function(&self.parameters, r#type, &self.block));
 	}
 
-	fn get_syntax_node(&self) -> &SyntaxNode {
+	fn get_syntax_node(&self) -> &'a SyntaxNode<'a> {
 		return self.node;
 	}
 }

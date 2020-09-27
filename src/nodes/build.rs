@@ -62,7 +62,7 @@ fn expression<'a>(text: &str, node: &'a SyntaxNode<'a>) -> Expression<'a> {
 	});
 }
 
-fn literal<'a>(text: &str, node: &'a SyntaxNode<'a>) -> Box<dyn Node + 'a> {
+fn literal<'a>(text: &str, node: &'a SyntaxNode<'a>) -> Box<dyn Node<'a> + 'a> {
 	let child = &node.children()[0];
 	return match child.element {
 		&elements::variables::NUMBER     => Box::new(integer(text, child)),
@@ -132,7 +132,7 @@ fn declaration<'a>(text: &str, node: &'a SyntaxNode<'a>) -> Declaration<'a> {
 	return Declaration::new(node, token(text, &node.children()[0]), node.children().get(2).map(|child| expression(text, child)));
 }
 
-fn control<'a>(text: &str, node: &'a SyntaxNode<'a>) -> Box<dyn Node + 'a> {
+fn control<'a>(text: &str, node: &'a SyntaxNode<'a>) -> Box<dyn Node<'a> + 'a> {
 	let child = &node.children()[0];
 	return match child.element {
 		&elements::controls::RETURN   => Box::new(r#return(text, child)),

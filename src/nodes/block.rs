@@ -20,8 +20,8 @@ impl<'a> Block<'a> {
 	}
 }
 
-impl Node for Block<'_> {
-	fn execute<'a>(&'a self, engine: &mut Engine<'a>) -> ReturnReference<'a> {
+impl<'a> Node<'a> for Block<'a> {
+	fn execute(&self, engine: &mut Engine<'a>) -> ReturnReference<'a> {
 		engine.push_scope();
 		execute!(engine, &self.statements);
 		let reference = if let Some(expression) = &self.expression {
@@ -34,7 +34,7 @@ impl Node for Block<'_> {
 		return Ok(reference);
 	}
 
-	fn get_syntax_node(&self) -> &SyntaxNode {
+	fn get_syntax_node(&self) -> &'a SyntaxNode<'a> {
 		return self.node;
 	}
 }
