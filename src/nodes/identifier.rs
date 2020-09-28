@@ -4,11 +4,11 @@ use crate::runtime::engine::Engine;
 
 pub struct Identifier<'a> {
 	node: &'a SyntaxNode<'a>,
-	identifier: Box<str>,
+	identifier: &'a str,
 }
 
 impl<'a> Identifier<'a> {
-	pub fn new(node: &'a SyntaxNode<'a>, identifier: Box<str>) -> Self {
+	pub fn new(node: &'a SyntaxNode<'a>, identifier: &'a str) -> Self {
 		return Self {
 			node,
 			identifier,

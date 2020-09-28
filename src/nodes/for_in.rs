@@ -6,13 +6,13 @@ use crate::runtime::engine::{ Control, Engine };
 
 pub struct ForIn<'a> {
 	node: &'a SyntaxNode<'a>,
-	identifier: Box<str>,
+	identifier: &'a str,
 	expression: Expression<'a>,
 	body:       Block<'a>,
 }
 
 impl<'a> ForIn<'a> {
-	pub fn new(node: &'a SyntaxNode<'a>, identifier: Box<str>, expression: Expression<'a>, body: Block<'a>) -> Self {
+	pub fn new(node: &'a SyntaxNode<'a>, identifier: &'a str, expression: Expression<'a>, body: Block<'a>) -> Self {
 		return Self {
 			node,
 			identifier,

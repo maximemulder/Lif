@@ -6,11 +6,11 @@ use crate::runtime::engine::Engine;
 pub struct Chain<'a> {
 	node: &'a SyntaxNode<'a>,
 	expression: Expression<'a>,
-	member:     Box<str>,
+	member:     &'a str,
 }
 
 impl<'a> Chain<'a> {
-	pub fn new(node: &'a SyntaxNode<'a>, expression: Expression<'a>, member: Box<str>) -> Self {
+	pub fn new(node: &'a SyntaxNode<'a>, expression: Expression<'a>, member: &'a str) -> Self {
 		return Self {
 			node,
 			expression,

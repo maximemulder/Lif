@@ -6,13 +6,13 @@ use crate::runtime::engine::Engine;
 pub struct Sequence<'a> {
 	node: &'a SyntaxNode<'a>,
 	expression:  Expression<'a>,
-	open:        Box<str>,
+	open:        &'a str,
 	expressions: Vec<Expression<'a>>,
-	close:       Box<str>,
+	close:       &'a str,
 }
 
 impl<'a> Sequence<'a> {
-	pub fn new(node: &'a SyntaxNode<'a>, expression:  Expression<'a>, open: Box<str>, expressions: Vec<Expression<'a>>, close: Box<str>) -> Self {
+	pub fn new(node: &'a SyntaxNode<'a>, expression:  Expression<'a>, open: &'a str, expressions: Vec<Expression<'a>>, close: &'a str) -> Self {
 		return Self {
 			node,
 			expression,

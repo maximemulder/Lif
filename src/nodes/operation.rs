@@ -7,11 +7,11 @@ pub struct Operation<'a> {
 	node: &'a SyntaxNode<'a>,
 	left:     Expression<'a>,
 	right:    Expression<'a>,
-	operator: Box<str>,
+	operator: &'a str,
 }
 
 impl<'a> Operation<'a> {
-	pub fn new(node: &'a SyntaxNode<'a>, left: Expression<'a>, right: Expression<'a>, operator: Box<str>) -> Self {
+	pub fn new(node: &'a SyntaxNode<'a>, left: Expression<'a>, right: Expression<'a>, operator: &'a str) -> Self {
 		return Self {
 			node,
 			left,

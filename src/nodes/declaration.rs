@@ -5,12 +5,12 @@ use crate::runtime::engine::Engine;
 
 pub struct Declaration<'a> {
 	node: &'a SyntaxNode<'a>,
-	identifier: Box<str>,
+	identifier: &'a str,
 	r#type: Option<Expression<'a>>,
 }
 
 impl<'a> Declaration<'a> {
-	pub fn new(node: &'a SyntaxNode<'a>, identifier: Box<str>, r#type: Option<Expression<'a>>) -> Self {
+	pub fn new(node: &'a SyntaxNode<'a>, identifier: &'a str, r#type: Option<Expression<'a>>) -> Self {
 		return Self {
 			node,
 			identifier,
