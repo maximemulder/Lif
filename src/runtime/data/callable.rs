@@ -43,15 +43,17 @@ impl GcTraceable for Primitive<'_, '_> {
 #[derive(Clone)]
 pub struct Function<'a, 'b> {
 	scope: GcScope<'a, 'b>,
+	generics: &'b Vec<&'a str>,
 	parameters: &'b Vec<Declaration<'a>>,
 	r#type: Option<GcValue<'a, 'b>>,
 	block: &'b Block<'a>,
 }
 
 impl<'a, 'b> Function<'a, 'b> {
-	pub fn new(scope: GcScope<'a, 'b>, parameters: &'b Vec<Declaration<'a>>, r#type: Option<GcValue<'a, 'b>>, block: &'b Block<'a>) -> Self {
+	pub fn new(scope: GcScope<'a, 'b>, generics: &'b Vec<&'a str>, parameters: &'b Vec<Declaration<'a>>, r#type: Option<GcValue<'a, 'b>>, block: &'b Block<'a>) -> Self {
 		return Self {
 			scope,
+			generics,
 			parameters,
 			r#type,
 			block,
@@ -62,6 +64,10 @@ impl<'a, 'b> Function<'a, 'b> {
 impl<'a, 'b> Callable<'a, 'b> for Function<'a, 'b> {
 	fn execute(&self, engine: &mut Engine<'a, 'b>, arguments: Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b> {
 		engine.push_frame(self.scope);
+		for (parameter, argument) in self.generics.iter().zip(&arguments[..self.generics.len()]) {
+			engine.add_constant_value(parameter, *argument);
+		}
+
 		for (parameter, argument) in self.parameters.iter().zip(arguments) {
 			let mut reference = parameter.execute(engine)?;
 			reference.write(argument)?;

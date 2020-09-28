@@ -154,21 +154,47 @@ fn r#continue<'a>(text: &'a str, node: &'a SyntaxNode<'a>) -> Continue<'a> {
 	return Continue::new(node, node.children().get(1).map(|child| expression(text, child)));
 }
 
-fn function<'a>(text: &'a str, node: &'a SyntaxNode<'a>) -> Function<'a> {
-	return Function::new(node, parameters(text, &node.children()[2]), node.children().get(5).map(|child| expression(text, child)), block(text, &node.children().last().unwrap()));
-}
-
-fn parameters<'a>(text: &'a str, node: &'a SyntaxNode<'a>) -> Vec<Declaration<'a>> {
+fn generics<'a>(text: &'a str, node: &'a SyntaxNode<'a>) -> Vec<&'a str> {
 	let mut identifiers = Vec::new();
 	for (i, child) in node.children().iter().enumerate()  {
 		if i % 2 == 1 {
 			continue;
 		}
 
-		identifiers.push(declaration(text, child));
+		identifiers.push(token(text, child));
 	}
 
 	return identifiers;
+}
+
+fn function<'a>(text: &'a str, node: &'a SyntaxNode<'a>) -> Function<'a> {
+	let children = node.children();
+	return Function::new(node, if children.len() >= 8 {
+		generics(text, &children[2])
+	} else {
+		Vec::new()
+	}, parameters(text, &children[if children.len() < 8 {
+		2
+	} else {
+		5
+	}]), if children[children.len() - 2].element == &elements::expressions::EXPRESSION {
+		Some(expression(text, &children[children.len() - 2]))
+	} else {
+		None
+	}, block(text, &children.last().unwrap()));
+}
+
+fn parameters<'a>(text: &'a str, node: &'a SyntaxNode<'a>) -> Vec<Declaration<'a>> {
+	let mut declarations = Vec::new();
+	for (i, child) in node.children().iter().enumerate()  {
+		if i % 2 == 1 {
+			continue;
+		}
+
+		declarations.push(declaration(text, child));
+	}
+
+	return declarations;
 }
 
 fn group<'a>(text: &'a str, node: &'a SyntaxNode<'a>) -> Group<'a> {

@@ -259,8 +259,8 @@ impl<'a, 'b> Engine<'a, 'b> {
 		return self.new_constant_value(self.environment.integer, Data::Integer(integer));
 	}
 
-	pub fn new_function(&mut self, parameters: &'b Vec<Declaration<'a>>, r#type: Option<GcValue<'a, 'b>>, block: &'b Block<'a>) -> GcReference<'a, 'b> {
-		return self.new_constant_value(self.environment.function, Data::Callable(Box::new(Function::new(self.scope, parameters, r#type, block))));
+	pub fn new_function(&mut self, generics: &'b Vec<&'a str>, parameters: &'b Vec<Declaration<'a>>, r#type: Option<GcValue<'a, 'b>>, block: &'b Block<'a>) -> GcReference<'a, 'b> {
+		return self.new_constant_value(self.environment.function, Data::Callable(Box::new(Function::new(self.scope, generics, parameters, r#type, block))));
 	}
 
 	pub fn new_primitive(&mut self, callback: &'b dyn Fn(&mut Engine<'a, 'b>, Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b>) -> GcReference<'a, 'b> {

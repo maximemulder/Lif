@@ -44,7 +44,7 @@ impl<'a, 'b> Engine<'a, 'b> {
 		return self.new_value(self.environment.class, Data::Class(Class::new(Some(self.environment.object))));
 	}
 
-	fn add_constant_value(&mut self, name: &str, value: GcValue<'a, 'b>) {
+	pub fn add_constant_value(&mut self, name: &str, value: GcValue<'a, 'b>) {
 		let reference = self.new_constant(value);
 		self.add_variable(name, reference);
 	}

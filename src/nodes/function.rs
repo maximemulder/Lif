@@ -7,15 +7,17 @@ use crate::runtime::engine::Engine;
 
 pub struct Function<'a> {
 	node: &'a SyntaxNode<'a>,
+	generics: Vec<&'a str>,
 	parameters: Vec<Declaration<'a>>,
 	r#type: Option<Expression<'a>>,
 	block: Block<'a>,
 }
 
 impl<'a> Function<'a> {
-	pub fn new(node: &'a SyntaxNode<'a>, parameters: Vec<Declaration<'a>>, r#type: Option<Expression<'a>>, block: Block<'a>) -> Self {
+	pub fn new(node: &'a SyntaxNode<'a>, generics: Vec<&'a str>, parameters: Vec<Declaration<'a>>, r#type: Option<Expression<'a>>, block: Block<'a>) -> Self {
 		return Self {
 			node,
+			generics,
 			parameters,
 			r#type,
 			block,
@@ -31,7 +33,7 @@ impl<'a> Node<'a> for Function<'a> {
 			None
 		};
 
-		return Ok(engine.new_function(&self.parameters, r#type, &self.block));
+		return Ok(engine.new_function(&self.generics, &self.parameters, r#type, &self.block));
 	}
 
 	fn get_syntax_node(&self) -> &'a SyntaxNode<'a> {
