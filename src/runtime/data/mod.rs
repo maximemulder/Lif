@@ -9,18 +9,18 @@ pub use instance::Instance;
 use crate::runtime::gc::GcTraceable;
 use crate::runtime::reference::GcReference;
 
-pub enum Data<'a> {
-	Array(Vec<GcReference<'a>>),
+pub enum Data<'a, 'b> {
+	Array(Vec<GcReference<'a, 'b>>),
 	Boolean(bool),
-	Callable(Box<dyn Callable<'a> + 'a>),
-	Class(Class<'a>),
-	Instance(Instance<'a>),
+	Callable(Box<dyn Callable<'a, 'b> + 'b>),
+	Class(Class<'a, 'b>),
+	Instance(Instance<'a, 'b>),
 	Integer(usize),
 	String(String),
 	Null,
 }
 
-impl GcTraceable for Data<'_> {
+impl GcTraceable for Data<'_, '_> {
 	fn trace(&mut self) {
 		match self {
 			Data::Array(references)  => for reference in references.iter_mut() {

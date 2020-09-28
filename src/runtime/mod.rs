@@ -12,4 +12,4 @@ use reference::GcReference;
 
 pub type Return<'a, T> = Result<T, Error<'a>>;
 
-pub type ReturnReference<'a> = Return<'a, GcReference<'a>>;
+pub type ReturnReference<'a, 'b> = Return<'a, GcReference<'a, 'b>>;

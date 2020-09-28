@@ -24,7 +24,7 @@ impl<'a> Function<'a> {
 }
 
 impl<'a> Node<'a> for Function<'a> {
-	fn execute(&self, engine: &mut Engine<'a>) -> ReturnReference<'a> {
+	fn execute<'b>(&'b self, engine: &mut Engine<'a, 'b>) -> ReturnReference<'a, 'b> {
 		let r#type = if let Some(r#type) = self.r#type.as_ref() {
 			Some(r#type.execute(engine)?.read()?)
 		} else {

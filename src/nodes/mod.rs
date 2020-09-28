@@ -42,6 +42,6 @@ use crate::runtime::engine::Engine;
 pub use crate::node::Node as SyntaxNode;
 
 pub trait Node<'a> {
-	fn execute(&self, engine: &mut Engine<'a>) -> ReturnReference<'a>;
+	fn execute<'b>(&'b self, engine: &mut Engine<'a, 'b>) -> ReturnReference<'a, 'b>;
 	fn get_syntax_node(&self) -> &'a SyntaxNode<'a>;
 }

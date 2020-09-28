@@ -23,7 +23,7 @@ impl<'a> If<'a> {
 }
 
 impl<'a> Node<'a> for If<'a> {
-	fn execute(&self, engine: &mut Engine<'a>) -> ReturnReference<'a> {
+	fn execute<'b>(&'b self, engine: &mut Engine<'a, 'b>) -> ReturnReference<'a, 'b> {
 		return if {
 			let reference = execute!(engine, &self.condition);
 			*reference.read()?.get_cast_boolean(engine)?

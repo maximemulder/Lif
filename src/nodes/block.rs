@@ -21,7 +21,7 @@ impl<'a> Block<'a> {
 }
 
 impl<'a> Node<'a> for Block<'a> {
-	fn execute(&self, engine: &mut Engine<'a>) -> ReturnReference<'a> {
+	fn execute<'b>(&'b self, engine: &mut Engine<'a, 'b>) -> ReturnReference<'a, 'b> {
 		engine.push_scope();
 		execute!(engine, &self.statements);
 		let reference = if let Some(expression) = &self.expression {

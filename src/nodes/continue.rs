@@ -17,7 +17,7 @@ impl<'a> Continue<'a> {
 }
 
 impl<'a> Node<'a> for Continue<'a> {
-	fn execute(&self, engine: &mut Engine<'a>) -> ReturnReference<'a> {
+	fn execute<'b>(&'b self, engine: &mut Engine<'a, 'b>) -> ReturnReference<'a, 'b> {
 		return engine.control_new(Control::Continue, &self.expression);
 	}
 

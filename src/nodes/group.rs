@@ -18,7 +18,7 @@ impl<'a> Group<'a> {
 }
 
 impl<'a> Node<'a> for Group<'a> {
-	fn execute(&self, engine: &mut Engine<'a>) -> ReturnReference<'a> {
+	fn execute<'b>(&'b self, engine: &mut Engine<'a, 'b>) -> ReturnReference<'a, 'b> {
 		return engine.execute(&self.expression);
 	}
 

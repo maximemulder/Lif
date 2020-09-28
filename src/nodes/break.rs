@@ -18,7 +18,7 @@ impl<'a> Break<'a> {
 }
 
 impl<'a> Node<'a> for Break<'a> {
-	fn execute(&self, engine: &mut Engine<'a>) -> ReturnReference<'a> {
+	fn execute<'b>(&'b self, engine: &mut Engine<'a, 'b>) -> ReturnReference<'a, 'b> {
 		return engine.control_new(Control::Break, &self.expression);
 	}
 

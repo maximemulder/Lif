@@ -5,22 +5,22 @@ use crate::runtime::error::Error;
 use crate::runtime::gc::{ GcRef, GcTraceable };
 use crate::runtime::reference::GcReference;
 
-pub type GcValue<'a> = GcRef<Value<'a>>;
+pub type GcValue<'a, 'b> = GcRef<Value<'a, 'b>>;
 
-pub struct Value<'a> {
-	pub class: GcValue<'a>,
-	data: Data<'a>,
+pub struct Value<'a, 'b> {
+	pub class: GcValue<'a, 'b>,
+	data: Data<'a, 'b>,
 }
 
-impl<'a> Value<'a> {
-	pub fn new(class: GcValue<'a>, data: Data<'a>) -> Self {
+impl<'a, 'b> Value<'a, 'b> {
+	pub fn new(class: GcValue<'a, 'b>, data: Data<'a, 'b>) -> Self {
 		return Self {
 			class,
 			data,
 		};
 	}
 
-	pub fn isa(&self, other: GcValue<'a>) -> bool {
+	pub fn isa(&self, other: GcValue<'a, 'b>) -> bool {
 		let mut class = self.class;
 		loop {
 			if class == other {
@@ -37,7 +37,7 @@ impl<'a> Value<'a> {
 		return false;
 	}
 
-	pub fn cast(&self, other: GcValue<'a>) -> Return<'a, ()> {
+	pub fn cast(&self, other: GcValue<'a, 'b>) -> Return<'a, ()> {
 		return if self.isa(other) {
 			Ok(())
 		} else {
@@ -45,32 +45,32 @@ impl<'a> Value<'a> {
 		};
 	}
 
-	pub fn get_cast_array(&self, engine: &Engine<'a>) -> Return<'a, &Vec<GcReference<'a>>> {
+	pub fn get_cast_array(&self, engine: &Engine<'a, 'b>) -> Return<'a, &Vec<GcReference<'a, 'b>>> {
 		self.cast(engine.environment.array)?;
 		return Ok(self.data_array());
 	}
 
-	pub fn get_cast_boolean(&self, engine: &Engine<'a>) -> Return<'a, &bool> {
+	pub fn get_cast_boolean(&self, engine: &Engine<'a, 'b>) -> Return<'a, &bool> {
 		self.cast(engine.environment.boolean)?;
 		return Ok(self.data_boolean());
 	}
 
-	pub fn get_cast_callable(&self, engine: &Engine<'a>) -> Return<'a, &dyn Callable<'a>> {
+	pub fn get_cast_callable(&self, engine: &Engine<'a, 'b>) -> Return<'a, &dyn Callable<'a, 'b>> {
 		self.cast(engine.environment.function)?;
 		return Ok(self.data_callable());
 	}
 
-	pub fn get_cast_string(&self, engine: &Engine<'a>) -> Return<'a, &String> {
+	pub fn get_cast_string(&self, engine: &Engine<'a, 'b>) -> Return<'a, &String> {
 		self.cast(engine.environment.string)?;
 		return Ok(self.data_string());
 	}
 
-	pub fn get_method(&self, engine: &Engine<'a>, name: &str) -> Option<GcReference<'a>> {
+	pub fn get_method(&self, engine: &Engine<'a, 'b>, name: &str) -> Option<GcReference<'a, 'b>> {
 		return self.class.data_class().get_method(engine, name);
 	}
 }
 
-impl GcTraceable for Value<'_> {
+impl GcTraceable for Value<'_, '_> {
 	fn trace(&mut self) {
 		self.class.trace();
 		self.data.trace();
@@ -97,12 +97,12 @@ macro_rules! data_mut {
 	};
 }
 
-impl<'a> Value<'a> {
-	pub fn data_array(&self) -> &Vec<GcReference<'a>> {
+impl<'a, 'b> Value<'a, 'b> {
+	pub fn data_array(&self) -> &Vec<GcReference<'a, 'b>> {
 		data!(self, Array);
 	}
 
-	pub fn data_array_mut(&mut self) -> &mut Vec<GcReference<'a>> {
+	pub fn data_array_mut(&mut self) -> &mut Vec<GcReference<'a, 'b>> {
 		data_mut!(self, Array);
 	}
 
@@ -114,19 +114,19 @@ impl<'a> Value<'a> {
 		data_mut!(self, Boolean);
 	}
 
-	pub fn data_class(&self) -> &Class<'a> {
+	pub fn data_class(&self) -> &Class<'a, 'b> {
 		data!(self, Class);
 	}
 
-	pub fn data_class_mut(&mut self) -> &mut Class<'a> {
+	pub fn data_class_mut(&mut self) -> &mut Class<'a, 'b> {
 		data_mut!(self, Class);
 	}
 
-	pub fn data_instance(&self) -> &Instance<'a> {
+	pub fn data_instance(&self) -> &Instance<'a, 'b> {
 		data!(self, Instance);
 	}
 
-	pub fn data_instance_mut(&mut self) -> &mut Instance<'a> {
+	pub fn data_instance_mut(&mut self) -> &mut Instance<'a, 'b> {
 		data_mut!(self, Instance);
 	}
 
@@ -146,7 +146,7 @@ impl<'a> Value<'a> {
 		data_mut!(self, String);
 	}
 
-	pub fn data_callable(&self) -> &dyn Callable<'a> {
+	pub fn data_callable(&self) -> &dyn Callable<'a, 'b> {
 		if let Data::Callable(callable) = &self.data {
 			return callable.as_ref();
 		}
@@ -154,7 +154,7 @@ impl<'a> Value<'a> {
 		panic!();
 	}
 
-	pub fn data_callable_mut(&mut self) -> &mut dyn Callable<'a> {
+	pub fn data_callable_mut(&mut self) -> &mut dyn Callable<'a, 'b> {
 		if let Data::Callable(callable) = &mut self.data {
 			return callable.as_mut();
 		}

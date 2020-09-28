@@ -17,7 +17,7 @@ impl<'a> Integer<'a> {
 }
 
 impl<'a> Node<'a> for Integer<'a> {
-	fn execute(&self, engine: &mut Engine<'a>) -> ReturnReference<'a> {
+	fn execute<'b>(&'b self, engine: &mut Engine<'a, 'b>) -> ReturnReference<'a, 'b> {
 		return Ok(engine.new_integer(self.integer));
 	}
 

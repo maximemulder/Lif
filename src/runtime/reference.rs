@@ -3,38 +3,38 @@ use crate::runtime::error::Error;
 use crate::runtime::gc::{ GcRef, GcTraceable };
 use crate::runtime::value::GcValue;
 
-pub type GcReference<'a> = GcRef<Reference<'a>>;
+pub type GcReference<'a, 'b> = GcRef<Reference<'a, 'b>>;
 
-pub struct Reference<'a> {
-	value: Option<GcValue<'a>>,
-	r#type: Type<'a>,
+pub struct Reference<'a, 'b> {
+	value: Option<GcValue<'a, 'b>>,
+	r#type: Type<'a, 'b>,
 }
 
-enum Type<'a> {
-	Variable(GcValue<'a>),
+enum Type<'a, 'b> {
+	Variable(GcValue<'a, 'b>),
 	Constant,
 }
 
-impl<'a> Reference<'a> {
-	pub fn new_variable(value: Option<GcValue<'a>>, r#type: GcValue<'a>) -> Self {
+impl<'a, 'b> Reference<'a, 'b> {
+	pub fn new_variable(value: Option<GcValue<'a, 'b>>, r#type: GcValue<'a, 'b>) -> Self {
 		return Self {
 			value,
 			r#type: Type::Variable(r#type),
 		};
 	}
 
-	pub fn new_constant(value: Option<GcValue<'a>>) -> Self {
+	pub fn new_constant(value: Option<GcValue<'a, 'b>>) -> Self {
 		return Self {
 			value,
 			r#type: Type::Constant,
 		};
 	}
 
-	pub fn read(&self) -> Return<'a, GcValue<'a>> {
+	pub fn read(&self) -> Return<'a, GcValue<'a, 'b>> {
 		return self.value.ok_or_else(|| Error::new_runtime("Trying to read an undefined value."));
 	}
 
-	pub fn write(&mut self, value: GcValue<'a>) -> Return<'a, ()> {
+	pub fn write(&mut self, value: GcValue<'a, 'b>) -> Return<'a, ()> {
 		match self.r#type {
 			Type::Variable(r#type) => if value.isa(r#type) {
 				self.set_value(value);
@@ -59,16 +59,16 @@ impl<'a> Reference<'a> {
 		return !self.is_defined();
 	}
 
-	pub fn get_value(&self) -> GcValue<'a> {
+	pub fn get_value(&self) -> GcValue<'a, 'b> {
 		return self.value.unwrap();
 	}
 
-	pub fn set_value(&mut self, value: GcValue<'a>) {
+	pub fn set_value(&mut self, value: GcValue<'a, 'b>) {
 		self.value = Some(value);
 	}
 }
 
-impl GcTraceable for Reference<'_> {
+impl GcTraceable for Reference<'_, '_> {
 	fn trace(&mut self) {
 		if let Some(value) = self.value.as_mut() {
 			value.trace();

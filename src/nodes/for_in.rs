@@ -23,7 +23,7 @@ impl<'a> ForIn<'a> {
 }
 
 impl<'a> Node<'a> for ForIn<'a> {
-	fn execute(&self, engine: &mut Engine<'a>) -> ReturnReference<'a> {
+	fn execute<'b>(&'b self, engine: &mut Engine<'a, 'b>) -> ReturnReference<'a, 'b> {
 		let mut array = Vec::new();
 		for element in {
 			let reference = execute!(engine, &self.expression);

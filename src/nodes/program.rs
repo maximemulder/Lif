@@ -18,7 +18,7 @@ impl<'a> Program<'a> {
 }
 
 impl<'a> Node<'a> for Program<'a> {
-	fn execute(&self, engine: &mut Engine<'a>) -> ReturnReference<'a> {
+	fn execute<'b>(&'b self, engine: &mut Engine<'a, 'b>) -> ReturnReference<'a, 'b> {
 		execute!(engine, &self.statements);
 		return Ok(engine.undefined());
 	}

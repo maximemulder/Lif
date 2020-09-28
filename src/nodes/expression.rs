@@ -17,7 +17,7 @@ impl<'a> Expression<'a> {
 }
 
 impl<'a> Node<'a> for Expression<'a> {
-	fn execute(&self, engine: &mut Engine<'a>) -> ReturnReference<'a> {
+	fn execute<'b>(&'b self, engine: &mut Engine<'a, 'b>) -> ReturnReference<'a, 'b> {
 		engine.collect();
 		return engine.execute(self.exe.as_ref());
 	}

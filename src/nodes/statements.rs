@@ -18,7 +18,7 @@ impl<'a> Statements<'a> {
 }
 
 impl<'a> Node<'a> for Statements<'a> {
-	fn execute(&self, engine: &mut Engine<'a>) -> ReturnReference<'a> {
+	fn execute<'b>(&'b self, engine: &mut Engine<'a, 'b>) -> ReturnReference<'a, 'b> {
 		for statement in self.statements.iter() {
 			execute!(engine, statement);
 		}

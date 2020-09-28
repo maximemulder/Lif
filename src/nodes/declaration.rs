@@ -20,7 +20,7 @@ impl<'a> Declaration<'a> {
 }
 
 impl<'a> Node<'a> for Declaration<'a> {
-	fn execute(&self, engine: &mut Engine<'a>) -> ReturnReference<'a> {
+	fn execute<'b>(&'b self, engine: &mut Engine<'a, 'b>) -> ReturnReference<'a, 'b> {
 		let r#type = if let Some(r#type) = &self.r#type {
 			let value = execute!(engine, r#type).read()?;
 			value.cast(engine.environment.class)?;

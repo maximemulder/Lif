@@ -17,7 +17,7 @@ impl<'a> Return<'a> {
 }
 
 impl<'a> Node<'a> for Return<'a> {
-	fn execute(&self, engine: &mut Engine<'a>) -> ReturnReference<'a> {
+	fn execute<'b>(&'b self, engine: &mut Engine<'a, 'b>) -> ReturnReference<'a, 'b> {
 		return engine.control_new(Control::Return, &self.expression);
 	}
 

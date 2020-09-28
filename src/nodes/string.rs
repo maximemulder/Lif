@@ -17,7 +17,7 @@ impl<'a> String<'a> {
 }
 
 impl<'a> Node<'a> for String<'a> {
-	fn execute(&self, engine: &mut Engine<'a>) -> ReturnReference<'a> {
+	fn execute<'b>(&'b self, engine: &mut Engine<'a, 'b>) -> ReturnReference<'a, 'b> {
 		return Ok(engine.new_string(self.string.to_string()));
 	}
 

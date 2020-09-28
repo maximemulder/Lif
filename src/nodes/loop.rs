@@ -18,7 +18,7 @@ impl<'a> Loop<'a> {
 }
 
 impl<'a> Node<'a> for Loop<'a> {
-	fn execute(&self, engine: &mut Engine<'a>) -> ReturnReference<'a> {
+	fn execute<'b>(&'b self, engine: &mut Engine<'a, 'b>) -> ReturnReference<'a, 'b> {
 		let mut array = Vec::new();
 		loop {
 			let reference = engine.execute(&self.body)?;

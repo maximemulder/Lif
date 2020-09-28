@@ -24,7 +24,7 @@ impl<'a> Sequence<'a> {
 }
 
 impl<'a> Node<'a> for Sequence<'a> {
-	fn execute(&self, engine: &mut Engine<'a>) -> ReturnReference<'a> {
+	fn execute<'b>(&'b self, engine: &mut Engine<'a, 'b>) -> ReturnReference<'a, 'b> {
 		let value = execute!(engine, &self.expression).read()?;
 		let mut arguments = Vec::new();
 		for argument in self.expressions.iter() {

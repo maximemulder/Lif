@@ -22,7 +22,7 @@ impl<'a> Operation<'a> {
 }
 
 impl<'a> Node<'a> for Operation<'a> {
-	fn execute(&self, engine: &mut Engine<'a>) -> ReturnReference<'a> {
+	fn execute<'b>(&'b self, engine: &mut Engine<'a, 'b>) -> ReturnReference<'a, 'b> {
 		if self.operator.to_string() == "=" {
 			let mut left  = execute!(engine, &self.left);
 			let right = execute!(engine, &self.right).read()?;
