@@ -27,7 +27,6 @@ pub struct Engine<'a, 'b> where 'a: 'b {
 	frames:          Vec<GcScope<'a, 'b>>,
 	scope:           GcScope<'a, 'b>,
 	undefined:       GcReference<'a, 'b>,
-	this:            Option<GcValue<'a, 'b>>,
 	control:         Option<Control>,
 }
 
@@ -42,7 +41,6 @@ impl<'a, 'b> Engine<'a, 'b> {
 			frames:      Vec::new(),
 			scope:       GcRef::null(),
 			undefined:   GcRef::null(),
-			this:        None,
 			control:     None,
 		};
 
@@ -51,18 +49,6 @@ impl<'a, 'b> Engine<'a, 'b> {
 		engine.registries.push(Vec::new());
 		engine.populate();
 		return engine;
-	}
-}
-
-impl<'a, 'b> Engine<'a, 'b> {
-	pub fn set_this(&mut self, this: GcValue<'a, 'b>) {
-		self.this = Some(this);
-	}
-
-	pub fn get_this(&mut self) -> Option<GcValue<'a, 'b>> {
-		let this = self.this;
-		self.this = None;
-		return this;
 	}
 }
 
@@ -107,18 +93,14 @@ impl<'a, 'b> Engine<'a, 'b> {
 
 	pub fn call_method(&mut self, value: GcValue<'a, 'b>, name: &str, mut arguments: Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b> {
 		arguments.insert(0, value);
-		return self.call(value.get_method(self, name).unwrap().read()?, arguments);
+		return self.call(value.get_method(self, name).unwrap(), arguments);
 	}
 
 	pub fn call_method_self(&mut self, value: GcValue<'a, 'b>, name: &str, arguments: Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b> {
-		return self.call(value.get_method(self, name).unwrap().read()?, arguments);
+		return self.call(value.get_method(self, name).unwrap(), arguments);
 	}
 
-	pub fn call(&mut self, value: GcValue<'a, 'b>, mut arguments: Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b> {
-		if let Some(this) = self.get_this() {
-			arguments.insert(0, this);
-		}
-
+	pub fn call(&mut self, value: GcValue<'a, 'b>, arguments: Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b> {
 		let callable = value.data_callable().duplicate();
 		return callable.execute(self, arguments);
 	}
@@ -203,10 +185,6 @@ impl GcTraceable for Engine<'_, '_> {
 
 		for frame in self.frames.iter_mut() {
 			frame.trace();
-		}
-
-		if let Some(this) = &mut self.this {
-			this.trace();
 		}
 	}
 }

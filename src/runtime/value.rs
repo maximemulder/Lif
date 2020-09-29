@@ -65,7 +65,7 @@ impl<'a, 'b> Value<'a, 'b> {
 		return Ok(self.data_string());
 	}
 
-	pub fn get_method(&self, engine: &Engine<'a, 'b>, name: &str) -> Option<GcReference<'a, 'b>> {
+	pub fn get_method(&self, engine: &Engine<'a, 'b>, name: &str) -> Option<GcValue<'a, 'b>> {
 		return self.class.data_class().get_method(engine, name);
 	}
 }

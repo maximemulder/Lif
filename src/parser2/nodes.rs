@@ -254,11 +254,28 @@ pub fn run<'a>(code: &Code, tokens: &Vec<Node<'a>>) -> Option<Node<'a>> {
 	));
 
 	let chain = ascents.create(AscentExtension::new(
-		descents.create(DescentSequence::new(vec![symbol_dot, variable_identifier])),
+		descents.create(DescentSequence::new(vec![
+			symbol_dot,
+			variable_identifier,
+			descents.create(DescentPredicateNot::new(symbol_parenthesis_l)),
+		])),
 		ascents.create(AscentList::new(vec![
 			extension,
 			ascents.create(AscentElement::new(&elements::expressions::EXPRESSION)),
 			ascents.create(AscentElement::new(&elements::expressions::CHAIN)),
+		]))
+	));
+
+	let method = ascents.create(AscentExtension::new(
+		descents.create(DescentSequence::new(vec![
+			symbol_dot,
+			variable_identifier,
+			descents.create(DescentSequence::new(vec![symbol_parenthesis_l, expressions, symbol_parenthesis_r])),
+		])),
+		ascents.create(AscentList::new(vec![
+			extension,
+			ascents.create(AscentElement::new(&elements::expressions::EXPRESSION)),
+			ascents.create(AscentElement::new(&elements::expressions::METHOD)),
 		]))
 	));
 
@@ -274,7 +291,7 @@ pub fn run<'a>(code: &Code, tokens: &Vec<Node<'a>>) -> Option<Node<'a>> {
 		]))
 	));
 
-	ascents.define(extension, AscentList::new(vec![chain, sequence]));
+	ascents.define(extension, AscentList::new(vec![chain, method, sequence]));
 
 	descents.define(expression_base, DescentElement::new(
 		descents.create(DescentChoice::new(vec![function, structure, r#let, control, group, literal])),

@@ -33,7 +33,7 @@ impl<'a> Node<'a> for Operation<'a> {
 		let left  = execute!(engine, &self.left).read()?;
 		let right = execute!(engine, &self.right).read()?;
 
-		return engine.call((left.get_method(engine, &self.operator).unwrap()).read()?, vec![left, right]);
+		return engine.call(left.get_method(engine, &self.operator).unwrap(), vec![left, right]);
 	}
 
 	fn get_syntax_node(&self) -> &'a SyntaxNode<'a> {
