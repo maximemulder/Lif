@@ -1,7 +1,6 @@
 use crate::runtime::ReturnReference;
 use crate::runtime::data::{ Class, Data };
 use crate::runtime::engine::Engine;
-use crate::runtime::error::Error;
 use crate::runtime::gc::{ GcRef, GcTraceable };
 use crate::runtime::value::GcValue;
 
@@ -55,7 +54,7 @@ impl<'a, 'b> Engine<'a, 'b> {
 	}
 
 	fn add_method_primitive(&mut self, mut value: GcValue<'a, 'b>, name: &str, callback: &'b dyn Fn(&mut Engine<'a, 'b>, Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b>) {
-		let primitive = self.new_primitive(callback);
+		let primitive = self.new_primitive(callback).get_value();
 		value.data_class_mut().methods.insert(name.to_string(), primitive);
 	}
 
@@ -132,7 +131,6 @@ impl<'a, 'b> Engine<'a, 'b> {
 		self.add_method_primitive(object, ">",  &object_greater);
 		self.add_method_primitive(object, "<=", &object_lesser_equal);
 		self.add_method_primitive(object, ">=", &object_greater_equal);
-		self.add_method_primitive(object, ".",  &object_chain);
 
 		self.add_method_primitive(string, "to_string", &string_to_string);
 		self.add_method_primitive(string, "==",        &string_comparison);
@@ -230,16 +228,10 @@ fn class_to_string<'a, 'b>(engine: &mut Engine<'a, 'b>, _: Vec<GcValue<'a, 'b>>)
 	return Ok(engine.new_string("CLASS".to_string()));
 }
 
-fn class_chain<'a, 'b>(engine: &mut Engine<'a, 'b>, arguments: Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b> {
+fn class_chain<'a, 'b>(engine: &mut Engine<'a, 'b>, mut arguments: Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b> {
 	let name = arguments[1].data_string().clone();
-	let mut this = arguments[0];
-	if let Some(method) = this.get_method(engine, &name) {
-		engine.set_this(this);
-		return Ok(method);
-	}
-
 	let member = engine.undefined();
-	let class = this.data_class_mut();
+	let class = arguments[0].data_class_mut();
 	return Ok(if let Some(&member) = class.statics.get(&name) {
 		member
 	} else {
@@ -279,16 +271,10 @@ fn instance_to_string<'a, 'b>(engine: &mut Engine<'a, 'b>, arguments: Vec<GcValu
 	return Ok(engine.new_string(string));
 }
 
-fn instance_chain<'a, 'b>(engine: &mut Engine<'a, 'b>, arguments: Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b> {
+fn instance_chain<'a, 'b>(engine: &mut Engine<'a, 'b>, mut arguments: Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b> {
 	let name = arguments[1].data_string().clone();
-	let mut this = arguments[0];
-	if let Some(method) = this.get_method(engine, &name) {
-		engine.set_this(this);
-		return Ok(method);
-	}
-
 	let member = engine.undefined();
-	let instance = this.data_instance_mut();
+	let instance = arguments[0].data_instance_mut();
 	return Ok(if let Some(&member) = instance.attributes.get(&name) {
 		member
 	} else {
@@ -353,17 +339,6 @@ fn object_lesser_equal<'a, 'b>(engine: &mut Engine<'a, 'b>, arguments: Vec<GcVal
 	let left  = engine.call_method_self(arguments[0], "<", arguments.clone())?;
 	let right = engine.call_method_self(arguments[0], "==", arguments.clone())?;
 	return Ok(engine.new_boolean(*left.read()?.data_boolean() || *right.read()?.data_boolean()));
-}
-
-fn object_chain<'a, 'b>(engine: &mut Engine<'a, 'b>, arguments: Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b> {
-	let name = arguments[1].data_string();
-	let this = arguments[0];
-	if let Some(method) = this.get_method(engine, name) {
-		engine.set_this(this);
-		return Ok(method);
-	}
-
-	return Err(Error::new_runtime("Method does not exist."));
 }
 
 fn string_to_string<'a, 'b>(engine: &mut Engine<'a, 'b>, arguments: Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b> {

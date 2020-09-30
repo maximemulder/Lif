@@ -11,6 +11,8 @@ use crate::nodes::statement::Statement;
 use crate::nodes::statements::Statements;
 use crate::nodes::structure::Structure;
 use crate::nodes::operation::Operation;
+use crate::nodes::chain::Chain;
+use crate::nodes::method::Method;
 use crate::nodes::sequence::Sequence;
 use crate::nodes::declaration::Declaration;
 use crate::nodes::function::Function;
@@ -19,7 +21,6 @@ use crate::nodes::group::Group;
 use crate::nodes::integer::Integer;
 use crate::nodes::identifier::Identifier;
 use crate::nodes::string::String;
-use crate::nodes::chain::Chain;
 use crate::nodes::r#return::Return;
 use crate::nodes::r#break::Break;
 use crate::nodes::r#continue::Continue;
@@ -56,6 +57,7 @@ fn expression<'a>(text: &'a str, node: &'a SyntaxNode<'a>) -> Expression<'a> {
 		&elements::expressions::FUNCTION    => Box::new(function(text, child)),
 		&elements::expressions::GROUP       => Box::new(group(text, child)),
 		&elements::expressions::CHAIN       => Box::new(chain(text, child)),
+		&elements::expressions::METHOD      => Box::new(method(text, child)),
 		&elements::expressions::SEQUENCE    => Box::new(sequence(text, child)),
 		&elements::expressions::OPERATION   => Box::new(operation(text, child)),
 		_ => panic!(),
@@ -198,11 +200,15 @@ fn parameters<'a>(text: &'a str, node: &'a SyntaxNode<'a>) -> Vec<Declaration<'a
 }
 
 fn group<'a>(text: &'a str, node: &'a SyntaxNode<'a>) -> Group<'a> {
-	return Group::new(node, expression(text, &node.children()[node.children().len() - 1]));
+	return Group::new(node, expression(text, &node.children()[1]));
 }
 
 fn chain<'a>(text: &'a str, node: &'a SyntaxNode<'a>) -> Chain<'a> {
 	return Chain::new(node, expression(text, &node.children()[0]), token(text, &node.children()[2]));
+}
+
+fn method<'a>(text: &'a str, node: &'a SyntaxNode<'a>) -> Method<'a> {
+	return Method::new(node, expression(text, &node.children()[0]), token(text, &node.children()[2]), expressions(text, &node.children()[4]));
 }
 
 fn sequence<'a>(text: &'a str, node: &'a SyntaxNode<'a>) -> Sequence<'a> {

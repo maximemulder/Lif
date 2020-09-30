@@ -7,7 +7,7 @@ use std::collections::HashMap;
 pub struct Class<'a, 'b> {
 	pub parent:  Option<GcValue<'a, 'b>>,
 	pub statics: HashMap<String, GcReference<'a, 'b>>,
-	pub methods: HashMap<String, GcReference<'a, 'b>>,
+	pub methods: HashMap<String, GcValue<'a, 'b>>,
 }
 
 impl<'a, 'b> Class<'a, 'b> {
@@ -19,7 +19,7 @@ impl<'a, 'b> Class<'a, 'b> {
 		}
 	}
 
-	pub fn get_method(&self, engine: &Engine<'a, 'b>, name: &str) -> Option<GcReference<'a, 'b>> {
+	pub fn get_method(&self, engine: &Engine<'a, 'b>, name: &str) -> Option<GcValue<'a, 'b>> {
 		if let Some(&method) = self.methods.get(name) {
 			return Some(method);
 		}
