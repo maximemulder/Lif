@@ -263,16 +263,17 @@ fn generic_to_string<'a, 'b>(engine: &mut Engine<'a, 'b>, _: Vec<GcValue<'a, 'b>
 	return Ok(engine.new_string("GENERIC".to_string()));
 }
 
-fn generic_apply<'a, 'b>(engine: &mut Engine<'a, 'b>, mut arguments: Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b> {
-	let n = arguments[0].data_generic().generics.len();
-	for i in 0 .. n {
-		let reference = engine.new_constant(arguments[i + 1]);
-		let name = arguments[0].data_generic().generics[i];
-		let mut scope = arguments[0].data_generic_mut().scope;
-		scope.add_variable(name, reference);
+fn generic_apply<'a, 'b>(engine: &mut Engine<'a, 'b>, arguments: Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b> {
+	engine.push_scope();
+	let generic = arguments[0].data_generic();
+	for (parameter, argument) in generic.generics.iter().zip(&arguments[1..]) {
+		let reference = engine.new_reference(*argument);
+		engine.add_variable(parameter, reference);
 	}
 
-	return Ok(arguments[0].data_generic().reference);
+	let reference = generic.node.execute(engine)?;
+	engine.pop_scope();
+	return Ok(reference);
 }
 
 fn instance_to_string<'a, 'b>(engine: &mut Engine<'a, 'b>, arguments: Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b> {

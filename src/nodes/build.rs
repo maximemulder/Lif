@@ -15,6 +15,7 @@ use crate::nodes::chain::Chain;
 use crate::nodes::method::Method;
 use crate::nodes::sequence::Sequence;
 use crate::nodes::declaration::Declaration;
+use crate::nodes::generic::Generic;
 use crate::nodes::function::Function;
 use crate::nodes::block::Block;
 use crate::nodes::group::Group;
@@ -54,7 +55,7 @@ fn expression<'a>(text: &'a str, node: &'a SyntaxNode<'a>) -> Expression<'a> {
 		&elements::structures::STRUCTURE    => Box::new(structure(text, child)),
 		&elements::expressions::LET         => Box::new(r#let(text, child)),
 		&elements::controls::CONTROL        => control(text, child),
-		&elements::expressions::FUNCTION    => Box::new(function(text, child)),
+		&elements::expressions::FUNCTION    => function(text, child),
 		&elements::expressions::GROUP       => Box::new(group(text, child)),
 		&elements::expressions::CHAIN       => Box::new(chain(text, child)),
 		&elements::expressions::METHOD      => Box::new(method(text, child)),
@@ -169,9 +170,25 @@ fn generics<'a>(text: &'a str, node: &'a SyntaxNode<'a>) -> Vec<&'a str> {
 	return identifiers;
 }
 
-fn function<'a>(text: &'a str, node: &'a SyntaxNode<'a>) -> Function<'a> {
+fn function<'a>(text: &'a str, node: &'a SyntaxNode<'a>) -> Box<dyn Node<'a> + 'a> {
 	let children = node.children();
-	return Function::new(node, if children.len() >= 8 {
+	let function = Box::new(Function::new(node, parameters(text, &children[if children.len() < 8 {
+		2
+	} else {
+		5
+	}]), if children[children.len() - 2].element == &elements::expressions::EXPRESSION {
+		Some(expression(text, &children[children.len() - 2]))
+	} else {
+		None
+	}, block(text, &children.last().unwrap())));
+
+	return if children.len() >= 8 {
+		Box::new(Generic::new(node, generics(text, &children[2]), function))
+	} else {
+		function
+	};
+
+	/* return Function::new(node, if children.len() >= 8 {
 		Some(generics(text, &children[2]))
 	} else {
 		None
@@ -183,7 +200,7 @@ fn function<'a>(text: &'a str, node: &'a SyntaxNode<'a>) -> Function<'a> {
 		Some(expression(text, &children[children.len() - 2]))
 	} else {
 		None
-	}, block(text, &children.last().unwrap()));
+	}, block(text, &children.last().unwrap())); */
 }
 
 fn parameters<'a>(text: &'a str, node: &'a SyntaxNode<'a>) -> Vec<Declaration<'a>> {

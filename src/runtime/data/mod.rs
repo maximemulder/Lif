@@ -31,7 +31,6 @@ impl GcTraceable for Data<'_, '_> {
 			},
 			Data::Callable(callable) => callable.trace(),
 			Data::Class(class)       => class.trace(),
-			Data::Generic(generic)   => generic.trace(),
 			Data::Instance(instance) => instance.trace(),
 			_ => (),
 		}

@@ -241,8 +241,8 @@ impl<'a, 'b> Engine<'a, 'b> {
 		return self.new_constant_value(self.environment.function, Data::Callable(Box::new(Function::new(self.scope, parameters, r#type, block))));
 	}
 
-	pub fn new_generic(&mut self, reference: GcReference<'a, 'b>, generics: &'b Vec<&'a str>) -> GcReference<'a, 'b> {
-		return self.new_constant_value(self.environment.generic, Data::Generic(Generic::new(reference, self.scope, generics)));
+	pub fn new_generic(&mut self, generics: &'b Vec<&'a str>, node: &'b dyn Node<'a>) -> GcReference<'a, 'b> {
+		return self.new_constant_value(self.environment.generic, Data::Generic(Generic::new(generics, node)));
 	}
 
 	pub fn new_primitive(&mut self, callback: &'b dyn Fn(&mut Engine<'a, 'b>, Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b>) -> GcReference<'a, 'b> {
