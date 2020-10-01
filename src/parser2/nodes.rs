@@ -300,7 +300,7 @@ pub fn run<'a>(code: &Code, tokens: &Vec<Node<'a>>) -> Option<Node<'a>> {
 			descents.create(DescentSequence::new(vec![
 				symbol_guillemet_l,
 				descents.create(DescentElement::new(
-					create_list!(expression, symbol_comma),
+					create_list!(expression_base, symbol_comma),
 					&elements::productions::EXPRESSIONS
 				)),
 				symbol_guillemet_r,
