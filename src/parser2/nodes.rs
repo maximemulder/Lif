@@ -201,9 +201,23 @@ pub fn run<'a>(code: &Code, tokens: &Vec<Node<'a>>) -> Option<Node<'a>> {
 		&elements::structures::BLOCK
 	));
 
+	let generics = descents.create(DescentOption::new(
+		descents.create(DescentSequence::new(vec![
+			symbol_guillemet_l,
+			descents.create(DescentAscent::new(
+				descents.create(DescentOneOrMore::new(
+					create_list!(variable_identifier, symbol_comma)
+				)),
+				ascents.create(AscentElement::new(&elements::productions::GENERICS))
+			)),
+			symbol_guillemet_r,
+		]))
+	));
+
 	let function = descents.create(DescentElement::new(
 		descents.create(DescentSequence::new(vec![
 			keyword_function,
+			generics,
 			symbol_parenthesis_l,
 			descents.create(DescentElement::new(
 				create_list_option!(declaration, symbol_comma),
@@ -283,6 +297,14 @@ pub fn run<'a>(code: &Code, tokens: &Vec<Node<'a>>) -> Option<Node<'a>> {
 		descents.create(DescentChoice::new(vec![
 			descents.create(DescentSequence::new(vec![symbol_parenthesis_l, expressions, symbol_parenthesis_r])),
 			descents.create(DescentSequence::new(vec![symbol_crotchet_l, expressions, symbol_crotchet_r])),
+			descents.create(DescentSequence::new(vec![
+				symbol_guillemet_l,
+				descents.create(DescentElement::new(
+					create_list!(expression, symbol_comma),
+					&elements::productions::EXPRESSIONS
+				)),
+				symbol_guillemet_r,
+			])),
 		])),
 		ascents.create(AscentList::new(vec![
 			extension,

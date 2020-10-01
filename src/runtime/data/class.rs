@@ -16,7 +16,7 @@ impl<'a, 'b> Class<'a, 'b> {
 			parent:  parent,
 			statics: HashMap::new(),
 			methods: HashMap::new(),
-		}
+		};
 	}
 
 	pub fn get_method(&self, engine: &Engine<'a, 'b>, name: &str) -> Option<GcValue<'a, 'b>> {

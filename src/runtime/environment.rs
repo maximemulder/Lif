@@ -9,6 +9,7 @@ pub struct Environment<'a, 'b> {
 	pub boolean:  GcValue<'a, 'b>,
 	pub class:    GcValue<'a, 'b>,
 	pub function: GcValue<'a, 'b>,
+	pub generic:  GcValue<'a, 'b>,
 	pub instance: GcValue<'a, 'b>,
 	pub integer:  GcValue<'a, 'b>,
 	pub object:   GcValue<'a, 'b>,
@@ -22,6 +23,7 @@ impl<'a, 'b> Environment<'a, 'b> {
 			boolean:  GcRef::null(),
 			class:    GcRef::null(),
 			function: GcRef::null(),
+			generic:  GcRef::null(),
 			instance: GcRef::null(),
 			integer:  GcRef::null(),
 			object:   GcRef::null(),
@@ -32,7 +34,7 @@ impl<'a, 'b> Environment<'a, 'b> {
 
 impl GcTraceable for Environment<'_, '_> {
 	fn trace(&mut self) {
-		for class in [self.array, self.boolean, self.class, self.function, self.instance, self.integer, self.object, self.string].iter_mut() {
+		for class in [self.array, self.boolean, self.class, self.function, self.instance, self.integer, self.generic, self.object, self.string].iter_mut() {
 			class.trace();
 		}
 	}
@@ -43,7 +45,7 @@ impl<'a, 'b> Engine<'a, 'b> {
 		return self.new_value(self.environment.class, Data::Class(Class::new(Some(self.environment.object))));
 	}
 
-	fn add_constant_value(&mut self, name: &str, value: GcValue<'a, 'b>) {
+	pub fn add_constant_value(&mut self, name: &str, value: GcValue<'a, 'b>) {
 		let reference = self.new_constant(value);
 		self.add_variable(name, reference);
 	}
@@ -65,6 +67,7 @@ impl<'a, 'b> Engine<'a, 'b> {
 		self.environment.array    = self.create_class();
 		self.environment.boolean  = self.create_class();
 		self.environment.function = self.create_class();
+		self.environment.generic  = self.create_class();
 		self.environment.instance = self.create_class();
 		self.environment.integer  = self.create_class();
 		self.environment.string   = self.create_class();
@@ -83,6 +86,7 @@ impl<'a, 'b> Engine<'a, 'b> {
 		let boolean  = self.environment.boolean;
 		let class    = self.environment.class;
 		let function = self.environment.function;
+		let generic  = self.environment.generic;
 		let instance = self.environment.instance;
 		let integer  = self.environment.integer;
 		let object   = self.environment.object;
@@ -113,6 +117,9 @@ impl<'a, 'b> Engine<'a, 'b> {
 
 		self.add_method_primitive(function, "to_string", &function_to_string);
 		self.add_method_primitive(function, "()",        &function_call);
+
+		self.add_method_primitive(generic, "to_string", &generic_to_string);
+		self.add_method_primitive(generic, "<>",        &generic_apply);
 
 		self.add_method_primitive(instance, "to_string", &instance_to_string);
 		self.add_method_primitive(instance, ".",         &instance_chain);
@@ -250,6 +257,23 @@ fn function_to_string<'a, 'b>(engine: &mut Engine<'a, 'b>, _: Vec<GcValue<'a, 'b
 
 fn function_call<'a, 'b>(engine: &mut Engine<'a, 'b>, arguments: Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b> {
 	return arguments[0].data_callable().duplicate().execute(engine, arguments[1 ..].to_vec());
+}
+
+fn generic_to_string<'a, 'b>(engine: &mut Engine<'a, 'b>, _: Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b> {
+	return Ok(engine.new_string("GENERIC".to_string()));
+}
+
+fn generic_apply<'a, 'b>(engine: &mut Engine<'a, 'b>, arguments: Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b> {
+	engine.push_scope();
+	let generic = arguments[0].data_generic();
+	for (parameter, argument) in generic.generics.iter().zip(&arguments[1..]) {
+		let reference = engine.new_reference(*argument);
+		engine.add_variable(parameter, reference);
+	}
+
+	let reference = generic.node.execute(engine)?;
+	engine.pop_scope();
+	return Ok(reference);
 }
 
 fn instance_to_string<'a, 'b>(engine: &mut Engine<'a, 'b>, arguments: Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b> {
