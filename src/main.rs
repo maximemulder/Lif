@@ -41,7 +41,7 @@ fn main() {
     // println!("=====");
 
     if let Some(tree) = parser2::nodes::run(&code, &tokens) {
-        printer::tree(&tree);
+        // printer::tree(&tree);
 		let program = nodes::build::program(&text, &tree);
 		let mut engine = Engine::new();
 		let result = engine.execute(&program);

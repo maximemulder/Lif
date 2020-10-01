@@ -1,4 +1,3 @@
-use crate::nodes::Node;
 use crate::nodes::block::Block;
 use crate::nodes::declaration::Declaration;
 use crate::runtime::ReturnReference;
@@ -63,11 +62,11 @@ impl<'a, 'b> Callable<'a, 'b> for Function<'a, 'b> {
 	fn execute(&self, engine: &mut Engine<'a, 'b>, arguments: Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b> {
 		engine.push_frame(self.scope);
 		for (parameter, argument) in self.parameters.iter().zip(arguments) {
-			let mut reference = parameter.execute(engine)?;
+			let mut reference = engine.execute(parameter)?;
 			reference.write(argument)?;
 		}
 
-		let reference = self.block.execute(engine)?;
+		let reference = engine.execute(self.block)?;
 		engine.pop_frame();
 
 		if engine.control_is(Control::Break) || engine.control_is(Control::Continue) {
