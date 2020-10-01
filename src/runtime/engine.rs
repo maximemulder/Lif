@@ -3,7 +3,7 @@ use crate::nodes::block::Block;
 use crate::nodes::declaration::Declaration;
 use crate::nodes::expression::Expression;
 use crate::runtime::ReturnReference;
-use crate::runtime::data::{ Class, Data, Function, Instance, Primitive };
+use crate::runtime::data::{ Class, Data, Function, Generic, Instance, Primitive };
 use crate::runtime::environment::Environment;
 use crate::runtime::error::Error;
 use crate::runtime::gc::{ Gc, GcRef, GcTraceable };
@@ -237,8 +237,12 @@ impl<'a, 'b> Engine<'a, 'b> {
 		return self.new_constant_value(self.environment.integer, Data::Integer(integer));
 	}
 
-	pub fn new_function(&mut self, generics: &'b Vec<&'a str>, parameters: &'b Vec<Declaration<'a>>, r#type: Option<GcValue<'a, 'b>>, block: &'b Block<'a>) -> GcReference<'a, 'b> {
-		return self.new_constant_value(self.environment.function, Data::Callable(Box::new(Function::new(self.scope, generics, parameters, r#type, block))));
+	pub fn new_function(&mut self, parameters: &'b Vec<Declaration<'a>>, r#type: Option<GcValue<'a, 'b>>, block: &'b Block<'a>) -> GcReference<'a, 'b> {
+		return self.new_constant_value(self.environment.function, Data::Callable(Box::new(Function::new(self.scope, parameters, r#type, block))));
+	}
+
+	pub fn new_generic(&mut self, reference: GcReference<'a, 'b>, generics: &'b Vec<&'a str>) -> GcReference<'a, 'b> {
+		return self.new_constant_value(self.environment.generic, Data::Generic(Generic::new(reference, self.scope, generics)));
 	}
 
 	pub fn new_primitive(&mut self, callback: &'b dyn Fn(&mut Engine<'a, 'b>, Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b>) -> GcReference<'a, 'b> {

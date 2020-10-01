@@ -172,9 +172,9 @@ fn generics<'a>(text: &'a str, node: &'a SyntaxNode<'a>) -> Vec<&'a str> {
 fn function<'a>(text: &'a str, node: &'a SyntaxNode<'a>) -> Function<'a> {
 	let children = node.children();
 	return Function::new(node, if children.len() >= 8 {
-		generics(text, &children[2])
+		Some(generics(text, &children[2]))
 	} else {
-		Vec::new()
+		None
 	}, parameters(text, &children[if children.len() < 8 {
 		2
 	} else {
