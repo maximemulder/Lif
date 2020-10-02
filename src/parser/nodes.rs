@@ -17,6 +17,7 @@ pub fn run<'a>(code: &Code, tokens: &Vec<Node<'a>>) -> Option<Node<'a>> {
 	let keyword_do              = descents.create(DescentToken::new(&elements::keywords::DO));
 	let keyword_else            = descents.create(DescentToken::new(&elements::keywords::ELSE));
 	let keyword_export          = descents.create(DescentToken::new(&elements::keywords::EXPORT));
+	let keyword_false           = descents.create(DescentToken::new(&elements::keywords::FALSE));
 	let keyword_finally         = descents.create(DescentToken::new(&elements::keywords::FINALLY));
 	let keyword_for             = descents.create(DescentToken::new(&elements::keywords::FOR));
 	let keyword_from            = descents.create(DescentToken::new(&elements::keywords::FROM));
@@ -35,6 +36,7 @@ pub fn run<'a>(code: &Code, tokens: &Vec<Node<'a>>) -> Option<Node<'a>> {
 	let keyword_static          = descents.create(DescentToken::new(&elements::keywords::STATIC));
 	let keyword_then            = descents.create(DescentToken::new(&elements::keywords::THEN));
 	let keyword_throw           = descents.create(DescentToken::new(&elements::keywords::THROW));
+	let keyword_true            = descents.create(DescentToken::new(&elements::keywords::TRUE));
 	let keyword_try             = descents.create(DescentToken::new(&elements::keywords::TRY));
 	let keyword_while           = descents.create(DescentToken::new(&elements::keywords::WHILE));
 	let symbol_plus             = descents.create(DescentToken::new(&elements::symbols::PLUS));
@@ -173,7 +175,7 @@ pub fn run<'a>(code: &Code, tokens: &Vec<Node<'a>>) -> Option<Node<'a>> {
 	));
 
 	let literal = descents.create(DescentElement::new(
-		descents.create(DescentChoice::new(vec![variable_identifier, variable_string, variable_number])),
+		descents.create(DescentChoice::new(vec![variable_identifier, variable_string, variable_number, keyword_true, keyword_false])),
 		&elements::expressions::LITERAL
 	));
 

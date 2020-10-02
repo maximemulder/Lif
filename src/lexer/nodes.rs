@@ -325,14 +325,41 @@ const KEYWORD_EXPORT: Node = Node::new_final(&elements::keywords::EXPORT);
 
 const KEYWORD_F: Node = Node::new(&elements::variables::IDENTIFIER, &|character| {
 	return Some(match character {
+		'a' => &KEYWORD_FA,
 		'i' => &KEYWORD_FI,
 		'o' => &KEYWORD_FO,
 		'r' => &KEYWORD_FR,
 		'u' => &KEYWORD_FU,
+		'b' ..= 'z' | 'A' ..= 'Z' | '0' ..= '9' | '_' => &IDENTIFIER,
+		_ => return None,
+	});
+});
+
+const KEYWORD_FA: Node = Node::new(&elements::variables::IDENTIFIER, &|character| {
+	return Some(match character {
+		'l' => &KEYWORD_FAL,
 		'a' ..= 'z' | 'A' ..= 'Z' | '0' ..= '9' | '_' => &IDENTIFIER,
 		_ => return None,
 	});
 });
+
+const KEYWORD_FAL: Node = Node::new(&elements::variables::IDENTIFIER, &|character| {
+	return Some(match character {
+		's' => &KEYWORD_FALS,
+		'a' ..= 'z' | 'A' ..= 'Z' | '0' ..= '9' | '_' => &IDENTIFIER,
+		_ => return None,
+	});
+});
+
+const KEYWORD_FALS: Node = Node::new(&elements::variables::IDENTIFIER, &|character| {
+	return Some(match character {
+		'e' => &KEYWORD_FALSE,
+		'a' ..= 'z' | 'A' ..= 'Z' | '0' ..= '9' | '_' => &IDENTIFIER,
+		_ => return None,
+	});
+});
+
+const KEYWORD_FALSE: Node = Node::new_final(&elements::keywords::FALSE);
 
 const KEYWORD_FI: Node = Node::new(&elements::variables::IDENTIFIER, &|character| {
 	return Some(match character {
@@ -807,11 +834,22 @@ const KEYWORD_THROW: Node = Node::new_final(&elements::keywords::THROW);
 
 const KEYWORD_TR: Node = Node::new(&elements::variables::IDENTIFIER, &|character| {
 	return Some(match character {
+		'u' => &KEYWORD_TRU,
 		'y' => &KEYWORD_TRY,
 		'a' ..= 'z' | 'A' ..= 'Z' | '0' ..= '9' | '_' => &IDENTIFIER,
 		_ => return None,
 	});
 });
+
+const KEYWORD_TRU: Node = Node::new(&elements::variables::IDENTIFIER, &|character| {
+	return Some(match character {
+		'e' => &KEYWORD_TRUE,
+		'a' ..= 'z' | 'A' ..= 'Z' | '0' ..= '9' | '_' => &IDENTIFIER,
+		_ => return None,
+	});
+});
+
+const KEYWORD_TRUE: Node = Node::new_final(&elements::keywords::TRUE);
 
 const KEYWORD_TRY: Node = Node::new_final(&elements::keywords::TRY);
 

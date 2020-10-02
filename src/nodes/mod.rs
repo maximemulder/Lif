@@ -34,6 +34,8 @@ pub mod group;
 pub mod integer;
 pub mod string;
 pub mod identifier;
+pub mod r#true;
+pub mod r#false;
 pub mod r#return;
 pub mod r#break;
 pub mod r#continue;

@@ -23,6 +23,8 @@ use crate::nodes::group::Group;
 use crate::nodes::integer::Integer;
 use crate::nodes::identifier::Identifier;
 use crate::nodes::string::String;
+use crate::nodes::r#true::True;
+use crate::nodes::r#false::False;
 use crate::nodes::r#return::Return;
 use crate::nodes::r#break::Break;
 use crate::nodes::r#continue::Continue;
@@ -70,11 +72,21 @@ fn expression<'a>(text: &'a str, node: &'a SyntaxNode<'a>) -> Expression<'a> {
 fn literal<'a>(text: &'a str, node: &'a SyntaxNode<'a>) -> Box<dyn Node<'a> + 'a> {
 	let child = &node.children()[0];
 	return match child.element {
+		&elements::keywords::TRUE        => Box::new(r#true(text, child)),
+		&elements::keywords::FALSE       => Box::new(r#false(text, child)),
 		&elements::variables::NUMBER     => Box::new(integer(text, child)),
 		&elements::variables::STRING     => Box::new(string(text, child)),
 		&elements::variables::IDENTIFIER => Box::new(identifier(text, child)),
 		_ => panic!(),
 	};
+}
+
+fn r#true<'a>(_: &'a str, node: &'a SyntaxNode<'a>) -> True<'a> {
+	return True::new(node);
+}
+
+fn r#false<'a>(_: &'a str, node: &'a SyntaxNode<'a>) -> False<'a> {
+	return False::new(node);
 }
 
 fn integer<'a>(text: &'a str, node: &'a SyntaxNode<'a>) -> Integer<'a> {
