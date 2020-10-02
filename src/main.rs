@@ -6,19 +6,17 @@
 #![feature(unsize)]
 #![feature(drain_filter)]
 
-mod ast;
 mod element;
 mod elements;
 mod lexer;
 mod node;
 mod nodes;
-mod parser2;
+mod parser;
 mod printer;
 mod runtime;
 mod code;
 
 use code::Code;
-// use node::Node;
 use runtime::engine::Engine;
 use std::cmp::min;
 use std::env;
@@ -40,7 +38,7 @@ fn main() {
 
     // println!("=====");
 
-    if let Some(tree) = parser2::nodes::run(&code, &tokens) {
+    if let Some(tree) = parser::nodes::run(&code, &tokens) {
         // printer::tree(&tree);
 		let program = nodes::build::program(&text, &tree);
 		let mut engine = Engine::new();

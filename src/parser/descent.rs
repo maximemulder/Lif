@@ -1,6 +1,6 @@
 use crate::node::Node;
 use crate::element::Element;
-use crate::parser2::Parser;
+use crate::parser::Parser;
 
 pub trait Descent<'a> {
 	fn descent(&self, parser: &mut Parser<'a, '_>) -> Option<Vec<Node<'a>>>;

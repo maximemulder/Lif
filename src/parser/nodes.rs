@@ -1,10 +1,10 @@
 use crate::code::Code;
 use crate::elements;
 use crate::node::Node;
-use crate::parser2::arena::Arena;
-use crate::parser2::ascent::*;
-use crate::parser2::descent::*;
-use crate::parser2::Parser;
+use crate::parser::arena::Arena;
+use crate::parser::ascent::*;
+use crate::parser::descent::*;
+use crate::parser::Parser;
 
 pub fn run<'a>(code: &Code, tokens: &Vec<Node<'a>>) -> Option<Node<'a>> {
 	let descents = Arena::<dyn Descent>::new();

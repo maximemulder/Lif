@@ -1,5 +1,5 @@
 use crate::element::Element;
-use crate::parser2::Parser;
+use crate::parser::Parser;
 use crate::node::Node;
 
 pub trait Ascent<'a> {
