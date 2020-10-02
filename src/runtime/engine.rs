@@ -44,8 +44,8 @@ impl<'a, 'b> Engine<'a, 'b> {
 			control:     None,
 		};
 
-		engine.scope = engine.scopes.alloc(Scope::new());
-		engine.undefined = engine.references.alloc(Reference::new_constant(None));
+		engine.scope = engine.alloc_scope(Scope::new());
+		engine.undefined = engine.alloc_reference(Reference::new_constant(None));
 		engine.registries.push(Vec::new());
 		engine.populate();
 		return engine;
@@ -53,8 +53,49 @@ impl<'a, 'b> Engine<'a, 'b> {
 }
 
 impl<'a, 'b> Engine<'a, 'b> {
+	pub fn alloc_value(&mut self, value: Value<'a, 'b>) -> GcValue<'a, 'b> {
+		return self.values.alloc(value);
+	}
+
+	pub fn alloc_reference(&mut self, reference: Reference<'a, 'b>) -> GcReference<'a, 'b> {
+		return self.references.alloc(reference);
+	}
+
+	pub fn alloc_scope(&mut self, scope: Scope<'a, 'b>) -> GcScope<'a, 'b> {
+		return self.scopes.alloc(scope);
+	}
+}
+
+impl<'a, 'b> Engine<'a, 'b> {
+	pub fn new_value(&mut self, class: GcValue<'a, 'b>, data: Data<'a, 'b>) -> GcValue<'a, 'b> {
+		return self.alloc_value(Value::new(class, data));
+	}
+
+	pub fn new_reference(&mut self, value: GcValue<'a, 'b>) -> GcReference<'a, 'b> {
+		return self.alloc_reference(Reference::new_variable(Some(value), self.environment.object));
+	}
+
+	pub fn new_variable(&mut self, value: Option<GcValue<'a, 'b>>, r#type: GcValue<'a, 'b>) -> GcReference<'a, 'b> {
+		return self.alloc_reference(Reference::new_variable(value, r#type));
+	}
+
+	pub fn new_constant(&mut self, value: GcValue<'a, 'b>) -> GcReference<'a, 'b> {
+		return self.alloc_reference(Reference::new_constant(Some(value)));
+	}
+
+	pub fn new_constant_value(&mut self, class: GcValue<'a, 'b>, data: Data<'a, 'b>) -> GcReference<'a, 'b> {
+		let value = self.new_value(class, data);
+		return self.new_constant(value);
+	}
+
+	pub fn undefined(&mut self) -> GcReference<'a, 'b> {
+		return self.undefined;
+	}
+}
+
+impl<'a, 'b> Engine<'a, 'b> {
 	pub fn push_scope(&mut self) {
-		self.scope = self.scopes.alloc(Scope::new_child(self.scope));
+		self.scope = self.alloc_scope(Scope::new_child(self.scope));
 	}
 
 	pub fn pop_scope(&mut self) {
@@ -172,50 +213,6 @@ impl<'a, 'b> Engine<'a, 'b> {
 	}
 }
 
-impl GcTraceable for Engine<'_, '_> {
-	fn trace(&mut self) {
-		self.environment.trace();
-		self.scope.trace();
-		self.undefined.trace();
-		for registries in self.registries.iter_mut() {
-			for registry in registries.iter_mut() {
-				registry.trace();
-			}
-		}
-
-		for frame in self.frames.iter_mut() {
-			frame.trace();
-		}
-	}
-}
-
-impl<'a, 'b> Engine<'a, 'b> {
-	pub fn new_value(&mut self, class: GcValue<'a, 'b>, data: Data<'a, 'b>) -> GcValue<'a, 'b> {
-		return self.values.alloc(Value::new(class, data));
-	}
-
-	pub fn new_reference(&mut self, value: GcValue<'a, 'b>) -> GcReference<'a, 'b> {
-		return self.references.alloc(Reference::new_variable(Some(value), self.environment.object));
-	}
-
-	pub fn new_variable(&mut self, value: Option<GcValue<'a, 'b>>, r#type: GcValue<'a, 'b>) -> GcReference<'a, 'b> {
-		return self.references.alloc(Reference::new_variable(value, r#type));
-	}
-
-	pub fn new_constant(&mut self, value: GcValue<'a, 'b>) -> GcReference<'a, 'b> {
-		return self.references.alloc(Reference::new_constant(Some(value)));
-	}
-
-	pub fn new_constant_value(&mut self, class: GcValue<'a, 'b>, data: Data<'a, 'b>) -> GcReference<'a, 'b> {
-		let value = self.new_value(class, data);
-		return self.new_constant(value);
-	}
-
-	pub fn undefined(&mut self) -> GcReference<'a, 'b> {
-		return self.undefined;
-	}
-}
-
 impl<'a, 'b> Engine<'a, 'b> {
 	pub fn new_array(&mut self, elements: Vec<GcReference<'a, 'b>>) -> GcReference<'a, 'b> {
 		return self.new_constant_value(self.environment.array, Data::Array(elements));
@@ -251,5 +248,22 @@ impl<'a, 'b> Engine<'a, 'b> {
 
 	pub fn new_string(&mut self, string: String) -> GcReference<'a, 'b> {
 		return self.new_constant_value(self.environment.string, Data::String(string));
+	}
+}
+
+impl GcTraceable for Engine<'_, '_> {
+	fn trace(&mut self) {
+		self.environment.trace();
+		self.scope.trace();
+		self.undefined.trace();
+		for registries in self.registries.iter_mut() {
+			for registry in registries.iter_mut() {
+				registry.trace();
+			}
+		}
+
+		for frame in self.frames.iter_mut() {
+			frame.trace();
+		}
 	}
 }
