@@ -45,7 +45,6 @@ fn main() {
 		let program = nodes::build::program(&text, &tree);
 		let mut engine = Engine::new();
 		let result = engine.execute(&program);
-		engine.collect();
 		if let Err(error) = result {
 			println!("{}", error.message);
 			if let Some(node) = error.node {

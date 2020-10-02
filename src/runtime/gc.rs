@@ -3,6 +3,8 @@ use std::clone::Clone;
 use std::cmp::{ Eq, PartialEq };
 use std::marker::Copy;
 
+pub const GC_THRESHOLD: usize = 250;
+
 pub trait GcTraceable {
 	fn trace(&mut self);
 }
@@ -19,21 +21,22 @@ impl<T> Gc<T> {
 	}
 
 	pub fn alloc(&mut self, object: T) -> GcRef<T> {
-		let r#ref = GcRef::alloc(object);
+		let r#ref = GcRef::new(Box::into_raw(Box::new(GcObject::new(object))));
 		self.refs.push(r#ref);
 		return r#ref;
 	}
 
-	pub fn collect(&mut self) -> usize {
-		let mut i = 0;
-		self.refs.drain_filter(|r#ref| if !r#ref.collect() {
-			i += 1;
-			true
-		} else {
-			false
-		});
-		return i;
+	pub fn collect(&mut self) {
+		self.refs.drain_filter(|r#ref| !r#ref.collect());
 	}
+}
+
+impl<T> Drop for Gc<T> {
+    fn drop(&mut self) {
+        for r#ref in self.refs.iter_mut() {
+			r#ref.free();
+		}
+    }
 }
 
 struct GcObject<T> {
@@ -61,31 +64,35 @@ impl<T> GcRef<T> {
 		};
 	}
 
-	fn alloc(object: T) -> Self {
+	fn new(pointer: *mut GcObject<T>) -> Self {
 		return Self {
-			pointer: Box::into_raw(Box::new(GcObject::new(object))),
+			pointer,
 		};
 	}
 
 	fn mark(&mut self) {
-		unsafe { self.pointer.as_mut().unwrap() }.flag = true;
-	}
-
-	fn collect(&mut self) -> bool {
-		if self.flag() {
-			unsafe { self.pointer.as_mut().unwrap() }.flag = false;
-			return true;
-		} else {
-			unsafe { Box::from_raw(self.pointer); };
-			return false;
-		}
+		unsafe { self.pointer.as_mut() }.unwrap().flag = true;
 	}
 
 	fn flag(&self) -> bool {
-		return if let Some(thing) = unsafe { self.pointer.as_ref() } {
-			thing.flag
-		} else {
+		return unsafe { self.pointer.as_ref() }.unwrap().flag;
+	}
+
+	fn reset(&mut self) {
+		unsafe { self.pointer.as_mut() }.unwrap().flag = false;
+	}
+
+	fn free(&mut self) {
+		unsafe { Box::from_raw(self.pointer); };
+	}
+
+	fn collect(&mut self) -> bool {
+		return if self.flag() {
+			self.reset();
 			true
+		} else {
+			self.free();
+			false
 		};
 	}
 }

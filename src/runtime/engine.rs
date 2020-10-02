@@ -6,7 +6,7 @@ use crate::runtime::ReturnReference;
 use crate::runtime::data::{ Class, Data, Function, Generic, Instance, Primitive };
 use crate::runtime::environment::Environment;
 use crate::runtime::error::Error;
-use crate::runtime::gc::{ Gc, GcRef, GcTraceable };
+use crate::runtime::gc::{ GC_THRESHOLD, Gc, GcRef, GcTraceable };
 use crate::runtime::reference::{ GcReference, Reference };
 use crate::runtime::scope::{ GcScope, Scope };
 use crate::runtime::value::{ GcValue, Value };
@@ -28,6 +28,7 @@ pub struct Engine<'a, 'b> where 'a: 'b {
 	scope:           GcScope<'a, 'b>,
 	undefined:       GcReference<'a, 'b>,
 	control:         Option<Control>,
+	allocations:     usize,
 }
 
 impl<'a, 'b> Engine<'a, 'b> {
@@ -42,6 +43,7 @@ impl<'a, 'b> Engine<'a, 'b> {
 			scope:       GcRef::null(),
 			undefined:   GcRef::null(),
 			control:     None,
+			allocations: 0,
 		};
 
 		engine.scope = engine.alloc_scope(Scope::new());
@@ -54,15 +56,21 @@ impl<'a, 'b> Engine<'a, 'b> {
 
 impl<'a, 'b> Engine<'a, 'b> {
 	pub fn alloc_value(&mut self, value: Value<'a, 'b>) -> GcValue<'a, 'b> {
-		return self.values.alloc(value);
+		let value = self.values.alloc(value);
+		self.allocations += 1;
+		return value;
 	}
 
 	pub fn alloc_reference(&mut self, reference: Reference<'a, 'b>) -> GcReference<'a, 'b> {
-		return self.references.alloc(reference);
+		let reference = self.references.alloc(reference);
+		self.allocations += 1;
+		return reference;
 	}
 
 	pub fn alloc_scope(&mut self, scope: Scope<'a, 'b>) -> GcScope<'a, 'b> {
-		return self.scopes.alloc(scope);
+		let scope = self.scopes.alloc(scope);
+		self.allocations += 1;
+		return scope;
 	}
 }
 
@@ -151,6 +159,7 @@ impl<'a, 'b> Engine<'a, 'b> {
 		self.scopes.collect();
 		self.references.collect();
 		self.values.collect();
+		self.allocations = 0;
 	}
 
 	pub fn execute(&mut self, node: &'b dyn Node<'a>) -> ReturnReference<'a, 'b> {
@@ -169,6 +178,10 @@ impl<'a, 'b> Engine<'a, 'b> {
 		let index = self.registries.len() - 2;
 		self.registries[index].push(reference);
 		self.registries.pop();
+		if self.allocations > GC_THRESHOLD {
+			self.collect();
+		}
+
 		return Ok(reference);
 	}
 }
