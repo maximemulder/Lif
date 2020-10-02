@@ -17,6 +17,7 @@ use crate::nodes::sequence::Sequence;
 use crate::nodes::declaration::Declaration;
 use crate::nodes::generic::Generic;
 use crate::nodes::function::Function;
+use crate::nodes::array::Array;
 use crate::nodes::block::Block;
 use crate::nodes::group::Group;
 use crate::nodes::integer::Integer;
@@ -58,6 +59,7 @@ fn expression<'a>(text: &'a str, node: &'a SyntaxNode<'a>) -> Expression<'a> {
 		&elements::expressions::FUNCTION    => function(text, child),
 		&elements::expressions::GROUP       => Box::new(group(text, child)),
 		&elements::expressions::CHAIN       => Box::new(chain(text, child)),
+		&elements::expressions::ARRAY       => Box::new(array(text, child)),
 		&elements::expressions::METHOD      => Box::new(method(text, child)),
 		&elements::expressions::SEQUENCE    => Box::new(sequence(text, child)),
 		&elements::expressions::OPERATION   => Box::new(operation(text, child)),
@@ -187,20 +189,6 @@ fn function<'a>(text: &'a str, node: &'a SyntaxNode<'a>) -> Box<dyn Node<'a> + '
 	} else {
 		function
 	};
-
-	/* return Function::new(node, if children.len() >= 8 {
-		Some(generics(text, &children[2]))
-	} else {
-		None
-	}, parameters(text, &children[if children.len() < 8 {
-		2
-	} else {
-		5
-	}]), if children[children.len() - 2].element == &elements::expressions::EXPRESSION {
-		Some(expression(text, &children[children.len() - 2]))
-	} else {
-		None
-	}, block(text, &children.last().unwrap())); */
 }
 
 fn parameters<'a>(text: &'a str, node: &'a SyntaxNode<'a>) -> Vec<Declaration<'a>> {
@@ -214,6 +202,10 @@ fn parameters<'a>(text: &'a str, node: &'a SyntaxNode<'a>) -> Vec<Declaration<'a
 	}
 
 	return declarations;
+}
+
+fn array<'a>(text: &'a str, node: &'a SyntaxNode<'a>) -> Array<'a> {
+	return Array::new(node, expressions(text, &node.children()[1]));
 }
 
 fn group<'a>(text: &'a str, node: &'a SyntaxNode<'a>) -> Group<'a> {

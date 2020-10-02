@@ -29,6 +29,7 @@ pub mod declaration;
 pub mod generic;
 pub mod function;
 pub mod block;
+pub mod array;
 pub mod group;
 pub mod integer;
 pub mod string;

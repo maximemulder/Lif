@@ -160,6 +160,11 @@ pub fn run<'a>(code: &Code, tokens: &Vec<Node<'a>>) -> Option<Node<'a>> {
 		}}
 	}
 
+	let expressions = descents.create(DescentElement::new(
+		create_list_option!(expression, symbol_comma),
+		&elements::productions::EXPRESSIONS
+	));
+
 	let r#type = descents.create(DescentOption::new(
 		descents.create(DescentSequence::new(vec![
 			symbol_colon,
@@ -170,6 +175,11 @@ pub fn run<'a>(code: &Code, tokens: &Vec<Node<'a>>) -> Option<Node<'a>> {
 	let literal = descents.create(DescentElement::new(
 		descents.create(DescentChoice::new(vec![variable_identifier, variable_string, variable_number])),
 		&elements::expressions::LITERAL
+	));
+
+	let array = descents.create(DescentElement::new(
+		descents.create(DescentSequence::new(vec![symbol_crotchet_l, expressions, symbol_crotchet_r])),
+		&elements::expressions::ARRAY
 	));
 
 	let group = descents.create(DescentElement::new(
@@ -262,11 +272,6 @@ pub fn run<'a>(code: &Code, tokens: &Vec<Node<'a>>) -> Option<Node<'a>> {
 		&elements::structures::STRUCTURE
 	));
 
-	let expressions = descents.create(DescentElement::new(
-		create_list_option!(expression, symbol_comma),
-		&elements::productions::EXPRESSIONS
-	));
-
 	let chain = ascents.create(AscentExtension::new(
 		descents.create(DescentSequence::new(vec![
 			symbol_dot,
@@ -316,7 +321,7 @@ pub fn run<'a>(code: &Code, tokens: &Vec<Node<'a>>) -> Option<Node<'a>> {
 	ascents.define(extension, AscentList::new(vec![chain, method, sequence]));
 
 	descents.define(expression_base, DescentElement::new(
-		descents.create(DescentChoice::new(vec![function, structure, r#let, control, group, literal])),
+		descents.create(DescentChoice::new(vec![function, structure, r#let, control, array, group, literal])),
 		&elements::expressions::EXPRESSION
 	));
 
