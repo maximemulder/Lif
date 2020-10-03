@@ -87,13 +87,14 @@ impl<T> GcRef<T> {
 	}
 
 	fn collect(&mut self) -> bool {
-		return if self.flag() {
+		let flag = self.flag();
+		if flag {
 			self.reset();
-			true
 		} else {
 			self.free();
-			false
-		};
+		}
+
+		return flag;
 	}
 }
 
