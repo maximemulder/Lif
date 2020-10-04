@@ -1,7 +1,7 @@
 use crate::runtime::ReturnReference;
 use crate::runtime::data::{ Class, Data };
 use crate::runtime::engine::Engine;
-use crate::runtime::gc::{ GcRef, GcTraceable };
+use crate::runtime::gc::GcTraceable;
 use crate::runtime::value::GcValue;
 
 pub struct Environment<'a, 'b> {
@@ -19,15 +19,15 @@ pub struct Environment<'a, 'b> {
 impl<'a, 'b> Environment<'a, 'b> {
 	pub fn new() -> Self {
 		return Self {
-			array:    GcRef::null(),
-			boolean:  GcRef::null(),
-			class:    GcRef::null(),
-			function: GcRef::null(),
-			generic:  GcRef::null(),
-			instance: GcRef::null(),
-			integer:  GcRef::null(),
-			object:   GcRef::null(),
-			string:   GcRef::null(),
+			array:    GcValue::null(),
+			boolean:  GcValue::null(),
+			class:    GcValue::null(),
+			function: GcValue::null(),
+			generic:  GcValue::null(),
+			instance: GcValue::null(),
+			integer:  GcValue::null(),
+			object:   GcValue::null(),
+			string:   GcValue::null(),
 		};
 	}
 }

@@ -6,7 +6,7 @@ use crate::runtime::ReturnReference;
 use crate::runtime::data::{ Class, Data, Function, Generic, Instance, Primitive };
 use crate::runtime::environment::Environment;
 use crate::runtime::error::Error;
-use crate::runtime::gc::{ GC_THRESHOLD, Gc, GcRef, GcTraceable };
+use crate::runtime::gc::{ GC_THRESHOLD, Gc, GcTraceable };
 use crate::runtime::reference::{ GcReference, Reference };
 use crate::runtime::scope::{ GcScope, Scope };
 use crate::runtime::value::{ GcValue, Value };
@@ -40,8 +40,8 @@ impl<'a, 'b> Engine<'a, 'b> {
 			values:      Gc::new(),
 			registries:  Vec::new(),
 			frames:      Vec::new(),
-			scope:       GcRef::null(),
-			undefined:   GcRef::null(),
+			scope:       GcScope::null(),
+			undefined:   GcReference::null(),
 			control:     None,
 			allocations: 0,
 		};
