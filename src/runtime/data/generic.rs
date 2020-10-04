@@ -1,12 +1,12 @@
-use crate::nodes::Node;
+use crate::nodes::Executable;
 
 pub struct Generic<'a, 'b> {
 	pub generics: &'b Vec<&'a str>,
-	pub node: &'b dyn Node<'a>,
+	pub node: &'b dyn Executable<'a>,
 }
 
 impl<'a, 'b> Generic<'a, 'b> {
-	pub fn new(generics: &'b Vec<&'a str>, node: &'b dyn Node<'a>) -> Self {
+	pub fn new(generics: &'b Vec<&'a str>, node: &'b dyn Executable<'a>) -> Self {
 		return Self {
 			generics,
 			node,

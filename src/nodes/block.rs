@@ -1,26 +1,22 @@
-use crate::nodes::{ Node, SyntaxNode };
-use crate::nodes::expression::Expression;
-use crate::nodes::statements::Statements;
+use crate::nodes::{ Executable, Node };
 use crate::runtime::ReturnReference;
 use crate::runtime::engine::Engine;
 
 pub struct Block<'a> {
-	node: &'a SyntaxNode<'a>,
-	statements: Statements<'a>,
-	expression: Option<Expression<'a>>,
+	statements: Node<'a>,
+	expression: Option<Node<'a>>,
 }
 
 impl<'a> Block<'a> {
-	pub fn new(node: &'a SyntaxNode<'a>, statements: Statements<'a>, expression: Option<Expression<'a>>) -> Self {
+	pub fn new(statements: Node<'a>, expression: Option<Node<'a>>) -> Self {
 		return Self {
-			node,
 			statements,
 			expression,
 		};
 	}
 }
 
-impl<'a> Node<'a> for Block<'a> {
+impl<'a> Executable<'a> for Block<'a> {
 	fn execute<'b>(&'b self, engine: &mut Engine<'a, 'b>) -> ReturnReference<'a, 'b> {
 		engine.push_scope();
 		execute!(engine, &self.statements);
@@ -32,9 +28,5 @@ impl<'a> Node<'a> for Block<'a> {
 
 		engine.pop_scope();
 		return Ok(reference);
-	}
-
-	fn get_syntax_node(&self) -> &'a SyntaxNode<'a> {
-		return self.node;
 	}
 }

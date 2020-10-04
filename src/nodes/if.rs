@@ -1,20 +1,16 @@
-use crate::nodes::{ Node, SyntaxNode };
-use crate::nodes::block::Block;
-use crate::nodes::expression::Expression;
+use crate::nodes::{ Executable, Node };
 use crate::runtime::ReturnReference;
 use crate::runtime::engine::Engine;
 
 pub struct If<'a> {
-	node: &'a SyntaxNode<'a>,
-	condition: Expression<'a>,
-	then:      Block<'a>,
-	r#else:    Option<Block<'a>>,
+	condition: Node<'a>,
+	then:      Node<'a>,
+	r#else:    Option<Node<'a>>,
 }
 
 impl<'a> If<'a> {
-	pub fn new(node: &'a SyntaxNode<'a>, condition: Expression<'a>, then: Block<'a>, r#else: Option<Block<'a>>) -> Self {
+	pub fn new(condition: Node<'a>, then: Node<'a>, r#else: Option<Node<'a>>) -> Self {
 		return Self {
-			node,
 			condition,
 			then,
 			r#else,
@@ -22,7 +18,7 @@ impl<'a> If<'a> {
 	}
 }
 
-impl<'a> Node<'a> for If<'a> {
+impl<'a> Executable<'a> for If<'a> {
 	fn execute<'b>(&'b self, engine: &mut Engine<'a, 'b>) -> ReturnReference<'a, 'b> {
 		return if {
 			let reference = execute!(engine, &self.condition);
@@ -34,9 +30,5 @@ impl<'a> Node<'a> for If<'a> {
 		} else {
 			Ok(engine.undefined())
 		}
-	}
-
-	fn get_syntax_node(&self) -> &'a SyntaxNode<'a> {
-		return self.node;
 	}
 }

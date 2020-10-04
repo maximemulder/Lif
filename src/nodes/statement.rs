@@ -1,28 +1,22 @@
-use crate::nodes::{ Node, SyntaxNode };
+use crate::nodes::{ Executable, Node };
 use crate::runtime::ReturnReference;
 use crate::runtime::engine::Engine;
 
 pub struct Statement<'a> {
-	node: &'a SyntaxNode<'a>,
-	exe: Box<dyn Node<'a> + 'a>,
+	node: Node<'a>,
 }
 
 impl<'a> Statement<'a> {
-	pub fn new(node: &'a SyntaxNode<'a>, exe: Box<dyn Node<'a> + 'a>) -> Self {
+	pub fn new(node: Node<'a>) -> Self {
 		return Self {
 			node,
-			exe,
 		};
 	}
 }
 
-impl<'a> Node<'a> for Statement<'a> {
+impl<'a> Executable<'a> for Statement<'a> {
 	fn execute<'b>(&'b self, engine: &mut Engine<'a, 'b>) -> ReturnReference<'a, 'b> {
-		execute!(engine, self.exe.as_ref());
+		execute!(engine, &self.node);
 		return Ok(engine.undefined());
-	}
-
-	fn get_syntax_node(&self) -> &'a SyntaxNode<'a> {
-		return self.node;
 	}
 }

@@ -271,7 +271,7 @@ fn generic_apply<'a, 'b>(engine: &mut Engine<'a, 'b>, arguments: Vec<GcValue<'a,
 		engine.add_variable(parameter, reference);
 	}
 
-	let reference = engine.execute(generic.node)?;
+	let reference = generic.node.execute(engine)?;
 	engine.pop_scope();
 	return Ok(reference);
 }

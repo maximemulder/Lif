@@ -14,8 +14,6 @@ macro_rules! execute {
 pub mod program;
 pub mod statements;
 pub mod statement;
-pub mod expression;
-pub mod structure;
 pub mod r#if;
 pub mod r#loop;
 pub mod r#while;
@@ -46,7 +44,26 @@ use crate::runtime::engine::Engine;
 
 pub use crate::node::Node as SyntaxNode;
 
-pub trait Node<'a> {
+pub trait Executable<'a> {
 	fn execute<'b>(&'b self, engine: &mut Engine<'a, 'b>) -> ReturnReference<'a, 'b>;
-	fn get_syntax_node(&self) -> &'a SyntaxNode<'a>;
+}
+
+pub struct Node<'a> {
+	pub syn: &'a SyntaxNode<'a>,
+	pub sem: Box<dyn Executable<'a> + 'a>,
+}
+
+impl<'a> Node<'a> {
+	pub fn new(syn: &'a SyntaxNode<'a>, sem: impl Executable<'a> + 'a) -> Self {
+		return Self {
+			syn,
+			sem: Box::new(sem),
+		};
+	}
+}
+
+impl<'a> Executable<'a> for Node<'a> {
+	fn execute<'b>(&'b self, engine: &mut Engine<'a, 'b>) -> ReturnReference<'a, 'b> {
+		return self.sem.execute(engine);
+	}
 }

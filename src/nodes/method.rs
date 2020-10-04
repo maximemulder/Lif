@@ -1,20 +1,17 @@
-use crate::nodes::{ Node, SyntaxNode };
-use crate::nodes::expression::Expression;
+use crate::nodes::{ Executable, Node };
 use crate::runtime::ReturnReference;
 use crate::runtime::engine::Engine;
 use crate::runtime::error::Error;
 
 pub struct Method<'a> {
-	node: &'a SyntaxNode<'a>,
-	expression: Expression<'a>,
+	expression: Node<'a>,
 	member:     &'a str,
-	expressions: Vec<Expression<'a>>,
+	expressions: Vec<Node<'a>>,
 }
 
 impl<'a> Method<'a> {
-	pub fn new(node: &'a SyntaxNode<'a>, expression: Expression<'a>, member: &'a str, expressions: Vec<Expression<'a>>) -> Self {
+	pub fn new(expression: Node<'a>, member: &'a str, expressions: Vec<Node<'a>>) -> Self {
 		return Self {
-			node,
 			expression,
 			member,
 			expressions,
@@ -22,7 +19,7 @@ impl<'a> Method<'a> {
 	}
 }
 
-impl<'a> Node<'a> for Method<'a> {
+impl<'a> Executable<'a> for Method<'a> {
 	fn execute<'b>(&'b self, engine: &mut Engine<'a, 'b>) -> ReturnReference<'a, 'b> {
 		let this = execute!(engine, &self.expression).read()?;
 		if let Some(method) = this.get_method(engine, self.member) {
@@ -36,9 +33,5 @@ impl<'a> Node<'a> for Method<'a> {
 		}
 
 		return Err(Error::new_runtime("Method does not exist."));
-	}
-
-	fn get_syntax_node(&self) -> &'a SyntaxNode<'a> {
-		return self.node;
 	}
 }

@@ -1,23 +1,20 @@
-use crate::nodes::{ Node, SyntaxNode };
-use crate::nodes::expression::Expression;
+use crate::nodes::{ Executable, Node };
 use crate::runtime::ReturnReference;
 use crate::runtime::engine::Engine;
 
 pub struct Array<'a> {
-	node: &'a SyntaxNode<'a>,
-	expressions: Vec<Expression<'a>>,
+	expressions: Vec<Node<'a>>,
 }
 
 impl<'a> Array<'a> {
-	pub fn new(node: &'a SyntaxNode<'a>, expressions: Vec<Expression<'a>>) -> Self {
+	pub fn new(expressions: Vec<Node<'a>>) -> Self {
 		return Self {
-			node,
 			expressions,
 		};
 	}
 }
 
-impl<'a> Node<'a> for Array<'a> {
+impl<'a> Executable<'a> for Array<'a> {
 	fn execute<'b>(&'b self, engine: &mut Engine<'a, 'b>) -> ReturnReference<'a, 'b> {
 		let mut references = Vec::new();
 		for expression in self.expressions.iter() {
@@ -26,9 +23,5 @@ impl<'a> Node<'a> for Array<'a> {
 		}
 
 		return Ok(engine.new_array(references));
-	}
-
-	fn get_syntax_node(&self) -> &'a SyntaxNode<'a> {
-		return self.node;
 	}
 }

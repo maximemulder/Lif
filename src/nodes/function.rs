@@ -1,21 +1,16 @@
-use crate::nodes::{ Node, SyntaxNode };
-use crate::nodes::block::Block;
-use crate::nodes::declaration::Declaration;
-use crate::nodes::expression::Expression;
+use crate::nodes::{ Executable, Node };
 use crate::runtime::ReturnReference;
 use crate::runtime::engine::Engine;
 
 pub struct Function<'a> {
-	node: &'a SyntaxNode<'a>,
-	parameters: Vec<Declaration<'a>>,
-	r#type: Option<Expression<'a>>,
-	block: Block<'a>,
+	parameters: Vec<Node<'a>>,
+	r#type: Option<Node<'a>>,
+	block: Node<'a>,
 }
 
 impl<'a> Function<'a> {
-	pub fn new(node: &'a SyntaxNode<'a>, parameters: Vec<Declaration<'a>>, r#type: Option<Expression<'a>>, block: Block<'a>) -> Self {
+	pub fn new(parameters: Vec<Node<'a>>, r#type: Option<Node<'a>>, block: Node<'a>) -> Self {
 		return Self {
-			node,
 			parameters,
 			r#type,
 			block,
@@ -23,7 +18,7 @@ impl<'a> Function<'a> {
 	}
 }
 
-impl<'a> Node<'a> for Function<'a> {
+impl<'a> Executable<'a> for Function<'a> {
 	fn execute<'b>(&'b self, engine: &mut Engine<'a, 'b>) -> ReturnReference<'a, 'b> {
 		let r#type = if let Some(r#type) = self.r#type.as_ref() {
 			Some(r#type.execute(engine)?.read()?)
@@ -32,9 +27,5 @@ impl<'a> Node<'a> for Function<'a> {
 		};
 
 		return Ok(engine.new_function(&self.parameters, r#type, &self.block));
-	}
-
-	fn get_syntax_node(&self) -> &'a SyntaxNode<'a> {
-		return self.node;
 	}
 }

@@ -1,27 +1,21 @@
-use crate::nodes::{ Node, SyntaxNode };
+use crate::nodes::Executable;
 use crate::runtime::ReturnReference;
 use crate::runtime::engine::Engine;
 
-pub struct Integer<'a> {
-	node: &'a SyntaxNode<'a>,
+pub struct Integer {
 	integer: usize,
 }
 
-impl<'a> Integer<'a> {
-	pub fn new(node: &'a SyntaxNode<'a>, integer: usize) -> Self {
+impl Integer {
+	pub fn new(integer: usize) -> Self {
 		return Self {
-			node,
 			integer,
 		};
 	}
 }
 
-impl<'a> Node<'a> for Integer<'a> {
+impl<'a> Executable<'a> for Integer {
 	fn execute<'b>(&'b self, engine: &mut Engine<'a, 'b>) -> ReturnReference<'a, 'b> {
 		return Ok(engine.new_integer(self.integer));
-	}
-
-	fn get_syntax_node(&self) -> &'a SyntaxNode<'a> {
-		return self.node;
 	}
 }

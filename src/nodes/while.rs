@@ -1,26 +1,22 @@
-use crate::nodes::{ Node, SyntaxNode };
-use crate::nodes::block::Block;
-use crate::nodes::expression::Expression;
+use crate::nodes::{ Executable, Node };
 use crate::runtime::ReturnReference;
 use crate::runtime::engine::{ Control, Engine };
 
 pub struct While<'a> {
-	node: &'a SyntaxNode<'a>,
-	condition: Expression<'a>,
-	body:      Block<'a>,
+	condition: Node<'a>,
+	body:      Node<'a>,
 }
 
 impl<'a> While<'a> {
-	pub fn new(node: &'a SyntaxNode<'a>, condition: Expression<'a>, body: Block<'a>) -> Self {
+	pub fn new(condition: Node<'a>, body: Node<'a>) -> Self {
 		return Self {
-			node,
 			condition,
 			body,
 		};
 	}
 }
 
-impl<'a> Node<'a> for While<'a> {
+impl<'a> Executable<'a> for While<'a> {
 	fn execute<'b>(&'b self, engine: &mut Engine<'a, 'b>) -> ReturnReference<'a, 'b> {
 		let mut array = Vec::new();
 		while {
@@ -46,9 +42,5 @@ impl<'a> Node<'a> for While<'a> {
 		}
 
 		return Ok(engine.new_array(array));
-	}
-
-	fn get_syntax_node(&self) -> &'a SyntaxNode<'a> {
-		return self.node;
 	}
 }

@@ -1,7 +1,4 @@
-use crate::nodes::Node;
-use crate::nodes::block::Block;
-use crate::nodes::declaration::Declaration;
-use crate::nodes::expression::Expression;
+use crate::nodes::{ Executable, Node };
 use crate::runtime::ReturnReference;
 use crate::runtime::data::{ Class, Data, Function, Generic, Instance, Primitive };
 use crate::runtime::environment::Environment;
@@ -162,13 +159,13 @@ impl<'a, 'b> Engine<'a, 'b> {
 		self.allocations = 0;
 	}
 
-	pub fn execute(&mut self, node: &'b dyn Node<'a>) -> ReturnReference<'a, 'b> {
+	pub fn execute(&mut self, node: &'b Node<'a>) -> ReturnReference<'a, 'b> {
 		self.registries.push(Vec::new());
-		let reference = match node.execute(self) {
+		let reference = match node.sem.execute(self) {
 			Ok(reference) => reference,
 			Err(mut error) => {
 				if error.node.is_none() {
-					error.node = Some(node.get_syntax_node());
+					error.node = Some(node.syn);
 				}
 
 				return Err(error);
@@ -187,7 +184,7 @@ impl<'a, 'b> Engine<'a, 'b> {
 }
 
 impl<'a, 'b> Engine<'a, 'b> {
-	pub fn control_new(&mut self, control: Control, node: &'b Option<Expression<'a>>) -> ReturnReference<'a, 'b> {
+	pub fn control_new(&mut self, control: Control, node: &'b Option<Node<'a>>) -> ReturnReference<'a, 'b> {
 		let reference = if let Some(node) = node {
 			let value = self.execute(node)?.read()?;
 			self.new_constant(value)
@@ -247,11 +244,11 @@ impl<'a, 'b> Engine<'a, 'b> {
 		return self.new_constant_value(self.environment.integer, Data::Integer(integer));
 	}
 
-	pub fn new_function(&mut self, parameters: &'b Vec<Declaration<'a>>, r#type: Option<GcValue<'a, 'b>>, block: &'b Block<'a>) -> GcReference<'a, 'b> {
+	pub fn new_function(&mut self, parameters: &'b Vec<Node<'a>>, r#type: Option<GcValue<'a, 'b>>, block: &'b Node<'a>) -> GcReference<'a, 'b> {
 		return self.new_constant_value(self.environment.function, Data::Callable(Box::new(Function::new(self.scope, parameters, r#type, block))));
 	}
 
-	pub fn new_generic(&mut self, generics: &'b Vec<&'a str>, node: &'b dyn Node<'a>) -> GcReference<'a, 'b> {
+	pub fn new_generic(&mut self, generics: &'b Vec<&'a str>, node: &'b dyn Executable<'a>) -> GcReference<'a, 'b> {
 		return self.new_constant_value(self.environment.generic, Data::Generic(Generic::new(generics, node)));
 	}
 

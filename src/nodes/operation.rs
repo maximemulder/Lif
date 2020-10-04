@@ -1,19 +1,16 @@
-use crate::nodes::{ Node, SyntaxNode };
-use crate::nodes::expression::Expression;
+use crate::nodes::{ Executable, Node };
 use crate::runtime::ReturnReference;
 use crate::runtime::engine::Engine;
 
 pub struct Operation<'a> {
-	node: &'a SyntaxNode<'a>,
-	left:     Expression<'a>,
-	right:    Expression<'a>,
+	left:     Node<'a>,
+	right:    Node<'a>,
 	operator: &'a str,
 }
 
 impl<'a> Operation<'a> {
-	pub fn new(node: &'a SyntaxNode<'a>, left: Expression<'a>, right: Expression<'a>, operator: &'a str) -> Self {
+	pub fn new(left: Node<'a>, right: Node<'a>, operator: &'a str) -> Self {
 		return Self {
-			node,
 			left,
 			right,
 			operator,
@@ -21,7 +18,7 @@ impl<'a> Operation<'a> {
 	}
 }
 
-impl<'a> Node<'a> for Operation<'a> {
+impl<'a> Executable<'a> for Operation<'a> {
 	fn execute<'b>(&'b self, engine: &mut Engine<'a, 'b>) -> ReturnReference<'a, 'b> {
 		if self.operator.to_string() == "=" {
 			let mut left  = execute!(engine, &self.left);
@@ -34,9 +31,5 @@ impl<'a> Node<'a> for Operation<'a> {
 		let right = execute!(engine, &self.right).read()?;
 
 		return engine.call(left.get_method(engine, &self.operator).unwrap(), vec![left, right]);
-	}
-
-	fn get_syntax_node(&self) -> &'a SyntaxNode<'a> {
-		return self.node;
 	}
 }

@@ -1,5 +1,4 @@
-use crate::nodes::block::Block;
-use crate::nodes::declaration::Declaration;
+use crate::nodes::Node;
 use crate::runtime::ReturnReference;
 use crate::runtime::engine::{ Control, Engine };
 use crate::runtime::error::Error;
@@ -42,13 +41,13 @@ impl GcTraceable for Primitive<'_, '_> {
 #[derive(Clone)]
 pub struct Function<'a, 'b> {
 	scope: GcScope<'a, 'b>,
-	parameters: &'b Vec<Declaration<'a>>,
+	parameters: &'b Vec<Node<'a>>,
 	r#type: Option<GcValue<'a, 'b>>,
-	block: &'b Block<'a>,
+	block: &'b Node<'a>,
 }
 
 impl<'a, 'b> Function<'a, 'b> {
-	pub fn new(scope: GcScope<'a, 'b>, parameters: &'b Vec<Declaration<'a>>, r#type: Option<GcValue<'a, 'b>>, block: &'b Block<'a>) -> Self {
+	pub fn new(scope: GcScope<'a, 'b>, parameters: &'b Vec<Node<'a>>, r#type: Option<GcValue<'a, 'b>>, block: &'b Node<'a>) -> Self {
 		return Self {
 			scope,
 			parameters,
