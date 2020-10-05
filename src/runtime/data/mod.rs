@@ -1,11 +1,11 @@
 mod callable;
 mod class;
 mod generic;
-mod instance;
+mod object;
 
 pub use class::Class;
 pub use callable::{ Callable, Function, Primitive };
-pub use instance::Instance;
+pub use object::Object;
 pub use generic::Generic;
 
 use crate::runtime::gc::GcTraceable;
@@ -17,7 +17,7 @@ pub enum Data<'a, 'b> {
 	Callable(Box<dyn Callable<'a, 'b> + 'b>),
 	Class(Class<'a, 'b>),
 	Generic(Generic<'a, 'b>),
-	Instance(Instance<'a, 'b>),
+	Object(Object<'a, 'b>),
 	Integer(usize),
 	String(String),
 	Null,
@@ -31,7 +31,7 @@ impl GcTraceable for Data<'_, '_> {
 			},
 			Data::Callable(callable) => callable.trace(),
 			Data::Class(class)       => class.trace(),
-			Data::Instance(instance) => instance.trace(),
+			Data::Object(object) => object.trace(),
 			_ => (),
 		}
 	}

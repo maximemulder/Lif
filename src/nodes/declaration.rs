@@ -23,7 +23,7 @@ impl<'a> Executable<'a> for Declaration<'a> {
 			value.cast(engine.environment.class)?;
 			value
 		} else {
-			engine.environment.object
+			engine.environment.any
 		};
 
 		let reference = engine.new_variable(None, r#type);

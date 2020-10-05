@@ -42,7 +42,9 @@ fn main() {
         // printer::tree(&tree);
 		let program = nodes::build::program(&text, &tree);
 		let mut engine = Engine::new();
+		let time = std::time::Instant::now();
 		let result = engine.execute(&program);
+		println!("{}", time.elapsed().as_secs());
 		if let Err(error) = result {
 			println!("{}", error.message);
 			if let Some(node) = error.node {

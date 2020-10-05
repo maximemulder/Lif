@@ -1,5 +1,5 @@
 use crate::runtime::Return;
-use crate::runtime::data::{ Callable, Class, Data, Generic, Instance };
+use crate::runtime::data::{ Callable, Class, Data, Generic, Object };
 use crate::runtime::engine::Engine;
 use crate::runtime::error::Error;
 use crate::runtime::gc::{ GcRef, GcTraceable };
@@ -130,12 +130,12 @@ impl<'a, 'b> Value<'a, 'b> {
 		data_mut!(self, Generic);
 	}
 
-	pub fn data_instance(&self) -> &Instance<'a, 'b> {
-		data!(self, Instance);
+	pub fn data_object(&self) -> &Object<'a, 'b> {
+		data!(self, Object);
 	}
 
-	pub fn data_instance_mut(&mut self) -> &mut Instance<'a, 'b> {
-		data_mut!(self, Instance);
+	pub fn data_object_mut(&mut self) -> &mut Object<'a, 'b> {
+		data_mut!(self, Object);
 	}
 
 	pub fn data_integer(&self) -> &usize {

@@ -5,28 +5,28 @@ use crate::runtime::gc::GcTraceable;
 use crate::runtime::value::GcValue;
 
 pub struct Environment<'a, 'b> {
+	pub any:      GcValue<'a, 'b>,
 	pub array:    GcValue<'a, 'b>,
 	pub boolean:  GcValue<'a, 'b>,
 	pub class:    GcValue<'a, 'b>,
 	pub function: GcValue<'a, 'b>,
 	pub generic:  GcValue<'a, 'b>,
-	pub instance: GcValue<'a, 'b>,
+	pub object: GcValue<'a, 'b>,
 	pub integer:  GcValue<'a, 'b>,
-	pub object:   GcValue<'a, 'b>,
 	pub string:   GcValue<'a, 'b>,
 }
 
 impl<'a, 'b> Environment<'a, 'b> {
 	pub fn new() -> Self {
 		return Self {
+			any:      GcValue::null(),
 			array:    GcValue::null(),
 			boolean:  GcValue::null(),
 			class:    GcValue::null(),
 			function: GcValue::null(),
 			generic:  GcValue::null(),
-			instance: GcValue::null(),
+			object: GcValue::null(),
 			integer:  GcValue::null(),
-			object:   GcValue::null(),
 			string:   GcValue::null(),
 		};
 	}
@@ -34,15 +34,15 @@ impl<'a, 'b> Environment<'a, 'b> {
 
 impl GcTraceable for Environment<'_, '_> {
 	fn trace(&mut self) {
-		for class in [self.array, self.boolean, self.class, self.function, self.instance, self.integer, self.generic, self.object, self.string].iter_mut() {
+		for class in [self.array, self.boolean, self.class, self.function, self.object, self.integer, self.generic, self.any, self.string].iter_mut() {
 			class.trace();
 		}
 	}
 }
 
 impl<'a, 'b> Engine<'a, 'b> {
-	fn create_class(&mut self) -> GcValue<'a, 'b> {
-		return self.new_value(self.environment.class, Data::Class(Class::new(Some(self.environment.object))));
+	fn create_class(&mut self, name: &str) -> GcValue<'a, 'b> {
+		return self.new_value(self.environment.class, Data::Class(Class::new(Some(name), Some(self.environment.any))));
 	}
 
 	pub fn add_constant_value(&mut self, name: &str, value: GcValue<'a, 'b>) {
@@ -61,20 +61,20 @@ impl<'a, 'b> Engine<'a, 'b> {
 	}
 
 	pub fn populate(&mut self) {
-		self.environment.class  = self.create_class();
-		self.environment.object = self.create_class();
+		self.environment.class = self.create_class("Class");
+		self.environment.any   = self.create_class("Any");
 
-		self.environment.array    = self.create_class();
-		self.environment.boolean  = self.create_class();
-		self.environment.function = self.create_class();
-		self.environment.generic  = self.create_class();
-		self.environment.instance = self.create_class();
-		self.environment.integer  = self.create_class();
-		self.environment.string   = self.create_class();
+		self.environment.array    = self.create_class("Array");
+		self.environment.boolean  = self.create_class("Boolean");
+		self.environment.function = self.create_class("Function");
+		self.environment.generic  = self.create_class("Generic");
+		self.environment.object = self.create_class("Object");
+		self.environment.integer  = self.create_class("Integer");
+		self.environment.string   = self.create_class("String");
 
 		self.environment.class.class = self.environment.class;
-		self.environment.class.data_class_mut().parent = Some(self.environment.object);
-		self.environment.object.data_class_mut().parent = None;
+		self.environment.class.data_class_mut().parent = Some(self.environment.any);
+		self.environment.any.data_class_mut().parent = None;
 
 		self.add_constant_primitive("assert", &primitive_assert);
 		self.add_constant_primitive("error",  &primitive_error);
@@ -82,23 +82,23 @@ impl<'a, 'b> Engine<'a, 'b> {
 		self.add_constant_primitive("new",    &primitive_new);
 		self.add_constant_primitive("print",  &primitive_print);
 
+		let any      = self.environment.any;
 		let array    = self.environment.array;
 		let boolean  = self.environment.boolean;
 		let class    = self.environment.class;
 		let function = self.environment.function;
 		let generic  = self.environment.generic;
-		let instance = self.environment.instance;
+		let object = self.environment.object;
 		let integer  = self.environment.integer;
-		let object   = self.environment.object;
 		let string   = self.environment.string;
 
+		self.add_constant_value("Any",      any);
 		self.add_constant_value("Array",    array);
 		self.add_constant_value("Boolean",  boolean);
 		self.add_constant_value("Class",    class);
 		self.add_constant_value("Function", function);
-		self.add_constant_value("Instance", instance);
-		self.add_constant_value("Integer",  integer);
 		self.add_constant_value("Object",   object);
+		self.add_constant_value("Integer",  integer);
 		self.add_constant_value("String",   string);
 
 		self.add_method_primitive(array, "to_string", &array_to_string);
@@ -121,8 +121,8 @@ impl<'a, 'b> Engine<'a, 'b> {
 		self.add_method_primitive(generic, "to_string", &generic_to_string);
 		self.add_method_primitive(generic, "<>",        &generic_apply);
 
-		self.add_method_primitive(instance, "to_string", &instance_to_string);
-		self.add_method_primitive(instance, ".",         &instance_chain);
+		self.add_method_primitive(object, "to_string", &object_to_string);
+		self.add_method_primitive(object, ".",         &object_chain);
 
 		self.add_method_primitive(integer, "to_string", &integer_to_string);
 		self.add_method_primitive(integer, "==",        &integer_comparison);
@@ -133,11 +133,11 @@ impl<'a, 'b> Engine<'a, 'b> {
 		self.add_method_primitive(integer, "/",         &integer_division);
 		self.add_method_primitive(integer, "%",         &integer_remainder);
 
-		self.add_method_primitive(object, "==", &object_comparison);
-		self.add_method_primitive(object, "!=", &object_difference);
-		self.add_method_primitive(object, ">",  &object_greater);
-		self.add_method_primitive(object, "<=", &object_lesser_equal);
-		self.add_method_primitive(object, ">=", &object_greater_equal);
+		self.add_method_primitive(any, "==", &any_comparison);
+		self.add_method_primitive(any, "!=", &any_difference);
+		self.add_method_primitive(any, ">",  &any_greater);
+		self.add_method_primitive(any, "<=", &any_lesser_equal);
+		self.add_method_primitive(any, ">=", &any_greater_equal);
 
 		self.add_method_primitive(string, "to_string", &string_to_string);
 		self.add_method_primitive(string, "==",        &string_comparison);
@@ -164,13 +164,39 @@ fn primitive_exit<'a, 'b>(_: &mut Engine<'a, 'b>, _: Vec<GcValue<'a, 'b>>) -> Re
 }
 
 fn primitive_new<'a, 'b>(engine: &mut Engine<'a, 'b>, arguments: Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b> {
-	return Ok(engine.new_instance(arguments[0]));
+	return Ok(engine.new_object(arguments[0]));
 }
 
 fn primitive_print<'a, 'b>(engine: &mut Engine<'a, 'b>, arguments: Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b> {
 	let reference = engine.call_method(arguments[0], "to_string", Vec::new())?;
 	println!("{}", reference.read()?.data_string());
 	return Ok(engine.undefined());
+}
+
+fn any_comparison<'a, 'b>(engine: &mut Engine<'a, 'b>, arguments: Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b> {
+	return Ok(engine.new_boolean(arguments[0] == arguments[1]));
+}
+
+fn any_difference<'a, 'b>(engine: &mut Engine<'a, 'b>, arguments: Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b> {
+	let reference = engine.call_method_self(arguments[0], "==", arguments)?;
+	return Ok(engine.new_boolean(!reference.read()?.data_boolean()));
+}
+
+fn any_greater<'a, 'b>(engine: &mut Engine<'a, 'b>, arguments: Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b> {
+	let left  = engine.call_method_self(arguments[0], "<", arguments.clone())?;
+	let right = engine.call_method_self(arguments[0], "==", arguments.clone())?;
+	return Ok(engine.new_boolean(!left.read()?.data_boolean() && !right.read()?.data_boolean()));
+}
+
+fn any_greater_equal<'a, 'b>(engine: &mut Engine<'a, 'b>, arguments: Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b> {
+	let reference = engine.call_method_self(arguments[0], "<", arguments)?;
+	return Ok(engine.new_boolean(!reference.read()?.data_boolean()));
+}
+
+fn any_lesser_equal<'a, 'b>(engine: &mut Engine<'a, 'b>, arguments: Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b> {
+	let left  = engine.call_method_self(arguments[0], "<", arguments.clone())?;
+	let right = engine.call_method_self(arguments[0], "==", arguments.clone())?;
+	return Ok(engine.new_boolean(*left.read()?.data_boolean() || *right.read()?.data_boolean()));
 }
 
 fn array_to_string<'a, 'b>(engine: &mut Engine<'a, 'b>, arguments: Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b> {
@@ -276,9 +302,9 @@ fn generic_apply<'a, 'b>(engine: &mut Engine<'a, 'b>, arguments: Vec<GcValue<'a,
 	return Ok(reference);
 }
 
-fn instance_to_string<'a, 'b>(engine: &mut Engine<'a, 'b>, arguments: Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b> {
+fn object_to_string<'a, 'b>(engine: &mut Engine<'a, 'b>, arguments: Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b> {
 	let mut string = String::from("{");
-	let attributes = &arguments[0].data_instance().attributes.clone();
+	let attributes = &arguments[0].data_object().attributes.clone();
 	for (name, attribute) in attributes {
 		string.push_str(&name);
 		string.push_str(": ");
@@ -295,14 +321,14 @@ fn instance_to_string<'a, 'b>(engine: &mut Engine<'a, 'b>, arguments: Vec<GcValu
 	return Ok(engine.new_string(string));
 }
 
-fn instance_chain<'a, 'b>(engine: &mut Engine<'a, 'b>, mut arguments: Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b> {
+fn object_chain<'a, 'b>(engine: &mut Engine<'a, 'b>, mut arguments: Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b> {
 	let name = arguments[1].data_string().clone();
 	let member = engine.undefined();
-	let instance = arguments[0].data_instance_mut();
-	return Ok(if let Some(&member) = instance.attributes.get(&name) {
+	let object = arguments[0].data_object_mut();
+	return Ok(if let Some(&member) = object.attributes.get(&name) {
 		member
 	} else {
-		instance.attributes.insert(name.clone(), member);
+		object.attributes.insert(name.clone(), member);
 		member
 	});
 }
@@ -337,32 +363,6 @@ fn integer_division<'a, 'b>(engine: &mut Engine<'a, 'b>, arguments: Vec<GcValue<
 
 fn integer_remainder<'a, 'b>(engine: &mut Engine<'a, 'b>, arguments: Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b> {
 	return Ok(engine.new_integer(*arguments[0].data_integer() % *arguments[1].data_integer()));
-}
-
-fn object_comparison<'a, 'b>(engine: &mut Engine<'a, 'b>, arguments: Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b> {
-	return Ok(engine.new_boolean(arguments[0] == arguments[1]));
-}
-
-fn object_difference<'a, 'b>(engine: &mut Engine<'a, 'b>, arguments: Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b> {
-	let reference = engine.call_method_self(arguments[0], "==", arguments)?;
-	return Ok(engine.new_boolean(!reference.read()?.data_boolean()));
-}
-
-fn object_greater<'a, 'b>(engine: &mut Engine<'a, 'b>, arguments: Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b> {
-	let left  = engine.call_method_self(arguments[0], "<", arguments.clone())?;
-	let right = engine.call_method_self(arguments[0], "==", arguments.clone())?;
-	return Ok(engine.new_boolean(!left.read()?.data_boolean() && !right.read()?.data_boolean()));
-}
-
-fn object_greater_equal<'a, 'b>(engine: &mut Engine<'a, 'b>, arguments: Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b> {
-	let reference = engine.call_method_self(arguments[0], "<", arguments)?;
-	return Ok(engine.new_boolean(!reference.read()?.data_boolean()));
-}
-
-fn object_lesser_equal<'a, 'b>(engine: &mut Engine<'a, 'b>, arguments: Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b> {
-	let left  = engine.call_method_self(arguments[0], "<", arguments.clone())?;
-	let right = engine.call_method_self(arguments[0], "==", arguments.clone())?;
-	return Ok(engine.new_boolean(*left.read()?.data_boolean() || *right.read()?.data_boolean()));
 }
 
 fn string_to_string<'a, 'b>(engine: &mut Engine<'a, 'b>, arguments: Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b> {

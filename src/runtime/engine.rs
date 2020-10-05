@@ -1,6 +1,6 @@
 use crate::nodes::{ Executable, Node };
 use crate::runtime::ReturnReference;
-use crate::runtime::data::{ Class, Data, Function, Generic, Instance, Primitive };
+use crate::runtime::data::{ Class, Data, Function, Generic, Object, Primitive };
 use crate::runtime::environment::Environment;
 use crate::runtime::error::Error;
 use crate::runtime::gc::{ GC_THRESHOLD, Gc, GcTraceable };
@@ -77,7 +77,7 @@ impl<'a, 'b> Engine<'a, 'b> {
 	}
 
 	pub fn new_reference(&mut self, value: GcValue<'a, 'b>) -> GcReference<'a, 'b> {
-		return self.alloc_reference(Reference::new_variable(Some(value), self.environment.object));
+		return self.alloc_reference(Reference::new_variable(Some(value), self.environment.any));
 	}
 
 	pub fn new_variable(&mut self, value: Option<GcValue<'a, 'b>>, r#type: GcValue<'a, 'b>) -> GcReference<'a, 'b> {
@@ -232,12 +232,12 @@ impl<'a, 'b> Engine<'a, 'b> {
 		return self.new_constant_value(self.environment.boolean, Data::Boolean(boolean));
 	}
 
-	pub fn new_class(&mut self) -> GcReference<'a, 'b> {
-		return self.new_constant_value(self.environment.class, Data::Class(Class::new(Some(self.environment.object))));
+	pub fn new_class(&mut self, name: Option<&str>) -> GcReference<'a, 'b> {
+		return self.new_constant_value(self.environment.class, Data::Class(Class::new(name, Some(self.environment.any))));
 	}
 
-	pub fn new_instance(&mut self, parent: GcValue<'a, 'b>) -> GcReference<'a, 'b> {
-		return self.new_constant_value(parent, Data::Instance(Instance::new()));
+	pub fn new_object(&mut self, parent: GcValue<'a, 'b>) -> GcReference<'a, 'b> {
+		return self.new_constant_value(parent, Data::Object(Object::new()));
 	}
 
 	pub fn new_integer(&mut self, integer: usize) -> GcReference<'a, 'b> {

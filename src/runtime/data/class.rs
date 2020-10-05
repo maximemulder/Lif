@@ -5,15 +5,17 @@ use crate::runtime::value::GcValue;
 use std::collections::HashMap;
 
 pub struct Class<'a, 'b> {
+	pub name: Option<Box<str>>,
 	pub parent:  Option<GcValue<'a, 'b>>,
 	pub statics: HashMap<String, GcReference<'a, 'b>>,
 	pub methods: HashMap<String, GcValue<'a, 'b>>,
 }
 
 impl<'a, 'b> Class<'a, 'b> {
-	pub fn new(parent: Option<GcValue<'a, 'b>>) -> Self {
+	pub fn new(name: Option<&str>, parent: Option<GcValue<'a, 'b>>) -> Self {
 		return Self {
-			parent:  parent,
+			parent,
+			name: name.map(|name| Box::from(name)),
 			statics: HashMap::new(),
 			methods: HashMap::new(),
 		};
