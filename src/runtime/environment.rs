@@ -257,8 +257,16 @@ fn boolean_comparison<'a, 'b>(engine: &mut Engine<'a, 'b>, arguments: Vec<GcValu
 	return Ok(engine.new_boolean(arguments[0].data_boolean() == arguments[1].data_boolean()));
 }
 
-fn class_to_string<'a, 'b>(engine: &mut Engine<'a, 'b>, _: Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b> {
-	return Ok(engine.new_string("CLASS".to_string()));
+fn class_to_string<'a, 'b>(engine: &mut Engine<'a, 'b>, arguments: Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b> {
+	let mut string = String::new();
+	string += "Class";
+	if let Some(name) = &arguments[0].data_class().name {
+		string += "(";
+		string += name;
+		string += ")";
+	}
+
+	return Ok(engine.new_string(string));
 }
 
 fn class_chain<'a, 'b>(engine: &mut Engine<'a, 'b>, mut arguments: Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b> {

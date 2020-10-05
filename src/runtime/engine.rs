@@ -132,7 +132,7 @@ impl<'a, 'b> Engine<'a, 'b> {
 			if let Some(parent) = scope.parent {
 				scope = parent;
 			} else {
-				return Err(Error::new_runtime("Variable does not exist."));
+				return Err(Error::new_undeclared_variable(name));
 			}
 		}
 	}

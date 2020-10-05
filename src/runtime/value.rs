@@ -41,7 +41,7 @@ impl<'a, 'b> Value<'a, 'b> {
 		return if self.isa(other) {
 			Ok(())
 		} else {
-			Err(Error::new_runtime("Value is not of the required type."))
+			Err(Error::new_cast(self, other))
 		};
 	}
 

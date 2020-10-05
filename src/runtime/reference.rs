@@ -31,20 +31,19 @@ impl<'a, 'b> Reference<'a, 'b> {
 	}
 
 	pub fn read(&self) -> Return<'a, GcValue<'a, 'b>> {
-		return self.value.ok_or_else(|| Error::new_runtime("Trying to read an undefined value."));
+		return self.value.ok_or_else(|| Error::new_undefined());
 	}
 
 	pub fn write(&mut self, value: GcValue<'a, 'b>) -> Return<'a, ()> {
 		match self.r#type {
-			Type::Variable(r#type) => if value.isa(r#type) {
+			Type::Variable(r#type) => {
+				value.cast(r#type)?;
 				self.set_value(value);
-			} else {
-				return Err(Error::new_runtime("Trying to write a value in a variable whose type does not match."));
 			},
 			Type::Constant => if self.value.is_none() {
 				self.set_value(value);
 			} else {
-				return Err(Error::new_runtime("Trying to write a value in a constant."));
+				return Err(Error::new_constant_write());
 			},
 		}
 

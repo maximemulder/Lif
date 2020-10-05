@@ -32,6 +32,6 @@ impl<'a> Executable<'a> for Method<'a> {
 			return engine.call(method, arguments);
 		}
 
-		return Err(Error::new_runtime("Method does not exist."));
+		return Err(Error::new_undefined_method(&self.member, this.class));
 	}
 }

@@ -69,7 +69,7 @@ impl<'a, 'b> Callable<'a, 'b> for Function<'a, 'b> {
 		engine.pop_frame();
 
 		if engine.control_is(Control::Break) || engine.control_is(Control::Continue) {
-			return Err(Error::new_runtime("Trying to loop control out of a function."));
+			return Err(Error::new_control());
 		}
 
 		if engine.control_consume(Control::Return) {
