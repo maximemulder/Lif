@@ -22,14 +22,14 @@ impl<'a> Method<'a> {
 impl<'a> Executable<'a> for Method<'a> {
 	fn execute<'b>(&'b self, engine: &mut Engine<'a, 'b>) -> ReturnReference<'a, 'b> {
 		let this = execute!(engine, &self.expression).read()?;
-		if let Some(method) = this.get_method(engine, self.member) {
+		if let Some(method) = this.get_method(self.member) {
 			let mut arguments = Vec::new();
 			arguments.push(this);
 			for argument in self.expressions.iter() {
 				arguments.push(execute!(engine, argument).read()?);
 			}
 
-			return engine.call(method, arguments);
+			return method.call(engine, arguments);
 		}
 
 		return Err(Error::new_undefined_method(&self.member, this.class));

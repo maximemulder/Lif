@@ -1,5 +1,5 @@
 use crate::node::Node;
-use crate::runtime::value::{ GcValue, Value };
+use crate::runtime::value::GcValue;
 
 pub struct Error<'a> {
 	pub message: Box<str>,
@@ -7,7 +7,6 @@ pub struct Error<'a> {
 }
 
 impl Error<'_> {
-
 	fn new(message: String) -> Self {
 		return Self {
 			message: Box::from(message),
@@ -57,7 +56,7 @@ impl Error<'_> {
 		return Self::new(String::from("RUNTIME ERROR: Cannot write data into a constant."));
 	}
 
-	pub fn new_cast(value: &Value, r#type: GcValue) -> Self {
+	pub fn new_cast(value: GcValue, r#type: GcValue) -> Self {
 		let mut message = String::new();
 		message += "RUNTIME ERROR: Cannot cast ";
 		if let Some(name) = &value.class.data_class().name {

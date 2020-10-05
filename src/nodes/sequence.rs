@@ -31,6 +31,6 @@ impl<'a> Executable<'a> for Sequence<'a> {
 		let mut name = String::new();
 		name.push_str(&self.open);
 		name.push_str(&self.close);
-		return engine.call_method(value, &name, arguments);
+		return value.call_method(engine, &name, arguments);
 	}
 }

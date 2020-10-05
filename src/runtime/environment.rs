@@ -154,7 +154,7 @@ fn primitive_assert<'a, 'b>(engine: &mut Engine<'a, 'b>, arguments: Vec<GcValue<
 }
 
 fn primitive_error<'a, 'b>(engine: &mut Engine<'a, 'b>, arguments: Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b> {
-	let reference = engine.call_method(arguments[0], "to_string", Vec::new())?;
+	let reference = arguments[0].call_method(engine, "to_string", Vec::new())?;
 	println!("{}", reference.read()?.data_string());
 	panic!();
 }
@@ -168,7 +168,7 @@ fn primitive_new<'a, 'b>(engine: &mut Engine<'a, 'b>, arguments: Vec<GcValue<'a,
 }
 
 fn primitive_print<'a, 'b>(engine: &mut Engine<'a, 'b>, arguments: Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b> {
-	let reference = engine.call_method(arguments[0], "to_string", Vec::new())?;
+	let reference = arguments[0].call_method(engine, "to_string", Vec::new())?;
 	println!("{}", reference.read()?.data_string());
 	return Ok(engine.undefined());
 }
@@ -178,24 +178,24 @@ fn any_comparison<'a, 'b>(engine: &mut Engine<'a, 'b>, arguments: Vec<GcValue<'a
 }
 
 fn any_difference<'a, 'b>(engine: &mut Engine<'a, 'b>, arguments: Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b> {
-	let reference = engine.call_method_self(arguments[0], "==", arguments)?;
+	let reference = arguments[0].call_method_self(engine, "==", arguments)?;
 	return Ok(engine.new_boolean(!reference.read()?.data_boolean()));
 }
 
 fn any_greater<'a, 'b>(engine: &mut Engine<'a, 'b>, arguments: Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b> {
-	let left  = engine.call_method_self(arguments[0], "<", arguments.clone())?;
-	let right = engine.call_method_self(arguments[0], "==", arguments.clone())?;
+	let left  = arguments[0].call_method_self(engine, "<", arguments.clone())?;
+	let right = arguments[0].call_method_self(engine, "==", arguments.clone())?;
 	return Ok(engine.new_boolean(!left.read()?.data_boolean() && !right.read()?.data_boolean()));
 }
 
 fn any_greater_equal<'a, 'b>(engine: &mut Engine<'a, 'b>, arguments: Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b> {
-	let reference = engine.call_method_self(arguments[0], "<", arguments)?;
+	let reference = arguments[0].call_method_self(engine, "<", arguments)?;
 	return Ok(engine.new_boolean(!reference.read()?.data_boolean()));
 }
 
 fn any_lesser_equal<'a, 'b>(engine: &mut Engine<'a, 'b>, arguments: Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b> {
-	let left  = engine.call_method_self(arguments[0], "<", arguments.clone())?;
-	let right = engine.call_method_self(arguments[0], "==", arguments.clone())?;
+	let left  = arguments[0].call_method_self(engine, "<", arguments.clone())?;
+	let right = arguments[0].call_method_self(engine, "==", arguments.clone())?;
 	return Ok(engine.new_boolean(*left.read()?.data_boolean() || *right.read()?.data_boolean()));
 }
 
@@ -203,7 +203,7 @@ fn array_to_string<'a, 'b>(engine: &mut Engine<'a, 'b>, arguments: Vec<GcValue<'
 	let mut string = String::from("[");
 	let elements = arguments[0].data_array().clone();
 	for element in elements.iter() {
-		let reference = engine.call_method(element.read()?, "to_string", Vec::new())?;
+		let reference = element.read()?.call_method(engine, "to_string", Vec::new())?;
 		string.push_str(reference.read()?.data_string());
 		string.push_str(", ");
 	}
@@ -316,7 +316,7 @@ fn object_to_string<'a, 'b>(engine: &mut Engine<'a, 'b>, arguments: Vec<GcValue<
 	for (name, attribute) in attributes {
 		string.push_str(&name);
 		string.push_str(": ");
-		let reference = engine.call_method(attribute.read()?, "to_string", Vec::new())?;
+		let reference = attribute.read()?.call_method(engine, "to_string", Vec::new())?;
 		string.push_str(reference.read()?.data_string());
 		string.push_str(", ");
 	}
@@ -382,6 +382,6 @@ fn string_comparison<'a, 'b>(engine: &mut Engine<'a, 'b>, arguments: Vec<GcValue
 }
 
 fn string_concatenation<'a, 'b>(engine: &mut Engine<'a, 'b>, arguments: Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b> {
-	let right = engine.call_method(arguments[1], "to_string", Vec::new())?;
+	let right = arguments[1].call_method(engine, "to_string", Vec::new())?;
 	return Ok(engine.new_string(format!("{}{}", arguments[0].data_string(), right.read()?.data_string())));
 }

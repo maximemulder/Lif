@@ -137,20 +137,6 @@ impl<'a, 'b> Engine<'a, 'b> {
 		}
 	}
 
-	pub fn call_method(&mut self, value: GcValue<'a, 'b>, name: &str, mut arguments: Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b> {
-		arguments.insert(0, value);
-		return self.call(value.get_method(self, name).unwrap(), arguments);
-	}
-
-	pub fn call_method_self(&mut self, value: GcValue<'a, 'b>, name: &str, arguments: Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b> {
-		return self.call(value.get_method(self, name).unwrap(), arguments);
-	}
-
-	pub fn call(&mut self, value: GcValue<'a, 'b>, arguments: Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b> {
-		let callable = value.data_callable().duplicate();
-		return callable.execute(self, arguments);
-	}
-
 	pub fn collect(&mut self) {
 		self.trace();
 		self.scopes.collect();

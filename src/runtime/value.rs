@@ -1,4 +1,4 @@
-use crate::runtime::Return;
+use crate::runtime::{ Return, ReturnReference };
 use crate::runtime::data::{ Callable, Class, Data, Generic, Object };
 use crate::runtime::engine::Engine;
 use crate::runtime::error::Error;
@@ -19,32 +19,53 @@ impl<'a, 'b> Value<'a, 'b> {
 			data,
 		};
 	}
+}
 
-	pub fn isa(&self, other: GcValue<'a, 'b>) -> bool {
-		let mut class = self.class;
-		loop {
-			if class == other {
-				return true;
-			}
-
-			if let Some(parent) = class.data_class().parent {
-				class = parent;
-			} else {
-				break;
-			}
-		}
-
-		return false;
+impl<'a, 'b> GcValue<'a, 'b> {
+	pub fn is(self, other: GcValue<'a, 'b>) -> bool {
+		return if self == other {
+			true
+		} else if let Some(parent) = self.data_class().parent {
+			parent.is(other)
+		} else {
+			false
+		};
 	}
 
-	pub fn cast(&self, other: GcValue<'a, 'b>) -> Return<'a, ()> {
+	pub fn isa(self, other: GcValue<'a, 'b>) -> bool {
+		return self.class.is(other);
+	}
+
+	pub fn cast(self, other: GcValue<'a, 'b>) -> Return<'a, ()> {
 		return if self.isa(other) {
 			Ok(())
 		} else {
 			Err(Error::new_cast(self, other))
 		};
 	}
+}
 
+impl<'a, 'b> GcValue<'a, 'b> {
+	pub fn get_method(&self, name: &str) -> Option<GcValue<'a, 'b>> {
+		return self.class.data_class().get_method(name);
+	}
+
+	pub fn call(self, engine: &mut Engine<'a, 'b>, arguments: Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b> {
+		let callable = self.data_callable().duplicate();
+		return callable.execute(engine, arguments);
+	}
+
+	pub fn call_method(self, engine: &mut Engine<'a, 'b>, name: &str, mut arguments: Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b> {
+		arguments.insert(0, self);
+		return self.call_method_self(engine, name, arguments);
+	}
+
+	pub fn call_method_self(self, engine: &mut Engine<'a, 'b>, name: &str, arguments: Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b> {
+		return self.get_method(name).unwrap().call(engine, arguments);
+	}
+}
+
+impl<'a, 'b> GcValue<'a, 'b> {
 	pub fn get_cast_array(&self, engine: &Engine<'a, 'b>) -> Return<'a, &Vec<GcReference<'a, 'b>>> {
 		self.cast(engine.environment.array)?;
 		return Ok(self.data_array());
@@ -63,10 +84,6 @@ impl<'a, 'b> Value<'a, 'b> {
 	pub fn get_cast_string(&self, engine: &Engine<'a, 'b>) -> Return<'a, &String> {
 		self.cast(engine.environment.string)?;
 		return Ok(self.data_string());
-	}
-
-	pub fn get_method(&self, engine: &Engine<'a, 'b>, name: &str) -> Option<GcValue<'a, 'b>> {
-		return self.class.data_class().get_method(engine, name);
 	}
 }
 
