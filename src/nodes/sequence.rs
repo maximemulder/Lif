@@ -28,9 +28,10 @@ impl<'a> Executable<'a> for Sequence<'a> {
 			arguments.push(execute!(engine, argument));
 		}
 
+		let array = engine.new_array(arguments);
 		let mut name = String::new();
 		name.push_str(&self.open);
 		name.push_str(&self.close);
-		return value.call_method(engine, &name, arguments);
+		return value.call_method(engine, &name, vec![array]);
 	}
 }

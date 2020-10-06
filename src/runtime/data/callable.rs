@@ -14,13 +14,14 @@ pub trait Callable<'a, 'b>: GcTraceable {
 
 #[derive(Clone)]
 pub struct Primitive<'a, 'b> {
-	// parameters: Box<[GcValue<'a, 'b>]>,
+	parameters: Box<[GcValue<'a, 'b>]>,
 	callback: &'b dyn Fn(&mut Engine<'a, 'b>, Vec<GcReference<'a, 'b>>) -> ReturnReference<'a, 'b>,
 }
 
 impl<'a, 'b> Primitive<'a, 'b> {
-	pub fn new(callback: &'b dyn Fn(&mut Engine<'a, 'b>, Vec<GcReference<'a, 'b>>) -> ReturnReference<'a, 'b>) -> Self {
+	pub fn new(parameters: Box<[GcValue<'a, 'b>]>, callback: &'b dyn Fn(&mut Engine<'a, 'b>, Vec<GcReference<'a, 'b>>) -> ReturnReference<'a, 'b>) -> Self {
 		return Self {
+			parameters,
 			callback,
 		};
 	}
@@ -28,6 +29,14 @@ impl<'a, 'b> Primitive<'a, 'b> {
 
 impl<'a, 'b> Callable<'a, 'b> for Primitive<'a, 'b> {
 	fn execute(&self, engine: &mut Engine<'a, 'b>, arguments: Vec<GcReference<'a, 'b>>) -> ReturnReference<'a, 'b> {
+		if arguments.len() != self.parameters.len() {
+			return Err(Error::new_arguments(self.parameters.len(), arguments.len()));
+		}
+
+		for (parameter, argument) in self.parameters.iter().zip(&arguments) {
+			argument.read()?.cast(*parameter)?;
+		}
+
 		return (self.callback)(engine, arguments);
 	}
 
