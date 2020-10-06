@@ -238,7 +238,7 @@ impl<'a, 'b> Engine<'a, 'b> {
 		return self.new_constant_value(self.environment.generic, Data::Generic(Generic::new(generics, node)));
 	}
 
-	pub fn new_primitive(&mut self, callback: &'b dyn Fn(&mut Engine<'a, 'b>, Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b>) -> GcReference<'a, 'b> {
+	pub fn new_primitive(&mut self, callback: &'b dyn Fn(&mut Engine<'a, 'b>, Vec<GcReference<'a, 'b>>) -> ReturnReference<'a, 'b>) -> GcReference<'a, 'b> {
 		return self.new_constant_value(self.environment.function, Data::Callable(Box::<Primitive<'a, 'b>>::new(Primitive::new(callback))));
 	}
 

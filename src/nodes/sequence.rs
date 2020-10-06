@@ -25,7 +25,7 @@ impl<'a> Executable<'a> for Sequence<'a> {
 		let value = execute!(engine, &self.expression).read()?;
 		let mut arguments = Vec::new();
 		for argument in self.expressions.iter() {
-			arguments.push(execute!(engine, argument).read()?);
+			arguments.push(execute!(engine, argument));
 		}
 
 		let mut name = String::new();

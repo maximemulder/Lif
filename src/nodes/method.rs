@@ -24,9 +24,9 @@ impl<'a> Executable<'a> for Method<'a> {
 		let this = execute!(engine, &self.expression).read()?;
 		if let Some(method) = this.get_method(self.member) {
 			let mut arguments = Vec::new();
-			arguments.push(this);
+			arguments.push(engine.new_constant(this));
 			for argument in self.expressions.iter() {
-				arguments.push(execute!(engine, argument).read()?);
+				arguments.push(execute!(engine, argument));
 			}
 
 			return method.call(engine, arguments);

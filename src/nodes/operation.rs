@@ -27,9 +27,9 @@ impl<'a> Executable<'a> for Operation<'a> {
 			return Ok(engine.undefined());
 		}
 
-		let left  = execute!(engine, &self.left).read()?;
-		let right = execute!(engine, &self.right).read()?;
+		let left  = execute!(engine, &self.left);
+		let right = execute!(engine, &self.right);
 
-		return left.get_method(&self.operator).unwrap().call(engine, vec![left, right]);
+		return left.read()?.get_method(&self.operator).unwrap().call(engine, vec![left, right]);
 	}
 }

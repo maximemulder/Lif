@@ -3,21 +3,23 @@ use crate::runtime::ReturnReference;
 use crate::runtime::engine::{ Control, Engine };
 use crate::runtime::error::Error;
 use crate::runtime::gc::GcTraceable;
+use crate::runtime::reference::GcReference;
 use crate::runtime::scope::GcScope;
 use crate::runtime::value::GcValue;
 
 pub trait Callable<'a, 'b>: GcTraceable {
-	fn execute(&self, engine: &mut Engine<'a, 'b>, arguments: Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b>;
+	fn execute(&self, engine: &mut Engine<'a, 'b>, arguments: Vec<GcReference<'a, 'b>>) -> ReturnReference<'a, 'b>;
 	fn duplicate<'slf>(&'slf self) -> Box<dyn Callable<'a, 'b> + 'slf>;
 }
 
 #[derive(Clone)]
 pub struct Primitive<'a, 'b> {
-	callback: &'b dyn Fn(&mut Engine<'a, 'b>, Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b>,
+	// parameters: Box<[GcValue<'a, 'b>]>,
+	callback: &'b dyn Fn(&mut Engine<'a, 'b>, Vec<GcReference<'a, 'b>>) -> ReturnReference<'a, 'b>,
 }
 
 impl<'a, 'b> Primitive<'a, 'b> {
-	pub fn new(callback: &'b dyn Fn(&mut Engine<'a, 'b>, Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b>) -> Self {
+	pub fn new(callback: &'b dyn Fn(&mut Engine<'a, 'b>, Vec<GcReference<'a, 'b>>) -> ReturnReference<'a, 'b>) -> Self {
 		return Self {
 			callback,
 		};
@@ -25,7 +27,7 @@ impl<'a, 'b> Primitive<'a, 'b> {
 }
 
 impl<'a, 'b> Callable<'a, 'b> for Primitive<'a, 'b> {
-	fn execute(&self, engine: &mut Engine<'a, 'b>, arguments: Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b> {
+	fn execute(&self, engine: &mut Engine<'a, 'b>, arguments: Vec<GcReference<'a, 'b>>) -> ReturnReference<'a, 'b> {
 		return (self.callback)(engine, arguments);
 	}
 
@@ -58,7 +60,7 @@ impl<'a, 'b> Function<'a, 'b> {
 }
 
 impl<'a, 'b> Callable<'a, 'b> for Function<'a, 'b> {
-	fn execute(&self, engine: &mut Engine<'a, 'b>, arguments: Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b> {
+	fn execute(&self, engine: &mut Engine<'a, 'b>, arguments: Vec<GcReference<'a, 'b>>) -> ReturnReference<'a, 'b> {
 		if arguments.len() != self.parameters.len() {
 			return Err(Error::new_arguments(self.parameters.len(), arguments.len()));
 		}
@@ -66,7 +68,7 @@ impl<'a, 'b> Callable<'a, 'b> for Function<'a, 'b> {
 		engine.push_frame(self.scope);
 		for (parameter, argument) in self.parameters.iter().zip(arguments) {
 			let mut reference = engine.execute(parameter)?;
-			reference.write(argument)?;
+			reference.write(argument.read()?)?;
 		}
 
 		let reference = engine.execute(self.block)?;
