@@ -1,12 +1,16 @@
 mod callable;
 mod class;
+mod function;
 mod generic;
 mod object;
+mod primitive;
 
+pub use callable::Callable;
 pub use class::Class;
-pub use callable::{ Callable, Function, Primitive };
-pub use object::Object;
+pub use function::Function;
 pub use generic::Generic;
+pub use object::Object;
+pub use primitive::Primitive;
 
 use crate::runtime::gc::GcTraceable;
 use crate::runtime::reference::GcReference;
