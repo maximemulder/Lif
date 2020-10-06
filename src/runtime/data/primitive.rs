@@ -34,7 +34,7 @@ impl<'a, 'b> Callable<'a, 'b> for Primitive<'a, 'b> {
 		return (self.callback)(engine, arguments);
 	}
 
-	fn duplicate<'slf>(&'slf self) -> Box<dyn Callable<'a, 'b> + 'slf> {
+	fn duplicate<'c>(&'c self) -> Box<dyn Callable<'a, 'b> + 'c> {
 		return Box::new(self.clone());
 	}
 }

@@ -61,7 +61,7 @@ impl<'a, 'b> Callable<'a, 'b> for Function<'a, 'b> {
 		return Ok(engine.undefined());
 	}
 
-	fn duplicate<'slf>(&'slf self) -> Box<dyn Callable<'a, 'b> + 'slf> {
+	fn duplicate<'c>(&'c self) -> Box<dyn Callable<'a, 'b> + 'c> {
 		return Box::new(self.clone());
 	}
 }
