@@ -12,7 +12,7 @@ pub struct Environment<'a, 'b> {
 	pub class:    GcValue<'a, 'b>,
 	pub function: GcValue<'a, 'b>,
 	pub generic:  GcValue<'a, 'b>,
-	pub object: GcValue<'a, 'b>,
+	pub object:   GcValue<'a, 'b>,
 	pub integer:  GcValue<'a, 'b>,
 	pub string:   GcValue<'a, 'b>,
 }
