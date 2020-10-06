@@ -59,6 +59,10 @@ impl<'a, 'b> Function<'a, 'b> {
 
 impl<'a, 'b> Callable<'a, 'b> for Function<'a, 'b> {
 	fn execute(&self, engine: &mut Engine<'a, 'b>, arguments: Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b> {
+		if arguments.len() != self.parameters.len() {
+			return Err(Error::new_arguments(self.parameters.len(), arguments.len()));
+		}
+
 		engine.push_frame(self.scope);
 		for (parameter, argument) in self.parameters.iter().zip(arguments) {
 			let mut reference = engine.execute(parameter)?;

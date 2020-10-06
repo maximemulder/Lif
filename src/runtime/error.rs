@@ -56,6 +56,16 @@ impl Error<'_> {
 		return Self::new(String::from("RUNTIME ERROR: Cannot write data into a constant."));
 	}
 
+	pub fn new_arguments(parameters: usize, arguments: usize) -> Self {
+		let mut message = String::new();
+		message += "RUNTIME ERROR: Provided ";
+		message += &arguments.to_string();
+		message += " arguments while the function expects ";
+		message += &parameters.to_string();
+		message += " parameters.";
+		return Self::new(message);
+	}
+
 	pub fn new_cast(value: GcValue, r#type: GcValue) -> Self {
 		let mut message = String::new();
 		message += "RUNTIME ERROR: Cannot cast ";
