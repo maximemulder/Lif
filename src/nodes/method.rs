@@ -6,11 +6,11 @@ use crate::runtime::error::Error;
 pub struct Method<'a> {
 	expression: Node<'a>,
 	member:     &'a str,
-	expressions: Vec<Node<'a>>,
+	expressions: Box<[Node<'a>]>,
 }
 
 impl<'a> Method<'a> {
-	pub fn new(expression: Node<'a>, member: &'a str, expressions: Vec<Node<'a>>) -> Self {
+	pub fn new(expression: Node<'a>, member: &'a str, expressions: Box<[Node<'a>]>) -> Self {
 		return Self {
 			expression,
 			member,

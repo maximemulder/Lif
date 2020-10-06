@@ -3,11 +3,11 @@ use crate::runtime::ReturnReference;
 use crate::runtime::engine::Engine;
 
 pub struct Array<'a> {
-	expressions: Vec<Node<'a>>,
+	expressions: Box<[Node<'a>]>,
 }
 
 impl<'a> Array<'a> {
-	pub fn new(expressions: Vec<Node<'a>>) -> Self {
+	pub fn new(expressions: Box<[Node<'a>]>) -> Self {
 		return Self {
 			expressions,
 		};

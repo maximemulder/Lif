@@ -52,13 +52,13 @@ impl GcTraceable for Primitive<'_, '_> {
 #[derive(Clone)]
 pub struct Function<'a, 'b> {
 	scope: GcScope<'a, 'b>,
-	parameters: &'b Vec<Node<'a>>,
+	parameters: &'b Box<[Node<'a>]>,
 	r#type: Option<GcValue<'a, 'b>>,
 	block: &'b Node<'a>,
 }
 
 impl<'a, 'b> Function<'a, 'b> {
-	pub fn new(scope: GcScope<'a, 'b>, parameters: &'b Vec<Node<'a>>, r#type: Option<GcValue<'a, 'b>>, block: &'b Node<'a>) -> Self {
+	pub fn new(scope: GcScope<'a, 'b>, parameters: &'b Box<[Node<'a>]>, r#type: Option<GcValue<'a, 'b>>, block: &'b Node<'a>) -> Self {
 		return Self {
 			scope,
 			parameters,

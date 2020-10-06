@@ -3,13 +3,13 @@ use crate::runtime::ReturnReference;
 use crate::runtime::engine::Engine;
 
 pub struct Function<'a> {
-	parameters: Vec<Node<'a>>,
+	parameters: Box<[Node<'a>]>,
 	r#type: Option<Node<'a>>,
 	block: Node<'a>,
 }
 
 impl<'a> Function<'a> {
-	pub fn new(parameters: Vec<Node<'a>>, r#type: Option<Node<'a>>, block: Node<'a>) -> Self {
+	pub fn new(parameters: Box<[Node<'a>]>, r#type: Option<Node<'a>>, block: Node<'a>) -> Self {
 		return Self {
 			parameters,
 			r#type,

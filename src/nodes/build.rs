@@ -170,17 +170,13 @@ fn r#continue<'a>(text: &'a str, node: &'a SyntaxNode<'a>) -> Node<'a> {
 	return Node::new(node, Continue::new(node.children().get(1).map(|child| expression(text, child))));
 }
 
-fn generics<'a>(text: &'a str, node: &'a SyntaxNode<'a>) -> Vec<&'a str> {
+fn generics<'a>(text: &'a str, node: &'a SyntaxNode<'a>) -> Box<[&'a str]> {
 	let mut identifiers = Vec::new();
-	for (i, child) in node.children().iter().enumerate()  {
-		if i % 2 == 1 {
-			continue;
-		}
-
+	for child in node.children().iter().step_by(2)  {
 		identifiers.push(token(text, child));
 	}
 
-	return identifiers;
+	return identifiers.into_boxed_slice();
 }
 
 fn function<'a>(text: &'a str, node: &'a SyntaxNode<'a>) -> Node<'a> {
@@ -202,17 +198,13 @@ fn function<'a>(text: &'a str, node: &'a SyntaxNode<'a>) -> Node<'a> {
 	};
 }
 
-fn parameters<'a>(text: &'a str, node: &'a SyntaxNode<'a>) -> Vec<Node<'a>> {
+fn parameters<'a>(text: &'a str, node: &'a SyntaxNode<'a>) -> Box<[Node<'a>]> {
 	let mut declarations = Vec::new();
-	for (i, child) in node.children().iter().enumerate()  {
-		if i % 2 == 1 {
-			continue;
-		}
-
+	for child in node.children().iter().step_by(2)  {
 		declarations.push(declaration(text, child));
 	}
 
-	return declarations;
+	return declarations.into_boxed_slice();
 }
 
 fn array<'a>(text: &'a str, node: &'a SyntaxNode<'a>) -> Node<'a> {
@@ -235,17 +227,13 @@ fn sequence<'a>(text: &'a str, node: &'a SyntaxNode<'a>) -> Node<'a> {
 	return Node::new(node, Sequence::new(expression(text, &node.children()[0]), token(text, &node.children()[1]), expressions(text, &node.children()[2]), token(text, &node.children()[3])));
 }
 
-fn expressions<'a>(text: &'a str, node: &'a SyntaxNode<'a>) -> Vec<Node<'a>> {
+fn expressions<'a>(text: &'a str, node: &'a SyntaxNode<'a>) -> Box<[Node<'a>]> {
 	let mut expressions = Vec::new();
-	for (i, child) in node.children().iter().enumerate()  {
-		if i % 2 == 1 {
-			continue;
-		}
-
+	for child in node.children().iter().step_by(2)  {
 		expressions.push(expression(text, child));
 	}
 
-	return expressions;
+	return expressions.into_boxed_slice();
 }
 
 fn operation<'a>(text: &'a str, node: &'a SyntaxNode<'a>) -> Node<'a> {

@@ -230,11 +230,11 @@ impl<'a, 'b> Engine<'a, 'b> {
 		return self.new_constant_value(self.environment.integer, Data::Integer(integer));
 	}
 
-	pub fn new_function(&mut self, parameters: &'b Vec<Node<'a>>, r#type: Option<GcValue<'a, 'b>>, block: &'b Node<'a>) -> GcReference<'a, 'b> {
+	pub fn new_function(&mut self, parameters: &'b Box<[Node<'a>]>, r#type: Option<GcValue<'a, 'b>>, block: &'b Node<'a>) -> GcReference<'a, 'b> {
 		return self.new_constant_value(self.environment.function, Data::Callable(Box::new(Function::new(self.scope, parameters, r#type, block))));
 	}
 
-	pub fn new_generic(&mut self, generics: &'b Vec<&'a str>, node: &'b dyn Executable<'a>) -> GcReference<'a, 'b> {
+	pub fn new_generic(&mut self, generics: &'b Box<[&'a str]>, node: &'b dyn Executable<'a>) -> GcReference<'a, 'b> {
 		return self.new_constant_value(self.environment.generic, Data::Generic(Generic::new(generics, node)));
 	}
 

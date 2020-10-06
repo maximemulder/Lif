@@ -5,12 +5,12 @@ use crate::runtime::engine::Engine;
 pub struct Sequence<'a> {
 	expression:  Node<'a>,
 	open:        &'a str,
-	expressions: Vec<Node<'a>>,
+	expressions: Box<[Node<'a>]>,
 	close:       &'a str,
 }
 
 impl<'a> Sequence<'a> {
-	pub fn new(expression: Node<'a>, open: &'a str, expressions: Vec<Node<'a>>, close: &'a str) -> Self {
+	pub fn new(expression: Node<'a>, open: &'a str, expressions: Box<[Node<'a>]>, close: &'a str) -> Self {
 		return Self {
 			expression,
 			open,

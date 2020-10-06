@@ -3,12 +3,12 @@ use crate::runtime::ReturnReference;
 use crate::runtime::engine::Engine;
 
 pub struct Generic<'a> {
-	parameters: Vec<&'a str>,
+	parameters: Box<[&'a str]>,
 	node: Node<'a>,
 }
 
 impl<'a> Generic<'a> {
-	pub fn new(parameters: Vec<&'a str>, node: Node<'a>) -> Self {
+	pub fn new(parameters: Box<[&'a str]>, node: Node<'a>) -> Self {
 		return Self {
 			parameters,
 			node,
