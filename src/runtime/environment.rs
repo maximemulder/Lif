@@ -51,13 +51,13 @@ impl<'a, 'b> Engine<'a, 'b> {
 		self.add_variable(name, reference);
 	}
 
-	fn add_constant_primitive(&mut self, name: &str, parameters: Box<[GcValue<'a, 'b>]>, callback: &'b dyn Fn(&mut Engine<'a, 'b>, Vec<GcReference<'a, 'b>>) -> ReturnReference<'a, 'b>) {
-		let primitive = self.new_primitive(parameters, callback);
+	fn add_constant_primitive<const N: usize>(&mut self, name: &str, parameters: [GcValue<'a, 'b>; N], callback: &'b dyn Fn(&mut Engine<'a, 'b>, Vec<GcReference<'a, 'b>>) -> ReturnReference<'a, 'b>) {
+		let primitive = self.new_primitive(Box::new(parameters), callback);
 		self.add_variable(name, primitive);
 	}
 
-	fn add_method_primitive(&mut self, mut value: GcValue<'a, 'b>, name: &str, parameters: Box<[GcValue<'a, 'b>]>, callback: &'b dyn Fn(&mut Engine<'a, 'b>, Vec<GcReference<'a, 'b>>) -> ReturnReference<'a, 'b>) {
-		let primitive = self.new_primitive(parameters, callback).get_value();
+	fn add_method_primitive<const N: usize>(&mut self, mut value: GcValue<'a, 'b>, name: &str, parameters: [GcValue<'a, 'b>; N], callback: &'b dyn Fn(&mut Engine<'a, 'b>, Vec<GcReference<'a, 'b>>) -> ReturnReference<'a, 'b>) {
+		let primitive = self.new_primitive(Box::new(parameters), callback).get_value();
 		value.data_class_mut().methods.insert(name.to_string(), primitive);
 	}
 
@@ -87,11 +87,11 @@ impl<'a, 'b> Engine<'a, 'b> {
 		let integer  = self.environment.integer;
 		let string   = self.environment.string;
 
-		self.add_constant_primitive("assert", Box::new([any]), &primitive_assert);
-		self.add_constant_primitive("error",  Box::new([any]), &primitive_error);
-		self.add_constant_primitive("exit",   Box::new([integer]), &primitive_exit);
-		self.add_constant_primitive("new",    Box::new([class]), &primitive_new);
-		self.add_constant_primitive("print",  Box::new([any]), &primitive_print);
+		self.add_constant_primitive("assert", [any],     &primitive_assert);
+		self.add_constant_primitive("error",  [any],     &primitive_error);
+		self.add_constant_primitive("exit",   [integer], &primitive_exit);
+		self.add_constant_primitive("new",    [class],   &primitive_new);
+		self.add_constant_primitive("print",  [any],     &primitive_print);
 
 		self.add_constant_value("Any",      any);
 		self.add_constant_value("Array",    array);
@@ -102,47 +102,47 @@ impl<'a, 'b> Engine<'a, 'b> {
 		self.add_constant_value("Integer",  integer);
 		self.add_constant_value("String",   string);
 
-		self.add_method_primitive(array, "to_string", Box::new([array]), &array_to_string);
-		self.add_method_primitive(array, "copy",      Box::new([array]), &array_copy);
-		self.add_method_primitive(array, "append",    Box::new([array, any]), &array_append);
-		self.add_method_primitive(array, "prepend",   Box::new([array, any]), &array_prepend);
-		self.add_method_primitive(array, "insert",    Box::new([array, integer, any]), &array_insert);
-		self.add_method_primitive(array, "remove",    Box::new([array, integer]), &array_remove);
-		self.add_method_primitive(array, "[]",        Box::new([array, array]), &array_access);
+		self.add_method_primitive(array, "to_string", [array],               &array_to_string);
+		self.add_method_primitive(array, "copy",      [array],               &array_copy);
+		self.add_method_primitive(array, "append",    [array, any],          &array_append);
+		self.add_method_primitive(array, "prepend",   [array, any],          &array_prepend);
+		self.add_method_primitive(array, "insert",    [array, integer, any], &array_insert);
+		self.add_method_primitive(array, "remove",    [array, integer],      &array_remove);
+		self.add_method_primitive(array, "[]",        [array, array],        &array_access);
 
-		self.add_method_primitive(boolean, "to_string", Box::new([boolean]), &boolean_to_string);
-		self.add_method_primitive(boolean, "==",        Box::new([boolean, any]), &boolean_comparison);
+		self.add_method_primitive(boolean, "to_string", [boolean],      &boolean_to_string);
+		self.add_method_primitive(boolean, "==",        [boolean, any], &boolean_comparison);
 
-		self.add_method_primitive(class, "to_string", Box::new([class]), &class_to_string);
-		self.add_method_primitive(class, ".",         Box::new([class, string]), &class_chain);
+		self.add_method_primitive(class, "to_string", [class],         &class_to_string);
+		self.add_method_primitive(class, ".",         [class, string], &class_chain);
 
-		self.add_method_primitive(function, "to_string", Box::new([function]), &function_to_string);
-		self.add_method_primitive(function, "()",        Box::new([function, array]), &function_call);
+		self.add_method_primitive(function, "to_string", [function],        &function_to_string);
+		self.add_method_primitive(function, "()",        [function, array], &function_call);
 
-		self.add_method_primitive(generic, "to_string", Box::new([generic]), &generic_to_string);
-		self.add_method_primitive(generic, "<>",        Box::new([generic, array]), &generic_apply);
+		self.add_method_primitive(generic, "to_string", [generic],        &generic_to_string);
+		self.add_method_primitive(generic, "<>",        [generic, array], &generic_apply);
 
-		self.add_method_primitive(object, "to_string", Box::new([object]), &object_to_string);
-		self.add_method_primitive(object, ".",         Box::new([object, string]), &object_chain);
+		self.add_method_primitive(object, "to_string", [object],         &object_to_string);
+		self.add_method_primitive(object, ".",         [object, string], &object_chain);
 
-		self.add_method_primitive(integer, "to_string", Box::new([integer]), &integer_to_string);
-		self.add_method_primitive(integer, "==",        Box::new([integer, any]), &integer_comparison);
-		self.add_method_primitive(integer, "<",         Box::new([integer, integer]), &integer_lesser);
-		self.add_method_primitive(integer, "+",         Box::new([integer, integer]), &integer_addition);
-		self.add_method_primitive(integer, "-",         Box::new([integer, integer]), &integer_subtraction);
-		self.add_method_primitive(integer, "*",         Box::new([integer, integer]), &integer_multiplication);
-		self.add_method_primitive(integer, "/",         Box::new([integer, integer]), &integer_division);
-		self.add_method_primitive(integer, "%",         Box::new([integer, integer]), &integer_remainder);
+		self.add_method_primitive(integer, "to_string", [integer],          &integer_to_string);
+		self.add_method_primitive(integer, "==",        [integer, any],     &integer_comparison);
+		self.add_method_primitive(integer, "<",         [integer, integer], &integer_lesser);
+		self.add_method_primitive(integer, "+",         [integer, integer], &integer_addition);
+		self.add_method_primitive(integer, "-",         [integer, integer], &integer_subtraction);
+		self.add_method_primitive(integer, "*",         [integer, integer], &integer_multiplication);
+		self.add_method_primitive(integer, "/",         [integer, integer], &integer_division);
+		self.add_method_primitive(integer, "%",         [integer, integer], &integer_remainder);
 
-		self.add_method_primitive(any, "==", Box::new([any, any]), &any_comparison);
-		self.add_method_primitive(any, "!=", Box::new([any, any]),  &any_difference);
-		self.add_method_primitive(any, ">",  Box::new([any, any]), &any_greater);
-		self.add_method_primitive(any, "<=", Box::new([any, any]), &any_lesser_equal);
-		self.add_method_primitive(any, ">=", Box::new([any, any]), &any_greater_equal);
+		self.add_method_primitive(any, "==", [any, any], &any_comparison);
+		self.add_method_primitive(any, "!=", [any, any], &any_difference);
+		self.add_method_primitive(any, ">",  [any, any], &any_greater);
+		self.add_method_primitive(any, "<=", [any, any], &any_lesser_equal);
+		self.add_method_primitive(any, ">=", [any, any], &any_greater_equal);
 
-		self.add_method_primitive(string, "to_string", Box::new([string]), &string_to_string);
-		self.add_method_primitive(string, "==",        Box::new([string, any]), &string_comparison);
-		self.add_method_primitive(string, "+",         Box::new([string, any]), &string_concatenation);
+		self.add_method_primitive(string, "to_string", [string],      &string_to_string);
+		self.add_method_primitive(string, "==",        [string, any], &string_comparison);
+		self.add_method_primitive(string, "+",         [string, any], &string_concatenation);
 	}
 }
 

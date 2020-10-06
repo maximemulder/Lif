@@ -1,3 +1,4 @@
+#![allow(incomplete_features)]
 #![allow(dead_code)]
 #![feature(const_fn)]
 #![feature(new_uninit)]
@@ -5,6 +6,7 @@
 #![feature(maybe_uninit_extra)]
 #![feature(unsize)]
 #![feature(drain_filter)]
+#![feature(const_generics)]
 
 mod element;
 mod elements;
