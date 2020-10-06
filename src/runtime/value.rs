@@ -63,6 +63,10 @@ impl<'a, 'b> GcValue<'a, 'b> {
 	pub fn call_method_self(self, engine: &mut Engine<'a, 'b>, name: &str, arguments: Vec<GcReference<'a, 'b>>) -> ReturnReference<'a, 'b> {
 		return self.get_method(name).unwrap().call(engine, arguments);
 	}
+
+	pub fn call_to_string(self, engine: &mut Engine<'a, 'b>) -> Return<'a, String> {
+		return Ok(self.call_method(engine, "to_string", Vec::new())?.read()?.data_string().clone());
+	}
 }
 
 impl<'a, 'b> GcValue<'a, 'b> {

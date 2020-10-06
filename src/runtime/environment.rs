@@ -155,8 +155,7 @@ fn primitive_assert<'a, 'b>(engine: &mut Engine<'a, 'b>, arguments: Vec<GcRefere
 }
 
 fn primitive_error<'a, 'b>(engine: &mut Engine<'a, 'b>, arguments: Vec<GcReference<'a, 'b>>) -> ReturnReference<'a, 'b> {
-	let reference = arguments[0].read()?.call_method(engine, "to_string", Vec::new())?;
-	println!("{}", reference.read()?.data_string());
+	println!("{}",  arguments[0].read()?.call_to_string(engine)?);
 	panic!();
 }
 
@@ -169,8 +168,7 @@ fn primitive_new<'a, 'b>(engine: &mut Engine<'a, 'b>, arguments: Vec<GcReference
 }
 
 fn primitive_print<'a, 'b>(engine: &mut Engine<'a, 'b>, arguments: Vec<GcReference<'a, 'b>>) -> ReturnReference<'a, 'b> {
-	let reference = arguments[0].read()?.call_method(engine, "to_string", Vec::new())?;
-	println!("{}", reference.read()?.data_string());
+	println!("{}", arguments[0].read()?.call_to_string(engine)?);
 	return Ok(engine.undefined());
 }
 
@@ -204,8 +202,7 @@ fn array_to_string<'a, 'b>(engine: &mut Engine<'a, 'b>, arguments: Vec<GcReferen
 	let mut string = String::from("[");
 	let elements = arguments[0].read()?.data_array().clone();
 	for element in elements.iter() {
-		let reference = element.read()?.call_method(engine, "to_string", Vec::new())?;
-		string.push_str(reference.read()?.data_string());
+		string.push_str(&element.read()?.call_to_string(engine)?);
 		string.push_str(", ");
 	}
 
@@ -319,8 +316,7 @@ fn object_to_string<'a, 'b>(engine: &mut Engine<'a, 'b>, arguments: Vec<GcRefere
 	for (name, attribute) in attributes {
 		string.push_str(&name);
 		string.push_str(": ");
-		let reference = attribute.read()?.call_method(engine, "to_string", Vec::new())?;
-		string.push_str(reference.read()?.data_string());
+		string.push_str(&attribute.read()?.call_to_string(engine)?);
 		string.push_str(", ");
 	}
 
@@ -386,6 +382,6 @@ fn string_comparison<'a, 'b>(engine: &mut Engine<'a, 'b>, arguments: Vec<GcRefer
 }
 
 fn string_concatenation<'a, 'b>(engine: &mut Engine<'a, 'b>, arguments: Vec<GcReference<'a, 'b>>) -> ReturnReference<'a, 'b> {
-	let right = arguments[1].read()?.call_method(engine, "to_string", Vec::new())?;
-	return Ok(engine.new_string(format!("{}{}", arguments[0].read()?.data_string(), right.read()?.data_string())));
+	let right = arguments[1].read()?.call_to_string(engine)?;
+	return Ok(engine.new_string(format!("{}{}", arguments[0].read()?.data_string(), right)));
 }
