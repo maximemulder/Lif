@@ -20,9 +20,8 @@ impl<'a> Operation<'a> {
 
 impl<'a> Executable<'a> for Operation<'a> {
 	fn execute<'b>(&'b self, engine: &mut Engine<'a, 'b>) -> ReturnReference<'a, 'b> {
-		let left  = execute!(engine, &self.left);
-		let right = execute!(engine, &self.right);
-
-		return left.read()?.get_method(&self.operator).unwrap().call(engine, vec![left, right]);
+		let left  = execute!(engine, &self.left).read()?;
+		let right = execute!(engine, &self.right).read()?;
+		return left.get_method(&self.operator).unwrap().call(engine, vec![left, right]);
 	}
 }

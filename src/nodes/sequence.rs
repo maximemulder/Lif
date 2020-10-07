@@ -28,7 +28,7 @@ impl<'a> Executable<'a> for Sequence<'a> {
 			arguments.push(execute!(engine, argument));
 		}
 
-		let array = engine.new_array(arguments);
+		let array = engine.new_array(arguments).read()?;
 		let mut name = String::new();
 		name.push_str(&self.open);
 		name.push_str(&self.close);

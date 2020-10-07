@@ -4,7 +4,6 @@ use crate::runtime::data::Callable;
 use crate::runtime::engine::{ Control, Engine };
 use crate::runtime::error::Error;
 use crate::runtime::gc::GcTraceable;
-use crate::runtime::reference::GcReference;
 use crate::runtime::scope::GcScope;
 use crate::runtime::value::GcValue;
 
@@ -28,7 +27,7 @@ impl<'a, 'b> Function<'a, 'b> {
 }
 
 impl<'a, 'b> Callable<'a, 'b> for Function<'a, 'b> {
-	fn execute(&self, engine: &mut Engine<'a, 'b>, arguments: Vec<GcReference<'a, 'b>>) -> ReturnReference<'a, 'b> {
+	fn execute(&self, engine: &mut Engine<'a, 'b>, arguments: Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b> {
 		if arguments.len() != self.parameters.len() {
 			return Err(Error::new_arguments(self.parameters.len(), arguments.len()));
 		}
@@ -36,7 +35,7 @@ impl<'a, 'b> Callable<'a, 'b> for Function<'a, 'b> {
 		engine.push_frame(self.scope);
 		for (parameter, argument) in self.parameters.iter().zip(arguments) {
 			let mut reference = engine.execute(parameter)?;
-			reference.write(argument.read()?)?;
+			reference.write(argument)?;
 		}
 
 		let reference = engine.execute(self.block)?;

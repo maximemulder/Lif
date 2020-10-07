@@ -50,17 +50,17 @@ impl<'a, 'b> GcValue<'a, 'b> {
 		return self.class.data_class().get_method(name);
 	}
 
-	pub fn call(self, engine: &mut Engine<'a, 'b>, arguments: Vec<GcReference<'a, 'b>>) -> ReturnReference<'a, 'b> {
+	pub fn call(self, engine: &mut Engine<'a, 'b>, arguments: Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b> {
 		let callable = self.data_callable().duplicate();
 		return callable.execute(engine, arguments);
 	}
 
-	pub fn call_method(self, engine: &mut Engine<'a, 'b>, name: &str, mut arguments: Vec<GcReference<'a, 'b>>) -> ReturnReference<'a, 'b> {
-		arguments.insert(0, engine.new_reference(self));
+	pub fn call_method(self, engine: &mut Engine<'a, 'b>, name: &str, mut arguments: Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b> {
+		arguments.insert(0, self);
 		return self.call_method_self(engine, name, arguments);
 	}
 
-	pub fn call_method_self(self, engine: &mut Engine<'a, 'b>, name: &str, arguments: Vec<GcReference<'a, 'b>>) -> ReturnReference<'a, 'b> {
+	pub fn call_method_self(self, engine: &mut Engine<'a, 'b>, name: &str, arguments: Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b> {
 		return self.get_method(name).unwrap().call(engine, arguments);
 	}
 

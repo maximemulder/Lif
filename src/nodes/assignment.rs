@@ -25,12 +25,13 @@ impl<'a> Assignment<'a> {
 impl<'a> Executable<'a> for Assignment<'a> {
 	fn execute<'b>(&'b self, engine: &mut Engine<'a, 'b>) -> ReturnReference<'a, 'b> {
 		let mut reference  = execute!(engine, &self.reference);
-		let mut expression = execute!(engine, &self.expression);
+		let mut expression = execute!(engine, &self.expression).read()?;
 		if let Some(operator) = &self.operator {
-			expression = reference.read()?.get_method(operator).unwrap().call(engine, vec![reference, expression])?;
+			let left = reference.read()?;
+			expression = left.get_method(operator).unwrap().call(engine, vec![left, expression])?.read()?;
 		}
 
-		reference.write(expression.read()?)?;
+		reference.write(expression)?;
 		return Ok(engine.undefined());
 	}
 }
