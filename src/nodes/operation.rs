@@ -20,13 +20,6 @@ impl<'a> Operation<'a> {
 
 impl<'a> Executable<'a> for Operation<'a> {
 	fn execute<'b>(&'b self, engine: &mut Engine<'a, 'b>) -> ReturnReference<'a, 'b> {
-		if self.operator.to_string() == "=" {
-			let mut left  = execute!(engine, &self.left);
-			let right = execute!(engine, &self.right).read()?;
-			left.write(right)?;
-			return Ok(engine.undefined());
-		}
-
 		let left  = execute!(engine, &self.left);
 		let right = execute!(engine, &self.right);
 

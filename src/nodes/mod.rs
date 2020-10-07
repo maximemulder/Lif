@@ -19,6 +19,7 @@ pub mod r#loop;
 pub mod r#while;
 pub mod do_while;
 pub mod for_in;
+pub mod assignment;
 pub mod operation;
 pub mod chain;
 pub mod method;

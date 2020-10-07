@@ -143,6 +143,27 @@ pub fn run<'a>(code: &Code, tokens: &Vec<Node<'a>>) -> Option<Node<'a>> {
 		}}
 	}
 
+	macro_rules! create_assignment {
+		( $child:expr, $tokens:expr ) => {
+			descents.create(DescentAscent::new($child, {
+				let ascent = ascents.declare();
+				ascents.define(ascent, AscentExtension::new(
+					descents.create(DescentSequence::new(vec![
+						descents.create(DescentChoice::new($tokens)),
+						$child,
+					])),
+					ascents.create(AscentList::new(vec![
+						ascent,
+						ascents.create(AscentElement::new(&elements::expressions::EXPRESSION)),
+						ascents.create(AscentElement::new(&elements::expressions::ASSIGNMENT)),
+					]))
+				));
+
+				ascent
+			}))
+		}
+	}
+
 	macro_rules! create_list {
 		( $element:expr, $separator:expr ) => {{
 			descents.create(DescentSequence::new(vec![
@@ -369,7 +390,7 @@ pub fn run<'a>(code: &Code, tokens: &Vec<Node<'a>>) -> Option<Node<'a>> {
 
 	let operation_11 = create_operation!(operation_10, vec![symbol_dot_d, symbol_dot_d_eq]);
 
-	let operation_12 = create_operation!(operation_11, vec![symbol_equal, symbol_plus_eq, symbol_minus_eq, symbol_asterisk_eq, symbol_slash_eq,
+	let operation_12 = create_assignment!(operation_11, vec![symbol_equal, symbol_plus_eq, symbol_minus_eq, symbol_asterisk_eq, symbol_slash_eq,
 		symbol_percent_eq, symbol_asterisk_d_eq, symbol_guillemet_l_d_eq, symbol_guillemet_r_d_eq, symbol_guillemet_l_t_eq, symbol_guillemet_r_t_eq,
 		symbol_ampersand_eq, symbol_caret_eq, symbol_pipe_eq, symbol_ampersand_d_eq, symbol_pipe_d_eq
 	]);

@@ -8,6 +8,7 @@ use crate::nodes::do_while::DoWhile;
 use crate::nodes::for_in::ForIn;
 use crate::nodes::statement::Statement;
 use crate::nodes::statements::Statements;
+use crate::nodes::assignment::Assignment;
 use crate::nodes::operation::Operation;
 use crate::nodes::chain::Chain;
 use crate::nodes::method::Method;
@@ -62,6 +63,7 @@ fn expression<'a>(text: &'a str, node: &'a SyntaxNode<'a>) -> Node<'a> {
 		&elements::expressions::ARRAY       => array(text, child),
 		&elements::expressions::METHOD      => method(text, child),
 		&elements::expressions::SEQUENCE    => sequence(text, child),
+		&elements::expressions::ASSIGNMENT  => assignment(text, child),
 		&elements::expressions::OPERATION   => operation(text, child),
 		_ => panic!(),
 	};
@@ -234,6 +236,10 @@ fn expressions<'a>(text: &'a str, node: &'a SyntaxNode<'a>) -> Box<[Node<'a>]> {
 	}
 
 	return expressions.into_boxed_slice();
+}
+
+fn assignment<'a>(text: &'a str, node: &'a SyntaxNode<'a>) -> Node<'a> {
+	return Node::new(node, Assignment::new(expression(text, &node.children()[0]), expression(text, &node.children()[2]), token(text, &node.children()[1])));
 }
 
 fn operation<'a>(text: &'a str, node: &'a SyntaxNode<'a>) -> Node<'a> {

@@ -10,4 +10,5 @@ pub const LET:        Element = Element::new("LET");
 pub const ARRAY:      Element = Element::new("ARRAY");
 pub const GROUP:      Element = Element::new("GROUP");
 pub const LITERAL:    Element = Element::new("LITERAL");
+pub const ASSIGNMENT: Element = Element::new("ASSIGNMENT");
 pub const OPERATION:  Element = Element::new("OPERATION");
