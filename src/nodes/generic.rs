@@ -3,21 +3,21 @@ use crate::runtime::ReturnReference;
 use crate::runtime::engine::Engine;
 
 pub struct Generic<'a> {
-	parameters: Box<[&'a str]>,
-	node: Node<'a>,
+    parameters: Box<[&'a str]>,
+    node: Node<'a>,
 }
 
 impl<'a> Generic<'a> {
-	pub fn new(parameters: Box<[&'a str]>, node: Node<'a>) -> Self {
-		return Self {
-			parameters,
-			node,
-		};
-	}
+    pub fn new(parameters: Box<[&'a str]>, node: Node<'a>) -> Self {
+        return Self {
+            parameters,
+            node,
+        };
+    }
 }
 
 impl<'a> Executable<'a> for Generic<'a> {
-	fn execute<'b>(&'b self, engine: &mut Engine<'a, 'b>) -> ReturnReference<'a, 'b> {
-		return Ok(engine.new_generic(&self.parameters, &self.node));
-	}
+    fn execute<'b>(&'b self, engine: &mut Engine<'a, 'b>) -> ReturnReference<'a, 'b> {
+        return Ok(engine.new_generic(&self.parameters, &self.node));
+    }
 }

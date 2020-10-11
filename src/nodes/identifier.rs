@@ -3,19 +3,19 @@ use crate::runtime::ReturnReference;
 use crate::runtime::engine::Engine;
 
 pub struct Identifier<'a> {
-	identifier: &'a str,
+    identifier: &'a str,
 }
 
 impl<'a> Identifier<'a> {
-	pub fn new(identifier: &'a str) -> Self {
-		return Self {
-			identifier,
-		};
-	}
+    pub fn new(identifier: &'a str) -> Self {
+        return Self {
+            identifier,
+        };
+    }
 }
 
 impl<'a> Executable<'a> for Identifier<'a> {
-	fn execute<'b>(&'b self, engine: &mut Engine<'a, 'b>) -> ReturnReference<'a, 'b> {
-		return engine.get_variable(&self.identifier);
-	}
+    fn execute<'b>(&'b self, engine: &mut Engine<'a, 'b>) -> ReturnReference<'a, 'b> {
+        return engine.get_variable(&self.identifier);
+    }
 }

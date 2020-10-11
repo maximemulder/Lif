@@ -5,14 +5,14 @@ use crate::node::{ Type, Node };
 pub fn tokens(code: &Code, nodes: &Vec<Node>) {
     for node in nodes {
         match &node.r#type {
-			Type::Token(_, _) => println!("{} {:?}", node.element.name, code.node_str(node)),
+            Type::Token(_, _) => println!("{} {:?}", node.element.name, code.node_str(node)),
             Type::Production(children) => tokens(code, children),
         }
     }
 }
 
 pub fn tree(tree: &Node) {
-	node(tree, String::from(""), String::from(""));
+    node(tree, String::from(""), String::from(""));
 }
 
 fn node(tree: &Node, prefix: String, infix: String) {
