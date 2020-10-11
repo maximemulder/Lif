@@ -7,6 +7,7 @@
 #![feature(unsize)]
 #![feature(drain_filter)]
 #![feature(const_generics)]
+#![feature(const_fn_fn_ptr_basics)]
 
 mod element;
 mod elements;
