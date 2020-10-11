@@ -6,12 +6,12 @@ pub struct True;
 
 impl True {
     pub fn new() -> Self {
-        return Self;
+        Self
     }
 }
 
 impl<'a> Executable<'a> for True {
     fn execute<'b>(&'b self, engine: &mut Engine<'a, 'b>) -> ReturnReference<'a, 'b> {
-        return Ok(engine.new_boolean(true));
+        Ok(engine.new_boolean(true))
     }
 }

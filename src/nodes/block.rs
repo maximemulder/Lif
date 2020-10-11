@@ -9,10 +9,10 @@ pub struct Block<'a> {
 
 impl<'a> Block<'a> {
     pub fn new(statements: Node<'a>, expression: Option<Node<'a>>) -> Self {
-        return Self {
+        Self {
             statements,
             expression,
-        };
+        }
     }
 }
 
@@ -27,6 +27,6 @@ impl<'a> Executable<'a> for Block<'a> {
         };
 
         engine.pop_scope();
-        return Ok(reference);
+        Ok(reference)
     }
 }

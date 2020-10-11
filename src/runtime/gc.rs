@@ -15,15 +15,15 @@ pub struct Gc<T> {
 
 impl<T> Gc<T> {
     pub fn new() -> Self {
-        return Self {
+        Self {
             refs: Vec::new(),
-        };
+        }
     }
 
     pub fn alloc(&mut self, object: T) -> GcRef<T> {
         let r#ref = GcRef::new(Box::into_raw(Box::new(GcObject::new(object))));
         self.refs.push(r#ref);
-        return r#ref;
+        r#ref
     }
 
     pub fn collect(&mut self) {
@@ -46,10 +46,10 @@ struct GcObject<T> {
 
 impl<T> GcObject<T> {
     fn new(object: T) -> Self {
-        return Self {
+        Self {
             object,
             flag: false,
-        };
+        }
     }
 }
 
@@ -59,15 +59,15 @@ pub struct GcRef<T> {
 
 impl<T> GcRef<T> {
     pub fn null() -> Self {
-        return Self {
+        Self {
             pointer: std::ptr::null_mut(),
-        };
+        }
     }
 
     fn new(pointer: *mut GcObject<T>) -> Self {
-        return Self {
+        Self {
             pointer,
-        };
+        }
     }
 
     fn mark(&mut self) {
@@ -75,7 +75,7 @@ impl<T> GcRef<T> {
     }
 
     fn flag(&self) -> bool {
-        return unsafe { self.pointer.as_ref() }.unwrap().flag;
+        unsafe { self.pointer.as_ref() }.unwrap().flag
     }
 
     fn reset(&mut self) {
@@ -94,7 +94,7 @@ impl<T> GcRef<T> {
             self.free();
         }
 
-        return flag;
+        flag
     }
 }
 
@@ -111,19 +111,19 @@ impl<T> Deref for GcRef<T> {
     type Target = T;
 
     fn deref(&self) -> &Self::Target {
-        return &unsafe { self.pointer.as_ref().unwrap() }.object;
+        &unsafe { self.pointer.as_ref().unwrap() }.object
     }
 }
 
 impl<T> DerefMut for GcRef<T> {
     fn deref_mut(&mut self) -> &mut Self::Target {
-        return &mut unsafe { self.pointer.as_mut().unwrap() }.object;
+        &mut unsafe { self.pointer.as_mut().unwrap() }.object
     }
 }
 
 impl<T> PartialEq for GcRef<T> {
     fn eq(&self, other: &GcRef<T>) -> bool {
-        return self.pointer == other.pointer;
+        self.pointer == other.pointer
     }
 }
 
@@ -131,9 +131,9 @@ impl<T> Eq for GcRef<T> {}
 
 impl<T> Clone for GcRef<T> {
     fn clone(&self) -> Self {
-        return Self {
+        Self {
             pointer: self.pointer,
-        };
+        }
     }
 }
 

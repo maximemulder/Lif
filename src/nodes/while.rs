@@ -9,10 +9,10 @@ pub struct While<'a> {
 
 impl<'a> While<'a> {
     pub fn new(condition: Node<'a>, body: Node<'a>) -> Self {
-        return Self {
+        Self {
             condition,
             body,
-        };
+        }
     }
 }
 
@@ -41,6 +41,6 @@ impl<'a> Executable<'a> for While<'a> {
             }
         }
 
-        return Ok(engine.new_array(array));
+        Ok(engine.new_array(array))
     }
 }

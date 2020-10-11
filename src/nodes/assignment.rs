@@ -10,7 +10,7 @@ pub struct Assignment<'a> {
 
 impl<'a> Assignment<'a> {
     pub fn new(reference: Node<'a>, expression: Node<'a>, operator: &'a str) -> Self {
-        return Self {
+        Self {
             reference,
             expression,
             operator: if operator.len() > 1 {
@@ -18,7 +18,7 @@ impl<'a> Assignment<'a> {
             } else {
                 None
             },
-        };
+        }
     }
 }
 
@@ -32,6 +32,6 @@ impl<'a> Executable<'a> for Assignment<'a> {
         }
 
         reference.write(expression)?;
-        return Ok(engine.undefined());
+        Ok(engine.undefined())
     }
 }

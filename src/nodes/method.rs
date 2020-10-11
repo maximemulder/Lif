@@ -11,11 +11,11 @@ pub struct Method<'a> {
 
 impl<'a> Method<'a> {
     pub fn new(expression: Node<'a>, member: &'a str, expressions: Box<[Node<'a>]>) -> Self {
-        return Self {
+        Self {
             expression,
             member,
             expressions,
-        };
+        }
     }
 }
 
@@ -32,6 +32,6 @@ impl<'a> Executable<'a> for Method<'a> {
             return method.call(engine, arguments);
         }
 
-        return Err(Error::new_undefined_method(&self.member, this.class));
+        Err(Error::new_undefined_method(&self.member, this.class))
     }
 }

@@ -14,37 +14,37 @@ pub struct Node<'a> {
 
 impl<'a> Node<'a> {
     pub fn new_token(element: &'a Element, delimiters: (usize, usize)) -> Self {
-        return Self {
+        Self {
             element,
             r#type: Type::Token(delimiters.0, delimiters.1),
-        };
+        }
     }
 
     pub fn new_production(element: &'a Element, children: Vec<Node<'a>>) -> Self {
-        return Self {
+        Self {
             element,
             r#type: Type::Production(children),
-        };
+        }
     }
 
     pub fn children(&self) -> &Vec<Node<'a>> {
-        return match &self.r#type {
+        match &self.r#type {
             Type::Production(children) => children,
             Type::Token(_, _) => panic!(),
-        };
+        }
     }
 
     pub fn left(&self) -> usize {
-        return match &self.r#type {
+        match &self.r#type {
             Type::Production(children) => children.first().unwrap().left(),
             Type::Token(left, _) => *left,
-        };
+        }
     }
 
     pub fn right(&self) -> usize {
-        return match &self.r#type {
+        match &self.r#type {
             Type::Production(children) => children.last().unwrap().right(),
             Type::Token(_, right) => *right,
-        };
+        }
     }
 }

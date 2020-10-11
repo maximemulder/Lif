@@ -10,11 +10,11 @@ pub struct Function<'a> {
 
 impl<'a> Function<'a> {
     pub fn new(parameters: Box<[Node<'a>]>, r#type: Option<Node<'a>>, block: Node<'a>) -> Self {
-        return Self {
+        Self {
             parameters,
             r#type,
             block,
-        };
+        }
     }
 }
 
@@ -26,6 +26,6 @@ impl<'a> Executable<'a> for Function<'a> {
             None
         };
 
-        return Ok(engine.new_function(&self.parameters, r#type, &self.block));
+        Ok(engine.new_function(&self.parameters, r#type, &self.block))
     }
 }

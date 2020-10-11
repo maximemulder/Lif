@@ -7,14 +7,14 @@ pub struct Return<'a> {
 
 impl<'a> Return<'a> {
     pub fn new(expression: Option<Node<'a>>) -> Self {
-        return Self {
+        Self {
             expression,
-        };
+        }
     }
 }
 
 impl<'a> Executable<'a> for Return<'a> {
     fn execute<'b>(&'b self, engine: &mut Engine<'a, 'b>) -> ReturnReference<'a, 'b> {
-        return engine.control_new(Control::Return, &self.expression);
+        engine.control_new(Control::Return, &self.expression)
     }
 }

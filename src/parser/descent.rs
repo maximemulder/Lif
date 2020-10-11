@@ -12,15 +12,15 @@ pub struct DescentAlias {
 
 impl DescentAlias {
     pub fn new(descent: usize) -> Self {
-        return Self {
+        Self {
             descent,
-        };
+        }
     }
 }
 
 impl<'a> Descent<'a> for DescentAlias {
     fn descent(&self, parser: &mut Parser<'a, '_>) -> Option<Vec<Node<'a>>> {
-        return parser.descent(self.descent);
+        parser.descent(self.descent)
     }
 }
 
@@ -31,10 +31,10 @@ pub struct DescentAscent {
 
 impl DescentAscent {
     pub fn new(descent: usize, ascent: usize) -> Self {
-        return Self {
+        Self {
             descent,
             ascent,
-        };
+        }
     }
 }
 
@@ -44,7 +44,7 @@ impl<'a> Descent<'a> for DescentAscent {
             return parser.ascent(self.ascent, nodes);
         }
 
-        return None;
+        None
     }
 }
 
@@ -54,9 +54,9 @@ pub struct DescentChoice {
 
 impl DescentChoice {
     pub fn new(descents: Vec<usize>) -> Self {
-        return Self {
+        Self {
             descents,
-        };
+        }
     }
 }
 
@@ -68,7 +68,7 @@ impl<'a> Descent<'a> for DescentChoice {
             }
         }
 
-        return None;
+        None
     }
 }
 
@@ -78,9 +78,9 @@ pub struct DescentSequence {
 
 impl DescentSequence {
     pub fn new(descents: Vec<usize>) -> Self {
-        return Self {
+        Self {
             descents,
-        };
+        }
     }
 }
 
@@ -95,7 +95,7 @@ impl<'a> Descent<'a> for DescentSequence {
             }
         }
 
-        return Some(nodes);
+        Some(nodes)
     }
 }
 
@@ -105,9 +105,9 @@ pub struct DescentZeroOrMore {
 
 impl DescentZeroOrMore {
     pub fn new(descent: usize) -> Self {
-        return Self {
+        Self {
             descent,
-        };
+        }
     }
 }
 
@@ -118,7 +118,7 @@ impl<'a> Descent<'a> for DescentZeroOrMore {
             nodes.extend(children);
         }
 
-        return Some(nodes);
+        Some(nodes)
     }
 }
 
@@ -128,9 +128,9 @@ pub struct DescentOneOrMore {
 
 impl DescentOneOrMore {
     pub fn new(descent: usize) -> Self {
-        return Self {
+        Self {
             descent,
-        };
+        }
     }
 }
 
@@ -141,11 +141,11 @@ impl<'a> Descent<'a> for DescentOneOrMore {
             nodes.extend(children);
         }
 
-        return if !nodes.is_empty() {
+        if !nodes.is_empty() {
             Some(nodes)
         } else {
             None
-        };
+        }
     }
 }
 
@@ -155,9 +155,9 @@ pub struct DescentOption {
 
 impl DescentOption {
     pub fn new(descent: usize) -> Self {
-        return Self {
+        Self {
             descent,
-        };
+        }
     }
 }
 
@@ -168,7 +168,7 @@ impl<'a> Descent<'a> for DescentOption {
             return nodes;
         }
 
-        return Some(Vec::new());
+        Some(Vec::new())
     }
 }
 
@@ -178,19 +178,19 @@ pub struct DescentPredicateAnd {
 
 impl DescentPredicateAnd {
     pub fn new(descent: usize) -> Self {
-        return Self {
+        Self {
             descent,
-        };
+        }
     }
 }
 
 impl<'a> Descent<'a> for DescentPredicateAnd {
     fn descent(&self, parser: &mut Parser<'a, '_>) -> Option<Vec<Node<'a>>> {
-        return if parser.descent_predicate(self.descent) {
+        if parser.descent_predicate(self.descent) {
             Some(Vec::new())
         } else {
             None
-        };
+        }
     }
 }
 
@@ -200,19 +200,19 @@ pub struct DescentPredicateNot {
 
 impl DescentPredicateNot {
     pub fn new(descent: usize) -> Self {
-        return Self {
+        Self {
             descent,
-        };
+        }
     }
 }
 
 impl<'a> Descent<'a> for DescentPredicateNot {
     fn descent(&self, parser: &mut Parser<'a, '_>) -> Option<Vec<Node<'a>>> {
-        return if parser.descent_predicate(self.descent) {
+        if parser.descent_predicate(self.descent) {
             None
         } else {
             Some(Vec::new())
-        };
+        }
     }
 }
 
@@ -223,20 +223,20 @@ pub struct DescentElement<'a> {
 
 impl<'a> DescentElement<'a> {
     pub fn new(descent: usize, element: &'a Element) -> Self {
-        return Self {
+        Self {
             descent,
             element,
-        };
+        }
     }
 }
 
 impl<'a> Descent<'a> for DescentElement<'a> {
     fn descent(&self, parser: &mut Parser<'a, '_>) -> Option<Vec<Node<'a>>> {
-        return if let Some(nodes) = parser.descent(self.descent) {
+        if let Some(nodes) = parser.descent(self.descent) {
             Some(vec![Node::new_production(self.element, nodes)])
         } else {
             None
-        };
+        }
     }
 }
 
@@ -246,9 +246,9 @@ pub struct DescentToken<'a> {
 
 impl<'a> DescentToken<'a> {
     pub fn new(element: &'a Element) -> Self {
-        return Self {
+        Self {
             element,
-        };
+        }
     }
 }
 
@@ -260,6 +260,6 @@ impl<'a> Descent<'a> for DescentToken<'a> {
             }
         }
 
-        return None;
+        None
     }
 }

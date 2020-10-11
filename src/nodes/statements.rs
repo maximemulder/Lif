@@ -8,9 +8,9 @@ pub struct Statements<'a> {
 
 impl<'a> Statements<'a> {
     pub fn new(statements: Vec<Node<'a>>) -> Self {
-        return Self {
+        Self {
             statements,
-        };
+        }
     }
 }
 
@@ -20,6 +20,6 @@ impl<'a> Executable<'a> for Statements<'a> {
             execute!(engine, statement);
         }
 
-        return Ok(engine.undefined());
+        Ok(engine.undefined())
     }
 }

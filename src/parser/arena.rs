@@ -8,15 +8,15 @@ pub struct Arena<T: ?Sized> {
 
 impl<T: ?Sized> Arena<T> {
     pub fn new() -> Self {
-        return Self {
+        Self {
             elements: RefCell::new(Vec::new()),
-        };
+        }
     }
 
     pub fn declare(&self) -> usize {
         let index = self.elements.borrow().len();
         self.elements.borrow_mut().push(MaybeUninit::uninit());
-        return index;
+        index
     }
 
     pub fn define<N: Unsize<T>>(&self, index: usize, element: N) {
@@ -26,14 +26,14 @@ impl<T: ?Sized> Arena<T> {
     pub fn create<N: Unsize<T>>(&self, element: N) -> usize {
         let index = self.declare();
         self.define(index, element);
-        return index;
+        index
     }
 
     pub fn get(&self, index: usize) -> Ref<Box<T>> {
-        return Ref::map(self.elements.borrow(), |elements| unsafe { elements[index].as_ptr().as_ref().unwrap() });
+        Ref::map(self.elements.borrow(), |elements| unsafe { elements[index].as_ptr().as_ref().unwrap() })
     }
 
     pub fn get_mut(&self, index: usize) -> RefMut<Box<T>> {
-        return RefMut::map(self.elements.borrow_mut(), |elements| unsafe { elements[index].as_mut_ptr().as_mut().unwrap() });
+        RefMut::map(self.elements.borrow_mut(), |elements| unsafe { elements[index].as_mut_ptr().as_mut().unwrap() })
     }
 }

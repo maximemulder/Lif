@@ -14,80 +14,80 @@ pub struct Value<'a, 'b> {
 
 impl<'a, 'b> Value<'a, 'b> {
     pub fn new(class: GcValue<'a, 'b>, data: Data<'a, 'b>) -> Self {
-        return Self {
+        Self {
             class,
             data,
-        };
+        }
     }
 }
 
 impl<'a, 'b> GcValue<'a, 'b> {
     pub fn is(self, other: GcValue<'a, 'b>) -> bool {
-        return if self == other {
+        if self == other {
             true
         } else if let Some(parent) = self.data_class().parent {
             parent.is(other)
         } else {
             false
-        };
+        }
     }
 
     pub fn isa(self, other: GcValue<'a, 'b>) -> bool {
-        return self.class.is(other);
+        self.class.is(other)
     }
 
     pub fn cast(self, other: GcValue<'a, 'b>) -> Return<'a, ()> {
-        return if self.isa(other) {
+        if self.isa(other) {
             Ok(())
         } else {
             Err(Error::new_cast(self, other))
-        };
+        }
     }
 }
 
 impl<'a, 'b> GcValue<'a, 'b> {
     pub fn get_method(&self, name: &str) -> Option<GcValue<'a, 'b>> {
-        return self.class.data_class().get_method(name);
+        self.class.data_class().get_method(name)
     }
 
     pub fn call(self, engine: &mut Engine<'a, 'b>, arguments: Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b> {
         let callable = self.data_callable().duplicate();
-        return callable.execute(engine, arguments);
+        callable.execute(engine, arguments)
     }
 
     pub fn call_method(self, engine: &mut Engine<'a, 'b>, name: &str, mut arguments: Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b> {
         arguments.insert(0, self);
-        return self.call_method_self(engine, name, arguments);
+        self.call_method_self(engine, name, arguments)
     }
 
     pub fn call_method_self(self, engine: &mut Engine<'a, 'b>, name: &str, arguments: Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b> {
-        return self.get_method(name).unwrap().call(engine, arguments);
+        self.get_method(name).unwrap().call(engine, arguments)
     }
 
     pub fn call_to_string(self, engine: &mut Engine<'a, 'b>) -> Return<'a, String> {
-        return Ok(self.call_method(engine, "to_string", Vec::new())?.read()?.data_string().clone());
+        Ok(self.call_method(engine, "to_string", Vec::new())?.read()?.data_string().clone())
     }
 }
 
 impl<'a, 'b> GcValue<'a, 'b> {
     pub fn get_cast_array(&self, engine: &Engine<'a, 'b>) -> Return<'a, &Vec<GcReference<'a, 'b>>> {
         self.cast(engine.environment.array)?;
-        return Ok(self.data_array());
+        Ok(self.data_array())
     }
 
     pub fn get_cast_boolean(&self, engine: &Engine<'a, 'b>) -> Return<'a, &bool> {
         self.cast(engine.environment.boolean)?;
-        return Ok(self.data_boolean());
+        Ok(self.data_boolean())
     }
 
     pub fn get_cast_callable(&self, engine: &Engine<'a, 'b>) -> Return<'a, &dyn Callable<'a, 'b>> {
         self.cast(engine.environment.function)?;
-        return Ok(self.data_callable());
+        Ok(self.data_callable())
     }
 
     pub fn get_cast_string(&self, engine: &Engine<'a, 'b>) -> Return<'a, &String> {
         self.cast(engine.environment.string)?;
-        return Ok(self.data_string());
+        Ok(self.data_string())
     }
 }
 

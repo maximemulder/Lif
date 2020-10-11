@@ -10,11 +10,11 @@ pub struct ForIn<'a> {
 
 impl<'a> ForIn<'a> {
     pub fn new(identifier: &'a str, expression: Node<'a>, body: Node<'a>) -> Self {
-        return Self {
+        Self {
             identifier,
             expression,
             body,
-        };
+        }
     }
 }
 
@@ -44,6 +44,6 @@ impl<'a> Executable<'a> for ForIn<'a> {
             }
         }
 
-        return Ok(engine.new_array(array));
+        Ok(engine.new_array(array))
     }
 }

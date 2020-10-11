@@ -8,9 +8,9 @@ pub struct Object<'a, 'b> {
 
 impl Object<'_, '_> {
     pub fn new() -> Self {
-        return Self {
+        Self {
             attributes: HashMap::new(),
-        };
+        }
     }
 }
 

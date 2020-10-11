@@ -8,17 +8,17 @@ pub struct Error<'a> {
 
 impl Error<'_> {
     fn new(message: String) -> Self {
-        return Self {
+        Self {
             message: Box::from(message),
             node: None
-        };
+        }
     }
 
     pub fn new_runtime(error: &str) -> Self {
         let mut message = String::new();
         message += "RUNTIME ERROR: ";
         message += error;
-        return Self::new(message);
+        Self::new(message)
     }
 
     pub fn new_undefined_method(method: &str, class: GcValue) -> Self {
@@ -33,7 +33,7 @@ impl Error<'_> {
         }
 
         message += ".";
-        return Self::new(message);
+        Self::new(message)
     }
 
     pub fn new_undeclared_variable(variable: &str) -> Self {
@@ -41,19 +41,19 @@ impl Error<'_> {
         message += "RUNTIME ERROR: Variable \"";
         message += variable;
         message += "\" is not declared.";
-        return Self::new(message);
+        Self::new(message)
     }
 
     pub fn new_control() -> Self {
-        return Self::new(String::from("RUNTIME ERROR: Cannot loop control out of a function."));
+        Self::new(String::from("RUNTIME ERROR: Cannot loop control out of a function."))
     }
 
     pub fn new_undefined() -> Self {
-        return Self::new(String::from("RUNTIME ERROR: Cannot read an undefined reference."));
+        Self::new(String::from("RUNTIME ERROR: Cannot read an undefined reference."))
     }
 
     pub fn new_constant_write() -> Self {
-        return Self::new(String::from("RUNTIME ERROR: Cannot write data into a constant."));
+        Self::new(String::from("RUNTIME ERROR: Cannot write data into a constant."))
     }
 
     pub fn new_arguments(parameters: usize, arguments: usize) -> Self {
@@ -63,7 +63,7 @@ impl Error<'_> {
         message += " arguments while the function expects ";
         message += &parameters.to_string();
         message += " parameters.";
-        return Self::new(message);
+        Self::new(message)
     }
 
     pub fn new_cast(value: GcValue, r#type: GcValue) -> Self {
@@ -87,6 +87,6 @@ impl Error<'_> {
         }
 
         message += ".";
-        return Self::new(message);
+        Self::new(message)
     }
 }

@@ -8,14 +8,14 @@ pub struct Break<'a> {
 
 impl<'a> Break<'a> {
     pub fn new(expression: Option<Node<'a>>) -> Self {
-        return Self {
+        Self {
             expression,
-        };
+        }
     }
 }
 
 impl<'a> Executable<'a> for Break<'a> {
     fn execute<'b>(&'b self, engine: &mut Engine<'a, 'b>) -> ReturnReference<'a, 'b> {
-        return engine.control_new(Control::Break, &self.expression);
+        engine.control_new(Control::Break, &self.expression)
     }
 }

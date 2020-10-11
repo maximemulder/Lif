@@ -10,17 +10,17 @@ pub struct If<'a> {
 
 impl<'a> If<'a> {
     pub fn new(condition: Node<'a>, then: Node<'a>, r#else: Option<Node<'a>>) -> Self {
-        return Self {
+        Self {
             condition,
             then,
             r#else,
-        };
+        }
     }
 }
 
 impl<'a> Executable<'a> for If<'a> {
     fn execute<'b>(&'b self, engine: &mut Engine<'a, 'b>) -> ReturnReference<'a, 'b> {
-        return if {
+        if {
             let reference = execute!(engine, &self.condition);
             *reference.read()?.get_cast_boolean(engine)?
         } {

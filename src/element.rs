@@ -5,8 +5,8 @@ pub struct Element {
 
 impl Element {
     pub const fn new(name: &'static str) -> Self {
-        return Self {
+        Self {
             name,
-        };
+        }
     }
 }

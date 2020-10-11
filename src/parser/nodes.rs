@@ -418,5 +418,5 @@ pub fn run<'a>(code: &Code, tokens: &Vec<Node<'a>>) -> Option<Node<'a>> {
     ));
 
     let mut parser = Parser::new(code, tokens, &descents, &ascents);
-    return parser.parse(program);
+    parser.parse(program)
 }

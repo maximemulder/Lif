@@ -8,14 +8,14 @@ pub struct Group<'a> {
 
 impl<'a> Group<'a> {
     pub fn new(expression: Node<'a>) -> Self {
-        return Self {
+        Self {
             expression,
-        };
+        }
     }
 }
 
 impl<'a> Executable<'a> for Group<'a> {
     fn execute<'b>(&'b self, engine: &mut Engine<'a, 'b>) -> ReturnReference<'a, 'b> {
-        return engine.execute(&self.expression);
+        engine.execute(&self.expression)
     }
 }

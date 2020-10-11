@@ -7,9 +7,9 @@ pub struct Generic<'a, 'b> {
 
 impl<'a, 'b> Generic<'a, 'b> {
     pub fn new(generics: &'b Box<[&'a str]>, node: &'b dyn Executable<'a>) -> Self {
-        return Self {
+        Self {
             generics,
             node,
-        };
+        }
     }
 }

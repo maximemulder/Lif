@@ -9,10 +9,10 @@ pub struct DoWhile<'a> {
 
 impl<'a> DoWhile<'a> {
     pub fn new(body: Node<'a>, condition: Node<'a>) -> Self {
-        return Self {
+        Self {
             body,
             condition,
-        };
+        }
     }
 }
 
@@ -45,6 +45,6 @@ impl<'a> Executable<'a> for DoWhile<'a> {
             }
         }
 
-        return Ok(engine.new_array(array));
+        Ok(engine.new_array(array))
     }
 }

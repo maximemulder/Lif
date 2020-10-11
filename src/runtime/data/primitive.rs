@@ -13,10 +13,10 @@ pub struct Primitive<'a, 'b> {
 
 impl<'a, 'b> Primitive<'a, 'b> {
     pub fn new(parameters: Box<[GcValue<'a, 'b>]>, callback: &'b dyn Fn(&mut Engine<'a, 'b>, Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b>) -> Self {
-        return Self {
+        Self {
             parameters,
             callback,
-        };
+        }
     }
 }
 
@@ -30,11 +30,11 @@ impl<'a, 'b> Callable<'a, 'b> for Primitive<'a, 'b> {
             argument.cast(*parameter)?;
         }
 
-        return (self.callback)(engine, arguments);
+        (self.callback)(engine, arguments)
     }
 
     fn duplicate<'c>(&'c self) -> Box<dyn Callable<'a, 'b> + 'c> {
-        return Box::new(self.clone());
+        Box::new(self.clone())
     }
 }
 

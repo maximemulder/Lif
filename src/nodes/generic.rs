@@ -9,15 +9,15 @@ pub struct Generic<'a> {
 
 impl<'a> Generic<'a> {
     pub fn new(parameters: Box<[&'a str]>, node: Node<'a>) -> Self {
-        return Self {
+        Self {
             parameters,
             node,
-        };
+        }
     }
 }
 
 impl<'a> Executable<'a> for Generic<'a> {
     fn execute<'b>(&'b self, engine: &mut Engine<'a, 'b>) -> ReturnReference<'a, 'b> {
-        return Ok(engine.new_generic(&self.parameters, &self.node));
+        Ok(engine.new_generic(&self.parameters, &self.node))
     }
 }

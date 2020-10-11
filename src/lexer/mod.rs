@@ -16,7 +16,7 @@ pub fn lex(string: &str) -> Vec<Node<'static>> {
         shift += length;
     }
 
-    return tokens;
+    tokens
 }
 
 fn automaton(string: &str) -> Option<(&'static Element, usize)> {
@@ -36,5 +36,5 @@ fn automaton(string: &str) -> Option<(&'static Element, usize)> {
         return None;
     }
 
-    return Some((node.element.unwrap(), counter));
+    Some((node.element.unwrap(), counter))
 }

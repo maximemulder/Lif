@@ -11,17 +11,17 @@ pub struct Scope<'a, 'b> {
 
 impl<'a, 'b> Scope<'a, 'b> {
     pub fn new() -> Self {
-        return Self {
+        Self {
             parent: None,
             variables: HashMap::new(),
-        };
+        }
     }
 
     pub fn new_child(scope: GcScope<'a, 'b>) -> Self {
-        return Self {
+        Self {
             parent: Some(scope),
             variables: HashMap::new(),
-        };
+        }
     }
 
     pub fn get_variable(&self, name: &str) -> Option<GcReference<'a, 'b>> {
@@ -29,7 +29,7 @@ impl<'a, 'b> Scope<'a, 'b> {
             return Some(*reference);
         }
 
-        return None;
+        None
     }
 
     pub fn add_variable(&mut self, name: &str, reference: GcReference<'a, 'b>) {

@@ -17,21 +17,21 @@ enum Type<'a, 'b> {
 
 impl<'a, 'b> Reference<'a, 'b> {
     pub fn new_variable(value: Option<GcValue<'a, 'b>>, r#type: GcValue<'a, 'b>) -> Self {
-        return Self {
+        Self {
             value,
             r#type: Type::Variable(r#type),
-        };
+        }
     }
 
     pub fn new_constant(value: Option<GcValue<'a, 'b>>) -> Self {
-        return Self {
+        Self {
             value,
             r#type: Type::Constant,
-        };
+        }
     }
 
     pub fn read(&self) -> Return<'a, GcValue<'a, 'b>> {
-        return self.value.ok_or_else(|| Error::new_undefined());
+        self.value.ok_or_else(|| Error::new_undefined())
     }
 
     pub fn write(&mut self, value: GcValue<'a, 'b>) -> Return<'a, ()> {
@@ -47,19 +47,19 @@ impl<'a, 'b> Reference<'a, 'b> {
             },
         }
 
-        return Ok(());
+        Ok(())
     }
 
     pub fn is_defined(&self) -> bool {
-        return self.value.is_some();
+        self.value.is_some()
     }
 
     pub fn is_undefined(&self) -> bool {
-        return !self.is_defined();
+        !self.is_defined()
     }
 
     pub fn get_value(&self) -> GcValue<'a, 'b> {
-        return self.value.unwrap();
+        self.value.unwrap()
     }
 
     pub fn set_value(&mut self, value: GcValue<'a, 'b>) {

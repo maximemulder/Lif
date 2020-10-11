@@ -8,14 +8,14 @@ pub struct String<'a> {
 
 impl<'a> String<'a> {
     pub fn new(string: &'a str) -> Self {
-        return Self {
+        Self {
             string,
-        };
+        }
     }
 }
 
 impl<'a> Executable<'a> for String<'a> {
     fn execute<'b>(&'b self, engine: &mut Engine<'a, 'b>) -> ReturnReference<'a, 'b> {
-        return Ok(engine.new_string(self.string.to_string()));
+        Ok(engine.new_string(self.string.to_string()))
     }
 }

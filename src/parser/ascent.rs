@@ -12,9 +12,9 @@ pub struct AscentList {
 
 impl AscentList {
     pub fn new(ascents: Vec<usize>) -> Self {
-        return Self {
+        Self {
             ascents,
-        };
+        }
     }
 }
 
@@ -28,7 +28,7 @@ impl<'a> Ascent<'a> for AscentList {
             }
         }
 
-        return Some(nodes);
+        Some(nodes)
     }
 }
 
@@ -39,10 +39,10 @@ pub struct AscentExtension {
 
 impl AscentExtension {
     pub fn new(descent: usize, ascent: usize) -> Self {
-        return Self {
+        Self {
             descent,
             ascent,
-        };
+        }
     }
 }
 
@@ -53,7 +53,7 @@ impl<'a> Ascent<'a> for AscentExtension {
             return parser.ascent(self.ascent, nodes);
         }
 
-        return Some(nodes);
+        Some(nodes)
     }
 }
 
@@ -63,14 +63,14 @@ pub struct AscentElement<'a> {
 
 impl<'a> AscentElement<'a> {
     pub fn new(element: &'a Element) -> Self {
-        return Self {
+        Self {
             element,
-        };
+        }
     }
 }
 
 impl<'a> Ascent<'a> for AscentElement<'a> {
     fn ascent(&self, parser: &mut Parser<'a, '_>, nodes: Vec<Node<'a>>) -> Option<Vec<Node<'a>>> {
-        return Some(vec![Node::new_production(self.element, nodes)]);
+        Some(vec![Node::new_production(self.element, nodes)])
     }
 }

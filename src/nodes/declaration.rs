@@ -9,10 +9,10 @@ pub struct Declaration<'a> {
 
 impl<'a> Declaration<'a> {
     pub fn new(identifier: &'a str, r#type: Option<Node<'a>>) -> Self {
-        return Self {
+        Self {
             identifier,
             r#type,
-        };
+        }
     }
 }
 
@@ -28,6 +28,6 @@ impl<'a> Executable<'a> for Declaration<'a> {
 
         let reference = engine.new_variable(None, r#type);
         engine.add_variable(&self.identifier, reference);
-        return Ok(reference);
+        Ok(reference)
     }
 }

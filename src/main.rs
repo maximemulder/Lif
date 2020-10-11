@@ -8,6 +8,7 @@
 #![feature(drain_filter)]
 #![feature(const_generics)]
 #![feature(const_fn_fn_ptr_basics)]
+#![warn(clippy::all)]
 
 mod element;
 mod elements;

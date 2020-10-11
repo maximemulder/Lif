@@ -17,12 +17,12 @@ pub struct Function<'a, 'b> {
 
 impl<'a, 'b> Function<'a, 'b> {
     pub fn new(scope: GcScope<'a, 'b>, parameters: &'b Box<[Node<'a>]>, r#type: Option<GcValue<'a, 'b>>, block: &'b Node<'a>) -> Self {
-        return Self {
+        Self {
             scope,
             parameters,
             r#type,
             block,
-        };
+        }
     }
 }
 
@@ -57,11 +57,11 @@ impl<'a, 'b> Callable<'a, 'b> for Function<'a, 'b> {
             }
         }
 
-        return Ok(engine.undefined());
+        Ok(engine.undefined())
     }
 
     fn duplicate<'c>(&'c self) -> Box<dyn Callable<'a, 'b> + 'c> {
-        return Box::new(self.clone());
+        Box::new(self.clone())
     }
 }
 

@@ -18,7 +18,7 @@ pub struct Environment<'a, 'b> {
 
 impl<'a, 'b> Environment<'a, 'b> {
     pub fn new() -> Self {
-        return Self {
+        Self {
             any:      GcValue::null(),
             array:    GcValue::null(),
             boolean:  GcValue::null(),
@@ -28,7 +28,7 @@ impl<'a, 'b> Environment<'a, 'b> {
             object:   GcValue::null(),
             integer:  GcValue::null(),
             string:   GcValue::null(),
-        };
+        }
     }
 }
 
@@ -42,7 +42,7 @@ impl GcTraceable for Environment<'_, '_> {
 
 impl<'a, 'b> Engine<'a, 'b> {
     fn create_class(&mut self, name: &str) -> GcValue<'a, 'b> {
-        return self.new_value(self.environment.class, Data::Class(Class::new(Some(name), Some(self.environment.any))));
+        self.new_value(self.environment.class, Data::Class(Class::new(Some(name), Some(self.environment.any))))
     }
 
     pub fn add_constant_value(&mut self, name: &str, value: GcValue<'a, 'b>) {
@@ -150,7 +150,7 @@ fn primitive_assert<'a, 'b>(engine: &mut Engine<'a, 'b>, arguments: Vec<GcValue<
         panic!();
     }
 
-    return Ok(engine.undefined());
+    Ok(engine.undefined())
 }
 
 fn primitive_error<'a, 'b>(engine: &mut Engine<'a, 'b>, arguments: Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b> {
@@ -163,38 +163,38 @@ fn primitive_exit<'a, 'b>(_: &mut Engine<'a, 'b>, _: Vec<GcValue<'a, 'b>>) -> Re
 }
 
 fn primitive_new<'a, 'b>(engine: &mut Engine<'a, 'b>, arguments: Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b> {
-    return Ok(engine.new_object(arguments[0]));
+    Ok(engine.new_object(arguments[0]))
 }
 
 fn primitive_print<'a, 'b>(engine: &mut Engine<'a, 'b>, arguments: Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b> {
     println!("{}", arguments[0].call_to_string(engine)?);
-    return Ok(engine.undefined());
+    Ok(engine.undefined())
 }
 
 fn any_comparison<'a, 'b>(engine: &mut Engine<'a, 'b>, arguments: Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b> {
-    return Ok(engine.new_boolean(arguments[0] == arguments[1]));
+    Ok(engine.new_boolean(arguments[0] == arguments[1]))
 }
 
 fn any_difference<'a, 'b>(engine: &mut Engine<'a, 'b>, arguments: Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b> {
     let reference = arguments[0].call_method_self(engine, "==", arguments)?;
-    return Ok(engine.new_boolean(!reference.read()?.data_boolean()));
+    Ok(engine.new_boolean(!reference.read()?.data_boolean()))
 }
 
 fn any_greater<'a, 'b>(engine: &mut Engine<'a, 'b>, arguments: Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b> {
     let left  = arguments[0].call_method_self(engine, "<", arguments.clone())?;
     let right = arguments[0].call_method_self(engine, "==", arguments.clone())?;
-    return Ok(engine.new_boolean(!left.read()?.data_boolean() && !right.read()?.data_boolean()));
+    Ok(engine.new_boolean(!left.read()?.data_boolean() && !right.read()?.data_boolean()))
 }
 
 fn any_greater_equal<'a, 'b>(engine: &mut Engine<'a, 'b>, arguments: Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b> {
     let reference = arguments[0].call_method_self(engine, "<", arguments)?;
-    return Ok(engine.new_boolean(!reference.read()?.data_boolean()));
+    Ok(engine.new_boolean(!reference.read()?.data_boolean()))
 }
 
 fn any_lesser_equal<'a, 'b>(engine: &mut Engine<'a, 'b>, arguments: Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b> {
     let left  = arguments[0].call_method_self(engine, "<", arguments.clone())?;
     let right = arguments[0].call_method_self(engine, "==", arguments.clone())?;
-    return Ok(engine.new_boolean(*left.read()?.data_boolean() || *right.read()?.data_boolean()));
+    Ok(engine.new_boolean(*left.read()?.data_boolean() || *right.read()?.data_boolean()))
 }
 
 fn array_to_string<'a, 'b>(engine: &mut Engine<'a, 'b>, arguments: Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b> {
@@ -210,48 +210,48 @@ fn array_to_string<'a, 'b>(engine: &mut Engine<'a, 'b>, arguments: Vec<GcValue<'
     }
 
     string.push_str("]");
-    return Ok(engine.new_string(string));
+    Ok(engine.new_string(string))
 }
 
 fn array_copy<'a, 'b>(engine: &mut Engine<'a, 'b>, arguments: Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b> {
-    return Ok(engine.new_array(arguments[0].data_array().clone()));
+    Ok(engine.new_array(arguments[0].data_array().clone()))
 }
 
 fn array_append<'a, 'b>(engine: &mut Engine<'a, 'b>, mut arguments: Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b> {
     let reference = engine.new_reference(arguments[1]);
     arguments[0].data_array_mut().push(reference);
-    return Ok(engine.undefined());
+    Ok(engine.undefined())
 }
 
 fn array_prepend<'a, 'b>(engine: &mut Engine<'a, 'b>, mut arguments: Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b> {
     let reference = engine.new_reference(arguments[1]);
     arguments[0].data_array_mut().insert(0, reference);
-    return Ok(engine.undefined());
+    Ok(engine.undefined())
 }
 
 fn array_insert<'a, 'b>(engine: &mut Engine<'a, 'b>, mut arguments: Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b> {
     let reference = engine.new_reference(arguments[1]);
     let index = *arguments[1].data_integer();
     arguments[0].data_array_mut().insert(index, reference);
-    return Ok(engine.undefined());
+    Ok(engine.undefined())
 }
 
 fn array_remove<'a, 'b>(engine: &mut Engine<'a, 'b>, mut arguments: Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b> {
     let index = *arguments[1].data_integer();
     arguments[0].data_array_mut().remove(index);
-    return Ok(engine.undefined());
+    Ok(engine.undefined())
 }
 
 fn array_access<'a, 'b>(_: &mut Engine<'a, 'b>, arguments: Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b> {
-    return Ok(arguments[0].data_array()[*arguments[1].data_integer()]);
+    Ok(arguments[0].data_array()[*arguments[1].data_integer()])
 }
 
 fn boolean_to_string<'a, 'b>(engine: &mut Engine<'a, 'b>, arguments: Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b> {
-    return Ok(engine.new_string(arguments[0].data_boolean().to_string()));
+    Ok(engine.new_string(arguments[0].data_boolean().to_string()))
 }
 
 fn boolean_comparison<'a, 'b>(engine: &mut Engine<'a, 'b>, arguments: Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b> {
-    return Ok(engine.new_boolean(arguments[0].data_boolean() == arguments[1].data_boolean()));
+    Ok(engine.new_boolean(arguments[0].data_boolean() == arguments[1].data_boolean()))
 }
 
 fn class_to_string<'a, 'b>(engine: &mut Engine<'a, 'b>, arguments: Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b> {
@@ -263,7 +263,7 @@ fn class_to_string<'a, 'b>(engine: &mut Engine<'a, 'b>, arguments: Vec<GcValue<'
         string += ")";
     }
 
-    return Ok(engine.new_string(string));
+    Ok(engine.new_string(string))
 }
 
 fn class_chain<'a, 'b>(engine: &mut Engine<'a, 'b>, arguments: Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b> {
@@ -271,20 +271,20 @@ fn class_chain<'a, 'b>(engine: &mut Engine<'a, 'b>, arguments: Vec<GcValue<'a, '
     let member = engine.undefined();
     let mut value = arguments[0];
     let class = value.data_class_mut();
-    return Ok(if let Some(&member) = class.statics.get(&name) {
+    Ok(if let Some(&member) = class.statics.get(&name) {
         member
     } else {
         class.statics.insert(name.clone(), member);
         member
-    });
+    })
 }
 
 fn class_access<'a, 'b>(engine: &mut Engine<'a, 'b>, _: Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b> {
-    return Ok(engine.new_constant(engine.environment.array));
+    Ok(engine.new_constant(engine.environment.array))
 }
 
 fn function_to_string<'a, 'b>(engine: &mut Engine<'a, 'b>, _: Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b> {
-    return Ok(engine.new_string("FUNCTION".to_string()));
+    Ok(engine.new_string("FUNCTION".to_string()))
 }
 
 fn function_call<'a, 'b>(engine: &mut Engine<'a, 'b>, arguments: Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b> {
@@ -293,11 +293,11 @@ fn function_call<'a, 'b>(engine: &mut Engine<'a, 'b>, arguments: Vec<GcValue<'a,
         array.push(argument.read()?);
     }
 
-    return arguments[0].data_callable().duplicate().execute(engine, array);
+    arguments[0].data_callable().duplicate().execute(engine, array)
 }
 
 fn generic_to_string<'a, 'b>(engine: &mut Engine<'a, 'b>, _: Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b> {
-    return Ok(engine.new_string("GENERIC".to_string()));
+    Ok(engine.new_string("GENERIC".to_string()))
 }
 
 fn generic_apply<'a, 'b>(engine: &mut Engine<'a, 'b>, arguments: Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b> {
@@ -311,7 +311,7 @@ fn generic_apply<'a, 'b>(engine: &mut Engine<'a, 'b>, arguments: Vec<GcValue<'a,
 
     let reference = generic.node.execute(engine)?;
     engine.pop_scope();
-    return Ok(reference);
+    Ok(reference)
 }
 
 fn object_to_string<'a, 'b>(engine: &mut Engine<'a, 'b>, arguments: Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b> {
@@ -329,7 +329,7 @@ fn object_to_string<'a, 'b>(engine: &mut Engine<'a, 'b>, arguments: Vec<GcValue<
     }
 
     string.push_str("}");
-    return Ok(engine.new_string(string));
+    Ok(engine.new_string(string))
 }
 
 fn object_chain<'a, 'b>(engine: &mut Engine<'a, 'b>, arguments: Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b> {
@@ -337,55 +337,55 @@ fn object_chain<'a, 'b>(engine: &mut Engine<'a, 'b>, arguments: Vec<GcValue<'a, 
     let member = engine.undefined();
     let mut value = arguments[0];
     let object = value.data_object_mut();
-    return Ok(if let Some(&member) = object.attributes.get(&name) {
+    Ok(if let Some(&member) = object.attributes.get(&name) {
         member
     } else {
         object.attributes.insert(name.clone(), member);
         member
-    });
+    })
 }
 
 fn integer_to_string<'a, 'b>(engine: &mut Engine<'a, 'b>, arguments: Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b> {
-    return Ok(engine.new_string(arguments[0].data_integer().to_string()));
+    Ok(engine.new_string(arguments[0].data_integer().to_string()))
 }
 
 fn integer_comparison<'a, 'b>(engine: &mut Engine<'a, 'b>, arguments: Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b> {
-    return Ok(engine.new_boolean(*arguments[0].data_integer() == *arguments[1].data_integer()));
+    Ok(engine.new_boolean(*arguments[0].data_integer() == *arguments[1].data_integer()))
 }
 
 fn integer_lesser<'a, 'b>(engine: &mut Engine<'a, 'b>, arguments: Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b> {
-    return Ok(engine.new_boolean(*arguments[0].data_integer() < *arguments[1].data_integer()));
+    Ok(engine.new_boolean(*arguments[0].data_integer() < *arguments[1].data_integer()))
 }
 
 fn integer_addition<'a, 'b>(engine: &mut Engine<'a, 'b>, arguments: Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b> {
-    return Ok(engine.new_integer(*arguments[0].data_integer() + *arguments[1].data_integer()));
+    Ok(engine.new_integer(*arguments[0].data_integer() + *arguments[1].data_integer()))
 }
 
 fn integer_subtraction<'a, 'b>(engine: &mut Engine<'a, 'b>, arguments: Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b> {
-    return Ok(engine.new_integer(*arguments[0].data_integer() - *arguments[1].data_integer()));
+    Ok(engine.new_integer(*arguments[0].data_integer() - *arguments[1].data_integer()))
 }
 
 fn integer_multiplication<'a, 'b>(engine: &mut Engine<'a, 'b>, arguments: Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b> {
-    return Ok(engine.new_integer(*arguments[0].data_integer() * *arguments[1].data_integer()));
+    Ok(engine.new_integer(*arguments[0].data_integer() * *arguments[1].data_integer()))
 }
 
 fn integer_division<'a, 'b>(engine: &mut Engine<'a, 'b>, arguments: Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b> {
-    return Ok(engine.new_integer(*arguments[0].data_integer() / *arguments[1].data_integer()));
+    Ok(engine.new_integer(*arguments[0].data_integer() / *arguments[1].data_integer()))
 }
 
 fn integer_remainder<'a, 'b>(engine: &mut Engine<'a, 'b>, arguments: Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b> {
-    return Ok(engine.new_integer(*arguments[0].data_integer() % *arguments[1].data_integer()));
+    Ok(engine.new_integer(*arguments[0].data_integer() % *arguments[1].data_integer()))
 }
 
 fn string_to_string<'a, 'b>(engine: &mut Engine<'a, 'b>, arguments: Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b> {
-    return Ok(engine.new_constant(arguments[0]));
+    Ok(engine.new_constant(arguments[0]))
 }
 
 fn string_comparison<'a, 'b>(engine: &mut Engine<'a, 'b>, arguments: Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b> {
-    return Ok(engine.new_boolean(arguments[0].data_string() == arguments[1].data_string()));
+    Ok(engine.new_boolean(arguments[0].data_string() == arguments[1].data_string()))
 }
 
 fn string_concatenation<'a, 'b>(engine: &mut Engine<'a, 'b>, arguments: Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b> {
     let right = arguments[1].call_to_string(engine)?;
-    return Ok(engine.new_string(format!("{}{}", arguments[0].data_string(), right)));
+    Ok(engine.new_string(format!("{}{}", arguments[0].data_string(), right)))
 }

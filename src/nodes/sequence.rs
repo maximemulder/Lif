@@ -11,12 +11,12 @@ pub struct Sequence<'a> {
 
 impl<'a> Sequence<'a> {
     pub fn new(expression: Node<'a>, open: &'a str, expressions: Box<[Node<'a>]>, close: &'a str) -> Self {
-        return Self {
+        Self {
             expression,
             open,
             expressions,
             close,
-        };
+        }
     }
 }
 
@@ -32,6 +32,6 @@ impl<'a> Executable<'a> for Sequence<'a> {
         let mut name = String::new();
         name.push_str(&self.open);
         name.push_str(&self.close);
-        return value.call_method(engine, &name, vec![array]);
+        value.call_method(engine, &name, vec![array])
     }
 }

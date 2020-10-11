@@ -6,22 +6,22 @@ pub struct Code {
 
 impl Code {
     pub fn new(text: &str) -> Self {
-        return Self {
+        Self {
             text: Box::from(text),
-        };
+        }
     }
 
     pub fn node_str(&self, node: &Node) -> &str {
-        return &self.text[node.left() .. node.right()];
+        &self.text[node.left() .. node.right()]
     }
 
     pub fn node_line(&self, node: &Node) -> &str {
         let index = node.left();
-        return &self.text[index - self.line_pos_left(index) .. index + self.line_pos_right(index)];
+        &self.text[index - self.line_pos_left(index) .. index + self.line_pos_right(index)]
     }
 
     pub fn node_x(&self, node: &Node) -> usize {
-        return self.line_pos_left(node.left()) + 1;
+        self.line_pos_left(node.left()) + 1
     }
 
     pub fn node_y(&self, node: &Node) -> usize {
@@ -39,23 +39,23 @@ impl Code {
             }
         }
 
-        return x;
+        x
     }
 
     pub fn node_shift_left(&self, node: &Node) -> usize {
-        return self.line_shift(self.index_iterator_reverse(node.left()));
+        self.line_shift(self.index_iterator_reverse(node.left()))
     }
 
     pub fn node_shift_right(&self, node: &Node) -> usize {
-        return self.line_shift(self.index_iterator(node.left()));
+        self.line_shift(self.index_iterator(node.left()))
     }
 
     fn line_pos_left(&self, index: usize) -> usize {
-        return self.line_pos(self.index_iterator_reverse(index));
+        self.line_pos(self.index_iterator_reverse(index))
     }
 
     fn line_pos_right(&self, index: usize) -> usize {
-        return self.line_pos(self.index_iterator(index));
+        self.line_pos(self.index_iterator(index))
     }
 
     fn line_pos(&self, chars: impl Iterator<Item = char>) -> usize {
@@ -67,7 +67,7 @@ impl Code {
             }
         }
 
-        return counter;
+        counter
     }
 
     fn line_shift(&self, chars: impl Iterator<Item = char>) -> usize {
@@ -80,14 +80,14 @@ impl Code {
             }
         }
 
-        return counter;
+        counter
     }
 
     fn index_iterator<'a>(&'a self, index: usize) -> impl Iterator<Item = char> + 'a {
-        return self.text[index ..].chars();
+        self.text[index ..].chars()
     }
 
     fn index_iterator_reverse<'a>(&'a self, index: usize) -> impl Iterator<Item = char> + 'a {
-        return self.text[.. index].chars().rev();
+        self.text[.. index].chars().rev()
     }
 }

@@ -12,12 +12,12 @@ pub struct Class<'a, 'b> {
 
 impl<'a, 'b> Class<'a, 'b> {
     pub fn new(name: Option<&str>, parent: Option<GcValue<'a, 'b>>) -> Self {
-        return Self {
+        Self {
             parent,
             name: name.map(|name| Box::from(name)),
             statics: HashMap::new(),
             methods: HashMap::new(),
-        };
+        }
     }
 
     pub fn get_method(&self, name: &str) -> Option<GcValue<'a, 'b>> {
@@ -29,7 +29,7 @@ impl<'a, 'b> Class<'a, 'b> {
             return parent.data_class().get_method(name);
         }
 
-        return None;
+        None
     }
 }
 

@@ -8,15 +8,15 @@ pub struct Statement<'a> {
 
 impl<'a> Statement<'a> {
     pub fn new(node: Node<'a>) -> Self {
-        return Self {
+        Self {
             node,
-        };
+        }
     }
 }
 
 impl<'a> Executable<'a> for Statement<'a> {
     fn execute<'b>(&'b self, engine: &mut Engine<'a, 'b>) -> ReturnReference<'a, 'b> {
         execute!(engine, &self.node);
-        return Ok(engine.undefined());
+        Ok(engine.undefined())
     }
 }

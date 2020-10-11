@@ -24,18 +24,18 @@ pub struct Parser<'a, 'b> {
 
 impl<'a, 'b> Parser<'a, 'b> {
     fn new(code: &'b Code, tokens: &'b Vec<Node<'a>>, descents: &'b Arena<dyn Descent<'a> + 'b>, ascents: &'b Arena<dyn Ascent<'a> + 'b>) -> Self {
-        return Self {
+        Self {
             code,
             tokens,
             descents,
             ascents,
             cursor: 0,
             reach: 0,
-        };
+        }
     }
 
     fn done(&self) -> bool {
-        return self.cursor == self.tokens.len();
+        self.cursor == self.tokens.len()
     }
 
     fn next(&mut self) -> Option<Node<'a>> {
@@ -49,7 +49,7 @@ impl<'a, 'b> Parser<'a, 'b> {
             return Some(token.clone());
         }
 
-        return None;
+        None
     }
 
     fn descent(&mut self, index: usize) -> Option<Vec<Node<'a>>> {
@@ -59,14 +59,14 @@ impl<'a, 'b> Parser<'a, 'b> {
             self.cursor = cursor;
         }
 
-        return nodes;
+        nodes
     }
 
     fn descent_predicate(&mut self, index: usize) -> bool {
         let cursor = self.cursor;
         let nodes = self.descents.get(index).descent(self);
         self.cursor = cursor;
-        return nodes.is_some();
+        nodes.is_some()
     }
 
     fn ascent(&mut self, index: usize, nodes: Vec<Node<'a>>) -> Option<Vec<Node<'a>>> {
@@ -76,14 +76,14 @@ impl<'a, 'b> Parser<'a, 'b> {
             self.cursor = cursor;
         }
 
-        return nodes;
+        nodes
     }
 
     fn ascent_predicate(&mut self, index: usize, nodes: Vec<Node<'a>>) -> bool {
         let cursor = self.cursor;
         let nodes = self.ascents.get(index).ascent(self, nodes);
         self.cursor = cursor;
-        return nodes.is_some();
+        nodes.is_some()
     }
 
     pub fn parse(&mut self, program: usize) -> Option<Node<'a>> {
@@ -94,7 +94,7 @@ impl<'a, 'b> Parser<'a, 'b> {
             return None;
         };
 
-        return if self.done() {
+        if self.done() {
             node
         } else {
             let token = &self.tokens[self.reach];
@@ -109,6 +109,6 @@ impl<'a, 'b> Parser<'a, 'b> {
             );
 
             None
-        };
+        }
     }
 }

@@ -8,9 +8,9 @@ pub struct Loop<'a> {
 
 impl<'a> Loop<'a> {
     pub fn new(body: Node<'a>) -> Self {
-        return Self {
+        Self {
             body,
-        };
+        }
     }
 }
 
@@ -36,6 +36,6 @@ impl<'a> Executable<'a> for Loop<'a> {
             }
         }
 
-        return Ok(engine.new_array(array));
+        Ok(engine.new_array(array))
     }
 }

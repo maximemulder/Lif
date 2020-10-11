@@ -8,14 +8,14 @@ pub struct Continue<'a> {
 
 impl<'a> Continue<'a> {
     pub fn new(expression: Option<Node<'a>>) -> Self {
-        return Self {
+        Self {
             expression,
-        };
+        }
     }
 }
 
 impl<'a> Executable<'a> for Continue<'a> {
     fn execute<'b>(&'b self, engine: &mut Engine<'a, 'b>) -> ReturnReference<'a, 'b> {
-        return engine.control_new(Control::Continue, &self.expression);
+        engine.control_new(Control::Continue, &self.expression)
     }
 }

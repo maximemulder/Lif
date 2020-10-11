@@ -8,9 +8,9 @@ pub struct Array<'a> {
 
 impl<'a> Array<'a> {
     pub fn new(expressions: Box<[Node<'a>]>) -> Self {
-        return Self {
+        Self {
             expressions,
-        };
+        }
     }
 }
 
@@ -22,6 +22,6 @@ impl<'a> Executable<'a> for Array<'a> {
             references.push(engine.new_reference(value));
         }
 
-        return Ok(engine.new_array(references));
+        Ok(engine.new_array(references))
     }
 }

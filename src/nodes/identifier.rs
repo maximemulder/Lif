@@ -8,14 +8,14 @@ pub struct Identifier<'a> {
 
 impl<'a> Identifier<'a> {
     pub fn new(identifier: &'a str) -> Self {
-        return Self {
+        Self {
             identifier,
-        };
+        }
     }
 }
 
 impl<'a> Executable<'a> for Identifier<'a> {
     fn execute<'b>(&'b self, engine: &mut Engine<'a, 'b>) -> ReturnReference<'a, 'b> {
-        return engine.get_variable(&self.identifier);
+        engine.get_variable(&self.identifier)
     }
 }

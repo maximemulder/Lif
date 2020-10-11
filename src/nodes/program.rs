@@ -8,15 +8,15 @@ pub struct Program<'a> {
 
 impl<'a> Program<'a> {
     pub fn new(statements: Node<'a>) -> Self {
-        return Self {
+        Self {
             statements,
-        };
+        }
     }
 }
 
 impl<'a> Executable<'a> for Program<'a> {
     fn execute<'b>(&'b self, engine: &mut Engine<'a, 'b>) -> ReturnReference<'a, 'b> {
         execute!(engine, &self.statements);
-        return Ok(engine.undefined());
+        Ok(engine.undefined())
     }
 }

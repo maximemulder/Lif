@@ -47,7 +47,7 @@ impl<'a, 'b> Engine<'a, 'b> {
         engine.undefined = engine.alloc_reference(Reference::new_constant(None));
         engine.registries.push(Vec::new());
         engine.populate();
-        return engine;
+        engine
     }
 }
 
@@ -55,46 +55,46 @@ impl<'a, 'b> Engine<'a, 'b> {
     pub fn alloc_value(&mut self, value: Value<'a, 'b>) -> GcValue<'a, 'b> {
         let value = self.values.alloc(value);
         self.allocations += 1;
-        return value;
+        value
     }
 
     pub fn alloc_reference(&mut self, reference: Reference<'a, 'b>) -> GcReference<'a, 'b> {
         let reference = self.references.alloc(reference);
         self.allocations += 1;
-        return reference;
+        reference
     }
 
     pub fn alloc_scope(&mut self, scope: Scope<'a, 'b>) -> GcScope<'a, 'b> {
         let scope = self.scopes.alloc(scope);
         self.allocations += 1;
-        return scope;
+        scope
     }
 }
 
 impl<'a, 'b> Engine<'a, 'b> {
     pub fn new_value(&mut self, class: GcValue<'a, 'b>, data: Data<'a, 'b>) -> GcValue<'a, 'b> {
-        return self.alloc_value(Value::new(class, data));
+        self.alloc_value(Value::new(class, data))
     }
 
     pub fn new_reference(&mut self, value: GcValue<'a, 'b>) -> GcReference<'a, 'b> {
-        return self.alloc_reference(Reference::new_variable(Some(value), self.environment.any));
+        self.alloc_reference(Reference::new_variable(Some(value), self.environment.any))
     }
 
     pub fn new_variable(&mut self, value: Option<GcValue<'a, 'b>>, r#type: GcValue<'a, 'b>) -> GcReference<'a, 'b> {
-        return self.alloc_reference(Reference::new_variable(value, r#type));
+        self.alloc_reference(Reference::new_variable(value, r#type))
     }
 
     pub fn new_constant(&mut self, value: GcValue<'a, 'b>) -> GcReference<'a, 'b> {
-        return self.alloc_reference(Reference::new_constant(Some(value)));
+        self.alloc_reference(Reference::new_constant(Some(value)))
     }
 
     pub fn new_constant_value(&mut self, class: GcValue<'a, 'b>, data: Data<'a, 'b>) -> GcReference<'a, 'b> {
         let value = self.new_value(class, data);
-        return self.new_constant(value);
+        self.new_constant(value)
     }
 
     pub fn undefined(&mut self) -> GcReference<'a, 'b> {
-        return self.undefined;
+        self.undefined
     }
 }
 
@@ -165,7 +165,7 @@ impl<'a, 'b> Engine<'a, 'b> {
             self.collect();
         }
 
-        return Ok(reference);
+        Ok(reference)
     }
 }
 
@@ -182,11 +182,11 @@ impl<'a, 'b> Engine<'a, 'b> {
             self.control = Some(control);
         }
 
-        return Ok(reference);
+        Ok(reference)
     }
 
     pub fn control_none(&mut self) -> bool {
-        return self.control.is_none();
+        self.control.is_none()
     }
 
     pub fn control_is(&mut self, other: Control) -> bool {
@@ -196,7 +196,7 @@ impl<'a, 'b> Engine<'a, 'b> {
             }
         }
 
-        return false;
+        false
     }
 
     pub fn control_consume(&mut self, control: Control) -> bool {
@@ -205,45 +205,45 @@ impl<'a, 'b> Engine<'a, 'b> {
             return true;
         }
 
-        return false;
+        false
     }
 }
 
 impl<'a, 'b> Engine<'a, 'b> {
     pub fn new_array(&mut self, elements: Vec<GcReference<'a, 'b>>) -> GcReference<'a, 'b> {
-        return self.new_constant_value(self.environment.array, Data::Array(elements));
+        self.new_constant_value(self.environment.array, Data::Array(elements))
     }
 
     pub fn new_boolean(&mut self, boolean: bool) -> GcReference<'a, 'b> {
-        return self.new_constant_value(self.environment.boolean, Data::Boolean(boolean));
+        self.new_constant_value(self.environment.boolean, Data::Boolean(boolean))
     }
 
     pub fn new_class(&mut self, name: Option<&str>) -> GcReference<'a, 'b> {
-        return self.new_constant_value(self.environment.class, Data::Class(Class::new(name, Some(self.environment.any))));
+        self.new_constant_value(self.environment.class, Data::Class(Class::new(name, Some(self.environment.any))))
     }
 
     pub fn new_object(&mut self, parent: GcValue<'a, 'b>) -> GcReference<'a, 'b> {
-        return self.new_constant_value(parent, Data::Object(Object::new()));
+        self.new_constant_value(parent, Data::Object(Object::new()))
     }
 
     pub fn new_integer(&mut self, integer: usize) -> GcReference<'a, 'b> {
-        return self.new_constant_value(self.environment.integer, Data::Integer(integer));
+        self.new_constant_value(self.environment.integer, Data::Integer(integer))
     }
 
     pub fn new_function(&mut self, parameters: &'b Box<[Node<'a>]>, r#type: Option<GcValue<'a, 'b>>, block: &'b Node<'a>) -> GcReference<'a, 'b> {
-        return self.new_constant_value(self.environment.function, Data::Callable(Box::new(Function::new(self.scope, parameters, r#type, block))));
+        self.new_constant_value(self.environment.function, Data::Callable(Box::new(Function::new(self.scope, parameters, r#type, block))))
     }
 
     pub fn new_generic(&mut self, generics: &'b Box<[&'a str]>, node: &'b dyn Executable<'a>) -> GcReference<'a, 'b> {
-        return self.new_constant_value(self.environment.generic, Data::Generic(Generic::new(generics, node)));
+        self.new_constant_value(self.environment.generic, Data::Generic(Generic::new(generics, node)))
     }
 
     pub fn new_primitive(&mut self, parameters: Box<[GcValue<'a, 'b>]>, callback: &'b dyn Fn(&mut Engine<'a, 'b>, Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b>) -> GcReference<'a, 'b> {
-        return self.new_constant_value(self.environment.function, Data::Callable(Box::<Primitive<'a, 'b>>::new(Primitive::new(parameters, callback))));
+        self.new_constant_value(self.environment.function, Data::Callable(Box::<Primitive<'a, 'b>>::new(Primitive::new(parameters, callback))))
     }
 
     pub fn new_string(&mut self, string: String) -> GcReference<'a, 'b> {
-        return self.new_constant_value(self.environment.string, Data::String(string));
+        self.new_constant_value(self.environment.string, Data::String(string))
     }
 }
 

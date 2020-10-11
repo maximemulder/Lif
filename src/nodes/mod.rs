@@ -56,15 +56,15 @@ pub struct Node<'a> {
 
 impl<'a> Node<'a> {
     pub fn new(syn: &'a SyntaxNode<'a>, sem: impl Executable<'a> + 'a) -> Self {
-        return Self {
+        Self {
             syn,
             sem: Box::new(sem),
-        };
+        }
     }
 }
 
 impl<'a> Executable<'a> for Node<'a> {
     fn execute<'b>(&'b self, engine: &mut Engine<'a, 'b>) -> ReturnReference<'a, 'b> {
-        return self.sem.execute(engine);
+        self.sem.execute(engine)
     }
 }
