@@ -3,25 +3,25 @@ use crate::runtime::ReturnReference;
 use crate::runtime::engine::Engine;
 
 pub struct Array<'a> {
-	expressions: Box<[Node<'a>]>,
+    expressions: Box<[Node<'a>]>,
 }
 
 impl<'a> Array<'a> {
-	pub fn new(expressions: Box<[Node<'a>]>) -> Self {
-		return Self {
-			expressions,
-		};
-	}
+    pub fn new(expressions: Box<[Node<'a>]>) -> Self {
+        Self {
+            expressions,
+        }
+    }
 }
 
 impl<'a> Executable<'a> for Array<'a> {
-	fn execute<'b>(&'b self, engine: &mut Engine<'a, 'b>) -> ReturnReference<'a, 'b> {
-		let mut references = Vec::new();
-		for expression in self.expressions.iter() {
-			let value = execute!(engine, expression).read()?;
-			references.push(engine.new_reference(value));
-		}
+    fn execute<'b>(&'b self, engine: &mut Engine<'a, 'b>) -> ReturnReference<'a, 'b> {
+        let mut references = Vec::new();
+        for expression in self.expressions.iter() {
+            let value = execute!(engine, expression).read()?;
+            references.push(engine.new_reference(value));
+        }
 
-		return Ok(engine.new_array(references));
-	}
+        Ok(engine.new_array(references))
+    }
 }

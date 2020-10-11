@@ -3,19 +3,19 @@ use crate::runtime::ReturnReference;
 use crate::runtime::engine::Engine;
 
 pub struct Group<'a> {
-	expression: Node<'a>,
+    expression: Node<'a>,
 }
 
 impl<'a> Group<'a> {
-	pub fn new(expression: Node<'a>) -> Self {
-		return Self {
-			expression,
-		};
-	}
+    pub fn new(expression: Node<'a>) -> Self {
+        Self {
+            expression,
+        }
+    }
 }
 
 impl<'a> Executable<'a> for Group<'a> {
-	fn execute<'b>(&'b self, engine: &mut Engine<'a, 'b>) -> ReturnReference<'a, 'b> {
-		return engine.execute(&self.expression);
-	}
+    fn execute<'b>(&'b self, engine: &mut Engine<'a, 'b>) -> ReturnReference<'a, 'b> {
+        engine.execute(&self.expression)
+    }
 }

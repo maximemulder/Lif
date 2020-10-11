@@ -1,14 +1,14 @@
 #![allow(dead_code)]
 
 macro_rules! execute {
-	( $engine:expr, $node:expr ) => {{
-		let reference = $engine.execute($node)?;
-		if $engine.control_none() {
-			reference
-		} else {
-			return Ok(reference);
-		}
-	}
+    ( $engine:expr, $node:expr ) => {{
+        let reference = $engine.execute($node)?;
+        if $engine.control_none() {
+            reference
+        } else {
+            return Ok(reference);
+        }
+    }
 }}
 
 pub mod program;
@@ -46,25 +46,25 @@ use crate::runtime::engine::Engine;
 pub use crate::node::Node as SyntaxNode;
 
 pub trait Executable<'a> {
-	fn execute<'b>(&'b self, engine: &mut Engine<'a, 'b>) -> ReturnReference<'a, 'b>;
+    fn execute<'b>(&'b self, engine: &mut Engine<'a, 'b>) -> ReturnReference<'a, 'b>;
 }
 
 pub struct Node<'a> {
-	pub syn: &'a SyntaxNode<'a>,
-	pub sem: Box<dyn Executable<'a> + 'a>,
+    pub syn: &'a SyntaxNode<'a>,
+    pub sem: Box<dyn Executable<'a> + 'a>,
 }
 
 impl<'a> Node<'a> {
-	pub fn new(syn: &'a SyntaxNode<'a>, sem: impl Executable<'a> + 'a) -> Self {
-		return Self {
-			syn,
-			sem: Box::new(sem),
-		};
-	}
+    pub fn new(syn: &'a SyntaxNode<'a>, sem: impl Executable<'a> + 'a) -> Self {
+        Self {
+            syn,
+            sem: Box::new(sem),
+        }
+    }
 }
 
 impl<'a> Executable<'a> for Node<'a> {
-	fn execute<'b>(&'b self, engine: &mut Engine<'a, 'b>) -> ReturnReference<'a, 'b> {
-		return self.sem.execute(engine);
-	}
+    fn execute<'b>(&'b self, engine: &mut Engine<'a, 'b>) -> ReturnReference<'a, 'b> {
+        self.sem.execute(engine)
+    }
 }
