@@ -14,7 +14,7 @@ impl<'a, 'b> Class<'a, 'b> {
     pub fn new(name: Option<&str>, parent: Option<GcValue<'a, 'b>>) -> Self {
         Self {
             parent,
-            name: name.map(|name| Box::from(name)),
+            name: name.map(Box::from),
             statics: HashMap::new(),
             methods: HashMap::new(),
         }

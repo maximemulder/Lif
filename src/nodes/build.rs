@@ -43,40 +43,40 @@ fn statements<'a>(text: &'a str, node: &'a SyntaxNode<'a>) -> Node<'a> {
 
 fn statement<'a>(text: &'a str, node: &'a SyntaxNode<'a>) -> Node<'a> {
     let child = &node.children()[0];
-    Node::new(node, Statement::new(match child.element {
-        &elements::expressions::EXPRESSION => expression(text, child),
-        &elements::structures::STRUCTURE   => structure(text, child),
+    Node::new(node, Statement::new(match *child.element {
+        elements::expressions::EXPRESSION => expression(text, child),
+        elements::structures::STRUCTURE   => structure(text, child),
         _ => panic!(),
     }))
 }
 
 fn expression<'a>(text: &'a str, node: &'a SyntaxNode<'a>) -> Node<'a> {
     let child = &node.children()[0];
-    match child.element {
-        &elements::expressions::LITERAL     => literal(text, child),
-        &elements::structures::STRUCTURE    => structure(text, child),
-        &elements::expressions::LET         => r#let(text, child),
-        &elements::controls::CONTROL        => control(text, child),
-        &elements::expressions::FUNCTION    => function(text, child),
-        &elements::expressions::GROUP       => group(text, child),
-        &elements::expressions::CHAIN       => chain(text, child),
-        &elements::expressions::ARRAY       => array(text, child),
-        &elements::expressions::METHOD      => method(text, child),
-        &elements::expressions::SEQUENCE    => sequence(text, child),
-        &elements::expressions::ASSIGNMENT  => assignment(text, child),
-        &elements::expressions::OPERATION   => operation(text, child),
+    match *child.element {
+        elements::expressions::LITERAL     => literal(text, child),
+        elements::structures::STRUCTURE    => structure(text, child),
+        elements::expressions::LET         => r#let(text, child),
+        elements::controls::CONTROL        => control(text, child),
+        elements::expressions::FUNCTION    => function(text, child),
+        elements::expressions::GROUP       => group(text, child),
+        elements::expressions::CHAIN       => chain(text, child),
+        elements::expressions::ARRAY       => array(text, child),
+        elements::expressions::METHOD      => method(text, child),
+        elements::expressions::SEQUENCE    => sequence(text, child),
+        elements::expressions::ASSIGNMENT  => assignment(text, child),
+        elements::expressions::OPERATION   => operation(text, child),
         _ => panic!(),
     }
 }
 
 fn literal<'a>(text: &'a str, node: &'a SyntaxNode<'a>) -> Node<'a> {
     let child = &node.children()[0];
-    match child.element {
-        &elements::keywords::TRUE        => r#true(text, child),
-        &elements::keywords::FALSE       => r#false(text, child),
-        &elements::variables::NUMBER     => integer(text, child),
-        &elements::variables::STRING     => string(text, child),
-        &elements::variables::IDENTIFIER => identifier(text, child),
+    match *child.element {
+        elements::keywords::TRUE        => r#true(text, child),
+        elements::keywords::FALSE       => r#false(text, child),
+        elements::variables::NUMBER     => integer(text, child),
+        elements::variables::STRING     => string(text, child),
+    	elements::variables::IDENTIFIER => identifier(text, child),
         _ => panic!(),
     }
 }
@@ -103,13 +103,13 @@ fn identifier<'a>(text: &'a str, node: &'a SyntaxNode<'a>) -> Node<'a> {
 
 fn structure<'a>(text: &'a str, node: &'a SyntaxNode<'a>) -> Node<'a> {
     let child = &node.children()[0];
-    match child.element {
-        &elements::structures::BLOCK    => block(text, child),
-        &elements::structures::IF       => r#if(text, child),
-        &elements::structures::LOOP     => r#loop(text, child),
-        &elements::structures::WHILE    => r#while(text, child),
-        &elements::structures::DO_WHILE => do_while(text, child),
-        &elements::structures::FOR_IN   => for_in(text, child),
+    match *child.element {
+        elements::structures::BLOCK    => block(text, child),
+        elements::structures::IF       => r#if(text, child),
+    	elements::structures::LOOP     => r#loop(text, child),
+        elements::structures::WHILE    => r#while(text, child),
+        elements::structures::DO_WHILE => do_while(text, child),
+        elements::structures::FOR_IN   => for_in(text, child),
         _ => panic!(),
     }
 }
@@ -152,10 +152,10 @@ fn declaration<'a>(text: &'a str, node: &'a SyntaxNode<'a>) -> Node<'a> {
 
 fn control<'a>(text: &'a str, node: &'a SyntaxNode<'a>) -> Node<'a> {
     let child = &node.children()[0];
-    match child.element {
-        &elements::controls::RETURN   => r#return(text, child),
-        &elements::controls::BREAK    => r#break(text, child),
-        &elements::controls::CONTINUE => r#continue(text, child),
+    match *child.element {
+        elements::controls::RETURN   => r#return(text, child),
+        elements::controls::BREAK    => r#break(text, child),
+        elements::controls::CONTINUE => r#continue(text, child),
         _ => panic!(),
     }
 }

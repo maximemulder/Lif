@@ -31,7 +31,7 @@ impl<'a, 'b> Reference<'a, 'b> {
     }
 
     pub fn read(&self) -> Return<'a, GcValue<'a, 'b>> {
-        self.value.ok_or_else(|| Error::new_undefined())
+        self.value.ok_or_else(Error::new_undefined)
     }
 
     pub fn write(&mut self, value: GcValue<'a, 'b>) -> Return<'a, ()> {

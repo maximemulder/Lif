@@ -209,7 +209,7 @@ fn array_to_string<'a, 'b>(engine: &mut Engine<'a, 'b>, arguments: Vec<GcValue<'
         string.truncate(string.len() - 2);
     }
 
-    string.push_str("]");
+    string.push(']');
     Ok(engine.new_string(string))
 }
 
@@ -328,7 +328,7 @@ fn object_to_string<'a, 'b>(engine: &mut Engine<'a, 'b>, arguments: Vec<GcValue<
         string.truncate(string.len() - 2);
     }
 
-    string.push_str("}");
+    string.push('}');
     Ok(engine.new_string(string))
 }
 

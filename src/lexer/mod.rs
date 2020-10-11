@@ -32,9 +32,5 @@ fn automaton(string: &str) -> Option<(&'static Element, usize)> {
         counter += 1;
     }
 
-    if node.element.is_none() {
-        return None;
-    }
-
-    Some((node.element.unwrap(), counter))
+    Some((node.element?, counter))
 }

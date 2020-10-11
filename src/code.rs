@@ -26,14 +26,12 @@ impl Code {
 
     pub fn node_y(&self, node: &Node) -> usize {
         let index = node.left();
-        let mut counter = 0;
         let mut x = 1;
-        for r#char in self.text.chars() {
+        for (counter, r#char) in self.text.chars().enumerate() {
             if counter == index {
                 break;
             }
 
-            counter += 1;
             if r#char == '\n' {
                 x += 1;
             }
@@ -83,11 +81,11 @@ impl Code {
         counter
     }
 
-    fn index_iterator<'a>(&'a self, index: usize) -> impl Iterator<Item = char> + 'a {
+    fn index_iterator(&self, index: usize) -> impl Iterator<Item = char> + '_ {
         self.text[index ..].chars()
     }
 
-    fn index_iterator_reverse<'a>(&'a self, index: usize) -> impl Iterator<Item = char> + 'a {
+    fn index_iterator_reverse(&self, index: usize) -> impl Iterator<Item = char> + '_ {
         self.text[.. index].chars().rev()
     }
 }

@@ -15,7 +15,7 @@ use std::cmp::min;
 
 pub struct Parser<'a, 'b> {
     code: &'b Code,
-    tokens: &'b Vec<Node<'a>>,
+    tokens: &'b [Node<'a>],
     descents: &'b Arena<dyn Descent<'a> + 'b>,
     ascents: &'b Arena<dyn Ascent<'a> + 'b>,
     cursor: usize,
@@ -23,7 +23,7 @@ pub struct Parser<'a, 'b> {
 }
 
 impl<'a, 'b> Parser<'a, 'b> {
-    fn new(code: &'b Code, tokens: &'b Vec<Node<'a>>, descents: &'b Arena<dyn Descent<'a> + 'b>, ascents: &'b Arena<dyn Ascent<'a> + 'b>) -> Self {
+    fn new(code: &'b Code, tokens: &'b [Node<'a>], descents: &'b Arena<dyn Descent<'a> + 'b>, ascents: &'b Arena<dyn Ascent<'a> + 'b>) -> Self {
         Self {
             code,
             tokens,

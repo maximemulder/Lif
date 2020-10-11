@@ -2,7 +2,7 @@ use crate::code::Code;
 use crate::element::Element;
 use crate::node::{ Type, Node };
 
-pub fn tokens(code: &Code, nodes: &Vec<Node>) {
+pub fn tokens(code: &Code, nodes: &[Node]) {
     for node in nodes {
         match &node.r#type {
             Type::Token(_, _) => println!("{} {:?}", node.element.name, code.node_str(node)),
@@ -30,6 +30,6 @@ fn node(tree: &Node, prefix: String, infix: String) {
     }
 }
 
-fn element(prefix: &String, element: &Element) {
+fn element(prefix: &str, element: &Element) {
     println!("{}{}", prefix, element.name);
 }

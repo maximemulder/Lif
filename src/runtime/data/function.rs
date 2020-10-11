@@ -10,13 +10,13 @@ use crate::runtime::value::GcValue;
 #[derive(Clone)]
 pub struct Function<'a, 'b> {
     scope: GcScope<'a, 'b>,
-    parameters: &'b Box<[Node<'a>]>,
+    parameters: &'b [Node<'a>],
     r#type: Option<GcValue<'a, 'b>>,
     block: &'b Node<'a>,
 }
 
 impl<'a, 'b> Function<'a, 'b> {
-    pub fn new(scope: GcScope<'a, 'b>, parameters: &'b Box<[Node<'a>]>, r#type: Option<GcValue<'a, 'b>>, block: &'b Node<'a>) -> Self {
+    pub fn new(scope: GcScope<'a, 'b>, parameters: &'b [Node<'a>], r#type: Option<GcValue<'a, 'b>>, block: &'b Node<'a>) -> Self {
         Self {
             scope,
             parameters,
