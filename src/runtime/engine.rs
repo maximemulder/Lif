@@ -1,6 +1,6 @@
 use crate::nodes::{ Executable, Node };
 use crate::runtime::ReturnReference;
-use crate::runtime::data::{ Class, Data, Function, Generic, Object, Primitive };
+use crate::runtime::data::{ Data, Tagger };
 use crate::runtime::environment::Environment;
 use crate::runtime::error::Error;
 use crate::runtime::gc::{ GC_THRESHOLD, Gc, GcTraceable };
@@ -15,8 +15,23 @@ pub enum Control {
     Continue,
 }
 
+pub struct Taggers {
+	functions: Tagger,
+	classes:   Tagger,
+}
+
+impl Taggers {
+	pub fn new() -> Self {
+		Self {
+			functions: Tagger::new(),
+			classes:   Tagger::new(),
+		}
+	}
+}
+
 pub struct Engine<'a, 'b> where 'a: 'b {
-    pub environment: Environment<'a, 'b>,
+	pub environment: Environment<'a, 'b>,
+	pub taggers:     Taggers,
     scopes:          Gc<Scope<'a, 'b>>,
     references:      Gc<Reference<'a, 'b>>,
     values:          Gc<Value<'a, 'b>>,
@@ -31,7 +46,8 @@ pub struct Engine<'a, 'b> where 'a: 'b {
 impl<'a, 'b> Engine<'a, 'b> {
     pub fn new() -> Self {
         let mut engine = Self {
-            environment: Environment::new(),
+			environment: Environment::new(),
+			taggers:     Taggers::new(),
             scopes:      Gc::new(),
             references:  Gc::new(),
             values:      Gc::new(),
@@ -86,11 +102,6 @@ impl<'a, 'b> Engine<'a, 'b> {
 
     pub fn new_constant(&mut self, value: GcValue<'a, 'b>) -> GcReference<'a, 'b> {
         self.alloc_reference(Reference::new_constant(Some(value)))
-    }
-
-    pub fn new_constant_value(&mut self, class: GcValue<'a, 'b>, data: Data<'a, 'b>) -> GcReference<'a, 'b> {
-        let value = self.new_value(class, data);
-        self.new_constant(value)
     }
 
     pub fn undefined(&mut self) -> GcReference<'a, 'b> {
@@ -210,40 +221,90 @@ impl<'a, 'b> Engine<'a, 'b> {
 }
 
 impl<'a, 'b> Engine<'a, 'b> {
+	pub fn new_array_value(&mut self, elements: Vec<GcReference<'a, 'b>>) -> GcValue<'a, 'b> {
+		self.new_value(self.environment.array, Data::new_array(elements))
+	}
+
+	pub fn new_boolean_value(&mut self, boolean: bool) -> GcValue<'a, 'b> {
+        self.new_value(self.environment.boolean, Data::new_boolean(boolean))
+	}
+
+	pub fn new_class_value(&mut self, name: &str) -> GcValue<'a, 'b> {
+		let tag = self.taggers.classes.generate(Some(Box::from(name)));
+        self.new_value(self.environment.class, Data::new_class(tag, Some(self.environment.any)))
+	}
+
+    pub fn new_function_value(&mut self, parameters: &'b [Node<'a>], r#type: Option<GcValue<'a, 'b>>, block: &'b Node<'a>) -> GcValue<'a, 'b> {
+		let tag = self.taggers.functions.generate(None);
+        self.new_value(self.environment.function, Data::new_function(tag, self.scope, parameters, r#type, block))
+    }
+
+	pub fn new_generic_value(&mut self, generics: &'b [&'a str], node: &'b dyn Executable<'a>) -> GcValue<'a, 'b> {
+        self.new_value(self.environment.generic, Data::new_generic(generics, node))
+	}
+
+	pub fn new_integer_value(&mut self, integer: usize) -> GcValue<'a, 'b> {
+        self.new_value(self.environment.integer, Data::new_integer(integer))
+	}
+
+	pub fn new_object_value(&mut self, parent: GcValue<'a, 'b>) -> GcValue<'a, 'b> {
+		self.new_value(parent, Data::new_object())
+	}
+
+    pub fn new_primitive_value(&mut self, name: &str, parameters: Box<[GcValue<'a, 'b>]>, callback: &'b dyn Fn(&mut Engine<'a, 'b>, Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b>) -> GcValue<'a, 'b> {
+		let tag = self.taggers.functions.generate(Some(Box::from(name)));
+        self.new_value(self.environment.function, Data::new_primitive(tag, parameters, callback))
+    }
+
+	pub fn new_string_value(&mut self, string: String) -> GcValue<'a, 'b> {
+        self.new_value(self.environment.string, Data::new_string(string))
+	}
+}
+
+impl<'a, 'b> Engine<'a, 'b> {
     pub fn new_array(&mut self, elements: Vec<GcReference<'a, 'b>>) -> GcReference<'a, 'b> {
-        self.new_constant_value(self.environment.array, Data::Array(elements))
+		let value = self.new_array_value(elements);
+        self.new_constant(value)
     }
 
     pub fn new_boolean(&mut self, boolean: bool) -> GcReference<'a, 'b> {
-        self.new_constant_value(self.environment.boolean, Data::Boolean(boolean))
-    }
+		let value = self.new_boolean_value(boolean);
+        self.new_constant(value)
+	}
 
-    pub fn new_class(&mut self, name: Option<&str>) -> GcReference<'a, 'b> {
-        self.new_constant_value(self.environment.class, Data::Class(Class::new(name, Some(self.environment.any))))
-    }
-
-    pub fn new_object(&mut self, parent: GcValue<'a, 'b>) -> GcReference<'a, 'b> {
-        self.new_constant_value(parent, Data::Object(Object::new()))
-    }
-
-    pub fn new_integer(&mut self, integer: usize) -> GcReference<'a, 'b> {
-        self.new_constant_value(self.environment.integer, Data::Integer(integer))
+	pub fn new_class(&mut self, name: &str) -> GcReference<'a, 'b> {
+		let value = self.new_class_value(name);
+        self.new_constant(value)
     }
 
     pub fn new_function(&mut self, parameters: &'b [Node<'a>], r#type: Option<GcValue<'a, 'b>>, block: &'b Node<'a>) -> GcReference<'a, 'b> {
-        self.new_constant_value(self.environment.function, Data::Callable(Box::new(Function::new(self.scope, parameters, r#type, block))))
+       let value = self.new_function_value(parameters, r#type, block);
+        self.new_constant(value)
     }
 
-    pub fn new_generic(&mut self, generics: &'b [&'a str], node: &'b dyn Executable<'a>) -> GcReference<'a, 'b> {
-        self.new_constant_value(self.environment.generic, Data::Generic(Generic::new(generics, node)))
+	pub fn new_generic(&mut self, generics: &'b [&'a str], node: &'b dyn Executable<'a>) -> GcReference<'a, 'b> {
+		let value = self.new_generic_value(generics, node);
+        self.new_constant(value)
     }
 
-    pub fn new_primitive(&mut self, parameters: Box<[GcValue<'a, 'b>]>, callback: &'b dyn Fn(&mut Engine<'a, 'b>, Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b>) -> GcReference<'a, 'b> {
-        self.new_constant_value(self.environment.function, Data::Callable(Box::<Primitive<'a, 'b>>::new(Primitive::new(parameters, callback))))
+	pub fn new_integer(&mut self, integer: usize) -> GcReference<'a, 'b> {
+		let value = self.new_integer_value(integer);
+        self.new_constant(value)
+    }
+
+	pub fn new_object(&mut self, parent: GcValue<'a, 'b>) -> GcReference<'a, 'b> {
+		let value = self.new_object_value(parent);
+        self.new_constant(value)
+    }
+
+    pub fn new_primitive(&mut self, name: &str, parameters: Box<[GcValue<'a, 'b>]>, callback: &'b dyn Fn(&mut Engine<'a, 'b>, Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b>) -> GcReference<'a, 'b> {
+		let value = self.new_primitive_value(name, parameters, callback);
+        self.new_constant(value)
     }
 
     pub fn new_string(&mut self, string: String) -> GcReference<'a, 'b> {
-        self.new_constant_value(self.environment.string, Data::String(string))
+		let value = self.new_string_value(string);
+        self.new_constant(value)
     }
 }
 

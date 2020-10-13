@@ -1,6 +1,6 @@
 use crate::nodes::Node;
 use crate::runtime::ReturnReference;
-use crate::runtime::data::Callable;
+use crate::runtime::data::{ Callable, Tag };
 use crate::runtime::engine::{ Control, Engine };
 use crate::runtime::error::Error;
 use crate::runtime::gc::GcTraceable;
@@ -9,6 +9,7 @@ use crate::runtime::value::GcValue;
 
 #[derive(Clone)]
 pub struct Function<'a, 'b> {
+	tag: Tag,
     scope: GcScope<'a, 'b>,
     parameters: &'b [Node<'a>],
     r#type: Option<GcValue<'a, 'b>>,
@@ -16,8 +17,9 @@ pub struct Function<'a, 'b> {
 }
 
 impl<'a, 'b> Function<'a, 'b> {
-    pub fn new(scope: GcScope<'a, 'b>, parameters: &'b [Node<'a>], r#type: Option<GcValue<'a, 'b>>, block: &'b Node<'a>) -> Self {
+    pub fn new(tag: Tag, scope: GcScope<'a, 'b>, parameters: &'b [Node<'a>], r#type: Option<GcValue<'a, 'b>>, block: &'b Node<'a>) -> Self {
         Self {
+			tag,
             scope,
             parameters,
             r#type,

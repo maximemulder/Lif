@@ -25,13 +25,8 @@ impl Error<'_> {
         let mut message = String::new();
         message += "RUNTIME ERROR: Method \"";
         message += method;
-        message += "\" is undefined";
-        if let Some(name) = &class.data_class().name {
-            message += " in type \"";
-            message += name;
-            message += "\"";
-        }
-
+		message += "\" is undefined in the type ";
+		message += &class.data_class().tag.to_string();
         message += ".";
         Self::new(message)
     }
@@ -68,24 +63,10 @@ impl Error<'_> {
 
     pub fn new_cast(value: GcValue, r#type: GcValue) -> Self {
         let mut message = String::new();
-        message += "RUNTIME ERROR: Cannot cast ";
-        if let Some(name) = &value.class.data_class().name {
-            message += "a value of the type \"";
-            message += name;
-            message += "\"";
-        } else {
-            message += "value ";
-        }
-
-        message += " to the ";
-        if let Some(name) = &r#type.data_class().name {
-            message += "type \"";
-            message += name;
-            message += "\"";
-        } else {
-            message += "required type";
-        }
-
+        message += "RUNTIME ERROR: Cannot cast a value of the type ";
+		message += &value.class.data_class().tag.to_string();
+		message += " to the type ";
+		message += &r#type.data_class().tag.to_string();
         message += ".";
         Self::new(message)
     }

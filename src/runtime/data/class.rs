@@ -1,20 +1,21 @@
+use crate::runtime::data::Tag;
 use crate::runtime::gc::GcTraceable;
 use crate::runtime::reference::GcReference;
 use crate::runtime::value::GcValue;
 use std::collections::HashMap;
 
 pub struct Class<'a, 'b> {
-    pub name: Option<Box<str>>,
+    pub tag: Tag,
     pub parent:  Option<GcValue<'a, 'b>>,
     pub statics: HashMap<String, GcReference<'a, 'b>>,
     pub methods: HashMap<String, GcValue<'a, 'b>>,
 }
 
 impl<'a, 'b> Class<'a, 'b> {
-    pub fn new(name: Option<&str>, parent: Option<GcValue<'a, 'b>>) -> Self {
+    pub fn new(tag: Tag, parent: Option<GcValue<'a, 'b>>) -> Self {
         Self {
+			tag,
             parent,
-            name: name.map(Box::from),
             statics: HashMap::new(),
             methods: HashMap::new(),
         }

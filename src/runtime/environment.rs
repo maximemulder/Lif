@@ -1,5 +1,4 @@
 use crate::runtime::ReturnReference;
-use crate::runtime::data::{ Class, Data };
 use crate::runtime::engine::Engine;
 use crate::runtime::gc::GcTraceable;
 use crate::runtime::value::GcValue;
@@ -41,36 +40,32 @@ impl GcTraceable for Environment<'_, '_> {
 }
 
 impl<'a, 'b> Engine<'a, 'b> {
-    fn create_class(&mut self, name: &str) -> GcValue<'a, 'b> {
-        self.new_value(self.environment.class, Data::Class(Class::new(Some(name), Some(self.environment.any))))
-    }
-
     pub fn add_constant_value(&mut self, name: &str, value: GcValue<'a, 'b>) {
         let reference = self.new_constant(value);
         self.add_variable(name, reference);
     }
 
     fn add_constant_primitive<const N: usize>(&mut self, name: &str, parameters: [GcValue<'a, 'b>; N], callback: &'b dyn Fn(&mut Engine<'a, 'b>, Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b>) {
-        let primitive = self.new_primitive(Box::new(parameters), callback);
+        let primitive = self.new_primitive(name, Box::new(parameters), callback);
         self.add_variable(name, primitive);
     }
 
     fn add_method_primitive<const N: usize>(&mut self, mut value: GcValue<'a, 'b>, name: &str, parameters: [GcValue<'a, 'b>; N], callback: &'b dyn Fn(&mut Engine<'a, 'b>, Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b>) {
-        let primitive = self.new_primitive(Box::new(parameters), callback).get_value();
+        let primitive = self.new_primitive(name, Box::new(parameters), callback).get_value();
         value.data_class_mut().methods.insert(name.to_string(), primitive);
     }
 
     pub fn populate(&mut self) {
-        self.environment.class = self.create_class("Class");
-        self.environment.any   = self.create_class("Any");
+        self.environment.class = self.new_class_value("Class");
+        self.environment.any   = self.new_class_value("Any");
 
-        self.environment.array    = self.create_class("Array");
-        self.environment.boolean  = self.create_class("Boolean");
-        self.environment.function = self.create_class("Function");
-        self.environment.generic  = self.create_class("Generic");
-        self.environment.object   = self.create_class("Object");
-        self.environment.integer  = self.create_class("Integer");
-        self.environment.string   = self.create_class("String");
+        self.environment.array    = self.new_class_value("Array");
+        self.environment.boolean  = self.new_class_value("Boolean");
+        self.environment.function = self.new_class_value("Function");
+        self.environment.generic  = self.new_class_value("Generic");
+        self.environment.object   = self.new_class_value("Object");
+        self.environment.integer  = self.new_class_value("Integer");
+        self.environment.string   = self.new_class_value("String");
 
         self.environment.class.class = self.environment.class;
         self.environment.class.data_class_mut().parent = Some(self.environment.any);
@@ -257,7 +252,7 @@ fn boolean_comparison<'a, 'b>(engine: &mut Engine<'a, 'b>, arguments: Vec<GcValu
 fn class_to_string<'a, 'b>(engine: &mut Engine<'a, 'b>, arguments: Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b> {
     let mut string = String::new();
     string += "Class";
-    if let Some(name) = &arguments[0].data_class().name {
+    if let Some(name) = &arguments[0].data_class().tag.get_name() {
         string += "(";
         string += name;
         string += ")";
