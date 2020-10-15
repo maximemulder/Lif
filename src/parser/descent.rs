@@ -49,13 +49,13 @@ impl<'a> Descent<'a> for DescentAscent {
 }
 
 pub struct DescentChoice {
-    descents: Vec<usize>,
+    descents: Box<[usize]>,
 }
 
 impl DescentChoice {
-    pub fn new(descents: Vec<usize>) -> Self {
+    pub fn new<const N: usize>(descents: [usize; N]) -> Self {
         Self {
-            descents,
+            descents: Box::new(descents),
         }
     }
 }
@@ -73,13 +73,13 @@ impl<'a> Descent<'a> for DescentChoice {
 }
 
 pub struct DescentSequence {
-    descents: Vec<usize>,
+    descents: Box<[usize]>,
 }
 
 impl DescentSequence {
-    pub fn new(descents: Vec<usize>) -> Self {
+    pub fn new<const N: usize>(descents: [usize; N]) -> Self {
         Self {
-            descents,
+            descents: Box::from(descents),
         }
     }
 }

@@ -7,13 +7,13 @@ pub trait Ascent<'a> {
 }
 
 pub struct AscentList {
-    ascents: Vec<usize>,
+    ascents: Box<[usize]>,
 }
 
 impl AscentList {
-    pub fn new(ascents: Vec<usize>) -> Self {
+    pub fn new<const N: usize>(ascents: [usize; N]) -> Self {
         Self {
-            ascents,
+            ascents: Box::new(ascents),
         }
     }
 }

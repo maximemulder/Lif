@@ -114,7 +114,7 @@ pub fn run<'a>(code: &Code, tokens: &[Node<'a>]) -> Option<Node<'a>> {
     macro_rules! create_control {
         ( $keyword:expr, $element:expr ) => {
             descents.create(DescentElement::new(
-                descents.create(DescentSequence::new(vec![$keyword, expression_option])),
+                descents.create(DescentSequence::new([$keyword, expression_option])),
                 $element
             ))
         }
@@ -124,15 +124,15 @@ pub fn run<'a>(code: &Code, tokens: &[Node<'a>]) -> Option<Node<'a>> {
         ( $child:expr, $tokens:expr ) => {{
             let ascent = ascents.declare();
             ascents.define(ascent, AscentExtension::new(
-                descents.create(DescentSequence::new(vec![
+                descents.create(DescentSequence::new([
                     descents.create(DescentChoice::new($tokens)),
                     $child,
                 ])),
-                ascents.create(AscentList::new(vec![
+                ascents.create(AscentList::new([
                     ascent,
                     ascents.create(AscentElement::new(&elements::expressions::EXPRESSION)),
                     ascents.create(AscentElement::new(&elements::expressions::OPERATION)),
-                ]))
+				]))
             ));
 
             ascent
@@ -150,11 +150,11 @@ pub fn run<'a>(code: &Code, tokens: &[Node<'a>]) -> Option<Node<'a>> {
             descents.create(DescentAscent::new($child, {
                 let ascent = ascents.declare();
                 ascents.define(ascent, AscentExtension::new(
-                    descents.create(DescentSequence::new(vec![
+                    descents.create(DescentSequence::new([
                         descents.create(DescentChoice::new($tokens)),
                         $child,
                     ])),
-                    ascents.create(AscentList::new(vec![
+                    ascents.create(AscentList::new([
                         ascent,
                         ascents.create(AscentElement::new(&elements::expressions::EXPRESSION)),
                         ascents.create(AscentElement::new(&elements::expressions::ASSIGNMENT)),
@@ -168,10 +168,10 @@ pub fn run<'a>(code: &Code, tokens: &[Node<'a>]) -> Option<Node<'a>> {
 
     macro_rules! create_list {
         ( $element:expr, $separator:expr ) => {{
-            descents.create(DescentSequence::new(vec![
+            descents.create(DescentSequence::new([
                 $element,
                 descents.create(DescentZeroOrMore::new(
-                    descents.create(DescentSequence::new(vec![$separator, $element]))
+                    descents.create(DescentSequence::new([$separator, $element]))
                 ))
             ]))
         }}
@@ -191,39 +191,39 @@ pub fn run<'a>(code: &Code, tokens: &[Node<'a>]) -> Option<Node<'a>> {
     ));
 
     let r#type = descents.create(DescentOption::new(
-        descents.create(DescentSequence::new(vec![
+        descents.create(DescentSequence::new([
             symbol_colon,
             expression_base_2,
         ]))
     ));
 
     let literal = descents.create(DescentElement::new(
-        descents.create(DescentChoice::new(vec![variable_identifier, variable_string, variable_number, keyword_true, keyword_false])),
+        descents.create(DescentChoice::new([variable_identifier, variable_string, variable_number, keyword_true, keyword_false])),
         &elements::expressions::LITERAL
     ));
 
     let array = descents.create(DescentElement::new(
-        descents.create(DescentSequence::new(vec![symbol_crotchet_l, expressions, symbol_crotchet_r])),
+        descents.create(DescentSequence::new([symbol_crotchet_l, expressions, symbol_crotchet_r])),
         &elements::expressions::ARRAY
     ));
 
     let group = descents.create(DescentElement::new(
-        descents.create(DescentSequence::new(vec![symbol_parenthesis_l, expression, symbol_parenthesis_r])),
+        descents.create(DescentSequence::new([symbol_parenthesis_l, expression, symbol_parenthesis_r])),
         &elements::expressions::GROUP
     ));
 
     let declaration = descents.create(DescentElement::new(
-        descents.create(DescentSequence::new(vec![variable_identifier, r#type])),
+        descents.create(DescentSequence::new([variable_identifier, r#type])),
         &elements::productions::DECLARATION
     ));
 
     let r#let = descents.create(DescentElement::new(
-        descents.create(DescentSequence::new(vec![keyword_let, declaration])),
+        descents.create(DescentSequence::new([keyword_let, declaration])),
         &elements::expressions::LET
     ));
 
     let control = descents.create(DescentElement::new(
-        descents.create(DescentChoice::new(vec![
+        descents.create(DescentChoice::new([
             create_control!(keyword_return,   &elements::controls::RETURN),
             create_control!(keyword_break,    &elements::controls::BREAK),
             create_control!(keyword_continue, &elements::controls::CONTINUE),
@@ -232,12 +232,12 @@ pub fn run<'a>(code: &Code, tokens: &[Node<'a>]) -> Option<Node<'a>> {
     ));
 
     let block = descents.create(DescentElement::new(
-        descents.create(DescentSequence::new(vec![symbol_brace_l, statements, expression_option, symbol_brace_r])),
+        descents.create(DescentSequence::new([symbol_brace_l, statements, expression_option, symbol_brace_r])),
         &elements::structures::BLOCK
     ));
 
     let generics = descents.create(DescentOption::new(
-        descents.create(DescentSequence::new(vec![
+        descents.create(DescentSequence::new([
             symbol_guillemet_l,
             descents.create(DescentAscent::new(
                 descents.create(DescentOneOrMore::new(
@@ -250,7 +250,7 @@ pub fn run<'a>(code: &Code, tokens: &[Node<'a>]) -> Option<Node<'a>> {
     ));
 
     let function = descents.create(DescentElement::new(
-        descents.create(DescentSequence::new(vec![
+        descents.create(DescentSequence::new([
             keyword_function,
             generics,
             symbol_parenthesis_l,
@@ -266,7 +266,7 @@ pub fn run<'a>(code: &Code, tokens: &[Node<'a>]) -> Option<Node<'a>> {
 	));
 
 	let method = descents.create(DescentElement::new(
-        descents.create(DescentSequence::new(vec![
+        descents.create(DescentSequence::new([
 			keyword_function,
 			variable_identifier,
             generics,
@@ -283,7 +283,7 @@ pub fn run<'a>(code: &Code, tokens: &[Node<'a>]) -> Option<Node<'a>> {
 	));
 
 	let class = descents.create(DescentElement::new(
-		descents.create(DescentSequence::new(vec![
+		descents.create(DescentSequence::new([
 			keyword_class,
             generics,
             r#type,
@@ -298,44 +298,44 @@ pub fn run<'a>(code: &Code, tokens: &[Node<'a>]) -> Option<Node<'a>> {
 	));
 
     let r#if = descents.create(DescentElement::new(
-        descents.create(DescentSequence::new(vec![
+        descents.create(DescentSequence::new([
             keyword_if,
             expression,
             block,
             descents.create(DescentOption::new(
-                descents.create(DescentSequence::new(vec![keyword_else, block])),
+                descents.create(DescentSequence::new([keyword_else, block])),
             )),
         ])),
         &elements::structures::IF
     ));
 
     let r#loop = descents.create(DescentElement::new(
-        descents.create(DescentSequence::new(vec![keyword_loop, block])),
+        descents.create(DescentSequence::new([keyword_loop, block])),
         &elements::structures::LOOP
     ));
 
     let r#while = descents.create(DescentElement::new(
-        descents.create(DescentSequence::new(vec![keyword_while, expression, block])),
+        descents.create(DescentSequence::new([keyword_while, expression, block])),
         &elements::structures::WHILE
     ));
 
     let for_in = descents.create(DescentElement::new(
-        descents.create(DescentSequence::new(vec![keyword_for, variable_identifier, keyword_in, expression, block])),
+        descents.create(DescentSequence::new([keyword_for, variable_identifier, keyword_in, expression, block])),
         &elements::structures::FOR_IN
     ));
 
     let structure = descents.create(DescentElement::new(
-        descents.create(DescentChoice::new(vec![block, r#if, r#loop, r#while, for_in])),
+        descents.create(DescentChoice::new([block, r#if, r#loop, r#while, for_in])),
         &elements::structures::STRUCTURE
     ));
 
     let chain = ascents.create(AscentExtension::new(
-        descents.create(DescentSequence::new(vec![
+        descents.create(DescentSequence::new([
             symbol_dot,
             variable_identifier,
             descents.create(DescentPredicateNot::new(symbol_parenthesis_l)),
         ])),
-        ascents.create(AscentList::new(vec![
+        ascents.create(AscentList::new([
             extension,
             ascents.create(AscentElement::new(&elements::expressions::EXPRESSION)),
             ascents.create(AscentElement::new(&elements::expressions::CHAIN)),
@@ -343,12 +343,12 @@ pub fn run<'a>(code: &Code, tokens: &[Node<'a>]) -> Option<Node<'a>> {
     ));
 
     let method = ascents.create(AscentExtension::new(
-        descents.create(DescentSequence::new(vec![
+        descents.create(DescentSequence::new([
             symbol_dot,
             variable_identifier,
-            descents.create(DescentSequence::new(vec![symbol_parenthesis_l, expressions, symbol_parenthesis_r])),
+            descents.create(DescentSequence::new([symbol_parenthesis_l, expressions, symbol_parenthesis_r])),
         ])),
-        ascents.create(AscentList::new(vec![
+        ascents.create(AscentList::new([
             extension,
             ascents.create(AscentElement::new(&elements::expressions::EXPRESSION)),
             ascents.create(AscentElement::new(&elements::expressions::METHOD)),
@@ -356,10 +356,10 @@ pub fn run<'a>(code: &Code, tokens: &[Node<'a>]) -> Option<Node<'a>> {
     ));
 
     let sequence = ascents.create(AscentExtension::new(
-        descents.create(DescentChoice::new(vec![
-            descents.create(DescentSequence::new(vec![symbol_parenthesis_l, expressions, symbol_parenthesis_r])),
-            descents.create(DescentSequence::new(vec![symbol_crotchet_l, expressions, symbol_crotchet_r])),
-            descents.create(DescentSequence::new(vec![
+        descents.create(DescentChoice::new([
+            descents.create(DescentSequence::new([symbol_parenthesis_l, expressions, symbol_parenthesis_r])),
+            descents.create(DescentSequence::new([symbol_crotchet_l, expressions, symbol_crotchet_r])),
+            descents.create(DescentSequence::new([
                 symbol_guillemet_l,
                 descents.create(DescentElement::new(
                     create_list!(expression_base, symbol_comma),
@@ -368,65 +368,65 @@ pub fn run<'a>(code: &Code, tokens: &[Node<'a>]) -> Option<Node<'a>> {
                 symbol_guillemet_r,
             ])),
         ])),
-        ascents.create(AscentList::new(vec![
+        ascents.create(AscentList::new([
             extension,
             ascents.create(AscentElement::new(&elements::expressions::EXPRESSION)),
             ascents.create(AscentElement::new(&elements::expressions::SEQUENCE)),
         ]))
     ));
 
-    ascents.define(extension, AscentList::new(vec![chain, method, sequence]));
+    ascents.define(extension, AscentList::new([chain, method, sequence]));
 
     descents.define(expression_base, DescentElement::new(
-        descents.create(DescentChoice::new(vec![class, function, structure, r#let, control, array, group, literal])),
+        descents.create(DescentChoice::new([class, function, structure, r#let, control, array, group, literal])),
         &elements::expressions::EXPRESSION
     ));
 
     let operation_1 = create_operation!(descents.create(DescentAscent::new(
         expression_base,
         extension,
-    )), vec![symbol_asterisk, symbol_slash, symbol_percent, symbol_asterisk_d]);
+    )), [symbol_asterisk, symbol_slash, symbol_percent, symbol_asterisk_d]);
 
 	descents.define(expression_base_2, DescentAlias::new(operation_1));
 
-    let operation_2  = create_operation!(operation_1,  vec![symbol_plus, symbol_minus]);
+    let operation_2  = create_operation!(operation_1, [symbol_plus, symbol_minus]);
 
-    let operation_3  = create_operation!(operation_2,  vec![symbol_guillemet_l_d, symbol_guillemet_r_d, symbol_guillemet_l_t, symbol_guillemet_l_t]);
+    let operation_3  = create_operation!(operation_2, [symbol_guillemet_l_d, symbol_guillemet_r_d, symbol_guillemet_l_t, symbol_guillemet_l_t]);
 
-    let operation_4  = create_operation!(operation_3,  vec![symbol_ampersand]);
+    let operation_4  = create_operation!(operation_3, [symbol_ampersand]);
 
-    let operation_5  = create_operation!(operation_4,  vec![symbol_caret]);
+    let operation_5  = create_operation!(operation_4, [symbol_caret]);
 
-    let operation_6  = create_operation!(operation_5,  vec![symbol_pipe]);
+    let operation_6  = create_operation!(operation_5, [symbol_pipe]);
 
-    let operation_7_l = create_operation_ascent!(operation_6, vec![symbol_guillemet_l, symbol_guillemet_l_eq]);
+    let operation_7_l = create_operation_ascent!(operation_6, [symbol_guillemet_l, symbol_guillemet_l_eq]);
 
-    let operation_7_r = create_operation_ascent!(operation_6, vec![symbol_guillemet_r, symbol_guillemet_r_eq]);
+    let operation_7_r = create_operation_ascent!(operation_6, [symbol_guillemet_r, symbol_guillemet_r_eq]);
 
-    let operation_7 = descents.create(DescentChoice::new(vec![
-        descents.create(DescentSequence::new(vec![
+    let operation_7 = descents.create(DescentChoice::new([
+        descents.create(DescentSequence::new([
             descents.create(DescentAscent::new(operation_6, operation_7_l)),
             descents.create(DescentPredicateNot::new(
-                descents.create(DescentChoice::new(vec![symbol_guillemet_r, symbol_guillemet_r_eq]))
+                descents.create(DescentChoice::new([symbol_guillemet_r, symbol_guillemet_r_eq]))
             )),
         ])),
-        descents.create(DescentSequence::new(vec![
+        descents.create(DescentSequence::new([
             descents.create(DescentAscent::new(operation_6, operation_7_r)),
             descents.create(DescentPredicateNot::new(
-                descents.create(DescentChoice::new(vec![symbol_guillemet_l, symbol_guillemet_l_eq]))
+                descents.create(DescentChoice::new([symbol_guillemet_l, symbol_guillemet_l_eq]))
             )),
         ])),
     ]));
 
-    let operation_8  = create_operation!(operation_7,  vec![symbol_equal_d, symbol_exclamation_eq]);
+    let operation_8  = create_operation!(operation_7,  [symbol_equal_d, symbol_exclamation_eq]);
 
-    let operation_9  = create_operation!(operation_8,  vec![symbol_ampersand_d]);
+    let operation_9  = create_operation!(operation_8,  [symbol_ampersand_d]);
 
-    let operation_10 = create_operation!(operation_9,  vec![symbol_pipe_d]);
+    let operation_10 = create_operation!(operation_9,  [symbol_pipe_d]);
 
-    let operation_11 = create_operation!(operation_10, vec![symbol_dot_d, symbol_dot_d_eq]);
+    let operation_11 = create_operation!(operation_10, [symbol_dot_d, symbol_dot_d_eq]);
 
-    let operation_12 = create_assignment!(operation_11, vec![symbol_equal, symbol_plus_eq, symbol_minus_eq, symbol_asterisk_eq, symbol_slash_eq,
+    let operation_12 = create_assignment!(operation_11, [symbol_equal, symbol_plus_eq, symbol_minus_eq, symbol_asterisk_eq, symbol_slash_eq,
         symbol_percent_eq, symbol_asterisk_d_eq, symbol_guillemet_l_d_eq, symbol_guillemet_r_d_eq, symbol_guillemet_l_t_eq, symbol_guillemet_r_t_eq,
         symbol_ampersand_eq, symbol_caret_eq, symbol_pipe_eq, symbol_ampersand_d_eq, symbol_pipe_d_eq
     ]);
@@ -436,9 +436,9 @@ pub fn run<'a>(code: &Code, tokens: &[Node<'a>]) -> Option<Node<'a>> {
     descents.define(expression_option, DescentOption::new(expression));
 
     let statement = descents.create(DescentElement::new(
-        descents.create(DescentChoice::new(vec![
-            descents.create(DescentSequence::new(vec![structure, descents.create(DescentOption::new(symbol_semicolon))])),
-            descents.create(DescentSequence::new(vec![expression, symbol_semicolon])),
+        descents.create(DescentChoice::new([
+            descents.create(DescentSequence::new([structure, descents.create(DescentOption::new(symbol_semicolon))])),
+            descents.create(DescentSequence::new([expression, symbol_semicolon])),
         ])),
         &elements::productions::STATEMENT
     ));
