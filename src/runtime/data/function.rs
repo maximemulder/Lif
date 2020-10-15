@@ -64,7 +64,11 @@ impl<'a, 'b> Callable<'a, 'b> for Function<'a, 'b> {
 
     fn duplicate<'c>(&'c self) -> Box<dyn Callable<'a, 'b> + 'c> {
         Box::new(self.clone())
-    }
+	}
+
+	fn get_tag(&self) -> Tag {
+		self.tag.clone()
+	}
 }
 
 impl GcTraceable for Function<'_, '_> {

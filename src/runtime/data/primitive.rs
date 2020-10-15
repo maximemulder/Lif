@@ -38,6 +38,10 @@ impl<'a, 'b> Callable<'a, 'b> for Primitive<'a, 'b> {
     fn duplicate<'c>(&'c self) -> Box<dyn Callable<'a, 'b> + 'c> {
         Box::new(self.clone())
     }
+
+	fn get_tag(&self) -> Tag {
+		self.tag.clone()
+	}
 }
 
 impl GcTraceable for Primitive<'_, '_> {

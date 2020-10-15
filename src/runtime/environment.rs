@@ -56,16 +56,16 @@ impl<'a, 'b> Engine<'a, 'b> {
     }
 
     pub fn populate(&mut self) {
-        self.environment.class = self.new_class_value("Class");
-        self.environment.any   = self.new_class_value("Any");
+        self.environment.class = self.new_class_primitive_value("Class");
+        self.environment.any   = self.new_class_primitive_value("Any");
 
-        self.environment.array    = self.new_class_value("Array");
-        self.environment.boolean  = self.new_class_value("Boolean");
-        self.environment.function = self.new_class_value("Function");
-        self.environment.generic  = self.new_class_value("Generic");
-        self.environment.object   = self.new_class_value("Object");
-        self.environment.integer  = self.new_class_value("Integer");
-        self.environment.string   = self.new_class_value("String");
+        self.environment.array    = self.new_class_primitive_value("Array");
+        self.environment.boolean  = self.new_class_primitive_value("Boolean");
+        self.environment.function = self.new_class_primitive_value("Function");
+        self.environment.generic  = self.new_class_primitive_value("Generic");
+        self.environment.object   = self.new_class_primitive_value("Object");
+        self.environment.integer  = self.new_class_primitive_value("Integer");
+        self.environment.string   = self.new_class_primitive_value("String");
 
         self.environment.class.class = self.environment.class;
         self.environment.class.data_class_mut().parent = Some(self.environment.any);

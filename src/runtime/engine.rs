@@ -229,13 +229,18 @@ impl<'a, 'b> Engine<'a, 'b> {
         self.new_value(self.environment.boolean, Data::new_boolean(boolean))
 	}
 
-	pub fn new_class_value(&mut self, name: &str) -> GcValue<'a, 'b> {
+	pub fn new_class_value(&mut self, parent: GcValue<'a, 'b>) -> GcValue<'a, 'b> {
+		let tag = self.taggers.classes.generate(None);
+        self.new_value(self.environment.class, Data::new_class(tag, Some(parent)))
+	}
+
+	pub fn new_class_primitive_value(&mut self, name: &str) -> GcValue<'a, 'b> {
 		let tag = self.taggers.classes.generate(Some(Box::from(name)));
         self.new_value(self.environment.class, Data::new_class(tag, Some(self.environment.any)))
 	}
 
-    pub fn new_function_value(&mut self, parameters: &'b [Node<'a>], r#type: Option<GcValue<'a, 'b>>, block: &'b Node<'a>) -> GcValue<'a, 'b> {
-		let tag = self.taggers.functions.generate(None);
+    pub fn new_function_value(&mut self, name: Option<&'a str>, parameters: &'b [Node<'a>], r#type: Option<GcValue<'a, 'b>>, block: &'b Node<'a>) -> GcValue<'a, 'b> {
+		let tag = self.taggers.functions.generate(name.map(Box::from));
         self.new_value(self.environment.function, Data::new_function(tag, self.scope, parameters, r#type, block))
     }
 
@@ -272,13 +277,13 @@ impl<'a, 'b> Engine<'a, 'b> {
         self.new_constant(value)
 	}
 
-	pub fn new_class(&mut self, name: &str) -> GcReference<'a, 'b> {
-		let value = self.new_class_value(name);
+	pub fn new_class(&mut self, parent: GcValue<'a, 'b>) -> GcReference<'a, 'b> {
+		let value = self.new_class_value(parent);
         self.new_constant(value)
     }
 
-    pub fn new_function(&mut self, parameters: &'b [Node<'a>], r#type: Option<GcValue<'a, 'b>>, block: &'b Node<'a>) -> GcReference<'a, 'b> {
-       let value = self.new_function_value(parameters, r#type, block);
+    pub fn new_function(&mut self, name: Option<&'a str>, parameters: &'b [Node<'a>], r#type: Option<GcValue<'a, 'b>>, block: &'b Node<'a>) -> GcReference<'a, 'b> {
+       let value = self.new_function_value(name, parameters, r#type, block);
         self.new_constant(value)
     }
 

@@ -105,6 +105,8 @@ pub fn run<'a>(code: &Code, tokens: &[Node<'a>]) -> Option<Node<'a>> {
 
     let expression_base = descents.declare();
 
+    let expression_base_2 = descents.declare();
+
     let expression_option = descents.declare();
 
     let extension = ascents.declare();
@@ -191,7 +193,7 @@ pub fn run<'a>(code: &Code, tokens: &[Node<'a>]) -> Option<Node<'a>> {
     let r#type = descents.create(DescentOption::new(
         descents.create(DescentSequence::new(vec![
             symbol_colon,
-            expression_base,
+            expression_base_2,
         ]))
     ));
 
@@ -261,7 +263,39 @@ pub fn run<'a>(code: &Code, tokens: &[Node<'a>]) -> Option<Node<'a>> {
             block,
         ])),
         &elements::expressions::FUNCTION
-    ));
+	));
+
+	let method = descents.create(DescentElement::new(
+        descents.create(DescentSequence::new(vec![
+			keyword_function,
+			variable_identifier,
+            generics,
+            symbol_parenthesis_l,
+            descents.create(DescentElement::new(
+                create_list_option!(declaration, symbol_comma),
+                &elements::productions::PARAMETERS
+            )),
+            symbol_parenthesis_r,
+            r#type,
+            block,
+        ])),
+        &elements::productions::METHOD
+	));
+
+	let class = descents.create(DescentElement::new(
+		descents.create(DescentSequence::new(vec![
+			keyword_class,
+            generics,
+            r#type,
+			symbol_brace_l,
+            descents.create(DescentElement::new(
+                descents.create(DescentOneOrMore::new(method)),
+                &elements::productions::METHODS
+            )),
+			symbol_brace_r,
+		])),
+		&elements::expressions::CLASS
+	));
 
     let r#if = descents.create(DescentElement::new(
         descents.create(DescentSequence::new(vec![
@@ -344,7 +378,7 @@ pub fn run<'a>(code: &Code, tokens: &[Node<'a>]) -> Option<Node<'a>> {
     ascents.define(extension, AscentList::new(vec![chain, method, sequence]));
 
     descents.define(expression_base, DescentElement::new(
-        descents.create(DescentChoice::new(vec![function, structure, r#let, control, array, group, literal])),
+        descents.create(DescentChoice::new(vec![class, function, structure, r#let, control, array, group, literal])),
         &elements::expressions::EXPRESSION
     ));
 
@@ -352,6 +386,8 @@ pub fn run<'a>(code: &Code, tokens: &[Node<'a>]) -> Option<Node<'a>> {
         expression_base,
         extension,
     )), vec![symbol_asterisk, symbol_slash, symbol_percent, symbol_asterisk_d]);
+
+	descents.define(expression_base_2, DescentAlias::new(operation_1));
 
     let operation_2  = create_operation!(operation_1,  vec![symbol_plus, symbol_minus]);
 

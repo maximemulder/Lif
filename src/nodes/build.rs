@@ -15,6 +15,7 @@ use crate::nodes::method::Method;
 use crate::nodes::sequence::Sequence;
 use crate::nodes::declaration::Declaration;
 use crate::nodes::generic::Generic;
+use crate::nodes::class::Class;
 use crate::nodes::function::Function;
 use crate::nodes::array::Array;
 use crate::nodes::block::Block;
@@ -57,6 +58,7 @@ fn expression<'a>(text: &'a str, node: &'a SyntaxNode<'a>) -> Node<'a> {
         elements::structures::STRUCTURE    => structure(text, child),
         elements::expressions::LET         => r#let(text, child),
         elements::controls::CONTROL        => control(text, child),
+        elements::expressions::CLASS       => class(text, child),
         elements::expressions::FUNCTION    => function(text, child),
         elements::expressions::GROUP       => group(text, child),
         elements::expressions::CHAIN       => chain(text, child),
@@ -77,7 +79,7 @@ fn literal<'a>(text: &'a str, node: &'a SyntaxNode<'a>) -> Node<'a> {
         elements::variables::NUMBER     => integer(text, child),
         elements::variables::STRING     => string(text, child),
     	elements::variables::IDENTIFIER => identifier(text, child),
-        _ => panic!(),
+        _ => { panic!() },
     }
 }
 
@@ -181,9 +183,52 @@ fn generics<'a>(text: &'a str, node: &'a SyntaxNode<'a>) -> Box<[&'a str]> {
     identifiers.into_boxed_slice()
 }
 
+fn class<'a>(text: &'a str, node: &'a SyntaxNode<'a>) -> Node<'a> {
+    let children = node.children();
+	let class = Node::new(node, Class::new(if children[children.len() - 4].element == &elements::expressions::EXPRESSION {
+		Some(expression(text, &children[children.len() - 4]))
+	} else {
+		None
+	}, class_functions(text, &children[children.len() - 2])));
+
+    if children.len() >= 7 {
+        Node::new(node, Generic::new(generics(text, &children[2]), class))
+    } else {
+        class
+    }
+}
+
+fn class_functions<'a>(text: &'a str, node: &'a SyntaxNode<'a>) -> Box<[Node<'a>]> {
+    let mut functions = Vec::new();
+    for child in node.children().iter() {
+        functions.push(class_function(text, child));
+    }
+
+    functions.into_boxed_slice()
+}
+
+fn class_function<'a>(text: &'a str, node: &'a SyntaxNode<'a>) -> Node<'a> {
+    let children = node.children();
+    let function = Node::new(node, Function::new(Some(token(text, &children[1])), parameters(text, &children[if children.len() < 9 {
+        3
+    } else {
+        6
+    }]), if children[children.len() - 2].element == &elements::expressions::EXPRESSION {
+        Some(expression(text, &children[children.len() - 2]))
+    } else {
+        None
+    }, block(text, &children.last().unwrap())));
+
+    if children.len() >= 9 {
+        Node::new(node, Generic::new(generics(text, &children[3]), function))
+    } else {
+        function
+    }
+}
+
 fn function<'a>(text: &'a str, node: &'a SyntaxNode<'a>) -> Node<'a> {
     let children = node.children();
-    let function = Node::new(node, Function::new(parameters(text, &children[if children.len() < 8 {
+    let function = Node::new(node, Function::new(None, parameters(text, &children[if children.len() < 8 {
         2
     } else {
         5

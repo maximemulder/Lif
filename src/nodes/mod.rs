@@ -26,6 +26,7 @@ pub mod method;
 pub mod sequence;
 pub mod declaration;
 pub mod generic;
+pub mod class;
 pub mod function;
 pub mod block;
 pub mod array;
