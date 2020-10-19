@@ -22,7 +22,6 @@ pub mod for_in;
 pub mod assignment;
 pub mod operation;
 pub mod chain;
-pub mod method;
 pub mod sequence;
 pub mod declaration;
 pub mod generic;

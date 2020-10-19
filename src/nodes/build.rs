@@ -11,7 +11,6 @@ use crate::nodes::statements::Statements;
 use crate::nodes::assignment::Assignment;
 use crate::nodes::operation::Operation;
 use crate::nodes::chain::Chain;
-use crate::nodes::method::Method;
 use crate::nodes::sequence::Sequence;
 use crate::nodes::declaration::Declaration;
 use crate::nodes::generic::Generic;
@@ -63,7 +62,6 @@ fn expression<'a>(text: &'a str, node: &'a SyntaxNode<'a>) -> Node<'a> {
         elements::expressions::GROUP       => group(text, child),
         elements::expressions::CHAIN       => chain(text, child),
         elements::expressions::ARRAY       => array(text, child),
-        elements::expressions::METHOD      => method(text, child),
         elements::expressions::SEQUENCE    => sequence(text, child),
         elements::expressions::ASSIGNMENT  => assignment(text, child),
         elements::expressions::OPERATION   => operation(text, child),
@@ -189,7 +187,7 @@ fn class<'a>(text: &'a str, node: &'a SyntaxNode<'a>) -> Node<'a> {
 		Some(expression(text, &children[children.len() - 4]))
 	} else {
 		None
-	}, class_functions(text, &children[children.len() - 2])));
+	}, methods(text, &children[children.len() - 2])));
 
     if children.len() >= 7 {
         Node::new(node, Generic::new(generics(text, &children[2]), class))
@@ -198,16 +196,16 @@ fn class<'a>(text: &'a str, node: &'a SyntaxNode<'a>) -> Node<'a> {
     }
 }
 
-fn class_functions<'a>(text: &'a str, node: &'a SyntaxNode<'a>) -> Box<[Node<'a>]> {
+fn methods<'a>(text: &'a str, node: &'a SyntaxNode<'a>) -> Box<[Node<'a>]> {
     let mut functions = Vec::new();
     for child in node.children().iter() {
-        functions.push(class_function(text, child));
+        functions.push(method(text, child));
     }
 
     functions.into_boxed_slice()
 }
 
-fn class_function<'a>(text: &'a str, node: &'a SyntaxNode<'a>) -> Node<'a> {
+fn method<'a>(text: &'a str, node: &'a SyntaxNode<'a>) -> Node<'a> {
     let children = node.children();
     let function = Node::new(node, Function::new(Some(token(text, &children[1])), parameters(text, &children[if children.len() < 9 {
         3
@@ -264,10 +262,6 @@ fn group<'a>(text: &'a str, node: &'a SyntaxNode<'a>) -> Node<'a> {
 
 fn chain<'a>(text: &'a str, node: &'a SyntaxNode<'a>) -> Node<'a> {
     Node::new(node, Chain::new(expression(text, &node.children()[0]), token(text, &node.children()[2])))
-}
-
-fn method<'a>(text: &'a str, node: &'a SyntaxNode<'a>) -> Node<'a> {
-    Node::new(node, Method::new(expression(text, &node.children()[0]), token(text, &node.children()[2]), expressions(text, &node.children()[4])))
 }
 
 fn sequence<'a>(text: &'a str, node: &'a SyntaxNode<'a>) -> Node<'a> {

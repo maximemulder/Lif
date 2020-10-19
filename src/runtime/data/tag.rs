@@ -45,9 +45,9 @@ impl Display for Tag {
     fn fmt(&self, f: &mut Formatter) -> Result {
         write!(f, "(")?;
 		if let Some(name) = self.name.as_ref() {
-			write!(f, "{}#", name)?;
+			write!(f, "{}", name)?;
 		}
 
-		write!(f, "{})", self.index)
+		write!(f, "#{})", self.index)
     }
 }

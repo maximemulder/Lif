@@ -252,6 +252,10 @@ impl<'a, 'b> Engine<'a, 'b> {
         self.new_value(self.environment.integer, Data::new_integer(integer))
 	}
 
+	pub fn new_method_value(&mut self, function: GcValue<'a, 'b>, this: GcValue<'a, 'b>) -> GcValue<'a, 'b> {
+		self.new_value(self.environment.method, Data::new_method(function, this))
+	}
+
 	pub fn new_object_value(&mut self, parent: GcValue<'a, 'b>) -> GcValue<'a, 'b> {
 		self.new_value(parent, Data::new_object())
 	}
@@ -296,6 +300,11 @@ impl<'a, 'b> Engine<'a, 'b> {
 		let value = self.new_integer_value(integer);
         self.new_constant(value)
     }
+
+	pub fn new_method(&mut self, function: GcValue<'a, 'b>, this: GcValue<'a, 'b>) -> GcReference<'a, 'b> {
+		let value = self.new_method_value(function, this);
+        self.new_constant(value)
+	}
 
 	pub fn new_object(&mut self, parent: GcValue<'a, 'b>) -> GcReference<'a, 'b> {
 		let value = self.new_object_value(parent);

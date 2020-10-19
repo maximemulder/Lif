@@ -333,25 +333,11 @@ pub fn run<'a>(code: &Code, tokens: &[Node<'a>]) -> Option<Node<'a>> {
         descents.create(DescentSequence::new([
             symbol_dot,
             variable_identifier,
-            descents.create(DescentPredicateNot::new(symbol_parenthesis_l)),
         ])),
         ascents.create(AscentList::new([
             extension,
             ascents.create(AscentElement::new(&elements::expressions::EXPRESSION)),
             ascents.create(AscentElement::new(&elements::expressions::CHAIN)),
-        ]))
-    ));
-
-    let method = ascents.create(AscentExtension::new(
-        descents.create(DescentSequence::new([
-            symbol_dot,
-            variable_identifier,
-            descents.create(DescentSequence::new([symbol_parenthesis_l, expressions, symbol_parenthesis_r])),
-        ])),
-        ascents.create(AscentList::new([
-            extension,
-            ascents.create(AscentElement::new(&elements::expressions::EXPRESSION)),
-            ascents.create(AscentElement::new(&elements::expressions::METHOD)),
         ]))
     ));
 
@@ -375,7 +361,7 @@ pub fn run<'a>(code: &Code, tokens: &[Node<'a>]) -> Option<Node<'a>> {
         ]))
     ));
 
-    ascents.define(extension, AscentList::new([chain, method, sequence]));
+    ascents.define(extension, AscentList::new([chain, sequence]));
 
     descents.define(expression_base, DescentElement::new(
         descents.create(DescentChoice::new([class, function, structure, r#let, control, array, group, literal])),

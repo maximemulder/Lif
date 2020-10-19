@@ -1,5 +1,5 @@
 use crate::runtime::{ Return, ReturnReference };
-use crate::runtime::data::{ Callable, Class, Data, Generic, Object };
+use crate::runtime::data::{ Callable, Class, Data, Generic, Method, Object };
 use crate::runtime::engine::Engine;
 use crate::runtime::error::Error;
 use crate::runtime::gc::{ GcRef, GcTraceable };
@@ -9,7 +9,7 @@ pub type GcValue<'a, 'b> = GcRef<Value<'a, 'b>>;
 
 pub struct Value<'a, 'b> {
     pub class: GcValue<'a, 'b>,
-    data: Data<'a, 'b>,
+    pub data: Data<'a, 'b>,
 }
 
 impl<'a, 'b> Value<'a, 'b> {
@@ -151,20 +151,28 @@ impl<'a, 'b> Value<'a, 'b> {
         data_mut!(self, Generic);
     }
 
-    pub fn data_object(&self) -> &Object<'a, 'b> {
-        data!(self, Object);
-    }
-
-    pub fn data_object_mut(&mut self) -> &mut Object<'a, 'b> {
-        data_mut!(self, Object);
-    }
-
     pub fn data_integer(&self) -> &usize {
         data!(self, Integer);
     }
 
     pub fn data_integer_mut(&mut self) -> &mut usize {
         data_mut!(self, Integer);
+    }
+
+    pub fn data_method(&self) -> &Method<'a, 'b> {
+        data!(self, Method);
+    }
+
+    pub fn data_method_mut(&mut self) -> &mut Method<'a, 'b> {
+        data_mut!(self, Method);
+    }
+
+    pub fn data_object(&self) -> &Object<'a, 'b> {
+        data!(self, Object);
+    }
+
+    pub fn data_object_mut(&mut self) -> &mut Object<'a, 'b> {
+        data_mut!(self, Object);
     }
 
     pub fn data_string(&self) -> &String {

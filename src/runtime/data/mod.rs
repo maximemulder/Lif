@@ -2,6 +2,7 @@ mod callable;
 mod class;
 mod function;
 mod generic;
+mod method;
 mod object;
 mod primitive;
 mod tag;
@@ -10,6 +11,7 @@ pub use callable::Callable;
 pub use class::Class;
 pub use function::Function;
 pub use generic::Generic;
+pub use method::Method;
 pub use object::Object;
 pub use primitive::Primitive;
 pub use tag::{ Tag, Tagger };
@@ -28,7 +30,8 @@ pub enum Data<'a, 'b> {
     Callable(Box<dyn Callable<'a, 'b> + 'b>),
     Class(Class<'a, 'b>),
     Generic(Generic<'a, 'b>),
-    Integer(usize),
+	Integer(usize),
+	Method(Method<'a, 'b>),
     Object(Object<'a, 'b>),
     String(String),
     Null,
@@ -59,6 +62,10 @@ impl<'a, 'b> Data<'a, 'b> {
 		Data::Generic(Generic::new(generics, node))
 	}
 
+	pub fn new_method(function: GcValue<'a, 'b>, this: GcValue<'a, 'b>) -> Self {
+		Data::Method(Method::new(function, this))
+	}
+
 	pub fn new_object() -> Self {
 		Data::Object(Object::new())
 	}
@@ -79,8 +86,9 @@ impl GcTraceable for Data<'_, '_> {
                 reference.trace();
             },
             Data::Callable(callable) => callable.trace(),
-            Data::Class(class)       => class.trace(),
-            Data::Object(object) => object.trace(),
+			Data::Class(class)       => class.trace(),
+			Data::Method(method)     => method.trace(),
+            Data::Object(object)     => object.trace(),
             _ => (),
         }
     }
