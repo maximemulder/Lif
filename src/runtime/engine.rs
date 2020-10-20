@@ -16,15 +16,17 @@ pub enum Control {
 }
 
 pub struct Taggers {
-	functions: Tagger,
+	generics:  Tagger,
 	classes:   Tagger,
+	functions: Tagger,
 }
 
 impl Taggers {
 	pub fn new() -> Self {
 		Self {
-			functions: Tagger::new(),
+			generics:  Tagger::new(),
 			classes:   Tagger::new(),
+			functions: Tagger::new(),
 		}
 	}
 }
@@ -244,8 +246,9 @@ impl<'a, 'b> Engine<'a, 'b> {
         self.new_value(self.environment.function, Data::new_function(tag, self.scope, parameters, r#type, block))
     }
 
-	pub fn new_generic_value(&mut self, generics: &'b [&'a str], node: &'b dyn Executable<'a>) -> GcValue<'a, 'b> {
-        self.new_value(self.environment.generic, Data::new_generic(generics, node))
+	pub fn new_generic_value(&mut self, name: Option<&'a str>, generics: &'b [&'a str], node: &'b dyn Executable<'a>) -> GcValue<'a, 'b> {
+		let tag = self.taggers.generics.generate(name.map(Box::from));
+        self.new_value(self.environment.generic, Data::new_generic(tag, generics, node))
 	}
 
 	pub fn new_integer_value(&mut self, integer: usize) -> GcValue<'a, 'b> {
@@ -291,8 +294,8 @@ impl<'a, 'b> Engine<'a, 'b> {
         self.new_constant(value)
     }
 
-	pub fn new_generic(&mut self, generics: &'b [&'a str], node: &'b dyn Executable<'a>) -> GcReference<'a, 'b> {
-		let value = self.new_generic_value(generics, node);
+	pub fn new_generic(&mut self, name: Option<&'a str>, generics: &'b [&'a str], node: &'b dyn Executable<'a>) -> GcReference<'a, 'b> {
+		let value = self.new_generic_value(name, generics, node);
         self.new_constant(value)
     }
 

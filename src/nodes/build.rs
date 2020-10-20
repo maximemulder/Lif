@@ -190,7 +190,7 @@ fn class<'a>(text: &'a str, node: &'a SyntaxNode<'a>) -> Node<'a> {
 	}, methods(text, &children[children.len() - 2])));
 
     if children.len() >= 7 {
-        Node::new(node, Generic::new(generics(text, &children[2]), class))
+        Node::new(node, Generic::new(None, generics(text, &children[2]), class))
     } else {
         class
     }
@@ -206,8 +206,9 @@ fn methods<'a>(text: &'a str, node: &'a SyntaxNode<'a>) -> Box<[Node<'a>]> {
 }
 
 fn method<'a>(text: &'a str, node: &'a SyntaxNode<'a>) -> Node<'a> {
-    let children = node.children();
-    let function = Node::new(node, Function::new(Some(token(text, &children[1])), parameters(text, &children[if children.len() < 9 {
+	let children = node.children();
+	let name = Some(token(text, &children[1]));
+    let function = Node::new(node, Function::new(name, parameters(text, &children[if children.len() < 9 {
         3
     } else {
         6
@@ -218,7 +219,7 @@ fn method<'a>(text: &'a str, node: &'a SyntaxNode<'a>) -> Node<'a> {
     }, block(text, &children.last().unwrap())));
 
     if children.len() >= 9 {
-        Node::new(node, Generic::new(generics(text, &children[3]), function))
+        Node::new(node, Generic::new(name, generics(text, &children[3]), function))
     } else {
         function
     }
@@ -237,7 +238,7 @@ fn function<'a>(text: &'a str, node: &'a SyntaxNode<'a>) -> Node<'a> {
     }, block(text, &children.last().unwrap())));
 
     if children.len() >= 8 {
-        Node::new(node, Generic::new(generics(text, &children[2]), function))
+        Node::new(node, Generic::new(None, generics(text, &children[2]), function))
     } else {
         function
     }

@@ -1,5 +1,5 @@
 use crate::runtime::{ Return, ReturnReference };
-use crate::runtime::data::{ Callable, Class, Data, Generic, Method, Object };
+use crate::runtime::data::{ Callable, Class, Data, Generic, Method, Object, Tag };
 use crate::runtime::engine::Engine;
 use crate::runtime::error::Error;
 use crate::runtime::gc::{ GcRef, GcTraceable };
@@ -9,7 +9,7 @@ pub type GcValue<'a, 'b> = GcRef<Value<'a, 'b>>;
 
 pub struct Value<'a, 'b> {
     pub class: GcValue<'a, 'b>,
-    pub data: Data<'a, 'b>,
+    data: Data<'a, 'b>,
 }
 
 impl<'a, 'b> Value<'a, 'b> {
@@ -119,6 +119,15 @@ macro_rules! data_mut {
 }
 
 impl<'a, 'b> Value<'a, 'b> {
+	pub fn data_tag(&self) -> Tag {
+		match &self.data {
+			Data::Callable(callable) => callable.get_tag(),
+			Data::Class(class) => class.tag.clone(),
+			Data::Generic(generic) => generic.tag.clone(),
+			_ => panic!(),
+		}
+	}
+
     pub fn data_array(&self) -> &Vec<GcReference<'a, 'b>> {
         data!(self, Array);
     }

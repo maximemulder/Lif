@@ -58,8 +58,8 @@ impl<'a, 'b> Data<'a, 'b> {
 		Data::Integer(integer)
 	}
 
-	pub fn new_generic(generics: &'b [&'a str], node: &'b dyn Executable<'a>) -> Self {
-		Data::Generic(Generic::new(generics, node))
+	pub fn new_generic(tag: Tag, generics: &'b [&'a str], node: &'b dyn Executable<'a>) -> Self {
+		Data::Generic(Generic::new(tag, generics, node))
 	}
 
 	pub fn new_method(function: GcValue<'a, 'b>, this: GcValue<'a, 'b>) -> Self {
