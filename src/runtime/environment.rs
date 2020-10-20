@@ -1,5 +1,6 @@
 use crate::runtime::ReturnReference;
 use crate::runtime::engine::Engine;
+use crate::runtime::error::Error;
 use crate::runtime::gc::GcTraceable;
 use crate::runtime::value::GcValue;
 
@@ -100,11 +101,12 @@ impl<'a, 'b> Engine<'a, 'b> {
         self.add_constant_value("Object",   object);
         self.add_constant_value("String",   string);
 
-        self.add_method_primitive(any, "==", [any, any], &any_comparison);
-        self.add_method_primitive(any, "!=", [any, any], &any_difference);
-        self.add_method_primitive(any, ">",  [any, any], &any_greater);
-        self.add_method_primitive(any, "<=", [any, any], &any_lesser_equal);
-        self.add_method_primitive(any, ">=", [any, any], &any_greater_equal);
+        self.add_method_primitive(any, ".",  [any, string], &any_chain);
+        self.add_method_primitive(any, "==", [any, any],    &any_comparison);
+        self.add_method_primitive(any, "!=", [any, any],    &any_difference);
+        self.add_method_primitive(any, ">",  [any, any],    &any_greater);
+        self.add_method_primitive(any, "<=", [any, any],    &any_lesser_equal);
+        self.add_method_primitive(any, ">=", [any, any],    &any_greater_equal);
 
         self.add_method_primitive(array, "to_string", [array],               &array_to_string);
         self.add_method_primitive(array, "copy",      [array],               &array_copy);
@@ -172,6 +174,16 @@ fn primitive_new<'a, 'b>(engine: &mut Engine<'a, 'b>, arguments: Vec<GcValue<'a,
 fn primitive_print<'a, 'b>(engine: &mut Engine<'a, 'b>, arguments: Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b> {
     println!("{}", arguments[0].call_to_string(engine)?);
     Ok(engine.undefined())
+}
+
+fn any_chain<'a, 'b>(engine: &mut Engine<'a, 'b>, arguments: Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b> {
+	let this = arguments[0];
+	let name = arguments[1].data_string().clone();
+	if let Some(method) = this.get_method(&name) {
+		return Ok(engine.new_method(method, this));
+	}
+
+	Err(Error::new_undefined_method(&name, this))
 }
 
 fn any_comparison<'a, 'b>(engine: &mut Engine<'a, 'b>, arguments: Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b> {
