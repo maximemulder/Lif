@@ -195,6 +195,15 @@ pub fn run<'a>(code: &Code, tokens: &[Node<'a>]) -> Option<Node<'a>> {
             symbol_colon,
             expression_base_2,
         ]))
+	));
+	let r#type = descents.create(DescentElement::new(
+		descents.create(DescentOption::new(
+			descents.create(DescentSequence::new([
+				symbol_colon,
+				expression_base_2,
+			])),
+		)),
+		&elements::productions::TYPE
     ));
 
     let literal = descents.create(DescentElement::new(
@@ -423,7 +432,7 @@ pub fn run<'a>(code: &Code, tokens: &[Node<'a>]) -> Option<Node<'a>> {
 
     let statement = descents.create(DescentElement::new(
         descents.create(DescentChoice::new([
-            descents.create(DescentSequence::new([structure, descents.create(DescentOption::new(symbol_semicolon))])),
+            descents.create(DescentSequence::new([structure, descents.create(DescentPredicateNot::new(symbol_semicolon))])),
             descents.create(DescentSequence::new([expression, symbol_semicolon])),
         ])),
         &elements::productions::STATEMENT

@@ -69,6 +69,10 @@ fn expression<'a>(text: &'a str, node: &'a SyntaxNode<'a>) -> Node<'a> {
     }
 }
 
+fn r#type<'a>(text: &'a str, node: &'a SyntaxNode<'a>) -> Option<Node<'a>> {
+    node.children().get(1).map(|child| expression(text, child))
+}
+
 fn literal<'a>(text: &'a str, node: &'a SyntaxNode<'a>) -> Node<'a> {
     let child = &node.children()[0];
     match *child.element {
@@ -147,7 +151,7 @@ fn r#let<'a>(text: &'a str, node: &'a SyntaxNode<'a>) -> Node<'a> {
 }
 
 fn declaration<'a>(text: &'a str, node: &'a SyntaxNode<'a>) -> Node<'a> {
-    Node::new(node, Declaration::new(token(text, &node.children()[0]), node.children().get(2).map(|child| expression(text, child))))
+    Node::new(node, Declaration::new(token(text, &node.children()[0]), r#type(text, &node.children()[1])))
 }
 
 fn control<'a>(text: &'a str, node: &'a SyntaxNode<'a>) -> Node<'a> {
@@ -183,13 +187,8 @@ fn generics<'a>(text: &'a str, node: &'a SyntaxNode<'a>) -> Box<[&'a str]> {
 
 fn class<'a>(text: &'a str, node: &'a SyntaxNode<'a>) -> Node<'a> {
     let children = node.children();
-	let class = Node::new(node, Class::new(if children[children.len() - 4].element == &elements::expressions::EXPRESSION {
-		Some(expression(text, &children[children.len() - 4]))
-	} else {
-		None
-	}, methods(text, &children[children.len() - 2])));
-
-    if children.len() >= 7 {
+	let class = Node::new(node, Class::new(r#type(text, &children[children.len() - 4]), methods(text, &children[children.len() - 2])));
+    if children.len() >= 6 {
         Node::new(node, Generic::new(None, generics(text, &children[2]), class))
     } else {
         class
@@ -208,17 +207,13 @@ fn methods<'a>(text: &'a str, node: &'a SyntaxNode<'a>) -> Box<[Node<'a>]> {
 fn method<'a>(text: &'a str, node: &'a SyntaxNode<'a>) -> Node<'a> {
 	let children = node.children();
 	let name = Some(token(text, &children[1]));
-    let function = Node::new(node, Function::new(name, parameters(text, &children[if children.len() < 9 {
+    let function = Node::new(node, Function::new(name, parameters(text, &children[if children.len() < 8 {
         3
     } else {
         6
-    }]), if children[children.len() - 2].element == &elements::expressions::EXPRESSION {
-        Some(expression(text, &children[children.len() - 2]))
-    } else {
-        None
-    }, block(text, &children.last().unwrap())));
+    }]), r#type(text, &children[children.len() - 2]), block(text, &children.last().unwrap())));
 
-    if children.len() >= 9 {
+    if children.len() >= 8 {
         Node::new(node, Generic::new(name, generics(text, &children[3]), function))
     } else {
         function
@@ -227,17 +222,13 @@ fn method<'a>(text: &'a str, node: &'a SyntaxNode<'a>) -> Node<'a> {
 
 fn function<'a>(text: &'a str, node: &'a SyntaxNode<'a>) -> Node<'a> {
     let children = node.children();
-    let function = Node::new(node, Function::new(None, parameters(text, &children[if children.len() < 8 {
+    let function = Node::new(node, Function::new(None, parameters(text, &children[if children.len() < 7 {
         2
     } else {
         5
-    }]), if children[children.len() - 2].element == &elements::expressions::EXPRESSION {
-        Some(expression(text, &children[children.len() - 2]))
-    } else {
-        None
-    }, block(text, &children.last().unwrap())));
+    }]), r#type(text, &children[children.len() - 2]), block(text, &children.last().unwrap())));
 
-    if children.len() >= 8 {
+    if children.len() >= 7 {
         Node::new(node, Generic::new(None, generics(text, &children[2]), function))
     } else {
         function
