@@ -190,12 +190,6 @@ pub fn run<'a>(code: &Code, tokens: &[Node<'a>]) -> Option<Node<'a>> {
         &elements::productions::EXPRESSIONS
     ));
 
-    let r#type = descents.create(DescentOption::new(
-        descents.create(DescentSequence::new([
-            symbol_colon,
-            expression_base_2,
-        ]))
-	));
 	let r#type = descents.create(DescentElement::new(
 		descents.create(DescentOption::new(
 			descents.create(DescentSequence::new([
