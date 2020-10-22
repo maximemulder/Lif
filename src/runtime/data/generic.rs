@@ -10,7 +10,7 @@ pub struct Generic<'a, 'b> {
 impl<'a, 'b> Generic<'a, 'b> {
     pub fn new(tag: Tag, generics: &'b [&'a str], node: &'b dyn Executable<'a>) -> Self {
         Self {
-			tag,
+            tag,
             generics,
             node,
         }

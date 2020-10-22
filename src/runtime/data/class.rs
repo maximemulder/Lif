@@ -14,7 +14,7 @@ pub struct Class<'a, 'b> {
 impl<'a, 'b> Class<'a, 'b> {
     pub fn new(tag: Tag, parent: Option<GcValue<'a, 'b>>) -> Self {
         Self {
-			tag,
+            tag,
             parent,
             statics: HashMap::new(),
             methods: HashMap::new(),

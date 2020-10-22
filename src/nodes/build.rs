@@ -80,7 +80,7 @@ fn literal<'a>(text: &'a str, node: &'a SyntaxNode<'a>) -> Node<'a> {
         elements::keywords::FALSE       => r#false(text, child),
         elements::variables::NUMBER     => integer(text, child),
         elements::variables::STRING     => string(text, child),
-    	elements::variables::IDENTIFIER => identifier(text, child),
+        elements::variables::IDENTIFIER => identifier(text, child),
         _ => { panic!() },
     }
 }
@@ -110,7 +110,7 @@ fn structure<'a>(text: &'a str, node: &'a SyntaxNode<'a>) -> Node<'a> {
     match *child.element {
         elements::structures::BLOCK    => block(text, child),
         elements::structures::IF       => r#if(text, child),
-    	elements::structures::LOOP     => r#loop(text, child),
+        elements::structures::LOOP     => r#loop(text, child),
         elements::structures::WHILE    => r#while(text, child),
         elements::structures::DO_WHILE => do_while(text, child),
         elements::structures::FOR_IN   => for_in(text, child),
@@ -187,7 +187,7 @@ fn generics<'a>(text: &'a str, node: &'a SyntaxNode<'a>) -> Box<[&'a str]> {
 
 fn class<'a>(text: &'a str, node: &'a SyntaxNode<'a>) -> Node<'a> {
     let children = node.children();
-	let class = Node::new(node, Class::new(r#type(text, &children[children.len() - 4]), methods(text, &children[children.len() - 2])));
+    let class = Node::new(node, Class::new(r#type(text, &children[children.len() - 4]), methods(text, &children[children.len() - 2])));
     if children.len() >= 6 {
         Node::new(node, Generic::new(None, generics(text, &children[2]), class))
     } else {
@@ -205,8 +205,8 @@ fn methods<'a>(text: &'a str, node: &'a SyntaxNode<'a>) -> Box<[Node<'a>]> {
 }
 
 fn method<'a>(text: &'a str, node: &'a SyntaxNode<'a>) -> Node<'a> {
-	let children = node.children();
-	let name = Some(token(text, &children[1]));
+    let children = node.children();
+    let name = Some(token(text, &children[1]));
     let function = Node::new(node, Function::new(name, parameters(text, &children[if children.len() < 8 {
         3
     } else {

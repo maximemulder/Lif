@@ -37,8 +37,8 @@ impl<'a> Executable<'a> for DoWhile<'a> {
                 continue;
             }
 
-			let reference = execute!(engine, &self.condition);
-			let condition = !*reference.read()?.get_cast_boolean(engine)?;
+            let reference = execute!(engine, &self.condition);
+            let condition = !*reference.read()?.get_cast_boolean(engine)?;
             if condition {
                 break;
             }

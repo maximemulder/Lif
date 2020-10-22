@@ -19,24 +19,24 @@ pub enum Control {
 }
 
 pub struct Taggers {
-	generics:  Tagger,
-	classes:   Tagger,
-	functions: Tagger,
+    generics:  Tagger,
+    classes:   Tagger,
+    functions: Tagger,
 }
 
 impl Taggers {
-	pub fn new() -> Self {
-		Self {
-			generics:  Tagger::new(),
-			classes:   Tagger::new(),
-			functions: Tagger::new(),
-		}
-	}
+    pub fn new() -> Self {
+        Self {
+            generics:  Tagger::new(),
+            classes:   Tagger::new(),
+            functions: Tagger::new(),
+        }
+    }
 }
 
 pub struct Engine<'a, 'b> where 'a: 'b {
-	pub environment: Environment<'a, 'b>,
-	taggers:     Taggers,
+    pub environment: Environment<'a, 'b>,
+    taggers:     Taggers,
     scopes:          Gc<Scope<'a, 'b>>,
     references:      Gc<Reference<'a, 'b>>,
     values:          Gc<Value<'a, 'b>>,
@@ -51,8 +51,8 @@ pub struct Engine<'a, 'b> where 'a: 'b {
 impl<'a, 'b> Engine<'a, 'b> {
     pub fn new() -> Self {
         let mut engine = Self {
-			environment: Environment::new(),
-			taggers:     Taggers::new(),
+            environment: Environment::new(),
+            taggers:     Taggers::new(),
             scopes:      Gc::new(),
             references:  Gc::new(),
             values:      Gc::new(),

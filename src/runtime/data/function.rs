@@ -9,7 +9,7 @@ use crate::runtime::value::GcValue;
 
 #[derive(Clone)]
 pub struct Function<'a, 'b> {
-	tag: Tag,
+    tag: Tag,
     scope: GcScope<'a, 'b>,
     parameters: &'b [Node<'a>],
     r#type: Option<GcValue<'a, 'b>>,
@@ -19,7 +19,7 @@ pub struct Function<'a, 'b> {
 impl<'a, 'b> Function<'a, 'b> {
     pub fn new(tag: Tag, scope: GcScope<'a, 'b>, parameters: &'b [Node<'a>], r#type: Option<GcValue<'a, 'b>>, block: &'b Node<'a>) -> Self {
         Self {
-			tag,
+            tag,
             scope,
             parameters,
             r#type,
@@ -64,11 +64,11 @@ impl<'a, 'b> Callable<'a, 'b> for Function<'a, 'b> {
 
     fn duplicate<'c>(&'c self) -> Box<dyn Callable<'a, 'b> + 'c> {
         Box::new(self.clone())
-	}
+    }
 
-	fn get_tag(&self) -> Tag {
-		self.tag.clone()
-	}
+    fn get_tag(&self) -> Tag {
+        self.tag.clone()
+    }
 }
 
 impl GcTraceable for Function<'_, '_> {

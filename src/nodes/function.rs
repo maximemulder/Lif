@@ -3,7 +3,7 @@ use crate::runtime::ReturnReference;
 use crate::runtime::engine::Engine;
 
 pub struct Function<'a> {
-	name: Option<&'a str>,
+    name: Option<&'a str>,
     parameters: Box<[Node<'a>]>,
     r#type: Option<Node<'a>>,
     block: Node<'a>,
@@ -12,7 +12,7 @@ pub struct Function<'a> {
 impl<'a> Function<'a> {
     pub fn new(name: Option<&'a str>, parameters: Box<[Node<'a>]>, r#type: Option<Node<'a>>, block: Node<'a>) -> Self {
         Self {
-			name,
+            name,
             parameters,
             r#type,
             block,

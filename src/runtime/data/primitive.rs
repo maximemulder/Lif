@@ -7,7 +7,7 @@ use crate::runtime::value::GcValue;
 
 #[derive(Clone)]
 pub struct Primitive<'a, 'b> {
-	tag: Tag,
+    tag: Tag,
     parameters: Box<[GcValue<'a, 'b>]>,
     callback: &'b dyn Fn(&mut Engine<'a, 'b>, Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b>,
 }
@@ -15,7 +15,7 @@ pub struct Primitive<'a, 'b> {
 impl<'a, 'b> Primitive<'a, 'b> {
     pub fn new(tag: Tag, parameters: Box<[GcValue<'a, 'b>]>, callback: &'b dyn Fn(&mut Engine<'a, 'b>, Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b>) -> Self {
         Self {
-			tag,
+            tag,
             parameters,
             callback,
         }
@@ -39,9 +39,9 @@ impl<'a, 'b> Callable<'a, 'b> for Primitive<'a, 'b> {
         Box::new(self.clone())
     }
 
-	fn get_tag(&self) -> Tag {
-		self.tag.clone()
-	}
+    fn get_tag(&self) -> Tag {
+        self.tag.clone()
+    }
 }
 
 impl GcTraceable for Primitive<'_, '_> {

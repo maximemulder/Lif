@@ -119,14 +119,14 @@ macro_rules! data_mut {
 }
 
 impl<'a, 'b> Value<'a, 'b> {
-	pub fn data_tag(&self) -> Tag {
-		match &self.data {
-			Data::Callable(callable) => callable.get_tag(),
-			Data::Class(class) => class.tag.clone(),
-			Data::Generic(generic) => generic.tag.clone(),
-			_ => panic!(),
-		}
-	}
+    pub fn data_tag(&self) -> Tag {
+        match &self.data {
+            Data::Callable(callable) => callable.get_tag(),
+            Data::Class(class) => class.tag.clone(),
+            Data::Generic(generic) => generic.tag.clone(),
+            _ => panic!(),
+        }
+    }
 
     pub fn data_array(&self) -> &Vec<GcReference<'a, 'b>> {
         data!(self, Array);

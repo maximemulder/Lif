@@ -132,7 +132,7 @@ pub fn run<'a>(code: &Code, tokens: &[Node<'a>]) -> Option<Node<'a>> {
                     ascent,
                     ascents.create(AscentElement::new(&elements::expressions::EXPRESSION)),
                     ascents.create(AscentElement::new(&elements::expressions::OPERATION)),
-				]))
+                ]))
             ));
 
             ascent
@@ -190,14 +190,14 @@ pub fn run<'a>(code: &Code, tokens: &[Node<'a>]) -> Option<Node<'a>> {
         &elements::productions::EXPRESSIONS
     ));
 
-	let r#type = descents.create(DescentElement::new(
-		descents.create(DescentOption::new(
-			descents.create(DescentSequence::new([
-				symbol_colon,
-				expression_base_2,
-			])),
-		)),
-		&elements::productions::TYPE
+    let r#type = descents.create(DescentElement::new(
+        descents.create(DescentOption::new(
+            descents.create(DescentSequence::new([
+                symbol_colon,
+                expression_base_2,
+            ])),
+        )),
+        &elements::productions::TYPE
     ));
 
     let literal = descents.create(DescentElement::new(
@@ -266,12 +266,12 @@ pub fn run<'a>(code: &Code, tokens: &[Node<'a>]) -> Option<Node<'a>> {
             block,
         ])),
         &elements::expressions::FUNCTION
-	));
+    ));
 
-	let method = descents.create(DescentElement::new(
+    let method = descents.create(DescentElement::new(
         descents.create(DescentSequence::new([
-			keyword_function,
-			variable_identifier,
+            keyword_function,
+            variable_identifier,
             generics,
             symbol_parenthesis_l,
             descents.create(DescentElement::new(
@@ -283,22 +283,22 @@ pub fn run<'a>(code: &Code, tokens: &[Node<'a>]) -> Option<Node<'a>> {
             block,
         ])),
         &elements::productions::METHOD
-	));
+    ));
 
-	let class = descents.create(DescentElement::new(
-		descents.create(DescentSequence::new([
-			keyword_class,
+    let class = descents.create(DescentElement::new(
+        descents.create(DescentSequence::new([
+            keyword_class,
             generics,
             r#type,
-			symbol_brace_l,
+            symbol_brace_l,
             descents.create(DescentElement::new(
                 descents.create(DescentOneOrMore::new(method)),
                 &elements::productions::METHODS
             )),
-			symbol_brace_r,
-		])),
-		&elements::expressions::CLASS
-	));
+            symbol_brace_r,
+        ])),
+        &elements::expressions::CLASS
+    ));
 
     let r#if = descents.create(DescentElement::new(
         descents.create(DescentSequence::new([
@@ -376,7 +376,7 @@ pub fn run<'a>(code: &Code, tokens: &[Node<'a>]) -> Option<Node<'a>> {
         extension,
     )), [symbol_asterisk, symbol_slash, symbol_percent, symbol_asterisk_d]);
 
-	descents.define(expression_base_2, DescentAlias::new(operation_1));
+    descents.define(expression_base_2, DescentAlias::new(operation_1));
 
     let operation_2  = create_operation!(operation_1, [symbol_plus, symbol_minus]);
 

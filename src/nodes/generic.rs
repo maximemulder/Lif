@@ -3,7 +3,7 @@ use crate::runtime::ReturnReference;
 use crate::runtime::engine::Engine;
 
 pub struct Generic<'a> {
-	name: Option<&'a str>,
+    name: Option<&'a str>,
     parameters: Box<[&'a str]>,
     node: Node<'a>,
 }
@@ -11,7 +11,7 @@ pub struct Generic<'a> {
 impl<'a> Generic<'a> {
     pub fn new(name: Option<&'a str>, parameters: Box<[&'a str]>, node: Node<'a>) -> Self {
         Self {
-			name,
+            name,
             parameters,
             node,
         }
