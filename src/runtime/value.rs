@@ -160,11 +160,11 @@ impl<'a, 'b> Value<'a, 'b> {
         data_mut!(self, Generic);
     }
 
-    pub fn data_integer(&self) -> &usize {
+    pub fn data_integer(&self) -> &isize {
         data!(self, Integer);
     }
 
-    pub fn data_integer_mut(&mut self) -> &mut usize {
+    pub fn data_integer_mut(&mut self) -> &mut isize {
         data_mut!(self, Integer);
     }
 

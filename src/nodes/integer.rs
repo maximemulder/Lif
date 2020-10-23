@@ -3,11 +3,11 @@ use crate::runtime::ReturnReference;
 use crate::runtime::engine::Engine;
 
 pub struct Integer {
-    integer: usize,
+    integer: isize,
 }
 
 impl Integer {
-    pub fn new(integer: usize) -> Self {
+    pub fn new(integer: isize) -> Self {
         Self {
             integer,
         }

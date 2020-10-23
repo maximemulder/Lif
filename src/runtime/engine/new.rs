@@ -35,7 +35,7 @@ impl<'a, 'b> Engine<'a, 'b> {
         self.new_value(self.environment.generic, Data::new_generic(tag, generics, node))
     }
 
-    pub fn new_integer_value(&mut self, integer: usize) -> GcValue<'a, 'b> {
+    pub fn new_integer_value(&mut self, integer: isize) -> GcValue<'a, 'b> {
         self.new_value(self.environment.integer, Data::new_integer(integer))
     }
 
@@ -83,7 +83,7 @@ impl<'a, 'b> Engine<'a, 'b> {
         self.new_constant(value)
     }
 
-    pub fn new_integer(&mut self, integer: usize) -> GcReference<'a, 'b> {
+    pub fn new_integer(&mut self, integer: isize) -> GcReference<'a, 'b> {
         let value = self.new_integer_value(integer);
         self.new_constant(value)
     }

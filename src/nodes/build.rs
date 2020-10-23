@@ -100,7 +100,7 @@ fn r#false<'a>(_: &'a str, node: &'a SyntaxNode<'a>) -> Node<'a> {
 }
 
 fn integer<'a>(text: &'a str, node: &'a SyntaxNode<'a>) -> Node<'a> {
-    Node::new(node, Integer::new(text[node.left() .. node.right()].parse::<usize>().unwrap()))
+    Node::new(node, Integer::new(text[node.left() .. node.right()].parse::<isize>().unwrap()))
 }
 
 fn string<'a>(text: &'a str, node: &'a SyntaxNode<'a>) -> Node<'a> {

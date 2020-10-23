@@ -30,7 +30,7 @@ pub enum Data<'a, 'b> {
     Callable(Box<dyn Callable<'a, 'b> + 'b>),
     Class(Class<'a, 'b>),
     Generic(Generic<'a, 'b>),
-    Integer(usize),
+    Integer(isize),
     Method(Method<'a, 'b>),
     Object(Object<'a, 'b>),
     String(String),
@@ -54,7 +54,7 @@ impl<'a, 'b> Data<'a, 'b> {
         Data::Callable(Box::new(Function::new(tag, scope, parameters, r#type, block)))
     }
 
-    pub fn new_integer(integer: usize) -> Self {
+    pub fn new_integer(integer: isize) -> Self {
         Data::Integer(integer)
     }
 

@@ -246,19 +246,19 @@ fn array_prepend<'a, 'b>(engine: &mut Engine<'a, 'b>, mut arguments: Vec<GcValue
 
 fn array_insert<'a, 'b>(engine: &mut Engine<'a, 'b>, mut arguments: Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b> {
     let reference = engine.new_reference(arguments[1]);
-    let index = *arguments[1].data_integer();
+    let index = *arguments[1].data_integer() as usize;
     arguments[0].data_array_mut().insert(index, reference);
     Ok(engine.undefined())
 }
 
 fn array_remove<'a, 'b>(engine: &mut Engine<'a, 'b>, mut arguments: Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b> {
-    let index = *arguments[1].data_integer();
+    let index = *arguments[1].data_integer() as usize;
     arguments[0].data_array_mut().remove(index);
     Ok(engine.undefined())
 }
 
 fn array_access<'a, 'b>(_: &mut Engine<'a, 'b>, arguments: Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b> {
-    Ok(arguments[0].data_array()[*arguments[1].data_integer()])
+    Ok(arguments[0].data_array()[*arguments[1].data_integer() as usize])
 }
 
 fn boolean_to_string<'a, 'b>(engine: &mut Engine<'a, 'b>, arguments: Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b> {
