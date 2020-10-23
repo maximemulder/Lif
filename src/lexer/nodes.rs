@@ -61,7 +61,12 @@ const KEYWORD_A: Node = Node::new(&elements::variables::IDENTIFIER, &|character|
     })
 });
 
-const KEYWORD_AS: Node = Node::new_final(&elements::keywords::AS);
+const KEYWORD_AS: Node = Node::new(&elements::keywords::AS, &|character| {
+    Some(match character {
+        'b' ..= 'z' | 'A' ..= 'Z' | '_' => &IDENTIFIER,
+        _ => return None,
+    })
+});
 
 const KEYWORD_B: Node = Node::new(&elements::variables::IDENTIFIER, &|character| {
     Some(match character {
@@ -95,7 +100,12 @@ const KEYWORD_BREA: Node = Node::new(&elements::variables::IDENTIFIER, &|charact
     })
 });
 
-const KEYWORD_BREAK: Node = Node::new_final(&elements::keywords::BREAK);
+const KEYWORD_BREAK: Node = Node::new(&elements::keywords::BREAK, &|character| {
+    Some(match character {
+        'b' ..= 'z' | 'A' ..= 'Z' | '_' => &IDENTIFIER,
+        _ => return None,
+    })
+});
 
 const KEYWORD_C: Node = Node::new(&elements::variables::IDENTIFIER, &|character| {
     Some(match character {
@@ -131,7 +141,12 @@ const KEYWORD_CATC: Node = Node::new(&elements::variables::IDENTIFIER, &|charact
     })
 });
 
-const KEYWORD_CATCH: Node = Node::new_final(&elements::keywords::CATCH);
+const KEYWORD_CATCH: Node = Node::new(&elements::keywords::CATCH, &|character| {
+    Some(match character {
+        'b' ..= 'z' | 'A' ..= 'Z' | '_' => &IDENTIFIER,
+        _ => return None,
+    })
+});
 
 const KEYWORD_CL: Node = Node::new(&elements::variables::IDENTIFIER, &|character| {
     Some(match character {
@@ -157,7 +172,12 @@ const KEYWORD_CLAS: Node = Node::new(&elements::variables::IDENTIFIER, &|charact
     })
 });
 
-const KEYWORD_CLASS: Node = Node::new_final(&elements::keywords::CLASS);
+const KEYWORD_CLASS: Node = Node::new(&elements::keywords::CLASS, &|character| {
+    Some(match character {
+        'b' ..= 'z' | 'A' ..= 'Z' | '_' => &IDENTIFIER,
+        _ => return None,
+    })
+});
 
 const KEYWORD_CO: Node = Node::new(&elements::variables::IDENTIFIER, &|character| {
     Some(match character {
@@ -207,7 +227,12 @@ const KEYWORD_CONTINU: Node = Node::new(&elements::variables::IDENTIFIER, &|char
     })
 });
 
-const KEYWORD_CONTINUE: Node = Node::new_final(&elements::keywords::CONTINUE);
+const KEYWORD_CONTINUE: Node = Node::new(&elements::keywords::CONTINUE, &|character| {
+    Some(match character {
+        'b' ..= 'z' | 'A' ..= 'Z' | '_' => &IDENTIFIER,
+        _ => return None,
+    })
+});
 
 const KEYWORD_D: Node = Node::new(&elements::variables::IDENTIFIER, &|character| {
     Some(match character {
@@ -258,9 +283,19 @@ const KEYWORD_DEFAUL: Node = Node::new(&elements::variables::IDENTIFIER, &|chara
     })
 });
 
-const KEYWORD_DEFAULT: Node = Node::new_final(&elements::keywords::DEFAULT);
+const KEYWORD_DEFAULT: Node = Node::new(&elements::keywords::DEFAULT, &|character| {
+    Some(match character {
+        'b' ..= 'z' | 'A' ..= 'Z' | '_' => &IDENTIFIER,
+        _ => return None,
+    })
+});
 
-const KEYWORD_DO: Node = Node::new_final(&elements::keywords::DO);
+const KEYWORD_DO: Node = Node::new(&elements::keywords::DO, &|character| {
+    Some(match character {
+        'b' ..= 'z' | 'A' ..= 'Z' | '_' => &IDENTIFIER,
+        _ => return None,
+    })
+});
 
 const KEYWORD_E: Node = Node::new(&elements::variables::IDENTIFIER, &|character| {
     Some(match character {
@@ -287,7 +322,12 @@ const KEYWORD_ELS: Node = Node::new(&elements::variables::IDENTIFIER, &|characte
     })
 });
 
-const KEYWORD_ELSE: Node = Node::new_final(&elements::keywords::ELSE);
+const KEYWORD_ELSE: Node = Node::new(&elements::keywords::ELSE, &|character| {
+    Some(match character {
+        'b' ..= 'z' | 'A' ..= 'Z' | '_' => &IDENTIFIER,
+        _ => return None,
+    })
+});
 
 const KEYWORD_EX: Node = Node::new(&elements::variables::IDENTIFIER, &|character| {
     Some(match character {
@@ -321,7 +361,12 @@ const KEYWORD_EXPOR: Node = Node::new(&elements::variables::IDENTIFIER, &|charac
     })
 });
 
-const KEYWORD_EXPORT: Node = Node::new_final(&elements::keywords::EXPORT);
+const KEYWORD_EXPORT: Node = Node::new(&elements::keywords::EXPORT, &|character| {
+    Some(match character {
+        'b' ..= 'z' | 'A' ..= 'Z' | '_' => &IDENTIFIER,
+        _ => return None,
+    })
+});
 
 const KEYWORD_F: Node = Node::new(&elements::variables::IDENTIFIER, &|character| {
     Some(match character {
@@ -359,7 +404,12 @@ const KEYWORD_FALS: Node = Node::new(&elements::variables::IDENTIFIER, &|charact
     })
 });
 
-const KEYWORD_FALSE: Node = Node::new_final(&elements::keywords::FALSE);
+const KEYWORD_FALSE: Node = Node::new(&elements::keywords::FALSE, &|character| {
+    Some(match character {
+        'b' ..= 'z' | 'A' ..= 'Z' | '_' => &IDENTIFIER,
+        _ => return None,
+    })
+});
 
 const KEYWORD_FI: Node = Node::new(&elements::variables::IDENTIFIER, &|character| {
     Some(match character {
@@ -401,7 +451,12 @@ const KEYWORD_FINALL: Node = Node::new(&elements::variables::IDENTIFIER, &|chara
     })
 });
 
-const KEYWORD_FINALLY: Node = Node::new_final(&elements::keywords::FINALLY);
+const KEYWORD_FINALLY: Node = Node::new(&elements::keywords::FINALLY, &|character| {
+    Some(match character {
+        'b' ..= 'z' | 'A' ..= 'Z' | '_' => &IDENTIFIER,
+        _ => return None,
+    })
+});
 
 const KEYWORD_FO: Node = Node::new(&elements::variables::IDENTIFIER, &|character| {
     Some(match character {
@@ -411,7 +466,12 @@ const KEYWORD_FO: Node = Node::new(&elements::variables::IDENTIFIER, &|character
     })
 });
 
-const KEYWORD_FOR: Node = Node::new_final(&elements::keywords::FOR);
+const KEYWORD_FOR: Node = Node::new(&elements::keywords::FOR, &|character| {
+    Some(match character {
+        'b' ..= 'z' | 'A' ..= 'Z' | '_' => &IDENTIFIER,
+        _ => return None,
+    })
+});
 
 const KEYWORD_FR: Node = Node::new(&elements::variables::IDENTIFIER, &|character| {
     Some(match character {
@@ -429,7 +489,12 @@ const KEYWORD_FRO: Node = Node::new(&elements::variables::IDENTIFIER, &|characte
     })
 });
 
-const KEYWORD_FROM: Node = Node::new_final(&elements::keywords::FROM);
+const KEYWORD_FROM: Node = Node::new(&elements::keywords::FROM, &|character| {
+    Some(match character {
+        'b' ..= 'z' | 'A' ..= 'Z' | '_' => &IDENTIFIER,
+        _ => return None,
+    })
+});
 
 const KEYWORD_FU: Node = Node::new(&elements::variables::IDENTIFIER, &|character| {
     Some(match character {
@@ -479,7 +544,12 @@ const KEYWORD_FUNCTIO: Node = Node::new(&elements::variables::IDENTIFIER, &|char
     })
 });
 
-const KEYWORD_FUNCTION: Node = Node::new_final(&elements::keywords::FUNCTION);
+const KEYWORD_FUNCTION: Node = Node::new(&elements::keywords::FUNCTION, &|character| {
+    Some(match character {
+        'b' ..= 'z' | 'A' ..= 'Z' | '_' => &IDENTIFIER,
+        _ => return None,
+    })
+});
 
 const KEYWORD_I: Node = Node::new(&elements::variables::IDENTIFIER, &|character| {
     Some(match character {
@@ -491,7 +561,12 @@ const KEYWORD_I: Node = Node::new(&elements::variables::IDENTIFIER, &|character|
     })
 });
 
-const KEYWORD_IF: Node = Node::new_final(&elements::keywords::IF);
+const KEYWORD_IF: Node = Node::new(&elements::keywords::IF, &|character| {
+    Some(match character {
+        'b' ..= 'z' | 'A' ..= 'Z' | '_' => &IDENTIFIER,
+        _ => return None,
+    })
+});
 
 const KEYWORD_IM: Node = Node::new(&elements::variables::IDENTIFIER, &|character| {
     Some(match character {
@@ -525,9 +600,19 @@ const KEYWORD_IMPOR: Node = Node::new(&elements::variables::IDENTIFIER, &|charac
     })
 });
 
-const KEYWORD_IMPORT: Node = Node::new_final(&elements::keywords::IMPORT);
+const KEYWORD_IMPORT: Node = Node::new(&elements::keywords::IMPORT, &|character| {
+    Some(match character {
+        'b' ..= 'z' | 'A' ..= 'Z' | '_' => &IDENTIFIER,
+        _ => return None,
+    })
+});
 
-const KEYWORD_IN: Node = Node::new_final(&elements::keywords::IN);
+const KEYWORD_IN: Node = Node::new(&elements::keywords::IN, &|character| {
+    Some(match character {
+        'b' ..= 'z' | 'A' ..= 'Z' | '_' => &IDENTIFIER,
+        _ => return None,
+    })
+});
 
 const KEYWORD_L: Node = Node::new(&elements::variables::IDENTIFIER, &|character| {
     Some(match character {
@@ -546,7 +631,12 @@ const KEYWORD_LE: Node = Node::new(&elements::variables::IDENTIFIER, &|character
     })
 });
 
-const KEYWORD_LET: Node = Node::new_final(&elements::keywords::LET);
+const KEYWORD_LET: Node = Node::new(&elements::keywords::LET, &|character| {
+    Some(match character {
+        'b' ..= 'z' | 'A' ..= 'Z' | '_' => &IDENTIFIER,
+        _ => return None,
+    })
+});
 
 const KEYWORD_LO: Node = Node::new(&elements::variables::IDENTIFIER, &|character| {
     Some(match character {
@@ -564,7 +654,12 @@ const KEYWORD_LOO: Node = Node::new(&elements::variables::IDENTIFIER, &|characte
     })
 });
 
-const KEYWORD_LOOP: Node = Node::new_final(&elements::keywords::LOOP);
+const KEYWORD_LOOP: Node = Node::new(&elements::keywords::LOOP, &|character| {
+    Some(match character {
+        'b' ..= 'z' | 'A' ..= 'Z' | '_' => &IDENTIFIER,
+        _ => return None,
+    })
+});
 
 const KEYWORD_P: Node = Node::new(&elements::variables::IDENTIFIER, &|character| {
     Some(match character {
@@ -616,7 +711,12 @@ const KEYWORD_PRIVAT: Node = Node::new(&elements::variables::IDENTIFIER, &|chara
     })
 });
 
-const KEYWORD_PRIVATE: Node = Node::new_final(&elements::keywords::PRIVATE);
+const KEYWORD_PRIVATE: Node = Node::new(&elements::keywords::PRIVATE, &|character| {
+    Some(match character {
+        'b' ..= 'z' | 'A' ..= 'Z' | '_' => &IDENTIFIER,
+        _ => return None,
+    })
+});
 
 const KEYWORD_PRO: Node = Node::new(&elements::variables::IDENTIFIER, &|character| {
     Some(match character {
@@ -666,7 +766,12 @@ const KEYWORD_PROTECTE: Node = Node::new(&elements::variables::IDENTIFIER, &|cha
     })
 });
 
-const KEYWORD_PROTECTED: Node = Node::new_final(&elements::keywords::PROTECTED);
+const KEYWORD_PROTECTED: Node = Node::new(&elements::keywords::PROTECTED, &|character| {
+    Some(match character {
+        'b' ..= 'z' | 'A' ..= 'Z' | '_' => &IDENTIFIER,
+        _ => return None,
+    })
+});
 
 const KEYWORD_PU: Node = Node::new(&elements::variables::IDENTIFIER, &|character| {
     Some(match character {
@@ -700,7 +805,12 @@ const KEYWORD_PUBLI: Node = Node::new(&elements::variables::IDENTIFIER, &|charac
     })
 });
 
-const KEYWORD_PUBLIC: Node = Node::new_final(&elements::keywords::PUBLIC);
+const KEYWORD_PUBLIC: Node = Node::new(&elements::keywords::PUBLIC, &|character| {
+    Some(match character {
+        'b' ..= 'z' | 'A' ..= 'Z' | '_' => &IDENTIFIER,
+        _ => return None,
+    })
+});
 
 const KEYWORD_R: Node = Node::new(&elements::variables::IDENTIFIER, &|character| {
     Some(match character {
@@ -742,7 +852,12 @@ const KEYWORD_RETUR: Node = Node::new(&elements::variables::IDENTIFIER, &|charac
     })
 });
 
-const KEYWORD_RETURN: Node = Node::new_final(&elements::keywords::RETURN);
+const KEYWORD_RETURN: Node = Node::new(&elements::keywords::RETURN, &|character| {
+    Some(match character {
+        'b' ..= 'z' | 'A' ..= 'Z' | '_' => &IDENTIFIER,
+        _ => return None,
+    })
+});
 
 const KEYWORD_S: Node = Node::new(&elements::variables::IDENTIFIER, &|character| {
     Some(match character {
@@ -784,7 +899,12 @@ const KEYWORD_STATI: Node = Node::new(&elements::variables::IDENTIFIER, &|charac
     })
 });
 
-const KEYWORD_STATIC: Node = Node::new_final(&elements::keywords::STATIC);
+const KEYWORD_STATIC: Node = Node::new(&elements::keywords::STATIC, &|character| {
+    Some(match character {
+        'b' ..= 'z' | 'A' ..= 'Z' | '_' => &IDENTIFIER,
+        _ => return None,
+    })
+});
 
 const KEYWORD_T: Node = Node::new(&elements::variables::IDENTIFIER, &|character| {
     Some(match character {
@@ -812,7 +932,12 @@ const KEYWORD_THE: Node = Node::new(&elements::variables::IDENTIFIER, &|characte
     })
 });
 
-const KEYWORD_THEN: Node = Node::new_final(&elements::keywords::THEN);
+const KEYWORD_THEN: Node = Node::new(&elements::keywords::THEN, &|character| {
+    Some(match character {
+        'b' ..= 'z' | 'A' ..= 'Z' | '_' => &IDENTIFIER,
+        _ => return None,
+    })
+});
 
 const KEYWORD_THR: Node = Node::new(&elements::variables::IDENTIFIER, &|character| {
     Some(match character {
@@ -830,7 +955,12 @@ const KEYWORD_THRO: Node = Node::new(&elements::variables::IDENTIFIER, &|charact
     })
 });
 
-const KEYWORD_THROW: Node = Node::new_final(&elements::keywords::THROW);
+const KEYWORD_THROW: Node = Node::new(&elements::keywords::THROW, &|character| {
+    Some(match character {
+        'b' ..= 'z' | 'A' ..= 'Z' | '_' => &IDENTIFIER,
+        _ => return None,
+    })
+});
 
 const KEYWORD_TR: Node = Node::new(&elements::variables::IDENTIFIER, &|character| {
     Some(match character {
@@ -849,9 +979,19 @@ const KEYWORD_TRU: Node = Node::new(&elements::variables::IDENTIFIER, &|characte
     })
 });
 
-const KEYWORD_TRUE: Node = Node::new_final(&elements::keywords::TRUE);
+const KEYWORD_TRUE: Node = Node::new(&elements::keywords::TRUE, &|character| {
+    Some(match character {
+        'b' ..= 'z' | 'A' ..= 'Z' | '_' => &IDENTIFIER,
+        _ => return None,
+    })
+});
 
-const KEYWORD_TRY: Node = Node::new_final(&elements::keywords::TRY);
+const KEYWORD_TRY: Node = Node::new(&elements::keywords::TRY, &|character| {
+    Some(match character {
+        'b' ..= 'z' | 'A' ..= 'Z' | '_' => &IDENTIFIER,
+        _ => return None,
+    })
+});
 
 const KEYWORD_W: Node = Node::new(&elements::variables::IDENTIFIER, &|character| {
     Some(match character {
@@ -885,7 +1025,12 @@ const KEYWORD_WHIL: Node = Node::new(&elements::variables::IDENTIFIER, &|charact
     })
 });
 
-const KEYWORD_WHILE: Node = Node::new_final(&elements::keywords::WHILE);
+const KEYWORD_WHILE: Node = Node::new(&elements::keywords::WHILE, &|character| {
+    Some(match character {
+        'b' ..= 'z' | 'A' ..= 'Z' | '_' => &IDENTIFIER,
+        _ => return None,
+    })
+});
 
 const SYMBOL_PLUS: Node = Node::new(&elements::symbols::PLUS, &|character| {
     if character == '=' {
