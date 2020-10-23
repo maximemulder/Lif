@@ -1,7 +1,7 @@
 mod node;
 mod nodes;
 use nodes::ROOT;
-use crate::elements::ignores::{ WHITESPACE, ENDLINE };
+use crate::elements::ignores::{ WHITESPACE, ENDLINE, COMMENT_LINE, COMMENT_BLOCK };
 use crate::element::Element;
 use crate::node::Node;
 
@@ -9,7 +9,7 @@ pub fn lex(string: &str) -> Vec<Node<'static>> {
     let mut tokens = Vec::new();
     let mut shift = 0;
     while let Some((element, length)) = automaton(&string[shift ..]) {
-        if element != &WHITESPACE && element != &ENDLINE {
+        if element != &WHITESPACE && element != &ENDLINE && element != &COMMENT_LINE && element != &COMMENT_BLOCK {
             tokens.push(Node::new_token(element, (shift, shift + length)));
         }
 

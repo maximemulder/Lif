@@ -1073,10 +1073,11 @@ const SYMBOL_ASTERISK_D: Node = Node::new(&elements::symbols::ASTERISK_D, &|char
 const SYMBOL_ASTERISK_D_EQ: Node = Node::new_final(&elements::symbols::ASTERISK_D_EQ);
 
 const SYMBOL_SLASH: Node = Node::new(&elements::symbols::SLASH, &|character| {
-    if character == '=' {
-        Some(&SYMBOL_SLASH_EQ)
-    } else {
-        None
+    match character {
+        '=' => Some(&SYMBOL_SLASH_EQ),
+        '/' => Some(&COMMENT_LINE),
+        '*' => Some(&COMMENT_BLOCK_1),
+        _ => None,
     }
 });
 
@@ -1307,3 +1308,28 @@ const ENDLINE: Node = Node::new(&elements::ignores::ENDLINE, &|character| {
         _ => None,
     }
 });
+
+const COMMENT_LINE: Node = Node::new(&elements::ignores::COMMENT_LINE, &|character| {
+    match character {
+        '\r' | '\n' => None,
+        _ => Some(&COMMENT_LINE),
+    }
+});
+
+const COMMENT_BLOCK_1: Node = Node::new_null(&|character| {
+    Some(if character == '*' {
+        &COMMENT_BLOCK_2
+    } else {
+        &COMMENT_BLOCK_1
+    })
+});
+
+const COMMENT_BLOCK_2: Node = Node::new_null(&|character| {
+    Some(if character == '/' {
+        &COMMENT_BLOCK_3
+    } else {
+        &COMMENT_BLOCK_1
+    })
+});
+
+const COMMENT_BLOCK_3: Node = Node::new_final(&elements::ignores::COMMENT_BLOCK);
