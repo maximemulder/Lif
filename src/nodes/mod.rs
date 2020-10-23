@@ -25,6 +25,7 @@ pub mod chain;
 pub mod sequence;
 pub mod declaration;
 pub mod generic;
+pub mod structure;
 pub mod class;
 pub mod function;
 pub mod block;
@@ -40,6 +41,7 @@ pub mod r#break;
 pub mod r#continue;
 
 pub mod build;
+
 use crate::runtime::ReturnReference;
 use crate::runtime::engine::Engine;
 

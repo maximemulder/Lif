@@ -14,6 +14,7 @@ use crate::nodes::chain::Chain;
 use crate::nodes::sequence::Sequence;
 use crate::nodes::declaration::Declaration;
 use crate::nodes::generic::Generic;
+use crate::nodes::structure::Structure;
 use crate::nodes::class::Class;
 use crate::nodes::function::Function;
 use crate::nodes::array::Array;
@@ -44,8 +45,9 @@ fn statements<'a>(text: &'a str, node: &'a SyntaxNode<'a>) -> Node<'a> {
 fn statement<'a>(text: &'a str, node: &'a SyntaxNode<'a>) -> Node<'a> {
     let child = &node.children()[0];
     Node::new(node, Statement::new(match *child.element {
-        elements::expressions::EXPRESSION => expression(text, child),
         elements::structures::STRUCTURE   => structure(text, child),
+        elements::flows::FLOW             => flow(text, child),
+        elements::expressions::EXPRESSION => expression(text, child),
         _ => panic!(),
     }))
 }
@@ -53,24 +55,28 @@ fn statement<'a>(text: &'a str, node: &'a SyntaxNode<'a>) -> Node<'a> {
 fn expression<'a>(text: &'a str, node: &'a SyntaxNode<'a>) -> Node<'a> {
     let child = &node.children()[0];
     match *child.element {
-        elements::expressions::LITERAL     => literal(text, child),
-        elements::structures::STRUCTURE    => structure(text, child),
-        elements::expressions::LET         => r#let(text, child),
+        elements::structures::CLASS        => class(text, child),
+        elements::structures::FUNCTION     => function(text, child),
+        elements::flows::FLOW              => flow(text, child),
         elements::controls::CONTROL        => control(text, child),
-        elements::expressions::CLASS       => class(text, child),
-        elements::expressions::FUNCTION    => function(text, child),
-        elements::expressions::GROUP       => group(text, child),
-        elements::expressions::CHAIN       => chain(text, child),
+        elements::expressions::LET         => r#let(text, child),
         elements::expressions::ARRAY       => array(text, child),
+        elements::expressions::GROUP       => group(text, child),
+        elements::expressions::LITERAL     => literal(text, child),
+        elements::expressions::CHAIN       => chain(text, child),
         elements::expressions::SEQUENCE    => sequence(text, child),
-        elements::expressions::ASSIGNMENT  => assignment(text, child),
         elements::expressions::OPERATION   => operation(text, child),
+        elements::expressions::ASSIGNMENT  => assignment(text, child),
         _ => panic!(),
     }
 }
 
 fn r#type<'a>(text: &'a str, node: &'a SyntaxNode<'a>) -> Option<Node<'a>> {
     node.children().get(1).map(|child| expression(text, child))
+}
+
+fn name<'a>(text: &'a str, node: &'a SyntaxNode<'a>) -> Option<&'a str> {
+    node.children().get(0).map(|child| token(text, child))
 }
 
 fn literal<'a>(text: &'a str, node: &'a SyntaxNode<'a>) -> Node<'a> {
@@ -107,13 +113,22 @@ fn identifier<'a>(text: &'a str, node: &'a SyntaxNode<'a>) -> Node<'a> {
 
 fn structure<'a>(text: &'a str, node: &'a SyntaxNode<'a>) -> Node<'a> {
     let child = &node.children()[0];
+    Node::new(node, Structure::new(match *child.element {
+        elements::structures::CLASS    => class_named(text, child),
+        elements::structures::FUNCTION => function_named(text, child),
+        _ => panic!(),
+    }))
+}
+
+fn flow<'a>(text: &'a str, node: &'a SyntaxNode<'a>) -> Node<'a> {
+    let child = &node.children()[0];
     match *child.element {
-        elements::structures::BLOCK    => block(text, child),
-        elements::structures::IF       => r#if(text, child),
-        elements::structures::LOOP     => r#loop(text, child),
-        elements::structures::WHILE    => r#while(text, child),
-        elements::structures::DO_WHILE => do_while(text, child),
-        elements::structures::FOR_IN   => for_in(text, child),
+        elements::flows::BLOCK     => block(text, child),
+        elements::flows::IF        => r#if(text, child),
+        elements::flows::LOOP      => r#loop(text, child),
+        elements::flows::WHILE     => r#while(text, child),
+        elements::flows::DO_WHILE  => do_while(text, child),
+        elements::flows::FOR_IN    => for_in(text, child),
         _ => panic!(),
     }
 }
@@ -187,9 +202,21 @@ fn generics<'a>(text: &'a str, node: &'a SyntaxNode<'a>) -> Box<[&'a str]> {
 
 fn class<'a>(text: &'a str, node: &'a SyntaxNode<'a>) -> Node<'a> {
     let children = node.children();
-    let class = Node::new(node, Class::new(r#type(text, &children[children.len() - 4]), methods(text, &children[children.len() - 2])));
-    if children.len() >= 6 {
-        Node::new(node, Generic::new(None, generics(text, &children[2]), class))
+    let name = name(text, &children[1]);
+    let class = Node::new(node, Class::new(name, r#type(text, &children[children.len() - 4]), methods(text, &children[children.len() - 2])));
+    if children.len() >= 7 {
+        Node::new(node, Generic::new(name, generics(text, &children[3]), class))
+    } else {
+        class
+    }
+}
+
+fn class_named<'a>(text: &'a str, node: &'a SyntaxNode<'a>) -> Node<'a> {
+    let children = node.children();
+    let name = Some(token(text, &children[1]));
+    let class = Node::new(node, Class::new(name, r#type(text, &children[children.len() - 4]), methods(text, &children[children.len() - 2])));
+    if children.len() >= 7 {
+        Node::new(node, Generic::new(name, generics(text, &children[3]), class))
     } else {
         class
     }
@@ -198,38 +225,31 @@ fn class<'a>(text: &'a str, node: &'a SyntaxNode<'a>) -> Node<'a> {
 fn methods<'a>(text: &'a str, node: &'a SyntaxNode<'a>) -> Box<[Node<'a>]> {
     let mut functions = Vec::new();
     for child in node.children().iter() {
-        functions.push(method(text, child));
+        functions.push(function_named(text, child));
     }
 
     functions.into_boxed_slice()
 }
 
-fn method<'a>(text: &'a str, node: &'a SyntaxNode<'a>) -> Node<'a> {
+fn function<'a>(text: &'a str, node: &'a SyntaxNode<'a>) -> Node<'a> {
     let children = node.children();
-    let name = Some(token(text, &children[1]));
-    let function = Node::new(node, Function::new(name, parameters(text, &children[if children.len() < 8 {
-        3
-    } else {
-        6
-    }]), r#type(text, &children[children.len() - 2]), block(text, &children.last().unwrap())));
+    let name = name(text, &children[1]);
+    let function = Node::new(node, Function::new(name, parameters(text, &children[children.len() - 4]), r#type(text, &children[children.len() - 2]), block(text, &children.last().unwrap())));
 
-    if children.len() >= 8 {
+    if children.len() >= 9 {
         Node::new(node, Generic::new(name, generics(text, &children[3]), function))
     } else {
         function
     }
 }
 
-fn function<'a>(text: &'a str, node: &'a SyntaxNode<'a>) -> Node<'a> {
+fn function_named<'a>(text: &'a str, node: &'a SyntaxNode<'a>) -> Node<'a> {
     let children = node.children();
-    let function = Node::new(node, Function::new(None, parameters(text, &children[if children.len() < 7 {
-        2
-    } else {
-        5
-    }]), r#type(text, &children[children.len() - 2]), block(text, &children.last().unwrap())));
+    let name = Some(token(text, &children[1]));
+    let function = Node::new(node, Function::new(name, parameters(text, &children[children.len() - 4]), r#type(text, &children[children.len() - 2]), block(text, &children.last().unwrap())));
 
-    if children.len() >= 7 {
-        Node::new(node, Generic::new(None, generics(text, &children[2]), function))
+    if children.len() >= 9 {
+        Node::new(node, Generic::new(name, generics(text, &children[3]), function))
     } else {
         function
     }

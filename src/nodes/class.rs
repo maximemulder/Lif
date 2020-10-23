@@ -3,13 +3,15 @@ use crate::runtime::ReturnReference;
 use crate::runtime::engine::Engine;
 
 pub struct Class<'a> {
+    name: Option<&'a str>,
     parent: Option<Node<'a>>,
     methods: Box<[Node<'a>]>,
 }
 
 impl<'a> Class<'a> {
-    pub fn new(parent: Option<Node<'a>>, methods: Box<[Node<'a>]>) -> Self {
+    pub fn new(name: Option<&'a str>, parent: Option<Node<'a>>, methods: Box<[Node<'a>]>) -> Self {
         Self {
+            name,
             parent,
             methods,
         }
@@ -24,7 +26,7 @@ impl<'a> Executable<'a> for Class<'a> {
             engine.environment.object
         };
 
-        let class = engine.new_class(parent);
+        let class = engine.new_class(self.name, parent);
         let mut value = class.read()?;
         let data = value.data_class_mut();
         for method in self.methods.iter() {

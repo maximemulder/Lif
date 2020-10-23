@@ -100,7 +100,7 @@ impl<'a> Descent<'a> for DescentSequence {
 }
 
 pub struct DescentZeroOrMore {
-    descent:   usize,
+    descent: usize,
 }
 
 impl DescentZeroOrMore {

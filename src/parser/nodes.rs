@@ -105,11 +105,16 @@ pub fn run<'a>(code: &Code, tokens: &[Node<'a>]) -> Option<Node<'a>> {
 
     let expression_base = descents.declare();
 
-    let expression_base_2 = descents.declare();
+    let operation_base = descents.declare();
 
     let expression_option = descents.declare();
 
     let extension = ascents.declare();
+
+    let name = descents.create(DescentElement::new(
+        descents.create(DescentOption::new(variable_identifier)),
+        &elements::productions::NAME
+    ));
 
     macro_rules! create_control {
         ( $keyword:expr, $element:expr ) => {
@@ -192,10 +197,7 @@ pub fn run<'a>(code: &Code, tokens: &[Node<'a>]) -> Option<Node<'a>> {
 
     let r#type = descents.create(DescentElement::new(
         descents.create(DescentOption::new(
-            descents.create(DescentSequence::new([
-                symbol_colon,
-                expression_base_2,
-            ])),
+            descents.create(DescentSequence::new([symbol_colon, operation_base])),
         )),
         &elements::productions::TYPE
     ));
@@ -236,7 +238,39 @@ pub fn run<'a>(code: &Code, tokens: &[Node<'a>]) -> Option<Node<'a>> {
 
     let block = descents.create(DescentElement::new(
         descents.create(DescentSequence::new([symbol_brace_l, statements, expression_option, symbol_brace_r])),
-        &elements::structures::BLOCK
+        &elements::flows::BLOCK
+    ));
+
+    let r#if = descents.create(DescentElement::new(
+        descents.create(DescentSequence::new([
+            keyword_if,
+            expression,
+            block,
+            descents.create(DescentOption::new(
+                descents.create(DescentSequence::new([keyword_else, block])),
+            )),
+        ])),
+        &elements::flows::IF
+    ));
+
+    let r#loop = descents.create(DescentElement::new(
+        descents.create(DescentSequence::new([keyword_loop, block])),
+        &elements::flows::LOOP
+    ));
+
+    let r#while = descents.create(DescentElement::new(
+        descents.create(DescentSequence::new([keyword_while, expression, block])),
+        &elements::flows::WHILE
+    ));
+
+    let for_in = descents.create(DescentElement::new(
+        descents.create(DescentSequence::new([keyword_for, variable_identifier, keyword_in, expression, block])),
+        &elements::flows::FOR_IN
+    ));
+
+    let flow = descents.create(DescentElement::new(
+        descents.create(DescentChoice::new([block, r#if, r#loop, r#while, for_in])),
+        &elements::flows::FLOW
     ));
 
     let generics = descents.create(DescentOption::new(
@@ -252,83 +286,38 @@ pub fn run<'a>(code: &Code, tokens: &[Node<'a>]) -> Option<Node<'a>> {
         ]))
     ));
 
-    let function = descents.create(DescentElement::new(
-        descents.create(DescentSequence::new([
-            keyword_function,
-            generics,
-            symbol_parenthesis_l,
-            descents.create(DescentElement::new(
-                create_list_option!(declaration, symbol_comma),
-                &elements::productions::PARAMETERS
-            )),
-            symbol_parenthesis_r,
-            r#type,
-            block,
-        ])),
-        &elements::expressions::FUNCTION
+    let parameters = descents.create(DescentElement::new(
+        create_list_option!(declaration, symbol_comma),
+        &elements::productions::PARAMETERS
     ));
 
-    let method = descents.create(DescentElement::new(
-        descents.create(DescentSequence::new([
-            keyword_function,
-            variable_identifier,
-            generics,
-            symbol_parenthesis_l,
-            descents.create(DescentElement::new(
-                create_list_option!(declaration, symbol_comma),
-                &elements::productions::PARAMETERS
-            )),
-            symbol_parenthesis_r,
-            r#type,
-            block,
-        ])),
-        &elements::productions::METHOD
+    let function = descents.create(DescentElement::new(
+        descents.create(DescentSequence::new([keyword_function, name, generics, symbol_parenthesis_l, parameters, symbol_parenthesis_r, r#type, block])),
+        &elements::structures::FUNCTION
+    ));
+
+    let function_named = descents.create(DescentElement::new(
+        descents.create(DescentSequence::new([keyword_function, variable_identifier, generics, symbol_parenthesis_l, parameters, symbol_parenthesis_r, r#type, block])),
+        &elements::structures::FUNCTION
+    ));
+
+    let methods = descents.create(DescentElement::new(
+        descents.create(DescentZeroOrMore::new(function_named)),
+        &elements::productions::METHODS
     ));
 
     let class = descents.create(DescentElement::new(
-        descents.create(DescentSequence::new([
-            keyword_class,
-            generics,
-            r#type,
-            symbol_brace_l,
-            descents.create(DescentElement::new(
-                descents.create(DescentOneOrMore::new(method)),
-                &elements::productions::METHODS
-            )),
-            symbol_brace_r,
-        ])),
-        &elements::expressions::CLASS
+        descents.create(DescentSequence::new([keyword_class, name, generics, r#type, symbol_brace_l, methods, symbol_brace_r])),
+        &elements::structures::CLASS
     ));
 
-    let r#if = descents.create(DescentElement::new(
-        descents.create(DescentSequence::new([
-            keyword_if,
-            expression,
-            block,
-            descents.create(DescentOption::new(
-                descents.create(DescentSequence::new([keyword_else, block])),
-            )),
-        ])),
-        &elements::structures::IF
-    ));
-
-    let r#loop = descents.create(DescentElement::new(
-        descents.create(DescentSequence::new([keyword_loop, block])),
-        &elements::structures::LOOP
-    ));
-
-    let r#while = descents.create(DescentElement::new(
-        descents.create(DescentSequence::new([keyword_while, expression, block])),
-        &elements::structures::WHILE
-    ));
-
-    let for_in = descents.create(DescentElement::new(
-        descents.create(DescentSequence::new([keyword_for, variable_identifier, keyword_in, expression, block])),
-        &elements::structures::FOR_IN
+    let class_named = descents.create(DescentElement::new(
+        descents.create(DescentSequence::new([keyword_class, variable_identifier, generics, r#type, symbol_brace_l, methods, symbol_brace_r])),
+        &elements::structures::CLASS
     ));
 
     let structure = descents.create(DescentElement::new(
-        descents.create(DescentChoice::new([block, r#if, r#loop, r#while, for_in])),
+        descents.create(DescentChoice::new([class_named, function_named])),
         &elements::structures::STRUCTURE
     ));
 
@@ -367,7 +356,7 @@ pub fn run<'a>(code: &Code, tokens: &[Node<'a>]) -> Option<Node<'a>> {
     ascents.define(extension, AscentList::new([chain, sequence]));
 
     descents.define(expression_base, DescentElement::new(
-        descents.create(DescentChoice::new([class, function, structure, r#let, control, array, group, literal])),
+        descents.create(DescentChoice::new([class, function, flow, control, r#let, array, group, literal])),
         &elements::expressions::EXPRESSION
     ));
 
@@ -376,7 +365,7 @@ pub fn run<'a>(code: &Code, tokens: &[Node<'a>]) -> Option<Node<'a>> {
         extension,
     )), [symbol_asterisk, symbol_slash, symbol_percent, symbol_asterisk_d]);
 
-    descents.define(expression_base_2, DescentAlias::new(operation_1));
+    descents.define(operation_base, DescentAlias::new(operation_1));
 
     let operation_2  = create_operation!(operation_1, [symbol_plus, symbol_minus]);
 
@@ -424,9 +413,12 @@ pub fn run<'a>(code: &Code, tokens: &[Node<'a>]) -> Option<Node<'a>> {
 
     descents.define(expression_option, DescentOption::new(expression));
 
+    let no_semicolon = descents.create(DescentPredicateNot::new(symbol_semicolon));
+
     let statement = descents.create(DescentElement::new(
         descents.create(DescentChoice::new([
-            descents.create(DescentSequence::new([structure, descents.create(DescentPredicateNot::new(symbol_semicolon))])),
+            descents.create(DescentSequence::new([structure, no_semicolon])),
+            descents.create(DescentSequence::new([flow, no_semicolon])),
             descents.create(DescentSequence::new([expression, symbol_semicolon])),
         ])),
         &elements::productions::STATEMENT

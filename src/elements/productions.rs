@@ -12,4 +12,4 @@ pub const PARAMETERS:  Element = Element::new("PARAMETERS");
 pub const GENERICS:    Element = Element::new("GENERICS");
 pub const TYPE:        Element = Element::new("TYPE");
 pub const METHODS:     Element = Element::new("METHODS");
-pub const METHOD:      Element = Element::new("METHOD");
+pub const NAME:        Element = Element::new("NAME");

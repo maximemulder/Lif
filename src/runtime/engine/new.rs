@@ -15,8 +15,8 @@ impl<'a, 'b> Engine<'a, 'b> {
         self.new_value(self.environment.boolean, Data::new_boolean(boolean))
     }
 
-    pub fn new_class_value(&mut self, parent: GcValue<'a, 'b>) -> GcValue<'a, 'b> {
-        let tag = self.taggers.classes.generate(None);
+    pub fn new_class_value(&mut self, name: Option<&'a str>, parent: GcValue<'a, 'b>) -> GcValue<'a, 'b> {
+        let tag = self.taggers.classes.generate(name.map(Box::from));
         self.new_value(self.environment.class, Data::new_class(tag, Some(parent)))
     }
 
@@ -68,8 +68,8 @@ impl<'a, 'b> Engine<'a, 'b> {
         self.new_constant(value)
     }
 
-    pub fn new_class(&mut self, parent: GcValue<'a, 'b>) -> GcReference<'a, 'b> {
-        let value = self.new_class_value(parent);
+    pub fn new_class(&mut self, name: Option<&'a str>, parent: GcValue<'a, 'b>) -> GcReference<'a, 'b> {
+        let value = self.new_class_value(name, parent);
         self.new_constant(value)
     }
 
