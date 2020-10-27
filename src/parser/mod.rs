@@ -5,6 +5,7 @@ pub mod descent;
 pub mod ascent;
 pub mod nodes;
 pub mod arena;
+pub mod arena2;
 
 use crate::code::Code;
 use crate::node::Node;

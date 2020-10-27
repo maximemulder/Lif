@@ -1,5 +1,17 @@
 use crate::element::Element;
 
+/* #[derive(Clone)]
+pub enum Origin<'a> {
+    Code(&'a Code<'a>),
+    Parent(&'a Parent<'a>)
+}
+
+#[derive(Clone)]
+pub enum Data<'a> {
+    Token(usize, usize),
+    Children(Box<[Node<'a>]>),
+} */
+
 #[derive(Clone)]
 pub enum Type<'a> {
     Production(Vec<Node<'a>>),
