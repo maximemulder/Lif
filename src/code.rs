@@ -1,14 +1,19 @@
 use crate::node::Node;
 
+use std::fs;
+
 pub struct Code {
-    text: Box<str>,
+    name: Box<str>,
+    pub text: Box<str>,
 }
 
 impl Code {
-    pub fn new(text: &str) -> Self {
-        Self {
+    pub fn new(name: &str) -> Option<Self> {
+        let text = fs::read_to_string(name).ok()?;
+        Some(Self {
+            name: Box::from(name),
             text: Box::from(text),
-        }
+        })
     }
 
     pub fn node_str(&self, node: &Node) -> &str {

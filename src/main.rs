@@ -24,7 +24,6 @@ use code::Code;
 use runtime::engine::Engine;
 use std::cmp::min;
 use std::env;
-use std::fs;
 
 fn main() {
     // println!("Leaf compiler.");
@@ -35,16 +34,15 @@ fn main() {
         panic!();
     }
 
-    let text = fs::read_to_string(&args[1]).expect("");
-    let tokens = lexer::lex(&text);
-    let code = Code::new(&text);
+    let code = Code::new(&args[1]).unwrap();
+    let tokens = lexer::lex(&code.text);
     // printer::tokens(&code, &tokens);
 
     // println!("=====");
 
     if let Some(tree) = parser::nodes::run(&code, &tokens) {
         // printer::tree(&tree);
-        let program = nodes::build::program(&text, &tree);
+        let program = nodes::build::program(&code.text, &tree);
         let mut engine = Engine::new();
         let result = engine.execute(&program);
         if let Err(error) = result {
