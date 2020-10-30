@@ -12,8 +12,8 @@ impl<T> ArenaItem<T> {
         }
     }
 
-    pub fn read(&self) -> &T {
-        unsafe { self.pointer.as_ref().unwrap().assume_init_ref() }
+    pub fn read<N>(&self) -> ArenaRef<N> where T: Unsize<N> {
+        ArenaRef::new(self.pointer as *mut MaybeUninit<N>)
     }
 
     pub fn write(&mut self, value: T) {
@@ -26,7 +26,7 @@ pub struct ArenaRef<T: ?Sized> {
 }
 
 impl<T: Sized> ArenaRef<T> {
-    pub fn new<N: Unsize<T>>(pointer: *mut MaybeUninit<N>) -> Self {
+    pub fn new(pointer: *mut MaybeUninit<T>) -> Self {
         Self {
             // pointer: unsafe { std::mem::transmute::<*mut MaybeUninit<N>, *mut T>(pointer) }
             pointer: unsafe { pointer.as_mut().unwrap().as_mut_ptr() }

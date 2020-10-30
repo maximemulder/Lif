@@ -1,24 +1,25 @@
 use crate::element::Element;
 use crate::parser::Parser;
+use crate::parser::arena2::ArenaRef;
 use crate::node::Node;
 
 pub trait Ascent<'a> {
     fn ascent(&self, parser: &mut Parser<'a, '_>, nodes: Vec<Node<'a>>) -> Option<Vec<Node<'a>>>;
 }
 
-pub struct AscentList {
-    ascents: Box<[usize]>,
+pub struct AscentList<'a> {
+    ascents: Box<[ArenaRef<dyn Ascent<'a>>]>,
 }
 
-impl AscentList {
-    pub fn new<const N: usize>(ascents: [usize; N]) -> Self {
+impl<'a> AscentList<'a> {
+    pub fn new<const N: usize>(ascents: [ArenaRef<dyn Ascent<'a>>; N]) -> Self {
         Self {
             ascents: Box::new(ascents),
         }
     }
 }
 
-impl<'a> Ascent<'a> for AscentList {
+impl<'a> Ascent<'a> for AscentList<'a> {
     fn ascent(&self, parser: &mut Parser<'a, '_>, mut nodes: Vec<Node<'a>>) -> Option<Vec<Node<'a>>> {
         for ascent in self.ascents.iter().rev() {
             if let Some(others) = parser.ascent(*ascent, nodes) {
