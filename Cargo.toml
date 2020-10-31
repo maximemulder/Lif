@@ -1,5 +1,5 @@
 [package]
-name = "v3"
+name = "leafcompiler"
 version = "0.1.0"
 authors = ["Maxime Mulder <maxime.mulder@viacesi.fr>"]
 edition = "2018"
