@@ -35,20 +35,21 @@ fn main() {
     }
 
     let code = Code::new(&args[1]).unwrap();
-    let tokens = lexer::lex(&code.text);
+    let tokens = lexer::lex(&code);
     // printer::tokens(&code, &tokens);
 
     // println!("=====");
 
     if let Some(tree) = parser::nodes::run(&code, &tokens) {
         // printer::tree(&tree);
-        let program = nodes::build::program(&code.text, &tree);
+        let program = nodes::build::program(&tree);
         let mut engine = Engine::new();
         let result = engine.execute(&program);
         if let Err(error) = result {
-            println!("{}", error.message);
+            eprintln!("{}", error.message);
             if let Some(node) = error.node {
-                println!("\n{}\n{}{}",
+                eprintln!("{}\n{}\n{}{}",
+                    code.name,
                     code.node_line(&node),
                     " ".repeat(code.node_shift_left(&node)),
                     "^".repeat(min(code.node_str(&node).len(), code.node_shift_right(&node)))

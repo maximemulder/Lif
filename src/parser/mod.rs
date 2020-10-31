@@ -14,16 +14,16 @@ use descent::Descent;
 use std::cmp::min;
 
 pub struct Parser<'a, 'b> {
-    code: &'b Code,
+    code: &'a Code,
     tokens: &'b [Node<'a>],
-    descents: &'b Arena<dyn Descent<'a> + 'b>,
-    ascents: &'b Arena<dyn Ascent<'a> + 'b>,
+    descents: &'b Arena<dyn Descent + 'b>,
+    ascents: &'b Arena<dyn Ascent + 'b>,
     cursor: usize,
     reach: usize,
 }
 
 impl<'a, 'b> Parser<'a, 'b> {
-    fn new(code: &'b Code, tokens: &'b [Node<'a>], descents: &'b Arena<dyn Descent<'a> + 'b>, ascents: &'b Arena<dyn Ascent<'a> + 'b>) -> Self {
+    fn new(code: &'a Code, tokens: &'b [Node<'a>], descents: &'b Arena<dyn Descent + 'b>, ascents: &'b Arena<dyn Ascent + 'b>) -> Self {
         Self {
             code,
             tokens,

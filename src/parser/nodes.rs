@@ -6,7 +6,7 @@ use crate::parser::ascent::*;
 use crate::parser::descent::*;
 use crate::parser::Parser;
 
-pub fn run<'a>(code: &Code, tokens: &[Node<'a>]) -> Option<Node<'a>> {
+pub fn run<'a>(code: &'a Code, tokens: &[Node<'a>]) -> Option<Node<'a>> {
     let descents = Arena::<dyn Descent>::new();
     let ascents = Arena::<dyn Ascent>::new();
 

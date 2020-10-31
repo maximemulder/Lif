@@ -1,50 +1,59 @@
+use crate::code::Code;
 use crate::element::Element;
 
 #[derive(Clone)]
-pub enum Type<'a> {
+pub enum Content<'a> {
     Production(Vec<Node<'a>>),
     Token(usize, usize),
 }
 
 #[derive(Clone)]
 pub struct Node<'a> {
-    pub element: &'a Element,
-    pub r#type: Type<'a>,
+    pub code: &'a Code,
+    pub element: &'static Element,
+    pub content: Content<'a>,
 }
 
 impl<'a> Node<'a> {
-    pub fn new_token(element: &'a Element, delimiters: (usize, usize)) -> Self {
+    pub fn new_token(code: &'a Code, element: &'static Element, delimiters: (usize, usize)) -> Self {
         Self {
+            code,
             element,
-            r#type: Type::Token(delimiters.0, delimiters.1),
+            content: Content::Token(delimiters.0, delimiters.1),
         }
     }
 
-    pub fn new_production(element: &'a Element, children: Vec<Node<'a>>) -> Self {
+    pub fn new_production(code: &'a Code, element: &'static Element, children: Vec<Node<'a>>) -> Self {
         Self {
+            code,
             element,
-            r#type: Type::Production(children),
+            content: Content::Production(children),
         }
     }
 
     pub fn children(&self) -> &Vec<Node<'a>> {
-        match &self.r#type {
-            Type::Production(children) => children,
-            Type::Token(_, _) => panic!(),
+        if let Content::Production(children) = &self.content {
+            return children;
         }
+
+        panic!();
+    }
+
+    pub fn text(&self) -> &str {
+        self.code.node_str(self)
     }
 
     pub fn left(&self) -> usize {
-        match &self.r#type {
-            Type::Production(children) => children.first().unwrap().left(),
-            Type::Token(left, _) => *left,
+        match &self.content {
+            Content::Production(children) => children.first().unwrap().left(),
+            Content::Token(left, _) => *left,
         }
     }
 
     pub fn right(&self) -> usize {
-        match &self.r#type {
-            Type::Production(children) => children.last().unwrap().right(),
-            Type::Token(_, right) => *right,
+        match &self.content {
+            Content::Production(children) => children.last().unwrap().right(),
+            Content::Token(_, right) => *right,
         }
     }
 }

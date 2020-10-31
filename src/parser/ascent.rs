@@ -2,8 +2,8 @@ use crate::element::Element;
 use crate::parser::Parser;
 use crate::node::Node;
 
-pub trait Ascent<'a> {
-    fn ascent(&self, parser: &mut Parser<'a, '_>, nodes: Vec<Node<'a>>) -> Option<Vec<Node<'a>>>;
+pub trait Ascent {
+    fn ascent<'a>(&self, parser: &mut Parser<'a, '_>, nodes: Vec<Node<'a>>) -> Option<Vec<Node<'a>>>;
 }
 
 pub struct AscentList {
@@ -18,8 +18,8 @@ impl AscentList {
     }
 }
 
-impl<'a> Ascent<'a> for AscentList {
-    fn ascent(&self, parser: &mut Parser<'a, '_>, mut nodes: Vec<Node<'a>>) -> Option<Vec<Node<'a>>> {
+impl Ascent for AscentList {
+    fn ascent<'a>(&self, parser: &mut Parser<'a, '_>, mut nodes: Vec<Node<'a>>) -> Option<Vec<Node<'a>>> {
         for ascent in self.ascents.iter().rev() {
             if let Some(others) = parser.ascent(*ascent, nodes) {
                 nodes = others;
@@ -46,8 +46,8 @@ impl AscentExtension {
     }
 }
 
-impl<'a> Ascent<'a> for AscentExtension {
-    fn ascent(&self, parser: &mut Parser<'a, '_>, mut nodes: Vec<Node<'a>>) -> Option<Vec<Node<'a>>> {
+impl Ascent for AscentExtension {
+    fn ascent<'a>(&self, parser: &mut Parser<'a, '_>, mut nodes: Vec<Node<'a>>) -> Option<Vec<Node<'a>>> {
         if let Some(children) = parser.descent(self.descent) {
             nodes.extend(children);
             return parser.ascent(self.ascent, nodes);
@@ -57,20 +57,20 @@ impl<'a> Ascent<'a> for AscentExtension {
     }
 }
 
-pub struct AscentElement<'a> {
-    element: &'a Element,
+pub struct AscentElement {
+    element: &'static Element,
 }
 
-impl<'a> AscentElement<'a> {
-    pub fn new(element: &'a Element) -> Self {
+impl AscentElement {
+    pub fn new(element: &'static Element) -> Self {
         Self {
             element,
         }
     }
 }
 
-impl<'a> Ascent<'a> for AscentElement<'a> {
-    fn ascent(&self, parser: &mut Parser<'a, '_>, nodes: Vec<Node<'a>>) -> Option<Vec<Node<'a>>> {
-        Some(vec![Node::new_production(self.element, nodes)])
+impl Ascent for AscentElement {
+    fn ascent<'a>(&self, parser: &mut Parser<'a, '_>, nodes: Vec<Node<'a>>) -> Option<Vec<Node<'a>>> {
+        Some(vec![Node::new_production(parser.code, self.element, nodes)])
     }
 }
