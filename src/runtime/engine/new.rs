@@ -8,39 +8,39 @@ use crate::runtime::value::GcValue;
 
 impl<'a, 'b> Engine<'a, 'b> {
     pub fn new_array_value(&mut self, elements: Vec<GcReference<'a, 'b>>) -> GcValue<'a, 'b> {
-        self.new_value(self.environment.array, Data::new_array(elements))
+        self.new_value(self.primitives.array, Data::new_array(elements))
     }
 
     pub fn new_boolean_value(&mut self, boolean: bool) -> GcValue<'a, 'b> {
-        self.new_value(self.environment.boolean, Data::new_boolean(boolean))
+        self.new_value(self.primitives.boolean, Data::new_boolean(boolean))
     }
 
     pub fn new_class_value(&mut self, name: Option<&'a str>, parent: GcValue<'a, 'b>) -> GcValue<'a, 'b> {
         let tag = self.taggers.classes.generate(name.map(Box::from));
-        self.new_value(self.environment.class, Data::new_class(tag, Some(parent)))
+        self.new_value(self.primitives.class, Data::new_class(tag, Some(parent)))
     }
 
     pub fn new_class_primitive_value(&mut self, name: &str) -> GcValue<'a, 'b> {
         let tag = self.taggers.classes.generate(Some(Box::from(name)));
-        self.new_value(self.environment.class, Data::new_class(tag, Some(self.environment.any)))
+        self.new_value(self.primitives.class, Data::new_class(tag, Some(self.primitives.any)))
     }
 
     pub fn new_function_value(&mut self, name: Option<&'a str>, parameters: &'b [Node<'a>], r#type: Option<GcValue<'a, 'b>>, block: &'b Node<'a>) -> GcValue<'a, 'b> {
         let tag = self.taggers.functions.generate(name.map(Box::from));
-        self.new_value(self.environment.function, Data::new_function(tag, self.scope, parameters, r#type, block))
+        self.new_value(self.primitives.function, Data::new_function(tag, self.scope, parameters, r#type, block))
     }
 
     pub fn new_generic_value(&mut self, name: Option<&'a str>, generics: &'b [&'a str], node: &'b dyn Executable<'a>) -> GcValue<'a, 'b> {
         let tag = self.taggers.generics.generate(name.map(Box::from));
-        self.new_value(self.environment.generic, Data::new_generic(tag, generics, node))
+        self.new_value(self.primitives.generic, Data::new_generic(tag, generics, node))
     }
 
     pub fn new_integer_value(&mut self, integer: isize) -> GcValue<'a, 'b> {
-        self.new_value(self.environment.integer, Data::new_integer(integer))
+        self.new_value(self.primitives.integer, Data::new_integer(integer))
     }
 
     pub fn new_method_value(&mut self, function: GcValue<'a, 'b>, this: GcValue<'a, 'b>) -> GcValue<'a, 'b> {
-        self.new_value(self.environment.method, Data::new_method(function, this))
+        self.new_value(self.primitives.method, Data::new_method(function, this))
     }
 
     pub fn new_object_value(&mut self, parent: GcValue<'a, 'b>) -> GcValue<'a, 'b> {
@@ -49,11 +49,11 @@ impl<'a, 'b> Engine<'a, 'b> {
 
     pub fn new_primitive_value(&mut self, name: &str, parameters: Box<[GcValue<'a, 'b>]>, callback: &'b dyn Fn(&mut Engine<'a, 'b>, Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b>) -> GcValue<'a, 'b> {
         let tag = self.taggers.functions.generate(Some(Box::from(name)));
-        self.new_value(self.environment.function, Data::new_primitive(tag, parameters, callback))
+        self.new_value(self.primitives.function, Data::new_primitive(tag, parameters, callback))
     }
 
     pub fn new_string_value(&mut self, string: String) -> GcValue<'a, 'b> {
-        self.new_value(self.environment.string, Data::new_string(string))
+        self.new_value(self.primitives.string, Data::new_string(string))
     }
 }
 

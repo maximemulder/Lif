@@ -23,7 +23,7 @@ impl<'a> Executable<'a> for Class<'a> {
         let parent = if let Some(parent) = &self.parent {
             execute!(engine, parent).read()?
         } else {
-            engine.environment.object
+            engine.primitives.object
         };
 
         let class = engine.new_class(self.name, parent);

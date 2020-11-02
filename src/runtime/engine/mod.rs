@@ -4,7 +4,7 @@ mod new;
 use crate::nodes::Node;
 use crate::runtime::ReturnReference;
 use crate::runtime::data::{ Data, Tagger };
-use crate::runtime::environment::Environment;
+use crate::runtime::primitives::Primitives;
 use crate::runtime::error::Error;
 use crate::runtime::gc::{ GC_THRESHOLD, Gc, GcTraceable };
 use crate::runtime::reference::{ GcReference, Reference };
@@ -35,23 +35,23 @@ impl Taggers {
 }
 
 pub struct Engine<'a, 'b> where 'a: 'b {
-    pub environment: Environment<'a, 'b>,
-    taggers:     Taggers,
-    scopes:          Gc<Scope<'a, 'b>>,
-    references:      Gc<Reference<'a, 'b>>,
-    values:          Gc<Value<'a, 'b>>,
-    registries:      Vec<Vec<GcReference<'a, 'b>>>,
-    frames:          Vec<GcScope<'a, 'b>>,
-    scope:           GcScope<'a, 'b>,
-    undefined:       GcReference<'a, 'b>,
-    control:         Option<Control>,
-    allocations:     usize,
+    pub primitives: Primitives<'a, 'b>,
+    taggers:        Taggers,
+    scopes:         Gc<Scope<'a, 'b>>,
+    references:     Gc<Reference<'a, 'b>>,
+    values:         Gc<Value<'a, 'b>>,
+    registries:     Vec<Vec<GcReference<'a, 'b>>>,
+    frames:         Vec<GcScope<'a, 'b>>,
+    scope:          GcScope<'a, 'b>,
+    undefined:      GcReference<'a, 'b>,
+    control:        Option<Control>,
+    allocations:    usize,
 }
 
 impl<'a, 'b> Engine<'a, 'b> {
     pub fn new() -> Self {
         let mut engine = Self {
-            environment: Environment::new(),
+            primitives: Primitives::new(),
             taggers:     Taggers::new(),
             scopes:      Gc::new(),
             references:  Gc::new(),
@@ -98,7 +98,7 @@ impl<'a, 'b> Engine<'a, 'b> {
     }
 
     pub fn new_reference(&mut self, value: GcValue<'a, 'b>) -> GcReference<'a, 'b> {
-        self.alloc_reference(Reference::new_variable(Some(value), self.environment.any))
+        self.alloc_reference(Reference::new_variable(Some(value), self.primitives.any))
     }
 
     pub fn new_variable(&mut self, value: Option<GcValue<'a, 'b>>, r#type: GcValue<'a, 'b>) -> GcReference<'a, 'b> {
@@ -187,7 +187,7 @@ impl<'a, 'b> Engine<'a, 'b> {
 
 impl GcTraceable for Engine<'_, '_> {
     fn trace(&mut self) {
-        self.environment.trace();
+        self.primitives.trace();
         self.scope.trace();
         self.undefined.trace();
         for registries in self.registries.iter_mut() {

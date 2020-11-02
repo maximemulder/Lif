@@ -20,10 +20,10 @@ impl<'a> Executable<'a> for Declaration<'a> {
     fn execute<'b>(&'b self, engine: &mut Engine<'a, 'b>) -> ReturnReference<'a, 'b> {
         let r#type = if let Some(r#type) = &self.r#type {
             let value = execute!(engine, r#type).read()?;
-            value.cast(engine.environment.class)?;
+            value.cast(engine.primitives.class)?;
             value
         } else {
-            engine.environment.any
+            engine.primitives.any
         };
 
         let reference = engine.new_variable(None, r#type);

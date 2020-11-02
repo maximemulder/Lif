@@ -71,22 +71,22 @@ impl<'a, 'b> GcValue<'a, 'b> {
 
 impl<'a, 'b> GcValue<'a, 'b> {
     pub fn get_cast_array(&self, engine: &Engine<'a, 'b>) -> Return<'a, &Vec<GcReference<'a, 'b>>> {
-        self.cast(engine.environment.array)?;
+        self.cast(engine.primitives.array)?;
         Ok(self.data_array())
     }
 
     pub fn get_cast_boolean(&self, engine: &Engine<'a, 'b>) -> Return<'a, &bool> {
-        self.cast(engine.environment.boolean)?;
+        self.cast(engine.primitives.boolean)?;
         Ok(self.data_boolean())
     }
 
     pub fn get_cast_callable(&self, engine: &Engine<'a, 'b>) -> Return<'a, &dyn Callable<'a, 'b>> {
-        self.cast(engine.environment.function)?;
+        self.cast(engine.primitives.function)?;
         Ok(self.data_callable())
     }
 
     pub fn get_cast_string(&self, engine: &Engine<'a, 'b>) -> Return<'a, &String> {
-        self.cast(engine.environment.string)?;
+        self.cast(engine.primitives.string)?;
         Ok(self.data_string())
     }
 }
