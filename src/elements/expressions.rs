@@ -8,4 +8,5 @@ pub const ARRAY:      Element = Element::new("ARRAY");
 pub const GROUP:      Element = Element::new("GROUP");
 pub const LITERAL:    Element = Element::new("LITERAL");
 pub const ASSIGNMENT: Element = Element::new("ASSIGNMENT");
-pub const OPERATION:  Element = Element::new("OPERATION");
+pub const BINOP:      Element = Element::new("BINOP");
+pub const PREOP:      Element = Element::new("PREOP");

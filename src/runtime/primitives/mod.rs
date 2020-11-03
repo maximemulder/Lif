@@ -64,7 +64,7 @@ impl<'a, 'b> Engine<'a, 'b> {
     }
 
     fn add_method_primitive<const N: usize>(&mut self, mut value: GcValue<'a, 'b>, name: &str, parameters: [GcValue<'a, 'b>; N], callback: &'b dyn Fn(&mut Engine<'a, 'b>, Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b>) {
-        let primitive = self.new_primitive(name, Box::new(parameters), callback).get_value();
+        let primitive = self.new_primitive(&name, Box::new(parameters), callback).get_value();
         value.data_class_mut().methods.insert(name.to_string(), primitive);
     }
 
@@ -111,12 +111,12 @@ impl<'a, 'b> Engine<'a, 'b> {
         self.add_constant_value("Object",   object);
         self.add_constant_value("String",   string);
 
-        self.add_method_primitive(any, ".",  [any, string], &any::chain);
-        self.add_method_primitive(any, "==", [any, any],    &any::comparison);
-        self.add_method_primitive(any, "!=", [any, any],    &any::difference);
-        self.add_method_primitive(any, ">",  [any, any],    &any::greater);
-        self.add_method_primitive(any, "<=", [any, any],    &any::lesser_equal);
-        self.add_method_primitive(any, ">=", [any, any],    &any::greater_equal);
+        self.add_method_primitive(any, "__cn__",  [any, string], &any::cn);
+        self.add_method_primitive(any, "__cmp__", [any, any],    &any::cmp);
+        self.add_method_primitive(any, "__dif__", [any, any],    &any::dif);
+        self.add_method_primitive(any, "__gt__",  [any, any],    &any::gt);
+        self.add_method_primitive(any, "__le__",  [any, any],    &any::le);
+        self.add_method_primitive(any, "__ge__",  [any, any],    &any::ge);
 
         self.add_method_primitive(array, "to_string", [array],               &array::to_string);
         self.add_method_primitive(array, "copy",      [array],               &array::copy);
@@ -124,40 +124,43 @@ impl<'a, 'b> Engine<'a, 'b> {
         self.add_method_primitive(array, "prepend",   [array, any],          &array::prepend);
         self.add_method_primitive(array, "insert",    [array, integer, any], &array::insert);
         self.add_method_primitive(array, "remove",    [array, integer],      &array::remove);
-        self.add_method_primitive(array, "[]",        [array, array],        &array::access);
+        self.add_method_primitive(array, "__id__",    [array, array],        &array::id);
 
         self.add_method_primitive(boolean, "to_string", [boolean],      &boolean::to_string);
-        self.add_method_primitive(boolean, "==",        [boolean, any], &boolean::comparison);
+        self.add_method_primitive(boolean, "__cmp__",   [boolean, any], &boolean::cmp);
+        self.add_method_primitive(boolean, "__not__",   [boolean],      &boolean::not);
 
-        self.add_method_primitive(class, "to_string",  [class],         &class::to_string);
-        self.add_method_primitive(class, ".",          [class, string], &class::chain);
-        self.add_method_primitive(class, "[]",         [class],         &class::access);
+        self.add_method_primitive(class, "to_string", [class],         &class::to_string);
+        self.add_method_primitive(class, "__cn__",    [class, string], &class::cn);
+        self.add_method_primitive(class, "__id__",    [class],         &class::id);
 
         self.add_method_primitive(function, "to_string", [function],        &function::to_string);
-        self.add_method_primitive(function, "()",        [function, array], &function::call);
+        self.add_method_primitive(function, "__cl__",    [function, array], &function::cl);
 
         self.add_method_primitive(generic, "to_string", [generic],        &generic::to_string);
-        self.add_method_primitive(generic, "<>",        [generic, array], &generic::apply);
+        self.add_method_primitive(generic, "__gn__",    [generic, array], &generic::gn);
 
         self.add_method_primitive(integer, "to_string", [integer],          &integer::to_string);
-        self.add_method_primitive(integer, "==",        [integer, any],     &integer::comparison);
-        self.add_method_primitive(integer, "<",         [integer, integer], &integer::lesser);
-        self.add_method_primitive(integer, "+",         [integer, integer], &integer::addition);
-        self.add_method_primitive(integer, "-",         [integer, integer], &integer::subtraction);
-        self.add_method_primitive(integer, "*",         [integer, integer], &integer::multiplication);
-        self.add_method_primitive(integer, "/",         [integer, integer], &integer::division);
-        self.add_method_primitive(integer, "%",         [integer, integer], &integer::remainder);
+        self.add_method_primitive(integer, "__cmp__",   [integer, any],     &integer::cmp);
+        self.add_method_primitive(integer, "__lt__",    [integer, integer], &integer::lt);
+        self.add_method_primitive(integer, "__pos__",   [integer],          &integer::pos);
+        self.add_method_primitive(integer, "__neg__",   [integer],          &integer::neg);
+        self.add_method_primitive(integer, "__add__",   [integer, integer], &integer::add);
+        self.add_method_primitive(integer, "__sub__",   [integer, integer], &integer::sub);
+        self.add_method_primitive(integer, "__mul__",   [integer, integer], &integer::mul);
+        self.add_method_primitive(integer, "__div__",   [integer, integer], &integer::div);
+        self.add_method_primitive(integer, "__rem__",   [integer, integer], &integer::rem);
 
         self.add_method_primitive(method, "to_string", [method],        &method::to_string);
-        self.add_method_primitive(method, "<>",        [method, array], &method::apply);
-        self.add_method_primitive(method, "()",        [method, array], &method::call);
+        self.add_method_primitive(method, "__gn__",    [method, array], &method::gn);
+        self.add_method_primitive(method, "__cl__",    [method, array], &method::cl);
 
         self.add_method_primitive(object, "to_string", [object],         &object::to_string);
-        self.add_method_primitive(object, ".",         [object, string], &object::chain);
+        self.add_method_primitive(object, "__cn__",    [object, string], &object::cn);
 
         self.add_method_primitive(string, "to_string", [string],      &string::to_string);
-        self.add_method_primitive(string, "==",        [string, any], &string::comparison);
-        self.add_method_primitive(string, "+",         [string, any], &string::concatenation);
+        self.add_method_primitive(string, "__cmp__",   [string, any], &string::cmp);
+        self.add_method_primitive(string, "__add__",   [string, any], &string::add);
     }
 }
 

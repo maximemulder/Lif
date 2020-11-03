@@ -105,7 +105,7 @@ pub fn run<'a>(code: &'a Code, tokens: &[Node<'a>]) -> Option<Node<'a>> {
 
     let expression_base = descents.declare();
 
-    let operation_base = descents.declare();
+    let binop_base = descents.declare();
 
     let expression_option = descents.declare();
 
@@ -125,7 +125,7 @@ pub fn run<'a>(code: &'a Code, tokens: &[Node<'a>]) -> Option<Node<'a>> {
         }
     }
 
-    macro_rules! create_operation_ascent {
+    macro_rules! create_binop_ascent {
         ( $child:expr, $tokens:expr ) => {{
             let ascent = ascents.declare();
             ascents.define(ascent, AscentExtension::new(
@@ -136,7 +136,7 @@ pub fn run<'a>(code: &'a Code, tokens: &[Node<'a>]) -> Option<Node<'a>> {
                 ascents.create(AscentList::new([
                     ascent,
                     ascents.create(AscentElement::new(&elements::expressions::EXPRESSION)),
-                    ascents.create(AscentElement::new(&elements::expressions::OPERATION)),
+                    ascents.create(AscentElement::new(&elements::expressions::BINOP)),
                 ]))
             ));
 
@@ -144,9 +144,9 @@ pub fn run<'a>(code: &'a Code, tokens: &[Node<'a>]) -> Option<Node<'a>> {
         }}
     }
 
-    macro_rules! create_operation {
+    macro_rules! create_binop {
         ( $child:expr, $tokens:expr ) => {{
-            descents.create(DescentAscent::new($child, create_operation_ascent!($child, $tokens)))
+            descents.create(DescentAscent::new($child, create_binop_ascent!($child, $tokens)))
         }}
     }
 
@@ -197,7 +197,7 @@ pub fn run<'a>(code: &'a Code, tokens: &[Node<'a>]) -> Option<Node<'a>> {
 
     let r#type = descents.create(DescentElement::new(
         descents.create(DescentOption::new(
-            descents.create(DescentSequence::new([symbol_colon, operation_base])),
+            descents.create(DescentSequence::new([symbol_colon, binop_base])),
         )),
         &elements::productions::TYPE
     ));
@@ -353,63 +353,71 @@ pub fn run<'a>(code: &'a Code, tokens: &[Node<'a>]) -> Option<Node<'a>> {
         ]))
     ));
 
-    ascents.define(extension, AscentList::new([chain, sequence]));
+    let preop = descents.create(DescentElement::new(
+        descents.create(DescentSequence::new([
+            descents.create(DescentChoice::new([symbol_minus, symbol_plus, symbol_exclamation])),
+            expression_base
+        ])),
+        &elements::expressions::PREOP
+    ));
 
     descents.define(expression_base, DescentElement::new(
-        descents.create(DescentChoice::new([class, function, flow, control, r#let, array, group, literal])),
+        descents.create(DescentChoice::new([class, function, flow, control, r#let, array, group, literal, preop])),
         &elements::expressions::EXPRESSION
     ));
 
-    let operation_1 = create_operation!(descents.create(DescentAscent::new(
+    ascents.define(extension, AscentList::new([chain, sequence]));
+
+    let binop_1 = create_binop!(descents.create(DescentAscent::new(
         expression_base,
         extension,
     )), [symbol_asterisk, symbol_slash, symbol_percent, symbol_asterisk_d]);
 
-    descents.define(operation_base, DescentAlias::new(operation_1));
+    descents.define(binop_base, DescentAlias::new(binop_1));
 
-    let operation_2  = create_operation!(operation_1, [symbol_plus, symbol_minus]);
+    let binop_2  = create_binop!(binop_1, [symbol_plus, symbol_minus]);
 
-    let operation_3  = create_operation!(operation_2, [symbol_guillemet_l_d, symbol_guillemet_r_d, symbol_guillemet_l_t, symbol_guillemet_l_t]);
+    let binop_3  = create_binop!(binop_2, [symbol_guillemet_l_d, symbol_guillemet_r_d, symbol_guillemet_l_t, symbol_guillemet_l_t]);
 
-    let operation_4  = create_operation!(operation_3, [symbol_ampersand]);
+    let binop_4  = create_binop!(binop_3, [symbol_ampersand]);
 
-    let operation_5  = create_operation!(operation_4, [symbol_caret]);
+    let binop_5  = create_binop!(binop_4, [symbol_caret]);
 
-    let operation_6  = create_operation!(operation_5, [symbol_pipe]);
+    let binop_6  = create_binop!(binop_5, [symbol_pipe]);
 
-    let operation_7_l = create_operation_ascent!(operation_6, [symbol_guillemet_l, symbol_guillemet_l_eq]);
+    let binop_7_l = create_binop_ascent!(binop_6, [symbol_guillemet_l, symbol_guillemet_l_eq]);
 
-    let operation_7_r = create_operation_ascent!(operation_6, [symbol_guillemet_r, symbol_guillemet_r_eq]);
+    let binop_7_r = create_binop_ascent!(binop_6, [symbol_guillemet_r, symbol_guillemet_r_eq]);
 
-    let operation_7 = descents.create(DescentChoice::new([
+    let binop_7 = descents.create(DescentChoice::new([
         descents.create(DescentSequence::new([
-            descents.create(DescentAscent::new(operation_6, operation_7_l)),
+            descents.create(DescentAscent::new(binop_6, binop_7_l)),
             descents.create(DescentPredicateNot::new(
                 descents.create(DescentChoice::new([symbol_guillemet_r, symbol_guillemet_r_eq]))
             )),
         ])),
         descents.create(DescentSequence::new([
-            descents.create(DescentAscent::new(operation_6, operation_7_r)),
+            descents.create(DescentAscent::new(binop_6, binop_7_r)),
             descents.create(DescentPredicateNot::new(
                 descents.create(DescentChoice::new([symbol_guillemet_l, symbol_guillemet_l_eq]))
             )),
         ])),
     ]));
 
-    let operation_8  = create_operation!(operation_7,  [symbol_equal_d, symbol_exclamation_eq]);
+    let binop_8  = create_binop!(binop_7,  [symbol_equal_d, symbol_exclamation_eq]);
 
-    let operation_9  = create_operation!(operation_8,  [symbol_ampersand_d]);
+    let binop_9  = create_binop!(binop_8,  [symbol_ampersand_d]);
 
-    let operation_10 = create_operation!(operation_9,  [symbol_pipe_d]);
+    let binop_10 = create_binop!(binop_9,  [symbol_pipe_d]);
 
-    let operation_11 = create_operation!(operation_10, [symbol_dot_d, symbol_dot_d_eq]);
+    let binop_11 = create_binop!(binop_10, [symbol_dot_d, symbol_dot_d_eq]);
 
-    let operation_12 = create_assignment!(operation_11, [symbol_equal, symbol_plus_eq, symbol_minus_eq, symbol_asterisk_eq, symbol_slash_eq,
+    let binop_12 = create_assignment!(binop_11, [symbol_equal, symbol_plus_eq, symbol_minus_eq, symbol_asterisk_eq, symbol_slash_eq,
         symbol_percent_eq, symbol_asterisk_d_eq, symbol_guillemet_l_d_eq, symbol_guillemet_r_d_eq, symbol_guillemet_l_t_eq, symbol_guillemet_r_t_eq,
         symbol_ampersand_eq, symbol_caret_eq, symbol_pipe_eq, symbol_ampersand_d_eq, symbol_pipe_d_eq
     ]);
 
-    descents.define(expression, DescentAlias::new(operation_12));
+    descents.define(expression, DescentAlias::new(binop_12));
 
     descents.define(expression_option, DescentOption::new(expression));
 

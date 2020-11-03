@@ -47,6 +47,6 @@ pub fn remove<'a, 'b>(engine: &mut Engine<'a, 'b>, mut arguments: Vec<GcValue<'a
     Ok(engine.undefined())
 }
 
-pub fn access<'a, 'b>(_: &mut Engine<'a, 'b>, arguments: Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b> {
+pub fn id<'a, 'b>(_: &mut Engine<'a, 'b>, arguments: Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b> {
     Ok(arguments[0].data_array()[*arguments[1].data_integer() as usize])
 }

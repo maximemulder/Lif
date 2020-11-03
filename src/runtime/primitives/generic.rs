@@ -6,7 +6,7 @@ pub fn to_string<'a, 'b>(engine: &mut Engine<'a, 'b>, _: Vec<GcValue<'a, 'b>>) -
     Ok(engine.new_string("GENERIC".to_string()))
 }
 
-pub fn apply<'a, 'b>(engine: &mut Engine<'a, 'b>, arguments: Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b> {
+pub fn gn<'a, 'b>(engine: &mut Engine<'a, 'b>, arguments: Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b> {
     engine.push_scope();
     let value = arguments[0];
     let generic = value.data_generic();

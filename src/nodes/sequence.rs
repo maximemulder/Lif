@@ -4,18 +4,21 @@ use crate::runtime::engine::Engine;
 
 pub struct Sequence<'a> {
     expression:  Node<'a>,
-    open:        &'a str,
     expressions: Box<[Node<'a>]>,
-    close:       &'a str,
+    operator:    &'a str,
 }
 
 impl<'a> Sequence<'a> {
     pub fn new(expression: Node<'a>, open: &'a str, expressions: Box<[Node<'a>]>, close: &'a str) -> Self {
         Self {
             expression,
-            open,
             expressions,
-            close,
+            operator: match format!("{}{}", open, close).as_str() {
+                "()" => "__cl__",
+                "[]" => "__id__",
+                "<>" => "__gn__",
+                _ => panic!(),
+            }
         }
     }
 }
@@ -29,9 +32,6 @@ impl<'a> Executable<'a> for Sequence<'a> {
         }
 
         let array = engine.new_array(arguments).read()?;
-        let mut name = String::new();
-        name.push_str(&self.open);
-        name.push_str(&self.close);
-        value.call_method(engine, &name, vec![array])
+        value.call_method(engine, &self.operator, vec![array])
     }
 }

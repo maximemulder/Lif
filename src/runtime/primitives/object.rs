@@ -20,7 +20,7 @@ pub fn to_string<'a, 'b>(engine: &mut Engine<'a, 'b>, arguments: Vec<GcValue<'a,
     Ok(engine.new_string(string))
 }
 
-pub fn chain<'a, 'b>(engine: &mut Engine<'a, 'b>, arguments: Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b> {
+pub fn cn<'a, 'b>(engine: &mut Engine<'a, 'b>, arguments: Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b> {
     let mut this = arguments[0];
     let name = arguments[1].data_string().clone();
     if let Some(method) = this.get_method(&name) {
@@ -32,7 +32,7 @@ pub fn chain<'a, 'b>(engine: &mut Engine<'a, 'b>, arguments: Vec<GcValue<'a, 'b>
     Ok(if let Some(&member) = object.attributes.get(&name) {
         member
     } else {
-        object.attributes.insert(name.clone(), member);
+        object.attributes.insert(name, member);
         member
     })
 }

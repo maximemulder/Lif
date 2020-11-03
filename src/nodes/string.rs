@@ -9,7 +9,7 @@ pub struct String<'a> {
 impl<'a> String<'a> {
     pub fn new(string: &'a str) -> Self {
         Self {
-            string,
+            string: &string[1 .. string.len() - 1],
         }
     }
 }

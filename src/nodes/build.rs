@@ -9,7 +9,8 @@ use crate::nodes::for_in::ForIn;
 use crate::nodes::statement::Statement;
 use crate::nodes::statements::Statements;
 use crate::nodes::assignment::Assignment;
-use crate::nodes::operation::Operation;
+use crate::nodes::preop::Preop;
+use crate::nodes::binop::Binop;
 use crate::nodes::chain::Chain;
 use crate::nodes::sequence::Sequence;
 use crate::nodes::declaration::Declaration;
@@ -65,7 +66,8 @@ fn expression<'a>(node: &'a SyntaxNode<'a>) -> Node<'a> {
         elements::expressions::LITERAL     => literal(child),
         elements::expressions::CHAIN       => chain(child),
         elements::expressions::SEQUENCE    => sequence(child),
-        elements::expressions::OPERATION   => operation(child),
+        elements::expressions::BINOP       => binop(child),
+        elements::expressions::PREOP       => preop(child),
         elements::expressions::ASSIGNMENT  => assignment(child),
         _ => panic!(),
     }
@@ -293,8 +295,12 @@ fn assignment<'a>(node: &'a SyntaxNode<'a>) -> Node<'a> {
     Node::new(node, Assignment::new(expression(&node.children()[0]), expression(&node.children()[2]), token(&node.children()[1])))
 }
 
-fn operation<'a>(node: &'a SyntaxNode<'a>) -> Node<'a> {
-    Node::new(node, Operation::new(expression(&node.children()[0]), expression(&node.children()[2]), token(&node.children()[1])))
+fn binop<'a>(node: &'a SyntaxNode<'a>) -> Node<'a> {
+    Node::new(node, Binop::new(expression(&node.children()[0]), token(&node.children()[1]), expression(&node.children()[2])))
+}
+
+fn preop<'a>(node: &'a SyntaxNode<'a>) -> Node<'a> {
+    Node::new(node, Preop::new(token(&node.children()[0]), expression(&node.children()[1])))
 }
 
 fn token<'a>(node: &'a SyntaxNode<'a>) -> &'a str {
