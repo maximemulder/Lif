@@ -14,18 +14,27 @@ impl<'a> Binop<'a> {
             left,
             right,
             operator: match operator {
-                "==" => "__eq__",
-                "!=" => "__ne__",
-                "<"  => "__lt__",
-                ">"  => "__gt__",
-                "<=" => "__le__",
-                ">=" => "__ge__",
-                "+" => "__add__",
-                "-" => "__sub__",
-                "*" => "__mul__",
-                "/" => "__div__",
-                "%" => "__rem__",
-                _    => panic!(),
+                "=="  => "__eq__",
+                "!="  => "__ne__",
+                "<"   => "__lt__",
+                ">"   => "__gt__",
+                "<="  => "__le__",
+                ">="  => "__ge__",
+                "&&"  => "__and__",
+                "||"  => "__or__",
+                "+"   => "__add__",
+                "-"   => "__sub__",
+                "*"   => "__mul__",
+                "/"   => "__div__",
+                "%"   => "__rem__",
+                "&"   => "__band__",
+                "|"   => "__bor__",
+                "^"   => "__bxor__",
+                "<<"  => "__bsl__",
+                ">>"  => "__bsr__",
+                "<<<" => "__bcls__",
+                ">>>" => "__bcrs__",
+                _     => panic!(),
             },
         }
     }
@@ -33,8 +42,36 @@ impl<'a> Binop<'a> {
 
 impl<'a> Executable<'a> for Binop<'a> {
     fn execute<'b>(&'b self, engine: &mut Engine<'a, 'b>) -> ReturnReference<'a, 'b> {
-        let left  = execute!(engine, &self.left).read()?;
-        let right = execute!(engine, &self.right).read()?;
-        left.get_method(&self.operator).unwrap().call(engine, vec![left, right])
+        let left = execute!(engine, &self.left).read()?;
+        match self.operator {
+            "__and__" => {
+                left.cast(engine.primitives.boolean)?;
+                let boolean = if *left.data_boolean() {
+                    let right = execute!(engine, &self.right).read()?;
+                    right.cast(engine.primitives.boolean)?;
+                    *right.data_boolean()
+                } else {
+                    false
+                };
+
+                Ok(engine.new_boolean(boolean))
+            },
+            "__or__" => {
+                left.cast(engine.primitives.boolean)?;
+                let boolean = if *left.data_boolean() {
+                    true
+                } else {
+                    let right = execute!(engine, &self.right).read()?;
+                    right.cast(engine.primitives.boolean)?;
+                    *right.data_boolean()
+                };
+
+                Ok(engine.new_boolean(boolean))
+            },
+            _ => {
+                let right = execute!(engine, &self.right).read()?;
+                left.get_method(&self.operator).unwrap().call(engine, vec![left, right])
+            },
+        }
     }
 }

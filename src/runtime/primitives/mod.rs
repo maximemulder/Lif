@@ -150,6 +150,14 @@ impl<'a, 'b> Engine<'a, 'b> {
         self.add_method_primitive(integer, "__mul__",   [integer, integer], &integer::mul);
         self.add_method_primitive(integer, "__div__",   [integer, integer], &integer::div);
         self.add_method_primitive(integer, "__rem__",   [integer, integer], &integer::rem);
+        self.add_method_primitive(integer, "__bnot__",  [integer],          &integer::bnot);
+        self.add_method_primitive(integer, "__band__",  [integer, integer], &integer::band);
+        self.add_method_primitive(integer, "__bor__",   [integer, integer], &integer::bor);
+        self.add_method_primitive(integer, "__bxor__",  [integer, integer], &integer::bxor);
+        self.add_method_primitive(integer, "__bls__",   [integer, integer], &integer::bls);
+        self.add_method_primitive(integer, "__brs__",   [integer, integer], &integer::brs);
+        self.add_method_primitive(integer, "__bcls__",  [integer, integer], &integer::bcls);
+        self.add_method_primitive(integer, "__bcrs__",  [integer, integer], &integer::bcrs);
 
         self.add_method_primitive(method, "to_string", [method],        &method::to_string);
         self.add_method_primitive(method, "__gn__",    [method, array], &method::gn);

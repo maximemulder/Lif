@@ -12,6 +12,7 @@ impl<'a> Preop<'a> {
         Self {
             expression,
             operator: match operator {
+                "~" => "__bnot__",
                 "+" => "__pos__",
                 "-" => "__neg__",
                 "!" => "__not__",

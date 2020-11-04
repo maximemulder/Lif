@@ -355,7 +355,7 @@ pub fn run<'a>(code: &'a Code, tokens: &[Node<'a>]) -> Option<Node<'a>> {
 
     let preop = descents.create(DescentElement::new(
         descents.create(DescentSequence::new([
-            descents.create(DescentChoice::new([symbol_minus, symbol_plus, symbol_exclamation])),
+            descents.create(DescentChoice::new([symbol_tilde, symbol_minus, symbol_plus, symbol_exclamation])),
             expression_base
         ])),
         &elements::expressions::PREOP
