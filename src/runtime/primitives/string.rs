@@ -6,8 +6,12 @@ pub fn to_string<'a, 'b>(engine: &mut Engine<'a, 'b>, arguments: Vec<GcValue<'a,
     Ok(engine.new_constant(arguments[0]))
 }
 
-pub fn cmp<'a, 'b>(engine: &mut Engine<'a, 'b>, arguments: Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b> {
-    Ok(engine.new_boolean(arguments[0].data_string() == arguments[1].data_string()))
+pub fn eq<'a, 'b>(engine: &mut Engine<'a, 'b>, arguments: Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b> {
+    Ok(engine.new_boolean(if arguments[1].isa(engine.primitives.string) {
+        arguments[0].data_string() == arguments[1].data_string()
+    } else {
+        false
+    }))
 }
 
 pub fn add<'a, 'b>(engine: &mut Engine<'a, 'b>, arguments: Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b> {

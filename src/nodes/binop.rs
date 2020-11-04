@@ -14,8 +14,8 @@ impl<'a> Binop<'a> {
             left,
             right,
             operator: match operator {
-                "==" => "__cmp__",
-                "!=" => "__dif__",
+                "==" => "__eq__",
+                "!=" => "__ne__",
                 "<"  => "__lt__",
                 ">"  => "__gt__",
                 "<=" => "__le__",

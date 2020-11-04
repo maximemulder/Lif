@@ -13,11 +13,11 @@ pub fn cn<'a, 'b>(engine: &mut Engine<'a, 'b>, arguments: Vec<GcValue<'a, 'b>>) 
     Err(Error::new_undefined_method(&name, this))
 }
 
-pub fn cmp<'a, 'b>(engine: &mut Engine<'a, 'b>, arguments: Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b> {
+pub fn eq<'a, 'b>(engine: &mut Engine<'a, 'b>, arguments: Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b> {
     Ok(engine.new_boolean(arguments[0] == arguments[1]))
 }
 
-pub fn dif<'a, 'b>(engine: &mut Engine<'a, 'b>, arguments: Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b> {
+pub fn ne<'a, 'b>(engine: &mut Engine<'a, 'b>, arguments: Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b> {
     let reference = arguments[0].call_method_self(engine, "__eq__", arguments)?;
     Ok(engine.new_boolean(!reference.read()?.data_boolean()))
 }
