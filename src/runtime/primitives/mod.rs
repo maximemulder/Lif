@@ -181,7 +181,8 @@ fn assert<'a, 'b>(engine: &mut Engine<'a, 'b>, arguments: Vec<GcValue<'a, 'b>>) 
 }
 
 fn error<'a, 'b>(engine: &mut Engine<'a, 'b>, arguments: Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b> {
-    println!("{}",  arguments[0].call_to_string(engine)?);
+    let message = arguments[0].call_to_string(engine)?;
+    writeln!(engine.error, "{}", message).unwrap();
     panic!();
 }
 
@@ -194,6 +195,7 @@ fn new<'a, 'b>(engine: &mut Engine<'a, 'b>, arguments: Vec<GcValue<'a, 'b>>) -> 
 }
 
 fn print<'a, 'b>(engine: &mut Engine<'a, 'b>, arguments: Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b> {
-    println!("{}", arguments[0].call_to_string(engine)?);
+    let message = arguments[0].call_to_string(engine)?;
+    writeln!(engine.output, "{}", message).unwrap();
     Ok(engine.undefined())
 }

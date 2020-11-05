@@ -11,6 +11,8 @@ use crate::runtime::reference::{ GcReference, Reference };
 use crate::runtime::scope::{ GcScope, Scope };
 use crate::runtime::value::{ GcValue, Value };
 
+use std::io::{ Read, Write };
+
 #[derive(PartialEq, Eq)]
 pub enum Control {
     Return,
@@ -35,6 +37,9 @@ impl Taggers {
 }
 
 pub struct Engine<'a, 'b> where 'a: 'b {
+    pub input:      &'b mut dyn Read,
+    pub output:     &'b mut dyn Write,
+    pub error:      &'b mut dyn Write,
     pub primitives: Primitives<'a, 'b>,
     taggers:        Taggers,
     scopes:         Gc<Scope<'a, 'b>>,
@@ -49,8 +54,11 @@ pub struct Engine<'a, 'b> where 'a: 'b {
 }
 
 impl<'a, 'b> Engine<'a, 'b> {
-    pub fn new() -> Self {
+    pub fn new(input: &'b mut dyn Read, output: &'b mut dyn Write, error: &'b mut dyn Write) -> Self {
         let mut engine = Self {
+            input,
+            output,
+            error,
             primitives: Primitives::new(),
             taggers:     Taggers::new(),
             scopes:      Gc::new(),

@@ -23,12 +23,13 @@ mod code;
 use code::Code;
 use runtime::engine::Engine;
 use std::cmp::min;
-use std::env;
+use std::env::args;
+use std::io::{ stderr, stdin, stdout };
 
 fn main() {
     // println!("Leaf compiler.");
 
-    let args: Vec<String> = env::args().collect();
+    let args: Vec<String> = args().collect();
     if args.len() != 2 {
         println!("Incorrect arguments length.");
         panic!();
@@ -43,7 +44,10 @@ fn main() {
     if let Some(tree) = parser::nodes::run(&code, &tokens) {
         // printer::tree(&tree);
         let program = nodes::build::program(&tree);
-        let mut engine = Engine::new();
+        let mut input  = stdin();
+        let mut output = stdout();
+        let mut error  = stderr();
+        let mut engine = Engine::new(&mut input, &mut output, &mut error);
         let result = engine.execute(&program);
         if let Err(error) = result {
             eprintln!("{}", error.message);
