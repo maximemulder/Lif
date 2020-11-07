@@ -71,11 +71,6 @@ fn test() {
     assert_output("print(false || true);", "true");
     assert_output("print(false || false);", "false");
 
-    assert_output("print(true || true);", "true");
-    assert_output("print(true || false);", "true");
-    assert_output("print(false || true);", "true");
-    assert_output("print(false || false);", "false");
-
     assert_output("print(\"Hello World !\");", "Hello World !");
     assert_output("print(\"1\" + \"2\");", "12");
     assert_output("print(\"1\" + 2);", "12");
