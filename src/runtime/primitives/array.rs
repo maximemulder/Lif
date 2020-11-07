@@ -35,7 +35,7 @@ pub fn prepend<'a, 'b>(engine: &mut Engine<'a, 'b>, mut arguments: Vec<GcValue<'
 }
 
 pub fn insert<'a, 'b>(engine: &mut Engine<'a, 'b>, mut arguments: Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b> {
-    let reference = engine.new_reference(arguments[1]);
+    let reference = engine.new_reference(arguments[2]);
     let index = *arguments[1].data_integer() as usize;
     arguments[0].data_array_mut().insert(index, reference);
     Ok(engine.undefined())
@@ -48,5 +48,5 @@ pub fn remove<'a, 'b>(engine: &mut Engine<'a, 'b>, mut arguments: Vec<GcValue<'a
 }
 
 pub fn id<'a, 'b>(_: &mut Engine<'a, 'b>, arguments: Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b> {
-    Ok(arguments[0].data_array()[*arguments[1].data_integer() as usize])
+    Ok(arguments[0].data_array()[*arguments[1].data_array()[0].read()?.data_integer() as usize])
 }
