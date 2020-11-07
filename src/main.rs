@@ -22,43 +22,27 @@ mod code;
 
 use code::Code;
 use runtime::engine::Engine;
-use std::cmp::min;
 use std::env::args;
-use std::io::{ stderr, stdin, stdout };
+use std::io::{ Read, Write, stderr, stdin, stdout };
+
+fn run(code: &Code, input: &mut dyn Read, output: &mut dyn Write, error: &mut dyn Write) {
+    let tokens = lexer::lex(&code);
+    if let Some(tree) = parser::nodes::run(&code, &tokens) {
+        let program = nodes::build::program(&tree);
+        Engine::new(input, output, error).run(&program);
+    }
+}
 
 fn main() {
-    // println!("Leaf compiler.");
-
     let args: Vec<String> = args().collect();
     if args.len() != 2 {
-        println!("Incorrect arguments length.");
+        eprintln!("Incorrect arguments length.");
         panic!();
     }
 
-    let code = Code::new(&args[1]).unwrap();
-    let tokens = lexer::lex(&code);
-    // printer::tokens(&code, &tokens);
-
-    // println!("=====");
-
-    if let Some(tree) = parser::nodes::run(&code, &tokens) {
-        // printer::tree(&tree);
-        let program = nodes::build::program(&tree);
-        let mut input  = stdin();
-        let mut output = stdout();
-        let mut error  = stderr();
-        let mut engine = Engine::new(&mut input, &mut output, &mut error);
-        let result = engine.execute(&program);
-        if let Err(error) = result {
-            eprintln!("{}", error.message);
-            if let Some(node) = error.node {
-                eprintln!("{}\n{}\n{}{}",
-                    code.name,
-                    code.node_line(&node),
-                    " ".repeat(code.node_shift_left(&node)),
-                    "^".repeat(min(code.node_str(&node).len(), code.node_shift_right(&node)))
-                );
-            }
-        }
-    }
+    let code = Code::from_file(&args[1]).unwrap();
+    let mut input  = stdin();
+    let mut output = stdout();
+    let mut error  = stderr();
+    run(&code, &mut input, &mut output, &mut error);
 }

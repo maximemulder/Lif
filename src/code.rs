@@ -2,17 +2,24 @@ use crate::node::Node;
 use std::fs::read_to_string;
 
 pub struct Code {
-    pub name: Box<str>,
+    pub name: Option<Box<str>>,
     pub text: Box<str>,
 }
 
 impl Code {
-    pub fn new(name: &str) -> Option<Self> {
+    pub fn from_file(name: &str) -> Option<Self> {
         let text = read_to_string(name).ok()?;
         Some(Self {
-            name: Box::from(name),
+            name: Some(Box::from(name)),
             text: Box::from(text),
         })
+    }
+
+    pub fn from_string(text: &str) -> Self {
+        Self {
+            name: None,
+            text: Box::from(text),
+        }
     }
 
     pub fn node_str(&self, node: &Node) -> &str {
