@@ -20,12 +20,15 @@ mod printer;
 mod runtime;
 mod code;
 
+#[cfg(test)]
+mod tests;
+
 use code::Code;
 use runtime::engine::Engine;
 use std::env::args;
 use std::io::{ Read, Write, stderr, stdin, stdout };
 
-fn run(code: &Code, input: &mut dyn Read, output: &mut dyn Write, error: &mut dyn Write) {
+pub fn run(code: &Code, input: &mut dyn Read, output: &mut dyn Write, error: &mut dyn Write) {
     let tokens = lexer::lex(&code);
     if let Some(tree) = parser::nodes::run(&code, &tokens) {
         let program = nodes::build::program(&tree);
