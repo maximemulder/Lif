@@ -22,7 +22,7 @@ fn test() {
     assert_output("print(2 == 2);", "true");
     assert_output("print(2 != 2);", "false");
     assert_output("print(2 <= 2);", "true");
-    assert_output("print(2 <= 2);", "true");
+    assert_output("print(2 >= 2);", "true");
 
     assert_output("print(2 < 3);", "true");
     assert_output("print(2 > 3);", "false");
