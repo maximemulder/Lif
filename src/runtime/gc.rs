@@ -1,7 +1,8 @@
-use std::ops::{ Deref, DerefMut };
 use std::clone::Clone;
 use std::cmp::{ Eq, PartialEq };
 use std::marker::Copy;
+use std::ops::{ Deref, DerefMut };
+use std::ptr::NonNull;
 
 pub const GC_THRESHOLD: usize = 250;
 
@@ -54,36 +55,36 @@ impl<T> GcObject<T> {
 }
 
 pub struct GcRef<T> {
-    pointer: *mut GcObject<T>,
+    pointer: NonNull<GcObject<T>>,
 }
 
 impl<T> GcRef<T> {
     pub fn null() -> Self {
         Self {
-            pointer: std::ptr::null_mut(),
+            pointer: NonNull::dangling(),
         }
     }
 
     fn new(pointer: *mut GcObject<T>) -> Self {
         Self {
-            pointer,
+            pointer: unsafe { NonNull::new_unchecked(pointer) },
         }
     }
 
     fn mark(&mut self) {
-        unsafe { self.pointer.as_mut() }.unwrap().flag = true;
+        unsafe { self.pointer.as_mut() }.flag = true;
     }
 
     fn flag(&self) -> bool {
-        unsafe { self.pointer.as_ref() }.unwrap().flag
+        unsafe { self.pointer.as_ref() }.flag
     }
 
     fn reset(&mut self) {
-        unsafe { self.pointer.as_mut() }.unwrap().flag = false;
+        unsafe { self.pointer.as_mut() }.flag = false;
     }
 
     fn free(&mut self) {
-        unsafe { Box::from_raw(self.pointer); };
+        unsafe { Box::from_raw(self.pointer.as_ptr()); };
     }
 
     fn collect(&mut self) -> bool {
@@ -111,13 +112,13 @@ impl<T> Deref for GcRef<T> {
     type Target = T;
 
     fn deref(&self) -> &Self::Target {
-        &unsafe { self.pointer.as_ref().unwrap() }.object
+        &unsafe { self.pointer.as_ref() }.object
     }
 }
 
 impl<T> DerefMut for GcRef<T> {
     fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut unsafe { self.pointer.as_mut().unwrap() }.object
+        &mut unsafe { self.pointer.as_mut() }.object
     }
 }
 
