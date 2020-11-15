@@ -11,7 +11,7 @@ mod string;
 
 use crate::runtime::ReturnReference;
 use crate::runtime::engine::Engine;
-use crate::runtime::gc::GcTraceable;
+use crate::runtime::gc::GcTrace;
 use crate::runtime::value::GcValue;
 
 pub struct Primitives<'a, 'b> {
@@ -44,7 +44,7 @@ impl<'a, 'b> Primitives<'a, 'b> {
     }
 }
 
-impl GcTraceable for Primitives<'_, '_> {
+impl GcTrace for Primitives<'_, '_> {
     fn trace(&mut self) {
         for class in [self.any, self.array, self.boolean, self.class, self.function, self.generic, self.integer, self.method, self.object, self.string].iter_mut() {
             class.trace();

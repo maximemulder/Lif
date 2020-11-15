@@ -2,7 +2,7 @@ use crate::runtime::{ Return, ReturnReference };
 use crate::runtime::data::{ Callable, Class, Data, Generic, Method, Object, Tag };
 use crate::runtime::engine::Engine;
 use crate::runtime::error::Error;
-use crate::runtime::gc::{ GcRef, GcTraceable };
+use crate::runtime::gc::{ GcRef, GcTrace };
 use crate::runtime::reference::GcReference;
 
 pub type GcValue<'a, 'b> = GcRef<Value<'a, 'b>>;
@@ -91,7 +91,7 @@ impl<'a, 'b> GcValue<'a, 'b> {
     }
 }
 
-impl GcTraceable for Value<'_, '_> {
+impl GcTrace for Value<'_, '_> {
     fn trace(&mut self) {
         self.class.trace();
         self.data.trace();

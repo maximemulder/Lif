@@ -1,5 +1,5 @@
 use crate::runtime::data::Tag;
-use crate::runtime::gc::GcTraceable;
+use crate::runtime::gc::GcTrace;
 use crate::runtime::reference::GcReference;
 use crate::runtime::value::GcValue;
 use std::collections::HashMap;
@@ -34,7 +34,7 @@ impl<'a, 'b> Class<'a, 'b> {
     }
 }
 
-impl GcTraceable for Class<'_, '_> {
+impl GcTrace for Class<'_, '_> {
     fn trace(&mut self) {
         if let Some(parent) = &mut self.parent {
             parent.trace();

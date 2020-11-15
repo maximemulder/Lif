@@ -6,7 +6,7 @@ use std::ptr::NonNull;
 
 pub const GC_THRESHOLD: usize = 250;
 
-pub trait GcTraceable {
+pub trait GcTrace {
     fn trace(&mut self);
 }
 
@@ -99,7 +99,7 @@ impl<T> GcRef<T> {
     }
 }
 
-impl<T: GcTraceable> GcTraceable for GcRef<T> {
+impl<T: GcTrace> GcTrace for GcRef<T> {
     fn trace(&mut self) {
         if !self.flag() {
             self.mark();

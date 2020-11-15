@@ -6,7 +6,7 @@ use crate::runtime::ReturnReference;
 use crate::runtime::data::{ Data, Tagger };
 use crate::runtime::primitives::Primitives;
 use crate::runtime::error::Error;
-use crate::runtime::gc::{ GC_THRESHOLD, Gc, GcTraceable };
+use crate::runtime::gc::{ GC_THRESHOLD, Gc, GcTrace };
 use crate::runtime::reference::{ GcReference, Reference };
 use crate::runtime::scope::{ GcScope, Scope };
 use crate::runtime::value::{ GcValue, Value };
@@ -215,7 +215,7 @@ impl<'a, 'b> Engine<'a, 'b> {
     }
 }
 
-impl GcTraceable for Engine<'_, '_> {
+impl GcTrace for Engine<'_, '_> {
     fn trace(&mut self) {
         self.primitives.trace();
         self.scope.trace();

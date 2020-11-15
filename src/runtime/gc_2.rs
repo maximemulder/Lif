@@ -5,7 +5,7 @@ use std::marker::{ Copy, PhantomData };
 
 pub const GC_THRESHOLD: usize = 250;
 
-pub trait GcTraceable {
+pub trait GcTrace {
     fn trace(&mut self);
 }
 
@@ -100,7 +100,7 @@ impl<'a, T> GcRef<'a, T> {
     }
 }
 
-impl<T: GcTraceable> GcTraceable for GcRef<'_, T> {
+impl<T: GcTrace> GcTrace for GcRef<'_, T> {
     fn trace(&mut self) {
         let object = self.object();
         if !object.flag() {

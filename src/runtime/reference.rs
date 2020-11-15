@@ -1,6 +1,6 @@
 use crate::runtime::Return;
 use crate::runtime::error::Error;
-use crate::runtime::gc::{ GcRef, GcTraceable };
+use crate::runtime::gc::{ GcRef, GcTrace };
 use crate::runtime::value::GcValue;
 
 pub type GcReference<'a, 'b> = GcRef<Reference<'a, 'b>>;
@@ -67,7 +67,7 @@ impl<'a, 'b> Reference<'a, 'b> {
     }
 }
 
-impl GcTraceable for Reference<'_, '_> {
+impl GcTrace for Reference<'_, '_> {
     fn trace(&mut self) {
         if let Some(value) = self.value.as_mut() {
             value.trace();

@@ -2,7 +2,7 @@ use crate::runtime::ReturnReference;
 use crate::runtime::data::{ Callable, Tag };
 use crate::runtime::engine::Engine;
 use crate::runtime::error::Error;
-use crate::runtime::gc::GcTraceable;
+use crate::runtime::gc::GcTrace;
 use crate::runtime::value::GcValue;
 
 #[derive(Clone)]
@@ -44,6 +44,6 @@ impl<'a, 'b> Callable<'a, 'b> for Primitive<'a, 'b> {
     }
 }
 
-impl GcTraceable for Primitive<'_, '_> {
+impl GcTrace for Primitive<'_, '_> {
     fn trace(&mut self) {}
 }

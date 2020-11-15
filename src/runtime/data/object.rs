@@ -1,4 +1,4 @@
-use crate::runtime::gc::GcTraceable;
+use crate::runtime::gc::GcTrace;
 use crate::runtime::reference::GcReference;
 use std::collections::HashMap;
 
@@ -14,7 +14,7 @@ impl Object<'_, '_> {
     }
 }
 
-impl GcTraceable for Object<'_, '_> {
+impl GcTrace for Object<'_, '_> {
     fn trace(&mut self) {
         for attribute in self.attributes.values_mut() {
             attribute.trace();

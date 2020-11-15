@@ -3,7 +3,7 @@ use crate::runtime::ReturnReference;
 use crate::runtime::data::{ Callable, Tag };
 use crate::runtime::engine::{ Control, Engine };
 use crate::runtime::error::Error;
-use crate::runtime::gc::GcTraceable;
+use crate::runtime::gc::GcTrace;
 use crate::runtime::scope::GcScope;
 use crate::runtime::value::GcValue;
 
@@ -71,7 +71,7 @@ impl<'a, 'b> Callable<'a, 'b> for Function<'a, 'b> {
     }
 }
 
-impl GcTraceable for Function<'_, '_> {
+impl GcTrace for Function<'_, '_> {
     fn trace(&mut self) {
         self.scope.trace();
     }
