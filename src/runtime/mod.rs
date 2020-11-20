@@ -7,8 +7,6 @@ pub mod reference;
 pub mod scope;
 pub mod value;
 
-mod gc_2;
-
 use error::Error;
 use reference::GcReference;
 
