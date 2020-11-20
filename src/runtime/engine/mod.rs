@@ -43,9 +43,7 @@ pub struct Engine<'a, 'b> where 'a: 'b {
     pub error:      &'b mut dyn Write,
     pub primitives: Primitives<'a, 'b>,
     taggers:        Taggers,
-    scopes:         Gc<Scope<'a, 'b>>,
-    references:     Gc<Reference<'a, 'b>>,
-    values:         Gc<Value<'a, 'b>>,
+    gc:             Gc,
     registries:     Vec<Vec<GcReference<'a, 'b>>>,
     frames:         Vec<GcScope<'a, 'b>>,
     scope:          GcScope<'a, 'b>,
@@ -60,11 +58,9 @@ impl<'a, 'b> Engine<'a, 'b> {
             input,
             output,
             error,
-            primitives: Primitives::new(),
+            primitives:  Primitives::new(),
             taggers:     Taggers::new(),
-            scopes:      Gc::new(),
-            references:  Gc::new(),
-            values:      Gc::new(),
+            gc:          Gc::new(),
             registries:  Vec::new(),
             frames:      Vec::new(),
             scope:       GcScope::null(),
@@ -83,19 +79,19 @@ impl<'a, 'b> Engine<'a, 'b> {
 
 impl<'a, 'b> Engine<'a, 'b> {
     pub fn alloc_value(&mut self, value: Value<'a, 'b>) -> GcValue<'a, 'b> {
-        let value = self.values.alloc(value);
+        let value = self.gc.alloc(value);
         self.allocations += 1;
         value
     }
 
     pub fn alloc_reference(&mut self, reference: Reference<'a, 'b>) -> GcReference<'a, 'b> {
-        let reference = self.references.alloc(reference);
+        let reference = self.gc.alloc(reference);
         self.allocations += 1;
         reference
     }
 
     pub fn alloc_scope(&mut self, scope: Scope<'a, 'b>) -> GcScope<'a, 'b> {
-        let scope = self.scopes.alloc(scope);
+        let scope = self.gc.alloc(scope);
         self.allocations += 1;
         scope
     }
@@ -164,9 +160,7 @@ impl<'a, 'b> Engine<'a, 'b> {
 
     pub fn collect(&mut self) {
         self.trace();
-        self.scopes.collect();
-        self.references.collect();
-        self.values.collect();
+        self.gc.collect();
         self.allocations = 0;
     }
 
