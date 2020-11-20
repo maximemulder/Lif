@@ -1,4 +1,4 @@
-use crate::runtime::gc::GcTraceable;
+use crate::runtime::gc::GcTrace;
 use crate::runtime::value::GcValue;
 
 pub struct Method<'a, 'b> {
@@ -15,7 +15,7 @@ impl<'a, 'b> Method<'a, 'b> {
     }
 }
 
-impl GcTraceable for Method<'_, '_> {
+impl GcTrace for Method<'_, '_> {
     fn trace(&mut self) {
         self.function.trace();
         self.this.trace();

@@ -1,4 +1,4 @@
-use crate::runtime::gc::{ GcRef, GcTraceable };
+use crate::runtime::gc::{ GcRef, GcTrace };
 use crate::runtime::reference::GcReference;
 use std::collections::HashMap;
 
@@ -37,7 +37,7 @@ impl<'a, 'b> Scope<'a, 'b> {
     }
 }
 
-impl GcTraceable for Scope<'_, '_> {
+impl GcTrace for Scope<'_, '_> {
     fn trace(&mut self) {
         if let Some(parent) = &mut self.parent {
             parent.trace();

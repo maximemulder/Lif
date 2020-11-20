@@ -19,7 +19,7 @@ pub use tag::{ Tag, Tagger };
 use crate::nodes::{ Executable, Node };
 use crate::runtime::ReturnReference;
 use crate::runtime::engine::Engine;
-use crate::runtime::gc::GcTraceable;
+use crate::runtime::gc::GcTrace;
 use crate::runtime::scope::GcScope;
 use crate::runtime::reference::GcReference;
 use crate::runtime::value::GcValue;
@@ -79,7 +79,7 @@ impl<'a, 'b> Data<'a, 'b> {
     }
 }
 
-impl GcTraceable for Data<'_, '_> {
+impl GcTrace for Data<'_, '_> {
     fn trace(&mut self) {
         match self {
             Data::Array(references)  => for reference in references.iter_mut() {
