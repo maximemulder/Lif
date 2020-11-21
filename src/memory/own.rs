@@ -1,3 +1,5 @@
+use crate::memory::{ Mut, Ref };
+
 use std::ops::{ Deref, DerefMut, Drop };
 
 fn alloc<T>(value: T) -> *mut T {
@@ -36,20 +38,7 @@ impl<T> Drop for Own<T> {
     }
 }
 
-#[derive(Clone, Copy, PartialEq, Eq)]
-pub struct Ref<T> {
-    pointer: *const T,
-}
-
-impl<T> Ref<T> {
-    fn new(pointer: *mut T) -> Self {
-        Self {
-            pointer,
-        }
-    }
-}
-
-impl<T> Deref for Ref<T> {
+impl<T> Deref for Own<T> {
     type Target = T;
 
     fn deref(&self) -> &Self::Target {
@@ -57,28 +46,7 @@ impl<T> Deref for Ref<T> {
     }
 }
 
-#[derive(Clone, Copy, PartialEq, Eq)]
-pub struct Mut<T> {
-    pointer: *mut T,
-}
-
-impl<T> Mut<T> {
-    fn new(pointer: *mut T) -> Self {
-        Self {
-            pointer,
-        }
-    }
-}
-
-impl<T> Deref for Mut<T> {
-    type Target = T;
-
-    fn deref(&self) -> &Self::Target {
-        unsafe { self.pointer.as_ref().unwrap() }
-    }
-}
-
-impl<T> DerefMut for Mut<T> {
+impl<T> DerefMut for Own<T> {
     fn deref_mut(&mut self) -> &mut Self::Target {
         unsafe { self.pointer.as_mut().unwrap() }
     }
