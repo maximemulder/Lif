@@ -1,5 +1,5 @@
-use std::ptr::null;
 use std::ops::Deref;
+use std::ptr::null;
 
 pub struct Ref<T> {
     pointer: *const T,

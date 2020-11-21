@@ -11,10 +11,10 @@
 #![feature(raw)]
 #![warn(clippy::all)]
 
-mod memory;
 mod element;
 mod elements;
 mod lexer;
+mod memory;
 mod node;
 mod nodes;
 mod parser;

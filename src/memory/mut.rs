@@ -1,5 +1,5 @@
-use std::ptr::null_mut;
 use std::ops::{ Deref, DerefMut };
+use std::ptr::null_mut;
 
 pub struct Mut<T> {
     pointer: *mut T,
