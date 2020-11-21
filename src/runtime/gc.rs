@@ -56,7 +56,7 @@ impl GcGuard {
         self.flag = true;
     }
 
-    fn flag(&mut self) -> bool {
+    fn flag(&self) -> bool {
         self.flag
     }
 
