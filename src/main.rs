@@ -11,6 +11,7 @@
 #![feature(raw)]
 #![warn(clippy::all)]
 
+mod memory;
 mod element;
 mod elements;
 mod lexer;
