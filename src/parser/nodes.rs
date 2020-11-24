@@ -1,12 +1,10 @@
-use crate::code::Code;
 use crate::elements;
-use crate::node::Node;
+use crate::parser::Parser;
 use crate::parser::arena::Arena;
 use crate::parser::ascent::*;
 use crate::parser::descent::*;
-use crate::parser::Parser;
 
-pub fn run<'a>(code: &'a Code, tokens: &[Node<'a>]) -> Option<Node<'a>> {
+pub fn get() -> Parser {
     let descents = Arena::<dyn Descent>::new();
     let ascents = Arena::<dyn Ascent>::new();
 
@@ -442,6 +440,5 @@ pub fn run<'a>(code: &'a Code, tokens: &[Node<'a>]) -> Option<Node<'a>> {
         &elements::productions::PROGRAM
     ));
 
-    let mut parser = Parser::new(code, tokens, &descents, &ascents);
-    parser.parse(program)
+    Parser::new(descents, ascents, program)
 }

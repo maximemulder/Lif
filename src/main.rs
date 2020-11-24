@@ -31,8 +31,8 @@ use std::env::args;
 use std::io::{ Read, Write, stderr, stdin, stdout };
 
 pub fn run(code: &Code, input: &mut dyn Read, output: &mut dyn Write, error: &mut dyn Write) {
-    let tokens = lexer::lex(&code);
-    if let Some(tree) = parser::nodes::run(&code, &tokens) {
+    let parser = parser::nodes::get();
+    if let Some(tree) = parser.parse(&code) {
         let program = nodes::build::program(&tree);
         Engine::new(input, output, error).run(&program);
     }
