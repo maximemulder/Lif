@@ -1,10 +1,9 @@
 use crate::elements;
-use crate::parser::Parser;
 use crate::parser::arena::Arena;
 use crate::parser::ascent::*;
 use crate::parser::descent::*;
 
-pub fn get() -> Parser {
+pub fn get() -> (Arena::<dyn Descent>, Arena::<dyn Ascent>, usize) {
     let descents = Arena::<dyn Descent>::new();
     let ascents = Arena::<dyn Ascent>::new();
 
@@ -440,5 +439,5 @@ pub fn get() -> Parser {
         &elements::productions::PROGRAM
     ));
 
-    Parser::new(descents, ascents, program)
+    (descents, ascents, program)
 }
