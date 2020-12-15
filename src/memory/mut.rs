@@ -1,7 +1,7 @@
 use std::ops::{ Deref, DerefMut };
 use std::ptr::null_mut;
 
-pub struct Mut<T> {
+pub struct Mut<T: ?Sized> {
     pointer: *mut T,
 }
 
@@ -11,7 +11,9 @@ impl<T> Mut<T> {
             pointer: null_mut(),
         }
     }
+}
 
+impl<T: ?Sized> Mut<T> {
     pub fn new(pointer: *mut T) -> Self {
         Self {
             pointer,
@@ -19,7 +21,7 @@ impl<T> Mut<T> {
     }
 }
 
-impl<T> Deref for Mut<T> {
+impl<T: ?Sized> Deref for Mut<T> {
     type Target = T;
 
     fn deref(&self) -> &Self::Target {
@@ -27,21 +29,21 @@ impl<T> Deref for Mut<T> {
     }
 }
 
-impl<T> DerefMut for Mut<T> {
+impl<T: ?Sized> DerefMut for Mut<T> {
     fn deref_mut(&mut self) -> &mut Self::Target {
         unsafe { self.pointer.as_mut().unwrap() }
     }
 }
 
-impl<T> PartialEq for Mut<T> {
+impl<T: ?Sized> PartialEq for Mut<T> {
     fn eq(&self, other: &Mut<T>) -> bool {
         self.pointer == other.pointer
     }
 }
 
-impl<T> Eq for Mut<T> {}
+impl<T: ?Sized> Eq for Mut<T> {}
 
-impl<T> Clone for Mut<T> {
+impl<T: ?Sized> Clone for Mut<T> {
     fn clone(&self) -> Self {
         Self {
             pointer: self.pointer,
@@ -49,4 +51,4 @@ impl<T> Clone for Mut<T> {
     }
 }
 
-impl<T> Copy for Mut<T> {}
+impl<T: ?Sized> Copy for Mut<T> {}

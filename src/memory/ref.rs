@@ -1,7 +1,7 @@
 use std::ops::Deref;
 use std::ptr::null;
 
-pub struct Ref<T> {
+pub struct Ref<T: ?Sized> {
     pointer: *const T,
 }
 
@@ -11,8 +11,10 @@ impl<T> Ref<T> {
             pointer: null(),
         }
     }
+}
 
-    pub fn new(pointer: *mut T) -> Self {
+impl<T: ?Sized> Ref<T> {
+    pub fn new(pointer: *const T) -> Self {
         Self {
             pointer,
         }
