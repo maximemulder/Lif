@@ -1,12 +1,13 @@
+use crate::memory::Ref;
 use crate::node::Node;
 use crate::runtime::value::GcValue;
 
-pub struct Error<'a> {
+pub struct Error {
     pub message: Box<str>,
-    pub node: Option<&'a Node<'a>>,
+    pub node: Option<Ref<Node>>,
 }
 
-impl Error<'_> {
+impl Error {
     fn new(message: String) -> Self {
         Self {
             message: Box::from(message),

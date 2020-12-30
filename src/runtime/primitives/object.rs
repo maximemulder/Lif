@@ -2,7 +2,7 @@ use crate::runtime::ReturnReference;
 use crate::runtime::engine::Engine;
 use crate::runtime::value::GcValue;
 
-pub fn to_string<'a, 'b>(engine: &mut Engine<'a, 'b>, arguments: Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b> {
+pub fn to_string<'a>(engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> ReturnReference<'a> {
     let mut string = String::from("{");
     let attributes = &arguments[0].data_object().attributes.clone();
     for (name, attribute) in attributes {
@@ -20,7 +20,7 @@ pub fn to_string<'a, 'b>(engine: &mut Engine<'a, 'b>, arguments: Vec<GcValue<'a,
     Ok(engine.new_string(string))
 }
 
-pub fn cn<'a, 'b>(engine: &mut Engine<'a, 'b>, arguments: Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b> {
+pub fn cn<'a>(engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> ReturnReference<'a> {
     let mut this = arguments[0];
     let name = arguments[1].data_string().clone();
     if let Some(method) = this.get_method(&name) {

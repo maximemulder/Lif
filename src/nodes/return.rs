@@ -1,20 +1,21 @@
+use crate::memory::Ref;
 use crate::nodes::{ Executable, Node };
 use crate::runtime::ReturnReference;
 use crate::runtime::engine::{ Control, Engine };
 
-pub struct Return<'a> {
-    expression: Option<Node<'a>>}
+pub struct Return {
+    expression: Option<Node>}
 
-impl<'a> Return<'a> {
-    pub fn new(expression: Option<Node<'a>>) -> Self {
+impl Return {
+    pub fn new(expression: Option<Node>) -> Self {
         Self {
             expression,
         }
     }
 }
 
-impl<'a> Executable<'a> for Return<'a> {
-    fn execute<'b>(&'b self, engine: &mut Engine<'a, 'b>) -> ReturnReference<'a, 'b> {
-        engine.control_new(Control::Return, &self.expression)
+impl Executable for Return {
+    fn execute<'a>(&self, engine: &mut Engine<'a>) -> ReturnReference<'a> {
+        engine.control_new(Control::Return, self.expression.as_ref().map(|expression| Ref::from_ref(expression)))
     }
 }

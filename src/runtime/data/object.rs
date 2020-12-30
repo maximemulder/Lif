@@ -2,11 +2,11 @@ use crate::runtime::gc::GcTrace;
 use crate::runtime::reference::GcReference;
 use std::collections::HashMap;
 
-pub struct Object<'a, 'b> {
-    pub attributes: HashMap<String, GcReference<'a, 'b>>,
+pub struct Object<'a> {
+    pub attributes: HashMap<String, GcReference<'a>>,
 }
 
-impl Object<'_, '_> {
+impl Object<'_> {
     pub fn new() -> Self {
         Self {
             attributes: HashMap::new(),
@@ -14,7 +14,7 @@ impl Object<'_, '_> {
     }
 }
 
-impl GcTrace for Object<'_, '_> {
+impl GcTrace for Object<'_> {
     fn trace(&mut self) {
         for attribute in self.attributes.values_mut() {
             attribute.trace();

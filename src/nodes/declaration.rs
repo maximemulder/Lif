@@ -1,14 +1,15 @@
+use crate::memory::Ref;
 use crate::nodes::{ Executable, Node };
 use crate::runtime::ReturnReference;
 use crate::runtime::engine::Engine;
 
-pub struct Declaration<'a> {
-    identifier: &'a str,
-    r#type: Option<Node<'a>>,
+pub struct Declaration {
+    identifier: Ref<str>,
+    r#type: Option<Node>,
 }
 
-impl<'a> Declaration<'a> {
-    pub fn new(identifier: &'a str, r#type: Option<Node<'a>>) -> Self {
+impl Declaration {
+    pub fn new(identifier: Ref<str>, r#type: Option<Node>) -> Self {
         Self {
             identifier,
             r#type,
@@ -16,10 +17,10 @@ impl<'a> Declaration<'a> {
     }
 }
 
-impl<'a> Executable<'a> for Declaration<'a> {
-    fn execute<'b>(&'b self, engine: &mut Engine<'a, 'b>) -> ReturnReference<'a, 'b> {
+impl Executable for Declaration {
+    fn execute<'a>(&self, engine: &mut Engine<'a>) -> ReturnReference<'a> {
         let r#type = if let Some(r#type) = &self.r#type {
-            let value = execute!(engine, r#type).read()?;
+            let value = execute!(engine, Ref::from_ref(r#type)).read()?;
             value.cast(engine.primitives.class)?;
             value
         } else {

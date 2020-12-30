@@ -10,8 +10,8 @@ impl True {
     }
 }
 
-impl<'a> Executable<'a> for True {
-    fn execute<'b>(&'b self, engine: &mut Engine<'a, 'b>) -> ReturnReference<'a, 'b> {
+impl Executable for True {
+    fn execute<'a>(&self, engine: &mut Engine<'a>) -> ReturnReference<'a> {
         Ok(engine.new_boolean(true))
     }
 }

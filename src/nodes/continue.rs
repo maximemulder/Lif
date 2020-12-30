@@ -1,21 +1,22 @@
+use crate::memory::Ref;
 use crate::nodes::{ Executable, Node };
 use crate::runtime::ReturnReference;
 use crate::runtime::engine::{ Control, Engine };
 
-pub struct Continue<'a> {
-    expression: Option<Node<'a>>,
+pub struct Continue {
+    expression: Option<Node>,
 }
 
-impl<'a> Continue<'a> {
-    pub fn new(expression: Option<Node<'a>>) -> Self {
+impl Continue {
+    pub fn new(expression: Option<Node>) -> Self {
         Self {
             expression,
         }
     }
 }
 
-impl<'a> Executable<'a> for Continue<'a> {
-    fn execute<'b>(&'b self, engine: &mut Engine<'a, 'b>) -> ReturnReference<'a, 'b> {
-        engine.control_new(Control::Continue, &self.expression)
+impl Executable for Continue {
+    fn execute<'a>(&self, engine: &mut Engine<'a>) -> ReturnReference<'a> {
+        engine.control_new(Control::Continue, self.expression.as_ref().map(|expression| Ref::from_ref(expression)))
     }
 }

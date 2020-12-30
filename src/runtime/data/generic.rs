@@ -1,14 +1,15 @@
+use crate::memory::Ref;
 use crate::nodes::Executable;
 use crate::runtime::data::Tag;
 
-pub struct Generic<'a, 'b> {
+pub struct Generic {
     pub tag: Tag,
-    pub generics: &'b [&'a str],
-    pub node: &'b dyn Executable<'a>,
+    pub generics: Ref<[Ref<str>]>,
+    pub node: Ref<dyn Executable>,
 }
 
-impl<'a, 'b> Generic<'a, 'b> {
-    pub fn new(tag: Tag, generics: &'b [&'a str], node: &'b dyn Executable<'a>) -> Self {
+impl Generic {
+    pub fn new(tag: Tag, generics: Ref<[Ref<str>]>, node: Ref<dyn Executable>) -> Self {
         Self {
             tag,
             generics,

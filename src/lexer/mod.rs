@@ -4,11 +4,12 @@ mod nodes;
 use crate::code::Code;
 use crate::elements::ignores::{ WHITESPACE, ENDLINE, COMMENT_LINE, COMMENT_BLOCK };
 use crate::element::Element;
+use crate::memory::Ref;
 use crate::node::Node;
 
 use nodes::ROOT;
 
-pub fn lex<'a>(code: &'a Code) -> Vec<Node<'a>> {
+pub fn lex(code: Ref<Code>) -> Vec<Node> {
     let mut tokens = Vec::new();
     let mut shift = 0;
     while let Some((element, length)) = automaton(&code.text[shift ..]) {

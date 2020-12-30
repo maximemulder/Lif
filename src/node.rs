@@ -1,21 +1,22 @@
 use crate::code::Code;
 use crate::element::Element;
+use crate::memory::Ref;
 
 #[derive(Clone)]
-pub enum Content<'a> {
-    Production(Vec<Node<'a>>),
+pub enum Content {
+    Production(Vec<Node>),
     Token(usize, usize),
 }
 
 #[derive(Clone)]
-pub struct Node<'a> {
-    pub code: &'a Code,
+pub struct Node {
+    pub code: Ref<Code>,
     pub element: &'static Element,
-    pub content: Content<'a>,
+    pub content: Content,
 }
 
-impl<'a> Node<'a> {
-    pub fn new_token(code: &'a Code, element: &'static Element, delimiters: (usize, usize)) -> Self {
+impl Node {
+    pub fn new_token(code: Ref<Code>, element: &'static Element, delimiters: (usize, usize)) -> Self {
         Self {
             code,
             element,
@@ -23,7 +24,7 @@ impl<'a> Node<'a> {
         }
     }
 
-    pub fn new_production(code: &'a Code, element: &'static Element, children: Vec<Node<'a>>) -> Self {
+    pub fn new_production(code: Ref<Code>, element: &'static Element, children: Vec<Node>) -> Self {
         Self {
             code,
             element,
@@ -31,7 +32,7 @@ impl<'a> Node<'a> {
         }
     }
 
-    pub fn children(&self) -> &Vec<Node<'a>> {
+    pub fn children(&self) -> &Vec<Node> {
         if let Content::Production(children) = &self.content {
             return children;
         }
@@ -39,8 +40,12 @@ impl<'a> Node<'a> {
         panic!();
     }
 
-    pub fn text(&self) -> &str {
-        self.code.node_str(self)
+    pub fn child(&self, index: usize) -> Ref<Node>{
+        Ref::from_ref(&self.children()[index])
+    }
+
+    pub fn text(&self) -> Ref<str> {
+        Ref::from_ref(self.code.node_str(self))
     }
 
     pub fn left(&self) -> usize {

@@ -3,7 +3,7 @@ use crate::parser::Parse;
 use crate::node::Node;
 
 pub trait Ascent {
-    fn ascent<'a>(&self, parser: &mut Parse<'_, 'a>, nodes: Vec<Node<'a>>) -> Option<Vec<Node<'a>>>;
+    fn ascent(&self, parser: &mut Parse, nodes: Vec<Node>) -> Option<Vec<Node>>;
 }
 
 pub struct AscentList {
@@ -19,7 +19,7 @@ impl AscentList {
 }
 
 impl Ascent for AscentList {
-    fn ascent<'a>(&self, parser: &mut Parse<'_, 'a>, mut nodes: Vec<Node<'a>>) -> Option<Vec<Node<'a>>> {
+    fn ascent(&self, parser: &mut Parse, mut nodes: Vec<Node>) -> Option<Vec<Node>> {
         for ascent in self.ascents.iter().rev() {
             if let Some(others) = parser.ascent(*ascent, nodes) {
                 nodes = others;
@@ -47,7 +47,7 @@ impl AscentExtension {
 }
 
 impl Ascent for AscentExtension {
-    fn ascent<'a>(&self, parser: &mut Parse<'_, 'a>, mut nodes: Vec<Node<'a>>) -> Option<Vec<Node<'a>>> {
+    fn ascent(&self, parser: &mut Parse, mut nodes: Vec<Node>) -> Option<Vec<Node>> {
         if let Some(children) = parser.descent(self.descent) {
             nodes.extend(children);
             return parser.ascent(self.ascent, nodes);
@@ -70,7 +70,7 @@ impl AscentElement {
 }
 
 impl Ascent for AscentElement {
-    fn ascent<'a>(&self, parser: &mut Parse<'_, 'a>, nodes: Vec<Node<'a>>) -> Option<Vec<Node<'a>>> {
+    fn ascent(&self, parser: &mut Parse, nodes: Vec<Node>) -> Option<Vec<Node>> {
         Some(vec![Node::new_production(parser.code, self.element, nodes)])
     }
 }

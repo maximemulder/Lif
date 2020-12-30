@@ -1,6 +1,7 @@
 mod control;
 mod new;
 
+use crate::memory::Ref;
 use crate::nodes::Node;
 use crate::runtime::ReturnReference;
 use crate::runtime::data::{ Data, Tagger };
@@ -37,23 +38,23 @@ impl Taggers {
     }
 }
 
-pub struct Engine<'a, 'b> where 'a: 'b {
-    pub input:      &'b mut dyn Read,
-    pub output:     &'b mut dyn Write,
-    pub error:      &'b mut dyn Write,
-    pub primitives: Primitives<'a, 'b>,
+pub struct Engine<'a> {
+    pub input:      &'a mut dyn Read,
+    pub output:     &'a mut dyn Write,
+    pub error:      &'a mut dyn Write,
+    pub primitives: Primitives<'a>,
     taggers:        Taggers,
     gc:             Gc,
-    registries:     Vec<Vec<GcReference<'a, 'b>>>,
-    frames:         Vec<GcScope<'a, 'b>>,
-    scope:          GcScope<'a, 'b>,
-    undefined:      GcReference<'a, 'b>,
+    registries:     Vec<Vec<GcReference<'a>>>,
+    frames:         Vec<GcScope<'a>>,
+    scope:          GcScope<'a>,
+    undefined:      GcReference<'a>,
     control:        Option<Control>,
     allocations:    usize,
 }
 
-impl<'a, 'b> Engine<'a, 'b> {
-    pub fn new(input: &'b mut dyn Read, output: &'b mut dyn Write, error: &'b mut dyn Write) -> Self {
+impl<'a> Engine<'a> {
+    pub fn new(input: &'a mut dyn Read, output: &'a mut dyn Write, error: &'a mut dyn Write) -> Self {
         let mut engine = Self {
             input,
             output,
@@ -77,49 +78,49 @@ impl<'a, 'b> Engine<'a, 'b> {
     }
 }
 
-impl<'a, 'b> Engine<'a, 'b> {
-    pub fn alloc_value(&mut self, value: Value<'a, 'b>) -> GcValue<'a, 'b> {
+impl<'a> Engine<'a> {
+    pub fn alloc_value(&mut self, value: Value<'a>) -> GcValue<'a> {
         let value = self.gc.alloc(value);
         self.allocations += 1;
         value
     }
 
-    pub fn alloc_reference(&mut self, reference: Reference<'a, 'b>) -> GcReference<'a, 'b> {
+    pub fn alloc_reference(&mut self, reference: Reference<'a>) -> GcReference<'a> {
         let reference = self.gc.alloc(reference);
         self.allocations += 1;
         reference
     }
 
-    pub fn alloc_scope(&mut self, scope: Scope<'a, 'b>) -> GcScope<'a, 'b> {
+    pub fn alloc_scope(&mut self, scope: Scope<'a>) -> GcScope<'a> {
         let scope = self.gc.alloc(scope);
         self.allocations += 1;
         scope
     }
 }
 
-impl<'a, 'b> Engine<'a, 'b> {
-    pub fn new_value(&mut self, class: GcValue<'a, 'b>, data: Data<'a, 'b>) -> GcValue<'a, 'b> {
+impl<'a> Engine<'a> {
+    pub fn new_value(&mut self, class: GcValue<'a>, data: Data<'a>) -> GcValue<'a> {
         self.alloc_value(Value::new(class, data))
     }
 
-    pub fn new_reference(&mut self, value: GcValue<'a, 'b>) -> GcReference<'a, 'b> {
+    pub fn new_reference(&mut self, value: GcValue<'a>) -> GcReference<'a> {
         self.alloc_reference(Reference::new_variable(Some(value), self.primitives.any))
     }
 
-    pub fn new_variable(&mut self, value: Option<GcValue<'a, 'b>>, r#type: GcValue<'a, 'b>) -> GcReference<'a, 'b> {
+    pub fn new_variable(&mut self, value: Option<GcValue<'a>>, r#type: GcValue<'a>) -> GcReference<'a> {
         self.alloc_reference(Reference::new_variable(value, r#type))
     }
 
-    pub fn new_constant(&mut self, value: GcValue<'a, 'b>) -> GcReference<'a, 'b> {
+    pub fn new_constant(&mut self, value: GcValue<'a>) -> GcReference<'a> {
         self.alloc_reference(Reference::new_constant(Some(value)))
     }
 
-    pub fn undefined(&mut self) -> GcReference<'a, 'b> {
+    pub fn undefined(&mut self) -> GcReference<'a> {
         self.undefined
     }
 }
 
-impl<'a, 'b> Engine<'a, 'b> {
+impl<'a> Engine<'a> {
     pub fn push_scope(&mut self) {
         self.scope = self.alloc_scope(Scope::new_child(self.scope));
     }
@@ -128,7 +129,7 @@ impl<'a, 'b> Engine<'a, 'b> {
         self.scope = self.scope.parent.unwrap();
     }
 
-    pub fn push_frame(&mut self, frame: GcScope<'a, 'b>) {
+    pub fn push_frame(&mut self, frame: GcScope<'a>) {
         self.frames.push(self.scope);
         self.scope = frame;
     }
@@ -138,12 +139,12 @@ impl<'a, 'b> Engine<'a, 'b> {
     }
 }
 
-impl<'a, 'b> Engine<'a, 'b> {
-    pub fn add_variable(&mut self, name: &str, reference: GcReference<'a, 'b>) {
+impl<'a> Engine<'a> {
+    pub fn add_variable(&mut self, name: &str, reference: GcReference<'a>) {
         self.scope.add_variable(name, reference);
     }
 
-    pub fn get_variable(&self, name: &str) -> ReturnReference<'a, 'b> {
+    pub fn get_variable(&self, name: &str) -> ReturnReference<'a> {
         let mut scope = self.scope;
         loop {
             if let Some(object) = scope.get_variable(name) {
@@ -164,7 +165,7 @@ impl<'a, 'b> Engine<'a, 'b> {
         self.allocations = 0;
     }
 
-    pub fn execute(&mut self, node: &'b Node<'a>) -> ReturnReference<'a, 'b> {
+    pub fn execute(&mut self, node: Ref<Node>) -> ReturnReference<'a> {
         self.registries.push(Vec::new());
         let reference = match node.sem.execute(self) {
             Ok(reference) => reference,
@@ -187,7 +188,7 @@ impl<'a, 'b> Engine<'a, 'b> {
         Ok(reference)
     }
 
-    pub fn run(&mut self, node: &'b Node<'a>) {
+    pub fn run(&mut self, node: Ref<Node>) {
         let result = self.execute(node);
         if let Err(error) = result {
             let mut message = String::new();
@@ -209,7 +210,7 @@ impl<'a, 'b> Engine<'a, 'b> {
     }
 }
 
-impl GcTrace for Engine<'_, '_> {
+impl GcTrace for Engine<'_> {
     fn trace(&mut self) {
         self.primitives.trace();
         self.scope.trace();

@@ -1,23 +1,24 @@
+use crate::memory::Ref;
 use crate::nodes::{ Executable, Node };
 use crate::runtime::ReturnReference;
 use crate::runtime::engine::Engine;
 
-pub struct Statements<'a> {
-    statements: Vec<Node<'a>>,
+pub struct Statements {
+    statements: Vec<Node>,
 }
 
-impl<'a> Statements<'a> {
-    pub fn new(statements: Vec<Node<'a>>) -> Self {
+impl Statements {
+    pub fn new(statements: Vec<Node>) -> Self {
         Self {
             statements,
         }
     }
 }
 
-impl<'a> Executable<'a> for Statements<'a> {
-    fn execute<'b>(&'b self, engine: &mut Engine<'a, 'b>) -> ReturnReference<'a, 'b> {
+impl Executable for Statements {
+    fn execute<'a>(&self, engine: &mut Engine<'a>) -> ReturnReference<'a> {
         for statement in self.statements.iter() {
-            execute!(engine, statement);
+            execute!(engine, Ref::from_ref(&statement));
         }
 
         Ok(engine.undefined())

@@ -2,14 +2,14 @@ use crate::runtime::gc::{ GcRef, GcTrace };
 use crate::runtime::reference::GcReference;
 use std::collections::HashMap;
 
-pub type GcScope<'a, 'b> = GcRef<Scope<'a, 'b>>;
+pub type GcScope<'a> = GcRef<Scope<'a>>;
 
-pub struct Scope<'a, 'b> {
-    pub parent: Option<GcScope<'a, 'b>>,
-    variables: HashMap<String, GcReference<'a, 'b>>,
+pub struct Scope<'a> {
+    pub parent: Option<GcScope<'a>>,
+    variables: HashMap<String, GcReference<'a>>,
 }
 
-impl<'a, 'b> Scope<'a, 'b> {
+impl<'a> Scope<'a> {
     pub fn new() -> Self {
         Self {
             parent: None,
@@ -17,14 +17,14 @@ impl<'a, 'b> Scope<'a, 'b> {
         }
     }
 
-    pub fn new_child(scope: GcScope<'a, 'b>) -> Self {
+    pub fn new_child(scope: GcScope<'a>) -> Self {
         Self {
             parent: Some(scope),
             variables: HashMap::new(),
         }
     }
 
-    pub fn get_variable(&self, name: &str) -> Option<GcReference<'a, 'b>> {
+    pub fn get_variable(&self, name: &str) -> Option<GcReference<'a>> {
         if let Some(reference) = self.variables.get(name) {
             return Some(*reference);
         }
@@ -32,12 +32,12 @@ impl<'a, 'b> Scope<'a, 'b> {
         None
     }
 
-    pub fn add_variable(&mut self, name: &str, reference: GcReference<'a, 'b>) {
+    pub fn add_variable(&mut self, name: &str, reference: GcReference<'a>) {
         self.variables.insert(name.to_string(), reference);
     }
 }
 
-impl GcTrace for Scope<'_, '_> {
+impl GcTrace for Scope<'_> {
     fn trace(&mut self) {
         if let Some(parent) = &mut self.parent {
             parent.trace();

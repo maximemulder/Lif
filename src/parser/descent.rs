@@ -3,7 +3,7 @@ use crate::element::Element;
 use crate::parser::Parse;
 
 pub trait Descent {
-    fn descent<'a>(&self, parser: &mut Parse<'_, 'a>) -> Option<Vec<Node<'a>>>;
+    fn descent(&self, parser: &mut Parse) -> Option<Vec<Node>>;
 }
 
 pub struct DescentAlias {
@@ -19,7 +19,7 @@ impl DescentAlias {
 }
 
 impl Descent for DescentAlias {
-    fn descent<'a>(&self, parser: &mut Parse<'_, 'a>) -> Option<Vec<Node<'a>>> {
+    fn descent(&self, parser: &mut Parse) -> Option<Vec<Node>> {
         parser.descent(self.descent)
     }
 }
@@ -39,7 +39,7 @@ impl DescentAscent {
 }
 
 impl Descent for DescentAscent {
-    fn descent<'a>(&self, parser: &mut Parse<'_, 'a>) -> Option<Vec<Node<'a>>> {
+    fn descent(&self, parser: &mut Parse) -> Option<Vec<Node>> {
         if let Some(nodes) = parser.descent(self.descent) {
             return parser.ascent(self.ascent, nodes);
         }
@@ -61,7 +61,7 @@ impl DescentChoice {
 }
 
 impl Descent for DescentChoice {
-    fn descent<'a>(&self, parser: &mut Parse<'_, 'a>) -> Option<Vec<Node<'a>>> {
+    fn descent(&self, parser: &mut Parse) -> Option<Vec<Node>> {
         for descent in self.descents.iter() {
             if let Some(nodes) = parser.descent(*descent) {
                 return Some(nodes);
@@ -85,7 +85,7 @@ impl DescentSequence {
 }
 
 impl Descent for DescentSequence {
-    fn descent<'a>(&self, parser: &mut Parse<'_, 'a>) -> Option<Vec<Node<'a>>> {
+    fn descent(&self, parser: &mut Parse) -> Option<Vec<Node>> {
         let mut nodes = Vec::new();
         for descent in self.descents.iter() {
             if let Some(children) = parser.descent(*descent) {
@@ -112,7 +112,7 @@ impl DescentZeroOrMore {
 }
 
 impl Descent for DescentZeroOrMore {
-    fn descent<'a>(&self, parser: &mut Parse<'_, 'a>) -> Option<Vec<Node<'a>>> {
+    fn descent(&self, parser: &mut Parse) -> Option<Vec<Node>> {
         let mut nodes = Vec::new();
         while let Some(children) = parser.descent(self.descent) {
             nodes.extend(children);
@@ -135,7 +135,7 @@ impl DescentOneOrMore {
 }
 
 impl Descent for DescentOneOrMore {
-    fn descent<'a>(&self, parser: &mut Parse<'_, 'a>) -> Option<Vec<Node<'a>>> {
+    fn descent(&self, parser: &mut Parse) -> Option<Vec<Node>> {
         let mut nodes = Vec::new();
         while let Some(children) = parser.descent(self.descent) {
             nodes.extend(children);
@@ -162,7 +162,7 @@ impl DescentOption {
 }
 
 impl Descent for DescentOption {
-    fn descent<'a>(&self, parser: &mut Parse<'_, 'a>) -> Option<Vec<Node<'a>>> {
+    fn descent(&self, parser: &mut Parse) -> Option<Vec<Node>> {
         let nodes = parser.descent(self.descent);
         if nodes.is_some() {
             return nodes;
@@ -185,7 +185,7 @@ impl DescentPredicateAnd {
 }
 
 impl Descent for DescentPredicateAnd {
-    fn descent<'a>(&self, parser: &mut Parse<'_, 'a>) -> Option<Vec<Node<'a>>> {
+    fn descent(&self, parser: &mut Parse) -> Option<Vec<Node>> {
         if parser.descent_predicate(self.descent) {
             Some(Vec::new())
         } else {
@@ -207,7 +207,7 @@ impl DescentPredicateNot {
 }
 
 impl Descent for DescentPredicateNot {
-    fn descent<'a>(&self, parser: &mut Parse<'_, 'a>) -> Option<Vec<Node<'a>>> {
+    fn descent(&self, parser: &mut Parse) -> Option<Vec<Node>> {
         if parser.descent_predicate(self.descent) {
             None
         } else {
@@ -231,7 +231,7 @@ impl DescentElement {
 }
 
 impl Descent for DescentElement {
-    fn descent<'a>(&self, parser: &mut Parse<'_, 'a>) -> Option<Vec<Node<'a>>> {
+    fn descent(&self, parser: &mut Parse) -> Option<Vec<Node>> {
         if let Some(nodes) = parser.descent(self.descent) {
             Some(vec![Node::new_production(parser.code, self.element, nodes)])
         } else {
@@ -253,7 +253,7 @@ impl DescentToken {
 }
 
 impl Descent for DescentToken {
-    fn descent<'a>(&self, parser: &mut Parse<'_, 'a>) -> Option<Vec<Node<'a>>> {
+    fn descent(&self, parser: &mut Parse) -> Option<Vec<Node>> {
         if let Some(token) = parser.next() {
             if token.element == self.element {
                 return Some(vec![token]);

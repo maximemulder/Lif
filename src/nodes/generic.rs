@@ -1,15 +1,16 @@
+use crate::memory::Ref;
 use crate::nodes::{ Executable, Node };
 use crate::runtime::ReturnReference;
 use crate::runtime::engine::Engine;
 
-pub struct Generic<'a> {
-    name: Option<&'a str>,
-    parameters: Box<[&'a str]>,
-    node: Node<'a>,
+pub struct Generic {
+    name: Option<Ref<str>>,
+    parameters: Box<[Ref<str>]>,
+    node: Node,
 }
 
-impl<'a> Generic<'a> {
-    pub fn new(name: Option<&'a str>, parameters: Box<[&'a str]>, node: Node<'a>) -> Self {
+impl Generic {
+    pub fn new(name: Option<Ref<str>>, parameters: Box<[Ref<str>]>, node: Node) -> Self {
         Self {
             name,
             parameters,
@@ -18,8 +19,8 @@ impl<'a> Generic<'a> {
     }
 }
 
-impl<'a> Executable<'a> for Generic<'a> {
-    fn execute<'b>(&'b self, engine: &mut Engine<'a, 'b>) -> ReturnReference<'a, 'b> {
-        Ok(engine.new_generic(self.name, &self.parameters, &self.node))
+impl Executable for Generic {
+    fn execute<'a>(&self, engine: &mut Engine<'a>) -> ReturnReference<'a> {
+        Ok(engine.new_generic(self.name, Ref::from_ref(&self.parameters), Ref::from_ref(&self.node)))
     }
 }

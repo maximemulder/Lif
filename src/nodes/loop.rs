@@ -1,24 +1,25 @@
+use crate::memory::Ref;
 use crate::nodes::{ Executable, Node };
 use crate::runtime::ReturnReference;
 use crate::runtime::engine::{ Control, Engine };
 
-pub struct Loop<'a> {
-    body: Node<'a>,
+pub struct Loop {
+    body: Node,
 }
 
-impl<'a> Loop<'a> {
-    pub fn new(body: Node<'a>) -> Self {
+impl Loop {
+    pub fn new(body: Node) -> Self {
         Self {
             body,
         }
     }
 }
 
-impl<'a> Executable<'a> for Loop<'a> {
-    fn execute<'b>(&'b self, engine: &mut Engine<'a, 'b>) -> ReturnReference<'a, 'b> {
+impl Executable for Loop {
+    fn execute<'a>(&self, engine: &mut Engine<'a>) -> ReturnReference<'a> {
         let mut array = Vec::new();
         loop {
-            let reference = engine.execute(&self.body)?;
+            let reference = engine.execute(Ref::from_ref(&self.body))?;
             if engine.control_is(Control::Return) {
                 return Ok(reference);
             }

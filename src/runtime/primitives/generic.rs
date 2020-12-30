@@ -2,11 +2,11 @@ use crate::runtime::ReturnReference;
 use crate::runtime::engine::Engine;
 use crate::runtime::value::GcValue;
 
-pub fn to_string<'a, 'b>(engine: &mut Engine<'a, 'b>, _: Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b> {
+pub fn to_string<'a>(engine: &mut Engine<'a>, _: Vec<GcValue<'a>>) -> ReturnReference<'a> {
     Ok(engine.new_string("GENERIC".to_string()))
 }
 
-pub fn gn<'a, 'b>(engine: &mut Engine<'a, 'b>, arguments: Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b> {
+pub fn gn<'a>(engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> ReturnReference<'a> {
     engine.push_scope();
     let value = arguments[0];
     let generic = value.data_generic();

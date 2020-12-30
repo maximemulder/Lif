@@ -1,3 +1,4 @@
+use crate::memory::Ref;
 use crate::nodes::Node;
 use crate::runtime::ReturnReference;
 use crate::runtime::data::{ Callable, Tag };
@@ -8,16 +9,16 @@ use crate::runtime::scope::GcScope;
 use crate::runtime::value::GcValue;
 
 #[derive(Clone)]
-pub struct Function<'a, 'b> {
+pub struct Function<'a> {
     tag: Tag,
-    scope: GcScope<'a, 'b>,
-    parameters: &'b [Node<'a>],
-    r#type: Option<GcValue<'a, 'b>>,
-    block: &'b Node<'a>,
+    scope: GcScope<'a>,
+    parameters: Ref<[Node]>,
+    r#type: Option<GcValue<'a>>,
+    block: Ref<Node>,
 }
 
-impl<'a, 'b> Function<'a, 'b> {
-    pub fn new(tag: Tag, scope: GcScope<'a, 'b>, parameters: &'b [Node<'a>], r#type: Option<GcValue<'a, 'b>>, block: &'b Node<'a>) -> Self {
+impl<'a> Function<'a> {
+    pub fn new(tag: Tag, scope: GcScope<'a>, parameters: Ref<[Node]>, r#type: Option<GcValue<'a>>, block: Ref<Node>) -> Self {
         Self {
             tag,
             scope,
@@ -28,15 +29,15 @@ impl<'a, 'b> Function<'a, 'b> {
     }
 }
 
-impl<'a, 'b> Callable<'a, 'b> for Function<'a, 'b> {
-    fn execute(&self, engine: &mut Engine<'a, 'b>, arguments: Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b> {
+impl<'a> Callable<'a> for Function<'a> {
+    fn execute(&self, engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> ReturnReference<'a> {
         if arguments.len() != self.parameters.len() {
             return Err(Error::new_arguments(self.parameters.len(), arguments.len()));
         }
 
         engine.push_frame(self.scope);
         for (parameter, argument) in self.parameters.iter().zip(arguments) {
-            let mut reference = engine.execute(parameter)?;
+            let mut reference = engine.execute(Ref::from_ref(parameter))?;
             reference.write(argument)?;
         }
 
@@ -62,7 +63,7 @@ impl<'a, 'b> Callable<'a, 'b> for Function<'a, 'b> {
         Ok(engine.undefined())
     }
 
-    fn duplicate<'c>(&'c self) -> Box<dyn Callable<'a, 'b> + 'c> {
+    fn duplicate<'c>(&'c self) -> Box<dyn Callable<'a> + 'c> {
         Box::new(self.clone())
     }
 
@@ -71,7 +72,7 @@ impl<'a, 'b> Callable<'a, 'b> for Function<'a, 'b> {
     }
 }
 
-impl GcTrace for Function<'_, '_> {
+impl GcTrace for Function<'_> {
     fn trace(&mut self) {
         self.scope.trace();
     }
