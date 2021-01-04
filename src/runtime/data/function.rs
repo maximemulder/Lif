@@ -76,5 +76,8 @@ impl<'a> Callable<'a> for Function<'a> {
 impl GcTrace for Function<'_> {
     fn trace(&mut self) {
         self.scope.trace();
+        if let Some(mut r#type) = self.r#type {
+            r#type.trace();
+        }
     }
 }
