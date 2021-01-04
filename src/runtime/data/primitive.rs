@@ -45,5 +45,9 @@ impl<'a> Callable<'a> for Primitive<'a> {
 }
 
 impl GcTrace for Primitive<'_> {
-    fn trace(&mut self) {}
+    fn trace(&mut self) {
+        for parameter in self.parameters.iter_mut() {
+            parameter.trace();
+        }
+    }
 }
