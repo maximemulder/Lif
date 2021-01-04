@@ -24,7 +24,7 @@ impl Function {
 impl Executable for Function {
     fn execute<'a>(&self, engine: &mut Engine<'a>) -> ReturnReference<'a> {
         let r#type = if let Some(r#type) = self.r#type.as_ref() {
-            Some(engine.execute(Ref::from_ref(r#type))?.read()?)
+            Some(engine.execute(r#type)?.read()?)
         } else {
             None
         };

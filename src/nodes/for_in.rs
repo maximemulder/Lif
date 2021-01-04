@@ -23,11 +23,11 @@ impl Executable for ForIn {
     fn execute<'a>(&self, engine: &mut Engine<'a>) -> ReturnReference<'a> {
         let mut array = Vec::new();
         for element in {
-            let reference = execute!(engine, Ref::from_ref(&self.expression));
+            let reference = execute!(engine, &self.expression);
             reference.read()?.get_cast_array(engine)?.clone()
         } {
             engine.add_variable(&self.identifier, element);
-            let reference = engine.execute(Ref::from_ref(&self.body))?;
+            let reference = engine.execute(&self.body)?;
             if engine.control_is(Control::Return) {
                 return Ok(reference);
             }

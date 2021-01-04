@@ -19,8 +19,8 @@ impl Declaration {
 
 impl Executable for Declaration {
     fn execute<'a>(&self, engine: &mut Engine<'a>) -> ReturnReference<'a> {
-        let r#type = if let Some(r#type) = &self.r#type {
-            let value = execute!(engine, Ref::from_ref(r#type)).read()?;
+        let r#type = if let Some(r#type) = self.r#type.as_ref() {
+            let value = execute!(engine, r#type).read()?;
             value.cast(engine.primitives.class)?;
             value
         } else {

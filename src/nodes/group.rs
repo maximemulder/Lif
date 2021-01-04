@@ -1,4 +1,3 @@
-use crate::memory::Ref;
 use crate::nodes::{ Executable, Node };
 use crate::runtime::ReturnReference;
 use crate::runtime::engine::Engine;
@@ -17,6 +16,6 @@ impl Group {
 
 impl Executable for Group {
     fn execute<'a>(&self, engine: &mut Engine<'a>) -> ReturnReference<'a> {
-        engine.execute(Ref::from_ref(&self.expression))
+        engine.execute(&self.expression)
     }
 }

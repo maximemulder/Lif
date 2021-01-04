@@ -25,6 +25,10 @@ impl<T: ?Sized> Ref<T> {
             pointer: reference as *const T
         }
     }
+
+    pub fn as_ref(r#ref: &Self) -> &T {
+        unsafe { r#ref.pointer.as_ref().unwrap() }
+    }
 }
 
 impl<T: ?Sized> Deref for Ref<T> {

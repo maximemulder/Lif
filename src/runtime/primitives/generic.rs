@@ -1,3 +1,4 @@
+use crate::memory::Ref;
 use crate::runtime::ReturnReference;
 use crate::runtime::engine::Engine;
 use crate::runtime::value::GcValue;
@@ -15,7 +16,7 @@ pub fn gn<'a>(engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> ReturnRef
         engine.add_variable(parameter, reference);
     }
 
-    let reference = generic.node.execute(engine)?;
+    let reference = engine.execute(Ref::as_ref(&generic.node))?;
     engine.pop_scope();
     Ok(reference)
 }

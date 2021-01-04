@@ -1,4 +1,3 @@
-use crate::memory::Ref;
 use crate::nodes::{ Executable, Node };
 use crate::runtime::ReturnReference;
 use crate::runtime::engine::Engine;
@@ -21,12 +20,12 @@ impl If {
 
 impl Executable for If {
     fn execute<'a>(&self, engine: &mut Engine<'a>) -> ReturnReference<'a> {
-        let reference = execute!(engine, Ref::from_ref(&self.condition));
+        let reference = execute!(engine, &self.condition);
         let condition = *reference.read()?.get_cast_boolean(engine)?;
         if condition {
-            engine.execute(Ref::from_ref(&self.then))
+            engine.execute(&self.then)
         } else if let Some(r#else) = self.r#else.as_ref() {
-            engine.execute(Ref::from_ref(r#else))
+            engine.execute(r#else)
         } else {
             Ok(engine.undefined())
         }

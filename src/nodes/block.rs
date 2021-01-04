@@ -1,4 +1,3 @@
-use crate::memory::Ref;
 use crate::nodes::{ Executable, Node };
 use crate::runtime::ReturnReference;
 use crate::runtime::engine::Engine;
@@ -20,9 +19,9 @@ impl Block {
 impl Executable for Block {
     fn execute<'a>(&self, engine: &mut Engine<'a>) -> ReturnReference<'a> {
         engine.push_scope();
-        execute!(engine, Ref::from_ref(&self.statements));
+        execute!(engine, &self.statements);
         let reference = if let Some(expression) = &self.expression {
-            execute!(engine, Ref::from_ref(expression))
+            execute!(engine, expression)
         } else {
             engine.undefined()
         };

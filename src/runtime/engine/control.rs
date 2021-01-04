@@ -1,10 +1,9 @@
-use crate::memory::Ref;
 use crate::nodes::Node;
 use crate::runtime::ReturnReference;
 use crate::runtime::engine::{ Control, Engine };
 
 impl<'a> Engine<'a> {
-    pub fn control_new(&mut self, control: Control, node: Option<Ref<Node>>) -> ReturnReference<'a> {
+    pub fn control_new(&mut self, control: Control, node: Option<&Node>) -> ReturnReference<'a> {
         let reference = if let Some(node) = node {
             let value = self.execute(node)?.read()?;
             self.new_constant(value)

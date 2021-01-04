@@ -69,6 +69,13 @@ impl Node {
 
 impl Executable for Node {
     fn execute<'a>(&self, engine: &mut Engine<'a>) -> ReturnReference<'a> {
-        self.sem.execute(engine)
+        let mut reference = self.sem.execute(engine);
+        if let Err(error) = &mut reference {
+            if error.node.is_none(){
+                error.node = Some(self.syn)
+            }
+        }
+
+        reference
     }
 }

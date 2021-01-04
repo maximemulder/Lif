@@ -45,12 +45,12 @@ impl Binop {
 
 impl Executable for Binop {
     fn execute<'a>(&self, engine: &mut Engine<'a>) -> ReturnReference<'a> {
-        let left = execute!(engine, Ref::from_ref(&self.left)).read()?;
+        let left = execute!(engine, &self.left).read()?;
         match self.operator.deref() {
             "__and__" => {
                 left.cast(engine.primitives.boolean)?;
                 let boolean = if *left.data_boolean() {
-                    let right = execute!(engine, Ref::from_ref(&self.right)).read()?;
+                    let right = execute!(engine, &self.right).read()?;
                     right.cast(engine.primitives.boolean)?;
                     *right.data_boolean()
                 } else {
@@ -64,7 +64,7 @@ impl Executable for Binop {
                 let boolean = if *left.data_boolean() {
                     true
                 } else {
-                    let right = execute!(engine, Ref::from_ref(&self.right)).read()?;
+                    let right = execute!(engine, &self.right).read()?;
                     right.cast(engine.primitives.boolean)?;
                     *right.data_boolean()
                 };
@@ -72,7 +72,7 @@ impl Executable for Binop {
                 Ok(engine.new_boolean(boolean))
             },
             _ => {
-                let right = execute!(engine, Ref::from_ref(&self.right)).read()?;
+                let right = execute!(engine, &self.right).read()?;
                 left.get_method(&self.operator).unwrap().call(engine, vec![left, right])
             },
         }

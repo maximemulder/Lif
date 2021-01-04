@@ -28,10 +28,10 @@ impl Sequence {
 
 impl Executable for Sequence {
     fn execute<'a>(&self, engine: &mut Engine<'a>) -> ReturnReference<'a> {
-        let value = execute!(engine, Ref::from_ref(&self.expression)).read()?;
+        let value = execute!(engine, &self.expression).read()?;
         let mut arguments = Vec::new();
         for argument in self.expressions.iter() {
-            arguments.push(execute!(engine, Ref::from_ref(argument)));
+            arguments.push(execute!(engine, argument));
         }
 
         let array = engine.new_array(arguments).read()?;

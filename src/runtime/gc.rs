@@ -7,7 +7,7 @@ use std::mem::transmute;
 use std::ops::{ Deref, DerefMut };
 use std::raw::TraitObject;
 
-pub const GC_THRESHOLD: usize = 250;
+pub const GC_THRESHOLD: usize = 1;
 
 pub trait GcTrace {
     fn trace(&mut self);

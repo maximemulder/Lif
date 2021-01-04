@@ -3,7 +3,7 @@ mod new;
 
 use crate::code::Code;
 use crate::memory::{ Own, Ref };
-use crate::nodes::Node;
+use crate::nodes::Executable;
 use crate::parser::Parser;
 use crate::runtime::ReturnReference;
 use crate::runtime::data::{ Data, Tagger };
@@ -171,17 +171,11 @@ impl<'a> Engine<'a> {
         self.allocations = 0;
     }
 
-    pub fn execute(&mut self, node: Ref<Node>) -> ReturnReference<'a> {
+    pub fn execute(&mut self, node: &dyn Executable) -> ReturnReference<'a> {
         self.registries.push(Vec::new());
-        let reference = match node.sem.execute(self) {
+        let reference = match node.execute(self) {
             Ok(reference) => reference,
-            Err(mut error) => {
-                if error.node.is_none() {
-                    error.node = Some(node.syn);
-                }
-
-                return Err(error);
-            },
+            Err(error) => return Err(error),
         };
 
         let index = self.registries.len() - 2;
@@ -201,7 +195,9 @@ impl<'a> Engine<'a> {
             own.ast = Some(ast);
             own.cst = Some(program(Ref::from_ref(&own.ast.as_ref().unwrap())));
             self.codes.push(own);
-            let result = self.execute(Ref::from_ref(&self.codes.last().unwrap().cst.as_ref().unwrap()));
+            let node = Ref::from_ref(self.codes.last().unwrap().cst.as_ref().unwrap());
+            let executable = Ref::as_ref(&node);
+            let result = self.execute(executable);
             if let Err(error) = result {
                 let mut message = String::new();
                 message += &error.message;

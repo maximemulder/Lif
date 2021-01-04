@@ -1,4 +1,3 @@
-use crate::memory::Ref;
 use crate::nodes::{ Executable, Node };
 use crate::runtime::ReturnReference;
 use crate::runtime::engine::Engine;
@@ -17,7 +16,7 @@ impl Program {
 
 impl Executable for Program {
     fn execute<'a>(&self, engine: &mut Engine<'a>) -> ReturnReference<'a> {
-        execute!(engine, Ref::from_ref(&self.statements));
+        execute!(engine, &self.statements);
         Ok(engine.undefined())
     }
 }

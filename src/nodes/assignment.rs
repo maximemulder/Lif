@@ -25,8 +25,8 @@ impl Assignment {
 
 impl Executable for Assignment {
     fn execute<'a>(&self, engine: &mut Engine<'a>) -> ReturnReference<'a> {
-        let mut reference  = execute!(engine, Ref::from_ref(&self.reference));
-        let mut expression = execute!(engine, Ref::from_ref(&self.expression)).read()?;
+        let mut reference  = execute!(engine, &self.reference);
+        let mut expression = execute!(engine, &self.expression).read()?;
         if let Some(operator) = &self.operator {
             let left = reference.read()?;
             expression = left.get_method(operator).unwrap().call(engine, vec![left, expression])?.read()?;

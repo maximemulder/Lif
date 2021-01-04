@@ -37,11 +37,12 @@ impl<'a> Callable<'a> for Function<'a> {
 
         engine.push_frame(self.scope);
         for (parameter, argument) in self.parameters.iter().zip(arguments) {
-            let mut reference = engine.execute(Ref::from_ref(parameter))?;
+            let mut reference = engine.execute(parameter)?;
             reference.write(argument)?;
         }
 
-        let reference = engine.execute(self.block)?;
+        let executable = Ref::as_ref(&self.block);
+        let reference = engine.execute(executable)?;
         engine.pop_frame();
 
         if engine.control_is(Control::Break) || engine.control_is(Control::Continue) {

@@ -27,7 +27,7 @@ impl Preop {
 
 impl Executable for Preop {
     fn execute<'a>(&self, engine: &mut Engine<'a>) -> ReturnReference<'a> {
-        let expression = execute!(engine, Ref::from_ref(&self.expression)).read()?;
+        let expression = execute!(engine, &self.expression).read()?;
         expression.get_method(&self.operator).unwrap().call(engine, vec![expression])
     }
 }
