@@ -9,25 +9,27 @@ mod method;
 mod object;
 mod string;
 
+use crate::code::Code;
+use crate::memory::Ref;
 use crate::runtime::ReturnReference;
 use crate::runtime::engine::Engine;
 use crate::runtime::gc::GcTrace;
 use crate::runtime::value::GcValue;
 
-pub struct Primitives<'a, 'b> {
-    pub any:      GcValue<'a, 'b>,
-    pub array:    GcValue<'a, 'b>,
-    pub boolean:  GcValue<'a, 'b>,
-    pub class:    GcValue<'a, 'b>,
-    pub function: GcValue<'a, 'b>,
-    pub generic:  GcValue<'a, 'b>,
-    pub method:   GcValue<'a, 'b>,
-    pub object:   GcValue<'a, 'b>,
-    pub integer:  GcValue<'a, 'b>,
-    pub string:   GcValue<'a, 'b>,
+pub struct Primitives<'a> {
+    pub any:      GcValue<'a>,
+    pub array:    GcValue<'a>,
+    pub boolean:  GcValue<'a>,
+    pub class:    GcValue<'a>,
+    pub function: GcValue<'a>,
+    pub generic:  GcValue<'a>,
+    pub method:   GcValue<'a>,
+    pub object:   GcValue<'a>,
+    pub integer:  GcValue<'a>,
+    pub string:   GcValue<'a>,
 }
 
-impl<'a, 'b> Primitives<'a, 'b> {
+impl<'a> Primitives<'a> {
     pub fn new() -> Self {
         Self {
             any:      GcValue::null(),
@@ -44,7 +46,7 @@ impl<'a, 'b> Primitives<'a, 'b> {
     }
 }
 
-impl GcTrace for Primitives<'_, '_> {
+impl GcTrace for Primitives<'_> {
     fn trace(&mut self) {
         for class in [self.any, self.array, self.boolean, self.class, self.function, self.generic, self.integer, self.method, self.object, self.string].iter_mut() {
             class.trace();
@@ -52,34 +54,34 @@ impl GcTrace for Primitives<'_, '_> {
     }
 }
 
-impl<'a, 'b> Engine<'a, 'b> {
-    pub fn add_constant_value(&mut self, name: &str, value: GcValue<'a, 'b>) {
+impl<'a> Engine<'a> {
+    pub fn add_constant_value(&mut self, name: &str, value: GcValue<'a>) {
         let reference = self.new_constant(value);
         self.add_variable(name, reference);
     }
 
-    fn add_constant_primitive<const N: usize>(&mut self, name: &str, parameters: [GcValue<'a, 'b>; N], callback: &'b dyn Fn(&mut Engine<'a, 'b>, Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b>) {
-        let primitive = self.new_primitive(name, Box::new(parameters), callback);
+    fn add_constant_primitive<const N: usize>(&mut self, name: &str, parameters: [GcValue<'a>; N], callback: &'a dyn Fn(&mut Engine<'a>, Vec<GcValue<'a>>) -> ReturnReference<'a>) {
+        let primitive = self.new_primitive(Ref::from_ref(name), Box::new(parameters), callback);
         self.add_variable(name, primitive);
     }
 
-    fn add_method_primitive<const N: usize>(&mut self, mut value: GcValue<'a, 'b>, name: &str, parameters: [GcValue<'a, 'b>; N], callback: &'b dyn Fn(&mut Engine<'a, 'b>, Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b>) {
-        let primitive = self.new_primitive(&name, Box::new(parameters), callback).get_value();
+    fn add_method_primitive<const N: usize>(&mut self, mut value: GcValue<'a>, name: &str, parameters: [GcValue<'a>; N], callback: &'a dyn Fn(&mut Engine<'a>, Vec<GcValue<'a>>) -> ReturnReference<'a>) {
+        let primitive = self.new_primitive(Ref::from_ref(&name), Box::new(parameters), callback).get_value();
         value.data_class_mut().methods.insert(name.to_string(), primitive);
     }
 
     pub fn populate(&mut self) {
-        self.primitives.class = self.new_class_primitive_value("Class");
-        self.primitives.any   = self.new_class_primitive_value("Any");
+        self.primitives.class = self.new_class_primitive_value(Ref::from_ref("Class"));
+        self.primitives.any   = self.new_class_primitive_value(Ref::from_ref("Any"));
 
-        self.primitives.array    = self.new_class_primitive_value("Array");
-        self.primitives.boolean  = self.new_class_primitive_value("Boolean");
-        self.primitives.function = self.new_class_primitive_value("Function");
-        self.primitives.generic  = self.new_class_primitive_value("Generic");
-        self.primitives.integer  = self.new_class_primitive_value("Integer");
-        self.primitives.method   = self.new_class_primitive_value("Method");
-        self.primitives.object   = self.new_class_primitive_value("Object");
-        self.primitives.string   = self.new_class_primitive_value("String");
+        self.primitives.array    = self.new_class_primitive_value(Ref::from_ref("Array"));
+        self.primitives.boolean  = self.new_class_primitive_value(Ref::from_ref("Boolean"));
+        self.primitives.function = self.new_class_primitive_value(Ref::from_ref("Function"));
+        self.primitives.generic  = self.new_class_primitive_value(Ref::from_ref("Generic"));
+        self.primitives.integer  = self.new_class_primitive_value(Ref::from_ref("Integer"));
+        self.primitives.method   = self.new_class_primitive_value(Ref::from_ref("Method"));
+        self.primitives.object   = self.new_class_primitive_value(Ref::from_ref("Object"));
+        self.primitives.string   = self.new_class_primitive_value(Ref::from_ref("String"));
 
         self.primitives.class.class = self.primitives.class;
         self.primitives.class.data_class_mut().parent = Some(self.primitives.any);
@@ -96,11 +98,12 @@ impl<'a, 'b> Engine<'a, 'b> {
         let object   = self.primitives.object;
         let string   = self.primitives.string;
 
-        self.add_constant_primitive("assert", [any],     &assert);
-        self.add_constant_primitive("error",  [any],     &error);
-        self.add_constant_primitive("exit",   [integer], &exit);
-        self.add_constant_primitive("new",    [class],   &new);
-        self.add_constant_primitive("print",  [any],     &print);
+        self.add_constant_primitive("assert",  [any],     &assert);
+        self.add_constant_primitive("error",   [any],     &error);
+        self.add_constant_primitive("exit",    [integer], &exit);
+        self.add_constant_primitive("include", [string],  &include);
+        self.add_constant_primitive("new",     [class],   &new);
+        self.add_constant_primitive("print",   [any],     &print);
 
         self.add_constant_value("Any",      any);
         self.add_constant_value("Array",    array);
@@ -172,7 +175,7 @@ impl<'a, 'b> Engine<'a, 'b> {
     }
 }
 
-fn assert<'a, 'b>(engine: &mut Engine<'a, 'b>, arguments: Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b> {
+fn assert<'a>(engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> ReturnReference<'a> {
     if !arguments[0].data_boolean() {
         panic!();
     }
@@ -180,21 +183,26 @@ fn assert<'a, 'b>(engine: &mut Engine<'a, 'b>, arguments: Vec<GcValue<'a, 'b>>) 
     Ok(engine.undefined())
 }
 
-fn error<'a, 'b>(engine: &mut Engine<'a, 'b>, arguments: Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b> {
+fn error<'a>(engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> ReturnReference<'a> {
     let message = arguments[0].call_to_string(engine)?;
     writeln!(engine.error, "{}", message).unwrap();
     panic!();
 }
 
-fn exit<'a, 'b>(_: &mut Engine<'a, 'b>, _: Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b> {
+fn exit<'a>(_: &mut Engine<'a>, _: Vec<GcValue<'a>>) -> ReturnReference<'a> {
     panic!();
 }
 
-fn new<'a, 'b>(engine: &mut Engine<'a, 'b>, arguments: Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b> {
+fn include<'a>(engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> ReturnReference<'a> {
+    engine.run(Code::from_file(&arguments[0].data_string()).unwrap());
+    Ok(engine.undefined())
+}
+
+fn new<'a>(engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> ReturnReference<'a> {
     Ok(engine.new_object(arguments[0]))
 }
 
-fn print<'a, 'b>(engine: &mut Engine<'a, 'b>, arguments: Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b> {
+fn print<'a>(engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> ReturnReference<'a> {
     let message = arguments[0].call_to_string(engine)?;
     writeln!(engine.output, "{}", message).unwrap();
     Ok(engine.undefined())

@@ -16,6 +16,7 @@ pub use object::Object;
 pub use primitive::Primitive;
 pub use tag::{ Tag, Tagger };
 
+use crate::memory::Ref;
 use crate::nodes::{ Executable, Node };
 use crate::runtime::ReturnReference;
 use crate::runtime::engine::Engine;
@@ -24,21 +25,21 @@ use crate::runtime::scope::GcScope;
 use crate::runtime::reference::GcReference;
 use crate::runtime::value::GcValue;
 
-pub enum Data<'a, 'b> {
-    Array(Vec<GcReference<'a, 'b>>),
+pub enum Data<'a> {
+    Array(Vec<GcReference<'a>>),
     Boolean(bool),
-    Callable(Box<dyn Callable<'a, 'b> + 'b>),
-    Class(Class<'a, 'b>),
-    Generic(Generic<'a, 'b>),
+    Callable(Box<dyn Callable<'a> + 'a>),
+    Class(Class<'a>),
+    Generic(Generic),
     Integer(isize),
-    Method(Method<'a, 'b>),
-    Object(Object<'a, 'b>),
+    Method(Method<'a>),
+    Object(Object<'a>),
     String(String),
     Null,
 }
 
-impl<'a, 'b> Data<'a, 'b> {
-    pub fn new_array(elements: Vec<GcReference<'a, 'b>>) -> Self {
+impl<'a> Data<'a> {
+    pub fn new_array(elements: Vec<GcReference<'a>>) -> Self {
         Data::Array(elements)
     }
 
@@ -46,11 +47,11 @@ impl<'a, 'b> Data<'a, 'b> {
         Data::Boolean(boolean)
     }
 
-    pub fn new_class(tag: Tag, parent: Option<GcValue<'a, 'b>>) -> Self {
+    pub fn new_class(tag: Tag, parent: Option<GcValue<'a>>) -> Self {
         Data::Class(Class::new(tag, parent))
     }
 
-    pub fn new_function(tag: Tag, scope: GcScope<'a, 'b>, parameters: &'b [Node<'a>], r#type: Option<GcValue<'a, 'b>>, block: &'b Node<'a>) -> Self {
+    pub fn new_function(tag: Tag, scope: GcScope<'a>, parameters: Ref<[Node]>, r#type: Option<GcValue<'a>>, block: Ref<Node>) -> Self {
         Data::Callable(Box::new(Function::new(tag, scope, parameters, r#type, block)))
     }
 
@@ -58,11 +59,11 @@ impl<'a, 'b> Data<'a, 'b> {
         Data::Integer(integer)
     }
 
-    pub fn new_generic(tag: Tag, generics: &'b [&'a str], node: &'b dyn Executable<'a>) -> Self {
+    pub fn new_generic(tag: Tag, generics: Ref<[Ref<str>]>, node: Ref<dyn Executable>) -> Self {
         Data::Generic(Generic::new(tag, generics, node))
     }
 
-    pub fn new_method(function: GcValue<'a, 'b>, this: GcValue<'a, 'b>) -> Self {
+    pub fn new_method(function: GcValue<'a>, this: GcValue<'a>) -> Self {
         Data::Method(Method::new(function, this))
     }
 
@@ -70,7 +71,7 @@ impl<'a, 'b> Data<'a, 'b> {
         Data::Object(Object::new())
     }
 
-    pub fn new_primitive(tag: Tag, parameters: Box<[GcValue<'a, 'b>]>, callback: &'b dyn Fn(&mut Engine<'a, 'b>, Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b>) -> Self {
+    pub fn new_primitive(tag: Tag, parameters: Box<[GcValue<'a>]>, callback: &'a dyn Fn(&mut Engine<'a>, Vec<GcValue<'a>>) -> ReturnReference<'a>) -> Self {
         Data::Callable(Box::new(Primitive::new(tag, parameters, callback)))
     }
 
@@ -79,7 +80,7 @@ impl<'a, 'b> Data<'a, 'b> {
     }
 }
 
-impl GcTrace for Data<'_, '_> {
+impl GcTrace for Data<'_> {
     fn trace(&mut self) {
         match self {
             Data::Array(references)  => for reference in references.iter_mut() {

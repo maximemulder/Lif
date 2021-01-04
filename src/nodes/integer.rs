@@ -14,8 +14,8 @@ impl Integer {
     }
 }
 
-impl<'a> Executable<'a> for Integer {
-    fn execute<'b>(&'b self, engine: &mut Engine<'a, 'b>) -> ReturnReference<'a, 'b> {
+impl Executable for Integer {
+    fn execute<'a>(&self, engine: &mut Engine<'a>) -> ReturnReference<'a> {
         Ok(engine.new_integer(self.integer))
     }
 }

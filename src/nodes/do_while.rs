@@ -1,14 +1,15 @@
+use crate::memory::Ref;
 use crate::nodes::{ Executable, Node };
 use crate::runtime::ReturnReference;
 use crate::runtime::engine::{ Control, Engine };
 
-pub struct DoWhile<'a> {
-    body:      Node<'a>,
-    condition: Node<'a>,
+pub struct DoWhile {
+    body:      Node,
+    condition: Node,
 }
 
-impl<'a> DoWhile<'a> {
-    pub fn new(body: Node<'a>, condition: Node<'a>) -> Self {
+impl DoWhile {
+    pub fn new(body: Node, condition: Node) -> Self {
         Self {
             body,
             condition,
@@ -16,11 +17,11 @@ impl<'a> DoWhile<'a> {
     }
 }
 
-impl<'a> Executable<'a> for DoWhile<'a> {
-    fn execute<'b>(&'b self, engine: &mut Engine<'a, 'b>) -> ReturnReference<'a, 'b> {
+impl Executable for DoWhile {
+    fn execute<'a>(&self, engine: &mut Engine<'a>) -> ReturnReference<'a> {
         let mut array = Vec::new();
         loop {
-            let reference = engine.execute(&self.body)?;
+            let reference = engine.execute(Ref::from_ref(&self.body))?;
             if engine.control_is(Control::Return) {
                 return Ok(reference);
             }
@@ -37,7 +38,7 @@ impl<'a> Executable<'a> for DoWhile<'a> {
                 continue;
             }
 
-            let reference = execute!(engine, &self.condition);
+            let reference = execute!(engine, Ref::from_ref(&self.condition));
             let condition = !*reference.read()?.get_cast_boolean(engine)?;
             if condition {
                 break;

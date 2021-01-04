@@ -4,15 +4,15 @@ use crate::runtime::reference::GcReference;
 use crate::runtime::value::GcValue;
 use std::collections::HashMap;
 
-pub struct Class<'a, 'b> {
+pub struct Class<'a> {
     pub tag: Tag,
-    pub parent:  Option<GcValue<'a, 'b>>,
-    pub statics: HashMap<String, GcReference<'a, 'b>>,
-    pub methods: HashMap<String, GcValue<'a, 'b>>,
+    pub parent:  Option<GcValue<'a>>,
+    pub statics: HashMap<String, GcReference<'a>>,
+    pub methods: HashMap<String, GcValue<'a>>,
 }
 
-impl<'a, 'b> Class<'a, 'b> {
-    pub fn new(tag: Tag, parent: Option<GcValue<'a, 'b>>) -> Self {
+impl<'a> Class<'a> {
+    pub fn new(tag: Tag, parent: Option<GcValue<'a>>) -> Self {
         Self {
             tag,
             parent,
@@ -21,7 +21,7 @@ impl<'a, 'b> Class<'a, 'b> {
         }
     }
 
-    pub fn get_method(&self, name: &str) -> Option<GcValue<'a, 'b>> {
+    pub fn get_method(&self, name: &str) -> Option<GcValue<'a>> {
         if let Some(&method) = self.methods.get(name) {
             return Some(method);
         }
@@ -34,7 +34,7 @@ impl<'a, 'b> Class<'a, 'b> {
     }
 }
 
-impl GcTrace for Class<'_, '_> {
+impl GcTrace for Class<'_> {
     fn trace(&mut self) {
         if let Some(parent) = &mut self.parent {
             parent.trace();

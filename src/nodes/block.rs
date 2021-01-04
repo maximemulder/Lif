@@ -1,14 +1,15 @@
+use crate::memory::Ref;
 use crate::nodes::{ Executable, Node };
 use crate::runtime::ReturnReference;
 use crate::runtime::engine::Engine;
 
-pub struct Block<'a> {
-    statements: Node<'a>,
-    expression: Option<Node<'a>>,
+pub struct Block {
+    statements: Node,
+    expression: Option<Node>,
 }
 
-impl<'a> Block<'a> {
-    pub fn new(statements: Node<'a>, expression: Option<Node<'a>>) -> Self {
+impl Block {
+    pub fn new(statements: Node, expression: Option<Node>) -> Self {
         Self {
             statements,
             expression,
@@ -16,12 +17,12 @@ impl<'a> Block<'a> {
     }
 }
 
-impl<'a> Executable<'a> for Block<'a> {
-    fn execute<'b>(&'b self, engine: &mut Engine<'a, 'b>) -> ReturnReference<'a, 'b> {
+impl Executable for Block {
+    fn execute<'a>(&self, engine: &mut Engine<'a>) -> ReturnReference<'a> {
         engine.push_scope();
-        execute!(engine, &self.statements);
+        execute!(engine, Ref::from_ref(&self.statements));
         let reference = if let Some(expression) = &self.expression {
-            execute!(engine, expression)
+            execute!(engine, Ref::from_ref(expression))
         } else {
             engine.undefined()
         };

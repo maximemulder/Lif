@@ -6,14 +6,14 @@ use crate::runtime::gc::GcTrace;
 use crate::runtime::value::GcValue;
 
 #[derive(Clone)]
-pub struct Primitive<'a, 'b> {
+pub struct Primitive<'a> {
     tag: Tag,
-    parameters: Box<[GcValue<'a, 'b>]>,
-    callback: &'b dyn Fn(&mut Engine<'a, 'b>, Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b>,
+    parameters: Box<[GcValue<'a>]>,
+    callback: &'a dyn Fn(&mut Engine<'a>, Vec<GcValue<'a>>) -> ReturnReference<'a>,
 }
 
-impl<'a, 'b> Primitive<'a, 'b> {
-    pub fn new(tag: Tag, parameters: Box<[GcValue<'a, 'b>]>, callback: &'b dyn Fn(&mut Engine<'a, 'b>, Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b>) -> Self {
+impl<'a> Primitive<'a> {
+    pub fn new(tag: Tag, parameters: Box<[GcValue<'a>]>, callback: &'a dyn Fn(&mut Engine<'a>, Vec<GcValue<'a>>) -> ReturnReference<'a>) -> Self {
         Self {
             tag,
             parameters,
@@ -22,8 +22,8 @@ impl<'a, 'b> Primitive<'a, 'b> {
     }
 }
 
-impl<'a, 'b> Callable<'a, 'b> for Primitive<'a, 'b> {
-    fn execute(&self, engine: &mut Engine<'a, 'b>, arguments: Vec<GcValue<'a, 'b>>) -> ReturnReference<'a, 'b> {
+impl<'a> Callable<'a> for Primitive<'a> {
+    fn execute(&self, engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> ReturnReference<'a> {
         if arguments.len() != self.parameters.len() {
             return Err(Error::new_arguments(self.parameters.len(), arguments.len()));
         }
@@ -35,7 +35,7 @@ impl<'a, 'b> Callable<'a, 'b> for Primitive<'a, 'b> {
         (self.callback)(engine, arguments)
     }
 
-    fn duplicate<'c>(&'c self) -> Box<dyn Callable<'a, 'b> + 'c> {
+    fn duplicate<'c>(&'c self) -> Box<dyn Callable<'a> + 'c> {
         Box::new(self.clone())
     }
 
@@ -44,6 +44,6 @@ impl<'a, 'b> Callable<'a, 'b> for Primitive<'a, 'b> {
     }
 }
 
-impl GcTrace for Primitive<'_, '_> {
+impl GcTrace for Primitive<'_> {
     fn trace(&mut self) {}
 }

@@ -7,6 +7,7 @@ mod nodes;
 mod arena;
 
 use crate::code::Code;
+use crate::memory::Ref;
 use crate::lexer::lex;
 use crate::node::Node;
 use arena::Arena;
@@ -30,23 +31,23 @@ impl Parser {
         }
     }
 
-    pub fn parse<'a>(&self, code: &'a Code) -> Option<Node<'a>> {
+    pub fn parse(&self, code: Ref<Code>) -> Option<Node> {
         let tokens = lex(code);
         let mut parse = Parse::new(self, code, &tokens);
         parse.parse(self.program)
     }
 }
 
-pub struct Parse<'a, 'b> {
+pub struct Parse<'a> {
     parser: &'a Parser,
-    code: &'b Code,
-    tokens: &'a [Node<'b>],
+    code: Ref<Code>,
+    tokens: &'a [Node],
     cursor: usize,
     reach: usize,
 }
 
-impl<'a, 'b> Parse<'a, 'b> {
-    fn new(parser: &'a Parser, code: &'b Code, tokens: &'a [Node<'b>]) -> Self {
+impl<'a> Parse<'a> {
+    fn new(parser: &'a Parser, code: Ref<Code>, tokens: &'a [Node]) -> Self {
         Self {
             parser,
             code,
@@ -60,7 +61,7 @@ impl<'a, 'b> Parse<'a, 'b> {
         self.cursor == self.tokens.len()
     }
 
-    fn next(&mut self) -> Option<Node<'b>> {
+    fn next(&mut self) -> Option<Node> {
         let option = self.tokens.get(self.cursor);
         if let Some(token) = option {
             if self.reach < self.cursor {
@@ -74,7 +75,7 @@ impl<'a, 'b> Parse<'a, 'b> {
         None
     }
 
-    fn run(&mut self, callback: impl FnOnce(&mut Self) -> Option<Vec<Node<'b>>>) -> Option<Vec<Node<'b>>>{
+    fn run(&mut self, callback: impl FnOnce(&mut Self) -> Option<Vec<Node>>) -> Option<Vec<Node>>{
         let cursor = self.cursor;
         let nodes = callback(self);
         if nodes.is_none() {
@@ -84,14 +85,14 @@ impl<'a, 'b> Parse<'a, 'b> {
         nodes
     }
 
-    fn run_predicate(&mut self, callback: impl FnOnce(&mut Self) -> Option<Vec<Node<'b>>>) -> bool {
+    fn run_predicate(&mut self, callback: impl FnOnce(&mut Self) -> Option<Vec<Node>>) -> bool {
         let cursor = self.cursor;
         let nodes = callback(self);
         self.cursor = cursor;
         nodes.is_some()
     }
 
-    fn descent(&mut self, index: usize) -> Option<Vec<Node<'b>>> {
+    fn descent(&mut self, index: usize) -> Option<Vec<Node>> {
         self.run(|parse| parse.parser.descents.get(index).descent(parse))
     }
 
@@ -99,15 +100,15 @@ impl<'a, 'b> Parse<'a, 'b> {
         self.run_predicate(|parse| parse.parser.descents.get(index).descent(parse))
     }
 
-    fn ascent(&mut self, index: usize, nodes: Vec<Node<'b>>) -> Option<Vec<Node<'b>>> {
+    fn ascent(&mut self, index: usize, nodes: Vec<Node>) -> Option<Vec<Node>> {
         self.run(|parse| parse.parser.ascents.get(index).ascent(parse, nodes))
     }
 
-    fn ascent_predicate(&mut self, index: usize, nodes: Vec<Node<'b>>) -> bool {
+    fn ascent_predicate(&mut self, index: usize, nodes: Vec<Node>) -> bool {
         self.run_predicate(|parse| parse.parser.ascents.get(index).ascent(parse, nodes))
     }
 
-    pub fn parse(&mut self, program: usize) -> Option<Node<'b>> {
+    pub fn parse(&mut self, program: usize) -> Option<Node> {
         let begin = std::time::Instant::now();
         let node = if let Some(mut nodes) = self.parser.descents.get(program).descent(self) {
             nodes.pop()

@@ -3,38 +3,38 @@ use crate::runtime::error::Error;
 use crate::runtime::gc::{ GcRef, GcTrace };
 use crate::runtime::value::GcValue;
 
-pub type GcReference<'a, 'b> = GcRef<Reference<'a, 'b>>;
+pub type GcReference<'a> = GcRef<Reference<'a>>;
 
-pub struct Reference<'a, 'b> {
-    value: Option<GcValue<'a, 'b>>,
-    r#type: Type<'a, 'b>,
+pub struct Reference<'a> {
+    value: Option<GcValue<'a>>,
+    r#type: Type<'a>,
 }
 
-enum Type<'a, 'b> {
-    Variable(GcValue<'a, 'b>),
+enum Type<'a> {
+    Variable(GcValue<'a>),
     Constant,
 }
 
-impl<'a, 'b> Reference<'a, 'b> {
-    pub fn new_variable(value: Option<GcValue<'a, 'b>>, r#type: GcValue<'a, 'b>) -> Self {
+impl<'a> Reference<'a> {
+    pub fn new_variable(value: Option<GcValue<'a>>, r#type: GcValue<'a>) -> Self {
         Self {
             value,
             r#type: Type::Variable(r#type),
         }
     }
 
-    pub fn new_constant(value: Option<GcValue<'a, 'b>>) -> Self {
+    pub fn new_constant(value: Option<GcValue<'a>>) -> Self {
         Self {
             value,
             r#type: Type::Constant,
         }
     }
 
-    pub fn read(&self) -> Return<'a, GcValue<'a, 'b>> {
+    pub fn read(&self) -> Return<GcValue<'a>> {
         self.value.ok_or_else(Error::new_undefined)
     }
 
-    pub fn write(&mut self, value: GcValue<'a, 'b>) -> Return<'a, ()> {
+    pub fn write(&mut self, value: GcValue<'a>) -> Return<()> {
         match self.r#type {
             Type::Variable(r#type) => {
                 value.cast(r#type)?;
@@ -58,16 +58,16 @@ impl<'a, 'b> Reference<'a, 'b> {
         !self.is_defined()
     }
 
-    pub fn get_value(&self) -> GcValue<'a, 'b> {
+    pub fn get_value(&self) -> GcValue<'a> {
         self.value.unwrap()
     }
 
-    pub fn set_value(&mut self, value: GcValue<'a, 'b>) {
+    pub fn set_value(&mut self, value: GcValue<'a>) {
         self.value = Some(value);
     }
 }
 
-impl GcTrace for Reference<'_, '_> {
+impl GcTrace for Reference<'_> {
     fn trace(&mut self) {
         if let Some(value) = self.value.as_mut() {
             value.trace();

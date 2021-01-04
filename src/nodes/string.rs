@@ -1,21 +1,22 @@
+use crate::memory::Ref;
 use crate::nodes::Executable;
 use crate::runtime::ReturnReference;
 use crate::runtime::engine::Engine;
 
-pub struct String<'a> {
-    string: &'a str,
+pub struct String {
+    string: Ref<str>,
 }
 
-impl<'a> String<'a> {
-    pub fn new(string: &'a str) -> Self {
+impl String {
+    pub fn new(string: Ref<str>) -> Self {
         Self {
-            string: &string[1 .. string.len() - 1],
+            string: Ref::from_ref(&string[1 .. string.len() - 1]),
         }
     }
 }
 
-impl<'a> Executable<'a> for String<'a> {
-    fn execute<'b>(&'b self, engine: &mut Engine<'a, 'b>) -> ReturnReference<'a, 'b> {
+impl Executable for String {
+    fn execute<'a>(&self, engine: &mut Engine<'a>) -> ReturnReference<'a> {
         Ok(engine.new_string(self.string.to_string()))
     }
 }

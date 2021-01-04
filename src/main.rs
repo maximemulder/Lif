@@ -29,15 +29,13 @@ use code::Code;
 use parser::Parser;
 use runtime::engine::Engine;
 use std::env::args;
-use std::io::{ Read, Write, stderr, stdin, stdout };
+use std::io::{ stderr, stdin, stdout };
 
-pub fn run(code: &Code, input: &mut dyn Read, output: &mut dyn Write, error: &mut dyn Write) {
-    let parser = Parser::new();
-    if let Some(tree) = parser.parse(&code) {
-        let program = nodes::build::program(&tree);
-        Engine::new(input, output, error).run(&program);
-    }
-}
+/* let parser = Parser::new();
+if let Some(tree) = parser.parse(Ref::from_ref(&code)) {
+    let program = nodes::build::program(Ref::from_ref(&tree));
+    Engine::new(input, output, error).run(Ref::from_ref(&program));
+} */
 
 fn main() {
     let args: Vec<String> = args().collect();
@@ -47,8 +45,9 @@ fn main() {
     }
 
     let code = Code::from_file(&args[1]).unwrap();
+    let parser = Parser::new();
     let mut input  = stdin();
     let mut output = stdout();
     let mut error  = stderr();
-    run(&code, &mut input, &mut output, &mut error);
+    Engine::new(&parser, &mut input, &mut output, &mut error).run(code);
 }

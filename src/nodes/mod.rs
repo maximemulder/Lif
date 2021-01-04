@@ -43,22 +43,23 @@ pub mod r#continue;
 
 pub mod build;
 
+use crate::memory::Ref;
 use crate::runtime::ReturnReference;
 use crate::runtime::engine::Engine;
 
 pub use crate::node::Node as SyntaxNode;
 
-pub trait Executable<'a> {
-    fn execute<'b>(&'b self, engine: &mut Engine<'a, 'b>) -> ReturnReference<'a, 'b>;
+pub trait Executable {
+    fn execute<'a>(&self, engine: &mut Engine<'a>) -> ReturnReference<'a>;
 }
 
-pub struct Node<'a> {
-    pub syn: &'a SyntaxNode<'a>,
-    pub sem: Box<dyn Executable<'a> + 'a>,
+pub struct Node {
+    pub syn: Ref<SyntaxNode>,
+    pub sem: Box<dyn Executable>,
 }
 
-impl<'a> Node<'a> {
-    pub fn new(syn: &'a SyntaxNode<'a>, sem: impl Executable<'a> + 'a) -> Self {
+impl Node {
+    pub fn new(syn: Ref<SyntaxNode>, sem: impl Executable + 'static) -> Self {
         Self {
             syn,
             sem: Box::new(sem),
@@ -66,8 +67,8 @@ impl<'a> Node<'a> {
     }
 }
 
-impl<'a> Executable<'a> for Node<'a> {
-    fn execute<'b>(&'b self, engine: &mut Engine<'a, 'b>) -> ReturnReference<'a, 'b> {
+impl Executable for Node {
+    fn execute<'a>(&self, engine: &mut Engine<'a>) -> ReturnReference<'a> {
         self.sem.execute(engine)
     }
 }

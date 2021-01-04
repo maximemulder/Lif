@@ -1,22 +1,23 @@
+use crate::memory::Ref;
 use crate::nodes::{ Executable, Node };
 use crate::runtime::ReturnReference;
 use crate::runtime::engine::Engine;
 
-pub struct Program<'a> {
-    statements: Node<'a>,
+pub struct Program {
+    statements: Node,
 }
 
-impl<'a> Program<'a> {
-    pub fn new(statements: Node<'a>) -> Self {
+impl Program {
+    pub fn new(statements: Node) -> Self {
         Self {
             statements,
         }
     }
 }
 
-impl<'a> Executable<'a> for Program<'a> {
-    fn execute<'b>(&'b self, engine: &mut Engine<'a, 'b>) -> ReturnReference<'a, 'b> {
-        execute!(engine, &self.statements);
+impl Executable for Program {
+    fn execute<'a>(&self, engine: &mut Engine<'a>) -> ReturnReference<'a> {
+        execute!(engine, Ref::from_ref(&self.statements));
         Ok(engine.undefined())
     }
 }

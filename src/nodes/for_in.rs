@@ -1,15 +1,16 @@
+use crate::memory::Ref;
 use crate::nodes::{ Executable, Node };
 use crate::runtime::ReturnReference;
 use crate::runtime::engine::{ Control, Engine };
 
-pub struct ForIn<'a> {
-    identifier: &'a str,
-    expression: Node<'a>,
-    body:       Node<'a>,
+pub struct ForIn {
+    identifier: Ref<str>,
+    expression: Node,
+    body:       Node,
 }
 
-impl<'a> ForIn<'a> {
-    pub fn new(identifier: &'a str, expression: Node<'a>, body: Node<'a>) -> Self {
+impl ForIn {
+    pub fn new(identifier: Ref<str>, expression: Node, body: Node) -> Self {
         Self {
             identifier,
             expression,
@@ -18,15 +19,15 @@ impl<'a> ForIn<'a> {
     }
 }
 
-impl<'a> Executable<'a> for ForIn<'a> {
-    fn execute<'b>(&'b self, engine: &mut Engine<'a, 'b>) -> ReturnReference<'a, 'b> {
+impl Executable for ForIn {
+    fn execute<'a>(&self, engine: &mut Engine<'a>) -> ReturnReference<'a> {
         let mut array = Vec::new();
         for element in {
-            let reference = execute!(engine, &self.expression);
+            let reference = execute!(engine, Ref::from_ref(&self.expression));
             reference.read()?.get_cast_array(engine)?.clone()
         } {
             engine.add_variable(&self.identifier, element);
-            let reference = engine.execute(&self.body)?;
+            let reference = engine.execute(Ref::from_ref(&self.body))?;
             if engine.control_is(Control::Return) {
                 return Ok(reference);
             }

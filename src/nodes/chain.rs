@@ -1,14 +1,15 @@
+use crate::memory::Ref;
 use crate::nodes::{ Executable, Node };
 use crate::runtime::ReturnReference;
 use crate::runtime::engine::Engine;
 
-pub struct Chain<'a> {
-    expression: Node<'a>,
-    member:     &'a str,
+pub struct Chain {
+    expression: Node,
+    member:     Ref<str>,
 }
 
-impl<'a> Chain<'a> {
-    pub fn new(expression: Node<'a>, member: &'a str) -> Self {
+impl Chain {
+    pub fn new(expression: Node, member: Ref<str>) -> Self {
         Self {
             expression,
             member,
@@ -16,9 +17,9 @@ impl<'a> Chain<'a> {
     }
 }
 
-impl<'a> Executable<'a> for Chain<'a> {
-    fn execute<'b>(&'b self, engine: &mut Engine<'a, 'b>) -> ReturnReference<'a, 'b> {
-        let value = execute!(engine, &self.expression).read()?;
+impl Executable for Chain {
+    fn execute<'a>(&self, engine: &mut Engine<'a>) -> ReturnReference<'a> {
+        let value = execute!(engine, Ref::from_ref(&self.expression)).read()?;
         let name = engine.new_string(self.member.to_string());
         value.call_method(engine, "__cn__", vec![name.read()?])
     }

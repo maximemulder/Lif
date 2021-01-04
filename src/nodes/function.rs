@@ -1,16 +1,17 @@
+use crate::memory::Ref;
 use crate::nodes::{ Executable, Node };
 use crate::runtime::ReturnReference;
 use crate::runtime::engine::Engine;
 
-pub struct Function<'a> {
-    name: Option<&'a str>,
-    parameters: Box<[Node<'a>]>,
-    r#type: Option<Node<'a>>,
-    block: Node<'a>,
+pub struct Function {
+    name: Option<Ref<str>>,
+    parameters: Box<[Node]>,
+    r#type: Option<Node>,
+    block: Node,
 }
 
-impl<'a> Function<'a> {
-    pub fn new(name: Option<&'a str>, parameters: Box<[Node<'a>]>, r#type: Option<Node<'a>>, block: Node<'a>) -> Self {
+impl Function {
+    pub fn new(name: Option<Ref<str>>, parameters: Box<[Node]>, r#type: Option<Node>, block: Node) -> Self {
         Self {
             name,
             parameters,
@@ -20,14 +21,14 @@ impl<'a> Function<'a> {
     }
 }
 
-impl<'a> Executable<'a> for Function<'a> {
-    fn execute<'b>(&'b self, engine: &mut Engine<'a, 'b>) -> ReturnReference<'a, 'b> {
+impl Executable for Function {
+    fn execute<'a>(&self, engine: &mut Engine<'a>) -> ReturnReference<'a> {
         let r#type = if let Some(r#type) = self.r#type.as_ref() {
-            Some(engine.execute(r#type)?.read()?)
+            Some(engine.execute(Ref::from_ref(r#type))?.read()?)
         } else {
             None
         };
 
-        Ok(engine.new_function(self.name, &self.parameters, r#type, &self.block))
+        Ok(engine.new_function(self.name, Ref::from_ref(&self.parameters), r#type, Ref::from_ref(&self.block)))
     }
 }

@@ -1,34 +1,37 @@
+use crate::memory::Ref;
 use crate::nodes::{ Executable, Node };
 use crate::runtime::ReturnReference;
 use crate::runtime::engine::Engine;
 
-pub struct Sequence<'a> {
-    expression:  Node<'a>,
-    expressions: Box<[Node<'a>]>,
-    operator:    &'a str,
+use std::ops::Deref;
+
+pub struct Sequence {
+    expression:  Node,
+    expressions: Box<[Node]>,
+    operator:    Ref<str>,
 }
 
-impl<'a> Sequence<'a> {
-    pub fn new(expression: Node<'a>, open: &'a str, expressions: Box<[Node<'a>]>, close: &'a str) -> Self {
+impl Sequence {
+    pub fn new(expression: Node, open: Ref<str>, expressions: Box<[Node]>, close: Ref<str>) -> Self {
         Self {
             expression,
             expressions,
-            operator: match format!("{}{}", open, close).as_str() {
+            operator: Ref::from_ref(match format!("{}{}", open.deref(), close.deref()).as_str() {
                 "()" => "__cl__",
                 "[]" => "__id__",
                 "<>" => "__gn__",
                 _ => panic!(),
-            }
+            })
         }
     }
 }
 
-impl<'a> Executable<'a> for Sequence<'a> {
-    fn execute<'b>(&'b self, engine: &mut Engine<'a, 'b>) -> ReturnReference<'a, 'b> {
-        let value = execute!(engine, &self.expression).read()?;
+impl Executable for Sequence {
+    fn execute<'a>(&self, engine: &mut Engine<'a>) -> ReturnReference<'a> {
+        let value = execute!(engine, Ref::from_ref(&self.expression)).read()?;
         let mut arguments = Vec::new();
         for argument in self.expressions.iter() {
-            arguments.push(execute!(engine, argument));
+            arguments.push(execute!(engine, Ref::from_ref(argument)));
         }
 
         let array = engine.new_array(arguments).read()?;
