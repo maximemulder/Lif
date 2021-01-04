@@ -9,6 +9,7 @@ mod method;
 mod object;
 mod string;
 
+use crate::code::Code;
 use crate::memory::Ref;
 use crate::runtime::ReturnReference;
 use crate::runtime::engine::Engine;
@@ -97,11 +98,12 @@ impl<'a> Engine<'a> {
         let object   = self.primitives.object;
         let string   = self.primitives.string;
 
-        self.add_constant_primitive("assert", [any],     &assert);
-        self.add_constant_primitive("error",  [any],     &error);
-        self.add_constant_primitive("exit",   [integer], &exit);
-        self.add_constant_primitive("new",    [class],   &new);
-        self.add_constant_primitive("print",  [any],     &print);
+        self.add_constant_primitive("assert",  [any],     &assert);
+        self.add_constant_primitive("error",   [any],     &error);
+        self.add_constant_primitive("exit",    [integer], &exit);
+        self.add_constant_primitive("include", [string],  &include);
+        self.add_constant_primitive("new",     [class],   &new);
+        self.add_constant_primitive("print",   [any],     &print);
 
         self.add_constant_value("Any",      any);
         self.add_constant_value("Array",    array);
@@ -189,6 +191,11 @@ fn error<'a>(engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> ReturnRefe
 
 fn exit<'a>(_: &mut Engine<'a>, _: Vec<GcValue<'a>>) -> ReturnReference<'a> {
     panic!();
+}
+
+fn include<'a>(engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> ReturnReference<'a> {
+    engine.run(Code::from_file(&arguments[0].data_string()).unwrap());
+    Ok(engine.undefined())
 }
 
 fn new<'a>(engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> ReturnReference<'a> {

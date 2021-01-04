@@ -3,7 +3,7 @@ use crate::element::Element;
 use crate::parser::Parse;
 
 pub trait Descent {
-    fn descent(&self, parser: &mut Parse) -> Option<Vec<Node>>;
+    fn descent(&self, parse: &mut Parse) -> Option<Vec<Node>>;
 }
 
 pub struct DescentAlias {
@@ -19,8 +19,8 @@ impl DescentAlias {
 }
 
 impl Descent for DescentAlias {
-    fn descent(&self, parser: &mut Parse) -> Option<Vec<Node>> {
-        parser.descent(self.descent)
+    fn descent(&self, parse: &mut Parse) -> Option<Vec<Node>> {
+        parse.descent(self.descent)
     }
 }
 
@@ -39,9 +39,9 @@ impl DescentAscent {
 }
 
 impl Descent for DescentAscent {
-    fn descent(&self, parser: &mut Parse) -> Option<Vec<Node>> {
-        if let Some(nodes) = parser.descent(self.descent) {
-            return parser.ascent(self.ascent, nodes);
+    fn descent(&self, parse: &mut Parse) -> Option<Vec<Node>> {
+        if let Some(nodes) = parse.descent(self.descent) {
+            return parse.ascent(self.ascent, nodes);
         }
 
         None
@@ -61,9 +61,9 @@ impl DescentChoice {
 }
 
 impl Descent for DescentChoice {
-    fn descent(&self, parser: &mut Parse) -> Option<Vec<Node>> {
+    fn descent(&self, parse: &mut Parse) -> Option<Vec<Node>> {
         for descent in self.descents.iter() {
-            if let Some(nodes) = parser.descent(*descent) {
+            if let Some(nodes) = parse.descent(*descent) {
                 return Some(nodes);
             }
         }
@@ -85,10 +85,10 @@ impl DescentSequence {
 }
 
 impl Descent for DescentSequence {
-    fn descent(&self, parser: &mut Parse) -> Option<Vec<Node>> {
+    fn descent(&self, parse: &mut Parse) -> Option<Vec<Node>> {
         let mut nodes = Vec::new();
         for descent in self.descents.iter() {
-            if let Some(children) = parser.descent(*descent) {
+            if let Some(children) = parse.descent(*descent) {
                 nodes.extend(children);
             } else {
                 return None;
@@ -112,9 +112,9 @@ impl DescentZeroOrMore {
 }
 
 impl Descent for DescentZeroOrMore {
-    fn descent(&self, parser: &mut Parse) -> Option<Vec<Node>> {
+    fn descent(&self, parse: &mut Parse) -> Option<Vec<Node>> {
         let mut nodes = Vec::new();
-        while let Some(children) = parser.descent(self.descent) {
+        while let Some(children) = parse.descent(self.descent) {
             nodes.extend(children);
         }
 
@@ -135,9 +135,9 @@ impl DescentOneOrMore {
 }
 
 impl Descent for DescentOneOrMore {
-    fn descent(&self, parser: &mut Parse) -> Option<Vec<Node>> {
+    fn descent(&self, parse: &mut Parse) -> Option<Vec<Node>> {
         let mut nodes = Vec::new();
-        while let Some(children) = parser.descent(self.descent) {
+        while let Some(children) = parse.descent(self.descent) {
             nodes.extend(children);
         }
 
@@ -162,8 +162,8 @@ impl DescentOption {
 }
 
 impl Descent for DescentOption {
-    fn descent(&self, parser: &mut Parse) -> Option<Vec<Node>> {
-        let nodes = parser.descent(self.descent);
+    fn descent(&self, parse: &mut Parse) -> Option<Vec<Node>> {
+        let nodes = parse.descent(self.descent);
         if nodes.is_some() {
             return nodes;
         }
@@ -185,8 +185,8 @@ impl DescentPredicateAnd {
 }
 
 impl Descent for DescentPredicateAnd {
-    fn descent(&self, parser: &mut Parse) -> Option<Vec<Node>> {
-        if parser.descent_predicate(self.descent) {
+    fn descent(&self, parse: &mut Parse) -> Option<Vec<Node>> {
+        if parse.descent_predicate(self.descent) {
             Some(Vec::new())
         } else {
             None
@@ -207,8 +207,8 @@ impl DescentPredicateNot {
 }
 
 impl Descent for DescentPredicateNot {
-    fn descent(&self, parser: &mut Parse) -> Option<Vec<Node>> {
-        if parser.descent_predicate(self.descent) {
+    fn descent(&self, parse: &mut Parse) -> Option<Vec<Node>> {
+        if parse.descent_predicate(self.descent) {
             None
         } else {
             Some(Vec::new())
@@ -231,9 +231,9 @@ impl DescentElement {
 }
 
 impl Descent for DescentElement {
-    fn descent(&self, parser: &mut Parse) -> Option<Vec<Node>> {
-        if let Some(nodes) = parser.descent(self.descent) {
-            Some(vec![Node::new_production(parser.code, self.element, nodes)])
+    fn descent(&self, parse: &mut Parse) -> Option<Vec<Node>> {
+        if let Some(nodes) = parse.descent(self.descent) {
+            Some(vec![Node::new_production(parse.code, self.element, nodes)])
         } else {
             None
         }
@@ -253,8 +253,8 @@ impl DescentToken {
 }
 
 impl Descent for DescentToken {
-    fn descent(&self, parser: &mut Parse) -> Option<Vec<Node>> {
-        if let Some(token) = parser.next() {
+    fn descent(&self, parse: &mut Parse) -> Option<Vec<Node>> {
+        if let Some(token) = parse.next() {
             if token.element == self.element {
                 return Some(vec![token]);
             }

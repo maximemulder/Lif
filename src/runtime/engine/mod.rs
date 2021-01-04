@@ -1,8 +1,10 @@
 mod control;
 mod new;
 
-use crate::memory::Ref;
+use crate::code::Code;
+use crate::memory::{ Own, Ref };
 use crate::nodes::Node;
+use crate::parser::Parser;
 use crate::runtime::ReturnReference;
 use crate::runtime::data::{ Data, Tagger };
 use crate::runtime::primitives::Primitives;
@@ -39,12 +41,14 @@ impl Taggers {
 }
 
 pub struct Engine<'a> {
+    pub parser:     &'a Parser,
     pub input:      &'a mut dyn Read,
     pub output:     &'a mut dyn Write,
     pub error:      &'a mut dyn Write,
     pub primitives: Primitives<'a>,
     taggers:        Taggers,
     gc:             Gc,
+    codes:          Vec<Own<Code>>,
     registries:     Vec<Vec<GcReference<'a>>>,
     frames:         Vec<GcScope<'a>>,
     scope:          GcScope<'a>,
@@ -54,14 +58,16 @@ pub struct Engine<'a> {
 }
 
 impl<'a> Engine<'a> {
-    pub fn new(input: &'a mut dyn Read, output: &'a mut dyn Write, error: &'a mut dyn Write) -> Self {
+    pub fn new(parser: &'a Parser, input: &'a mut dyn Read, output: &'a mut dyn Write, error: &'a mut dyn Write) -> Self {
         let mut engine = Self {
+            parser,
             input,
             output,
             error,
             primitives:  Primitives::new(),
             taggers:     Taggers::new(),
             gc:          Gc::new(),
+            codes:       Vec::new(),
             registries:  Vec::new(),
             frames:      Vec::new(),
             scope:       GcScope::null(),
@@ -181,30 +187,37 @@ impl<'a> Engine<'a> {
         let index = self.registries.len() - 2;
         self.registries[index].push(reference);
         self.registries.pop();
-        if self.allocations > GC_THRESHOLD {
+        /* if self.allocations > GC_THRESHOLD {
             self.collect();
-        }
+        } */
 
         Ok(reference)
     }
 
-    pub fn run(&mut self, node: Ref<Node>) {
-        let result = self.execute(node);
-        if let Err(error) = result {
-            let mut message = String::new();
-            message += &error.message;
-            if let Some(node) = error.node {
-                let code = node.code;
-                if let Some(name) = &code.name {
-                    message += name;
-                }
+    pub fn run(&mut self, code: Code) {
+        use crate::nodes::build::program;
+        let mut own = Own::new(code);
+        if let Some(ast) = self.parser.parse(own.get_ref()) {
+            own.ast = Some(ast);
+            own.cst = Some(program(Ref::from_ref(&own.ast.as_ref().unwrap())));
+            self.codes.push(own);
+            let result = self.execute(Ref::from_ref(&self.codes.last().unwrap().cst.as_ref().unwrap()));
+            if let Err(error) = result {
+                let mut message = String::new();
+                message += &error.message;
+                if let Some(node) = error.node {
+                    let code = node.code;
+                    if let Some(name) = &code.name {
+                        message += name;
+                    }
 
-                message += "\n";
-                message += code.node_line(&node);
-                message += "\n";
-                message += &" ".repeat(code.node_shift_left(&node));
-                message += &"^".repeat(min(code.node_str(&node).len(), code.node_shift_right(&node)));
-                writeln!(self.error, "{}", message).unwrap();
+                    message += "\n";
+                    message += code.node_line(&node);
+                    message += "\n";
+                    message += &" ".repeat(code.node_shift_left(&node));
+                    message += &"^".repeat(min(code.node_str(&node).len(), code.node_shift_right(&node)));
+                    writeln!(self.error, "{}", message).unwrap();
+                }
             }
         }
     }

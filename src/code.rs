@@ -1,9 +1,12 @@
-use crate::node::Node;
+use crate::node::Node as ANode;
+use crate::nodes::Node as CNode;
 use std::fs::read_to_string;
 
 pub struct Code {
     pub name: Option<Box<str>>,
     pub text: Box<str>,
+    pub ast: Option<ANode>,
+    pub cst: Option<CNode>,
 }
 
 impl Code {
@@ -12,6 +15,8 @@ impl Code {
         Some(Self {
             name: Some(Box::from(name)),
             text: Box::from(text),
+            ast: None,
+            cst: None,
         })
     }
 
@@ -19,23 +24,25 @@ impl Code {
         Self {
             name: None,
             text: Box::from(text),
+            ast: None,
+            cst: None,
         }
     }
 
-    pub fn node_str(&self, node: &Node) -> &str {
+    pub fn node_str(&self, node: &ANode) -> &str {
         &self.text[node.left() .. node.right()]
     }
 
-    pub fn node_line(&self, node: &Node) -> &str {
+    pub fn node_line(&self, node: &ANode) -> &str {
         let index = node.left();
         &self.text[index - self.line_pos_left(index) .. index + self.line_pos_right(index)]
     }
 
-    pub fn node_x(&self, node: &Node) -> usize {
+    pub fn node_x(&self, node: &ANode) -> usize {
         self.line_pos_left(node.left()) + 1
     }
 
-    pub fn node_y(&self, node: &Node) -> usize {
+    pub fn node_y(&self, node: &ANode) -> usize {
         let index = node.left();
         let mut x = 1;
         for (counter, r#char) in self.text.chars().enumerate() {
@@ -51,11 +58,11 @@ impl Code {
         x
     }
 
-    pub fn node_shift_left(&self, node: &Node) -> usize {
+    pub fn node_shift_left(&self, node: &ANode) -> usize {
         self.line_shift(self.index_iterator_reverse(node.left()))
     }
 
-    pub fn node_shift_right(&self, node: &Node) -> usize {
+    pub fn node_shift_right(&self, node: &ANode) -> usize {
         self.line_shift(self.index_iterator(node.left()))
     }
 

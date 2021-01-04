@@ -1,5 +1,6 @@
 use crate::code::Code;
-use crate::run;
+use crate::parser::Parser;
+use crate::runtime::engine::Engine;
 
 use std::io::empty;
 
@@ -8,7 +9,7 @@ fn assert_output(text: &str, result: &str) {
     let mut input  = empty();
     let mut output = Vec::new();
     let mut error  = Vec::new();
-    run(&code, &mut input, &mut output, &mut error);
+    Engine::new(&Parser::new(), &mut input, &mut output, &mut error).run(code);
     assert!(String::from_utf8(error).unwrap().is_empty());
     assert_eq!(String::from_utf8(output).unwrap(), format!("{}\n", result));
 }
