@@ -76,9 +76,9 @@ impl<'a> Engine<'a> {
             allocations: 0,
         };
 
-        engine.scope = engine.alloc_scope(Scope::new());
-        engine.undefined = engine.alloc_reference(Reference::new_constant(None));
         engine.registries.push(Vec::new());
+        engine.undefined = engine.alloc_reference(Reference::new_constant(None));
+        engine.scope = engine.alloc_scope(Scope::new());
         engine.populate();
         engine
     }
@@ -93,6 +93,7 @@ impl<'a> Engine<'a> {
 
     pub fn alloc_reference(&mut self, reference: Reference<'a>) -> GcReference<'a> {
         let reference = self.gc.alloc(reference);
+        self.registries.last_mut().unwrap().push(reference);
         self.allocations += 1;
         reference
     }
@@ -181,9 +182,9 @@ impl<'a> Engine<'a> {
         let index = self.registries.len() - 2;
         self.registries[index].push(reference);
         self.registries.pop();
-        /* if self.allocations > GC_THRESHOLD {
+        if self.allocations > GC_THRESHOLD {
             self.collect();
-        } */
+        }
 
         Ok(reference)
     }

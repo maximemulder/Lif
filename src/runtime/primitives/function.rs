@@ -2,7 +2,6 @@ use crate::runtime::ReturnReference;
 use crate::runtime::engine::Engine;
 use crate::runtime::value::GcValue;
 
-
 pub fn to_string<'a>(engine: &mut Engine<'a>, _: Vec<GcValue<'a>>) -> ReturnReference<'a> {
     Ok(engine.new_string("FUNCTION".to_string()))
 }
