@@ -31,12 +31,6 @@ use runtime::engine::Engine;
 use std::env::args;
 use std::io::{ stderr, stdin, stdout };
 
-/* let parser = Parser::new();
-if let Some(tree) = parser.parse(Ref::from_ref(&code)) {
-    let program = nodes::build::program(Ref::from_ref(&tree));
-    Engine::new(input, output, error).run(Ref::from_ref(&program));
-} */
-
 fn main() {
     let args: Vec<String> = args().collect();
     if args.len() != 2 {
