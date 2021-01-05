@@ -7,7 +7,7 @@ use std::mem::transmute;
 use std::ops::{ Deref, DerefMut };
 use std::raw::TraitObject;
 
-pub const GC_THRESHOLD: usize = 1;
+pub const GC_THRESHOLD: usize = 250;
 
 pub trait GcTrace {
     fn trace(&mut self);
@@ -15,12 +15,14 @@ pub trait GcTrace {
 
 pub struct Gc {
     guards: Vec<Own<GcGuard>>,
+    allocations: usize,
 }
 
 impl Gc {
     pub fn new() -> Self {
         Self {
             guards: Vec::new(),
+            allocations: 0,
         }
     }
 
@@ -30,16 +32,22 @@ impl Gc {
             let mut guard = Own::new(GcGuard::new(transmute::<*mut dyn GcTrace, TraitObject>(pointers)));
             let r#ref = GcRef::new(guard.get_mut());
             self.guards.push(guard);
+            self.allocations += 1;
             r#ref
         }
     }
 
     pub fn collect(&mut self) {
         self.guards.drain_filter(|guard| guard.reset());
+        self.allocations = 0;
+    }
+
+    pub fn get_allocations(&self) -> usize {
+        self.allocations
     }
 }
 
-struct GcGuard {
+pub struct GcGuard {
     pointers: TraitObject,
     flag: bool,
 }
@@ -71,7 +79,18 @@ impl Drop for GcGuard {
     fn drop(&mut self) {
         unsafe {
             Box::<dyn GcTrace>::from_raw(transmute::<TraitObject, *mut dyn GcTrace>(self.pointers));
-        };
+        }
+    }
+}
+
+impl GcTrace for GcGuard {
+    fn trace(&mut self) {
+        if !self.flag() {
+            self.mark();
+            unsafe {
+                transmute::<TraitObject, *mut dyn GcTrace>(self.pointers).as_mut().unwrap().trace();
+            }
+        }
     }
 }
 
@@ -93,6 +112,10 @@ impl<T: GcTrace> GcRef<T> {
             pointer,
             phantom: PhantomData,
         }
+    }
+
+    pub fn get_guard(&self) -> Mut<GcGuard> {
+        self.pointer
     }
 }
 
