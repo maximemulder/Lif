@@ -81,7 +81,7 @@ impl<'a> Engine<'a> {
     }
 }
 
-impl<'a> Engine<'a> {
+impl Engine<'_> {
     pub fn alloc<T: GcTrace>(&mut self, object: T) -> GcRef<T> {
         let r#ref = self.gc.alloc(object);
         self.registries.store(r#ref);
