@@ -186,7 +186,7 @@ fn assert<'a>(engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> ReturnRef
 fn error<'a>(engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> ReturnReference<'a> {
     let message = arguments[0].call_to_string(engine)?;
     writeln!(engine.error, "{}", message).unwrap();
-    panic!();
+    Ok(engine.undefined())
 }
 
 fn exit<'a>(_: &mut Engine<'a>, _: Vec<GcValue<'a>>) -> ReturnReference<'a> {
