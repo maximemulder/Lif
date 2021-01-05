@@ -14,7 +14,6 @@ use crate::runtime::reference::{ GcReference, Reference };
 use crate::runtime::scope::{ GcScope, Scope };
 use crate::runtime::value::{ GcValue, Value };
 
-use std::cmp::min;
 use std::io::{ Read, Write };
 
 #[derive(PartialEq, Eq)]
@@ -200,21 +199,7 @@ impl<'a> Engine<'a> {
             let executable = Ref::as_ref(&node);
             let result = self.execute(executable);
             if let Err(error) = result {
-                let mut message = String::new();
-                message += &error.message;
-                if let Some(node) = error.node {
-                    let code = node.code;
-                    if let Some(name) = &code.name {
-                        message += name;
-                    }
-
-                    message += "\n";
-                    message += code.node_line(&node);
-                    message += "\n";
-                    message += &" ".repeat(code.node_shift_left(&node));
-                    message += &"^".repeat(min(code.node_str(&node).len(), code.node_shift_right(&node)));
-                    writeln!(self.error, "{}", message).unwrap();
-                }
+                writeln!(self.error, "{}", error.get_message()).unwrap();
             }
         }
     }

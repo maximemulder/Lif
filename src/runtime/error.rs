@@ -2,6 +2,8 @@ use crate::memory::Ref;
 use crate::node::Node;
 use crate::runtime::value::GcValue;
 
+use std::cmp::min;
+
 pub struct Error {
     pub message: Box<str>,
     pub node: Option<Ref<Node>>,
@@ -70,5 +72,24 @@ impl Error {
         message += &r#type.data_class().tag.to_string();
         message += ".";
         Self::new(message)
+    }
+
+    pub fn get_message(&self) -> String {
+        let mut message = String::new();
+        message += &self.message;
+        if let Some(node) = self.node {
+            let code = node.code;
+            if let Some(name) = &code.name {
+                message += name;
+            }
+
+            message += "\n";
+            message += code.node_line(&node);
+            message += "\n";
+            message += &" ".repeat(code.node_shift_left(&node));
+            message += &"^".repeat(min(code.node_str(&node).len(), code.node_shift_right(&node)));
+        }
+
+        message
     }
 }
