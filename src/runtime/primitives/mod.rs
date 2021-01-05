@@ -16,6 +16,8 @@ use crate::runtime::engine::Engine;
 use crate::runtime::gc::GcTrace;
 use crate::runtime::value::GcValue;
 
+use std::process;
+
 pub struct Primitives<'a> {
     pub any:      GcValue<'a>,
     pub array:    GcValue<'a>,
@@ -189,8 +191,8 @@ fn error<'a>(engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> ReturnRefe
     Ok(engine.undefined())
 }
 
-fn exit<'a>(_: &mut Engine<'a>, _: Vec<GcValue<'a>>) -> ReturnReference<'a> {
-    panic!();
+fn exit<'a>(_: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> ReturnReference<'a> {
+    process::exit(*arguments[0].data_integer() as i32);
 }
 
 fn include<'a>(engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> ReturnReference<'a> {
