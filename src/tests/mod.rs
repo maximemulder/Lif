@@ -95,4 +95,7 @@ fn test() {
 
     assert_output("print(if true { 1 } else { 0 });", "1");
     assert_output("print(if false { 1 } else { 0 });", "0");
+
+    assert_output("print(eval(\"6 + 6\"));", "12");
+    assert_output("exec(\"print(6 + 6);\");", "12");
 }
