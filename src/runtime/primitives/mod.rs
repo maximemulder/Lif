@@ -10,7 +10,6 @@ mod object;
 mod string;
 
 use crate::code::Code;
-use crate::memory::Ref;
 use crate::nodes::build;
 use crate::runtime::ReturnReference;
 use crate::runtime::engine::Engine;
@@ -64,27 +63,27 @@ impl<'a> Engine<'a> {
     }
 
     fn add_constant_primitive<const N: usize>(&mut self, name: &str, parameters: [GcValue<'a>; N], callback: &'a dyn Fn(&mut Engine<'a>, Vec<GcValue<'a>>) -> ReturnReference<'a>) {
-        let primitive = self.new_primitive(Ref::from_ref(name), Box::new(parameters), callback);
+        let primitive = self.new_primitive(name, Box::new(parameters), callback);
         self.add_variable(name, primitive);
     }
 
     fn add_method_primitive<const N: usize>(&mut self, mut value: GcValue<'a>, name: &str, parameters: [GcValue<'a>; N], callback: &'a dyn Fn(&mut Engine<'a>, Vec<GcValue<'a>>) -> ReturnReference<'a>) {
-        let primitive = self.new_primitive(Ref::from_ref(&name), Box::new(parameters), callback).get_value();
+        let primitive = self.new_primitive(&name, Box::new(parameters), callback).get_value();
         value.data_class_mut().methods.insert(name.to_string(), primitive);
     }
 
     pub fn populate(&mut self) {
-        self.primitives.class = self.new_class_primitive_value(Ref::from_ref("Class"));
-        self.primitives.any   = self.new_class_primitive_value(Ref::from_ref("Any"));
+        self.primitives.class = self.new_class_primitive_value("Class");
+        self.primitives.any   = self.new_class_primitive_value("Any");
 
-        self.primitives.array    = self.new_class_primitive_value(Ref::from_ref("Array"));
-        self.primitives.boolean  = self.new_class_primitive_value(Ref::from_ref("Boolean"));
-        self.primitives.function = self.new_class_primitive_value(Ref::from_ref("Function"));
-        self.primitives.generic  = self.new_class_primitive_value(Ref::from_ref("Generic"));
-        self.primitives.integer  = self.new_class_primitive_value(Ref::from_ref("Integer"));
-        self.primitives.method   = self.new_class_primitive_value(Ref::from_ref("Method"));
-        self.primitives.object   = self.new_class_primitive_value(Ref::from_ref("Object"));
-        self.primitives.string   = self.new_class_primitive_value(Ref::from_ref("String"));
+        self.primitives.array    = self.new_class_primitive_value("Array");
+        self.primitives.boolean  = self.new_class_primitive_value("Boolean");
+        self.primitives.function = self.new_class_primitive_value("Function");
+        self.primitives.generic  = self.new_class_primitive_value("Generic");
+        self.primitives.integer  = self.new_class_primitive_value("Integer");
+        self.primitives.method   = self.new_class_primitive_value("Method");
+        self.primitives.object   = self.new_class_primitive_value("Object");
+        self.primitives.string   = self.new_class_primitive_value("String");
 
         self.primitives.class.class = self.primitives.class;
         self.primitives.class.data_class_mut().parent = Some(self.primitives.any);

@@ -21,6 +21,6 @@ impl Generic {
 
 impl Executable for Generic {
     fn execute<'a>(&self, engine: &mut Engine<'a>) -> ReturnReference<'a> {
-        Ok(engine.new_generic(self.name, Ref::from_ref(&self.parameters), Ref::from_ref(&self.node)))
+        Ok(engine.new_generic(Ref::as_option(&self.name), Ref::from_ref(&self.parameters), Ref::from_ref(&self.node)))
     }
 }

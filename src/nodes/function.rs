@@ -29,6 +29,6 @@ impl Executable for Function {
             None
         };
 
-        Ok(engine.new_function(self.name, Ref::from_ref(&self.parameters), r#type, Ref::from_ref(&self.block)))
+        Ok(engine.new_function(Ref::as_option(&self.name), Ref::from_ref(&self.parameters), r#type, Ref::from_ref(&self.block)))
     }
 }

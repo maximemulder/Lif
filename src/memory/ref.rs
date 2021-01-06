@@ -29,6 +29,10 @@ impl<T: ?Sized> Ref<T> {
     pub fn as_ref(r#ref: &Self) -> &T {
         unsafe { r#ref.pointer.as_ref().unwrap() }
     }
+
+    pub fn as_option(r#ref: &Option<Ref<T>>) -> Option<&T> {
+        r#ref.as_ref().map(Ref::as_ref)
+    }
 }
 
 impl<T: ?Sized> Deref for Ref<T> {

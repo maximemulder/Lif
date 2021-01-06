@@ -27,7 +27,7 @@ impl Executable for Class {
             engine.primitives.object
         };
 
-        let class = engine.new_class(self.name, parent);
+        let class = engine.new_class(Ref::as_option(&self.name), parent);
         let mut value = class.read()?;
         let data = value.data_class_mut();
         for method in self.methods.iter() {
