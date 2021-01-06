@@ -2,6 +2,7 @@ mod any;
 mod array;
 mod boolean;
 mod class;
+mod file;
 mod function;
 mod generic;
 mod integer;
@@ -23,6 +24,7 @@ pub struct Primitives<'a> {
     pub array:    GcValue<'a>,
     pub boolean:  GcValue<'a>,
     pub class:    GcValue<'a>,
+    pub file:     GcValue<'a>,
     pub function: GcValue<'a>,
     pub generic:  GcValue<'a>,
     pub method:   GcValue<'a>,
@@ -38,6 +40,7 @@ impl<'a> Primitives<'a> {
             array:    GcValue::null(),
             boolean:  GcValue::null(),
             class:    GcValue::null(),
+            file:     GcValue::null(),
             function: GcValue::null(),
             generic:  GcValue::null(),
             method:   GcValue::null(),
@@ -50,7 +53,7 @@ impl<'a> Primitives<'a> {
 
 impl GcTrace for Primitives<'_> {
     fn trace(&mut self) {
-        for class in [self.any, self.array, self.boolean, self.class, self.function, self.generic, self.integer, self.method, self.object, self.string].iter_mut() {
+        for class in [self.any, self.array, self.boolean, self.class, self.file, self.function, self.generic, self.integer, self.method, self.object, self.string].iter_mut() {
             class.trace();
         }
     }
@@ -72,12 +75,18 @@ impl<'a> Engine<'a> {
         value.data_class_mut().methods.insert(name.to_string(), primitive);
     }
 
+    fn add_static_primitive<const N: usize>(&mut self, mut value: GcValue<'a>, name: &str, parameters: [GcValue<'a>; N], callback: &'a dyn Fn(&mut Engine<'a>, Vec<GcValue<'a>>) -> ReturnReference<'a>) {
+        let primitive = self.new_primitive(&name, Box::new(parameters), callback).get_value();
+        value.data_class_mut().statics.insert(name.to_string(), self.new_constant(primitive));
+    }
+
     pub fn populate(&mut self) {
         self.primitives.class = self.new_class_primitive_value("Class");
         self.primitives.any   = self.new_class_primitive_value("Any");
 
         self.primitives.array    = self.new_class_primitive_value("Array");
         self.primitives.boolean  = self.new_class_primitive_value("Boolean");
+        self.primitives.file     = self.new_class_primitive_value("File");
         self.primitives.function = self.new_class_primitive_value("Function");
         self.primitives.generic  = self.new_class_primitive_value("Generic");
         self.primitives.integer  = self.new_class_primitive_value("Integer");
@@ -94,6 +103,7 @@ impl<'a> Engine<'a> {
         boolean::populate(self);
         class::populate(self);
         function::populate(self);
+        file::populate(self);
         generic::populate(self);
         integer::populate(self);
         method::populate(self);
