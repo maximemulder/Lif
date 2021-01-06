@@ -94,7 +94,9 @@ impl<'a> Engine<'a> {
         boolean::populate(self);
         class::populate(self);
         function::populate(self);
+        generic::populate(self);
         integer::populate(self);
+        method::populate(self);
         object::populate(self);
         string::populate(self);
 

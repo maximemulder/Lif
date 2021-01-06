@@ -5,6 +5,7 @@ use crate::runtime::value::GcValue;
 
 pub fn populate(engine: &mut Engine) {
     let Primitives { any, boolean, .. } = engine.primitives;
+    engine.add_constant_value("Boolean", boolean);
     engine.add_method_primitive(boolean, "to_string", [boolean],      &to_string);
     engine.add_method_primitive(boolean, "__eq__",    [boolean, any], &eq);
     engine.add_method_primitive(boolean, "__not__",   [boolean],      &not);
