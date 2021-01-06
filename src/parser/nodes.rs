@@ -3,9 +3,23 @@ use crate::parser::arena::Arena;
 use crate::parser::ascent::*;
 use crate::parser::descent::*;
 
-pub fn get() -> (Arena::<dyn Descent>, Arena::<dyn Ascent>, usize) {
+pub fn get() -> (Arena::<dyn Descent>, Arena::<dyn Ascent>) {
     let descents = Arena::<dyn Descent>::new();
     let ascents = Arena::<dyn Ascent>::new();
+
+    let program = descents.declare(); // 0
+
+    let expression = descents.declare(); // 1
+
+    let statements = descents.declare();
+
+    let expression_base = descents.declare();
+
+    let binop_base = descents.declare();
+
+    let expression_option = descents.declare();
+
+    let extension = ascents.declare();
 
     let keyword_as              = descents.create(DescentToken::new(&elements::keywords::AS));
     let keyword_catch           = descents.create(DescentToken::new(&elements::keywords::CATCH));
@@ -95,18 +109,6 @@ pub fn get() -> (Arena::<dyn Descent>, Arena::<dyn Ascent>, usize) {
     let variable_identifier     = descents.create(DescentToken::new(&elements::variables::IDENTIFIER));
     let variable_string         = descents.create(DescentToken::new(&elements::variables::STRING));
     let variable_number         = descents.create(DescentToken::new(&elements::variables::NUMBER));
-
-    let statements = descents.declare();
-
-    let expression = descents.declare();
-
-    let expression_base = descents.declare();
-
-    let binop_base = descents.declare();
-
-    let expression_option = descents.declare();
-
-    let extension = ascents.declare();
 
     let name = descents.create(DescentElement::new(
         descents.create(DescentOption::new(variable_identifier)),
@@ -434,10 +436,10 @@ pub fn get() -> (Arena::<dyn Descent>, Arena::<dyn Ascent>, usize) {
         &elements::productions::STATEMENTS
     ));
 
-    let program = descents.create(DescentElement::new(
+    descents.define(program, DescentElement::new(
         statements,
         &elements::productions::PROGRAM
     ));
 
-    (descents, ascents, program)
+    (descents, ascents)
 }

@@ -11,6 +11,7 @@ mod string;
 
 use crate::code::Code;
 use crate::memory::Ref;
+use crate::nodes::build;
 use crate::runtime::ReturnReference;
 use crate::runtime::engine::Engine;
 use crate::runtime::gc::GcTrace;
@@ -102,6 +103,8 @@ impl<'a> Engine<'a> {
 
         self.add_constant_primitive("assert",  [any],     &assert);
         self.add_constant_primitive("error",   [any],     &error);
+        self.add_constant_primitive("eval",    [string],  &eval);
+        self.add_constant_primitive("exec",    [string],  &exec);
         self.add_constant_primitive("exit",    [integer], &exit);
         self.add_constant_primitive("include", [string],  &include);
         self.add_constant_primitive("new",     [class],   &new);
@@ -191,12 +194,27 @@ fn error<'a>(engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> ReturnRefe
     Ok(engine.undefined())
 }
 
+fn eval<'a>(engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> ReturnReference<'a> {
+    let code = Code::from_string(&engine.parser, 1, &build::expression, &arguments[0].data_string());
+    Ok(match engine.run(code) {
+        Some(reference) => reference,
+        None => engine.undefined(),
+    })
+}
+
+fn exec<'a>(engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> ReturnReference<'a> {
+    let code = Code::from_string(&engine.parser, 0, &build::program, &arguments[0].data_string());
+    engine.run(code);
+    Ok(engine.undefined())
+}
+
 fn exit<'a>(_: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> ReturnReference<'a> {
     process::exit(*arguments[0].data_integer() as i32);
 }
 
 fn include<'a>(engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> ReturnReference<'a> {
-    engine.run(Code::from_file(&arguments[0].data_string()).unwrap());
+    let code = Code::from_file(&engine.parser, 0, &build::program, &arguments[0].data_string()).unwrap();
+    engine.run(code);
     Ok(engine.undefined())
 }
 

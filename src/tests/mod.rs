@@ -1,15 +1,22 @@
 use crate::code::Code;
+use crate::nodes::build;
 use crate::parser::Parser;
 use crate::runtime::engine::Engine;
 
 use std::io::empty;
 
 fn assert_output(text: &str, result: &str) {
-    let code = Code::from_string(text);
+    let parser = Parser::new();
     let mut input  = empty();
     let mut output = Vec::new();
     let mut error  = Vec::new();
-    Engine::new(&Parser::new(), &mut input, &mut output, &mut error).run(code);
+
+    {
+        let mut engine = Engine::new(&parser, &mut input, &mut output, &mut error);
+        let code = Code::from_string(engine.parser, 0, &build::program, text);
+        engine.run(code);
+    }
+
     assert!(String::from_utf8(error).unwrap().is_empty());
     assert_eq!(String::from_utf8(output).unwrap(), format!("{}\n", result));
 }

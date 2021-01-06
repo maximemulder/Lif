@@ -1,5 +1,7 @@
+use crate::memory::{ Own, Ref };
 use crate::node::Node as ANode;
 use crate::nodes::Node as CNode;
+use crate::parser::Parser;
 use std::fs::read_to_string;
 
 pub struct Code {
@@ -10,23 +12,26 @@ pub struct Code {
 }
 
 impl Code {
-    pub fn from_file(name: &str) -> Option<Self> {
-        let text = read_to_string(name).ok()?;
-        Some(Self {
-            name: Some(Box::from(name)),
+    fn new(parser: &Parser, production: usize, program: &dyn Fn(Ref<ANode>) -> CNode, name: Option<&str>, text: Box<str>) -> Own<Self> {
+        let mut code = Own::new(Self {
+            name: name.map(Box::from),
             text: Box::from(text),
             ast: None,
             cst: None,
-        })
+        });
+
+        let ast = parser.parse(production, code.get_ref()).unwrap();
+        code.ast = Some(ast);
+        code.cst = Some(program(Ref::from_ref(&code.ast.as_ref().unwrap())));
+        code
     }
 
-    pub fn from_string(text: &str) -> Self {
-        Self {
-            name: None,
-            text: Box::from(text),
-            ast: None,
-            cst: None,
-        }
+    pub fn from_file(parser: &Parser, production: usize, program: &dyn Fn(Ref<ANode>) -> CNode, name: &str) -> Option<Own<Self>> {
+        Some(Code::new(parser, production, program, Some(name), read_to_string(name).ok()?.into_boxed_str()))
+    }
+
+    pub fn from_string(parser: &Parser, production: usize, program: &dyn Fn(Ref<ANode>) -> CNode, text: &str) -> Own<Self> {
+        Code::new(parser, production, program, None, Box::from(text))
     }
 
     pub fn node_str(&self, node: &ANode) -> &str {

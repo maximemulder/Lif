@@ -18,7 +18,6 @@ use std::cmp::min;
 pub struct Parser {
     descents: Arena<dyn Descent>,
     ascents: Arena<dyn Ascent>,
-    program: usize,
 }
 
 impl Parser {
@@ -27,14 +26,13 @@ impl Parser {
         Self {
             descents: grammar.0,
             ascents:  grammar.1,
-            program:  grammar.2,
         }
     }
 
-    pub fn parse(&self, code: Ref<Code>) -> Option<Node> {
+    pub fn parse(&self, production: usize, code: Ref<Code>) -> Option<Node> {
         let tokens = lex(code);
         let mut parse = Parse::new(self, code, &tokens);
-        parse.parse(self.program)
+        parse.parse(production)
     }
 }
 

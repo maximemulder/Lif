@@ -54,7 +54,7 @@ fn statement<'a>(node: Ref<SyntaxNode>) -> Node {
     }))
 }
 
-fn expression<'a>(node: Ref<SyntaxNode>) -> Node {
+pub fn expression<'a>(node: Ref<SyntaxNode>) -> Node {
     let child = node.child(0);
     match *child.element {
         elements::structures::CLASS        => class(child),

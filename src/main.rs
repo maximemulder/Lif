@@ -27,6 +27,7 @@ mod tests;
 
 use code::Code;
 use parser::Parser;
+use nodes::build;
 use runtime::engine::Engine;
 use std::env::args;
 use std::io::{ stderr, stdin, stdout };
@@ -38,10 +39,11 @@ fn main() {
         panic!();
     }
 
-    let code = Code::from_file(&args[1]).unwrap();
     let parser = Parser::new();
     let mut input  = stdin();
     let mut output = stdout();
     let mut error  = stderr();
-    Engine::new(&parser, &mut input, &mut output, &mut error).run(code);
+    let mut engine = Engine::new(&parser, &mut input, &mut output, &mut error);
+    let code = Code::from_file(engine.parser, 0, &build::program, &args[1]).unwrap();
+    engine.run(code);
 }

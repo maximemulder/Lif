@@ -167,19 +167,16 @@ impl<'a> Engine<'a> {
         Ok(reference)
     }
 
-    pub fn run(&mut self, code: Code) {
-        use crate::nodes::build::program;
-        let mut own = Own::new(code);
-        if let Some(ast) = self.parser.parse(own.get_ref()) {
-            own.ast = Some(ast);
-            own.cst = Some(program(Ref::from_ref(&own.ast.as_ref().unwrap())));
-            self.codes.push(own);
-            let node = Ref::from_ref(self.codes.last().unwrap().cst.as_ref().unwrap());
-            let executable = Ref::as_ref(&node);
-            let result = self.execute(executable);
-            if let Err(error) = result {
+    pub fn run(&mut self, code: Own<Code>) -> Option<GcReference<'a>> {
+        self.codes.push(code);
+        let node = Ref::from_ref(self.codes.last().unwrap().cst.as_ref().unwrap());
+        let executable = Ref::as_ref(&node);
+        match self.execute(executable) {
+            Ok(reference) => Some(reference),
+            Err(error) => {
                 writeln!(self.error, "{}", error.get_message()).unwrap();
-            }
+                None
+            },
         }
     }
 }
