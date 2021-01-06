@@ -89,17 +89,16 @@ impl<'a> Engine<'a> {
         self.primitives.class.data_class_mut().parent = Some(self.primitives.any);
         self.primitives.any.data_class_mut().parent = None;
 
-        let any      = self.primitives.any;
-        let array    = self.primitives.array;
-        let boolean  = self.primitives.boolean;
-        let class    = self.primitives.class;
-        let function = self.primitives.function;
-        let generic  = self.primitives.generic;
-        let integer  = self.primitives.integer;
-        let method   = self.primitives.method;
-        let object   = self.primitives.object;
-        let string   = self.primitives.string;
+        any::populate(self);
+        array::populate(self);
+        boolean::populate(self);
+        class::populate(self);
+        function::populate(self);
+        integer::populate(self);
+        object::populate(self);
+        string::populate(self);
 
+        let Primitives { any, class, integer, string, .. } = self.primitives;
         self.add_constant_primitive("assert",  [any],     &assert);
         self.add_constant_primitive("error",   [any],     &error);
         self.add_constant_primitive("eval",    [string],  &eval);
@@ -108,74 +107,6 @@ impl<'a> Engine<'a> {
         self.add_constant_primitive("include", [string],  &include);
         self.add_constant_primitive("new",     [class],   &new);
         self.add_constant_primitive("print",   [any],     &print);
-
-        self.add_constant_value("Any",      any);
-        self.add_constant_value("Array",    array);
-        self.add_constant_value("Boolean",  boolean);
-        self.add_constant_value("Class",    class);
-        self.add_constant_value("Function", function);
-        self.add_constant_value("Integer",  integer);
-        self.add_constant_value("Object",   object);
-        self.add_constant_value("String",   string);
-
-        self.add_method_primitive(any, "__cn__", [any, string], &any::cn);
-        self.add_method_primitive(any, "__eq__", [any, any],    &any::eq);
-        self.add_method_primitive(any, "__ne__", [any, any],    &any::ne);
-        self.add_method_primitive(any, "__gt__", [any, any],    &any::gt);
-        self.add_method_primitive(any, "__le__", [any, any],    &any::le);
-        self.add_method_primitive(any, "__ge__", [any, any],    &any::ge);
-
-        self.add_method_primitive(array, "to_string", [array],               &array::to_string);
-        self.add_method_primitive(array, "copy",      [array],               &array::copy);
-        self.add_method_primitive(array, "append",    [array, any],          &array::append);
-        self.add_method_primitive(array, "prepend",   [array, any],          &array::prepend);
-        self.add_method_primitive(array, "insert",    [array, integer, any], &array::insert);
-        self.add_method_primitive(array, "remove",    [array, integer],      &array::remove);
-        self.add_method_primitive(array, "__id__",    [array, array],        &array::id);
-
-        self.add_method_primitive(boolean, "to_string", [boolean],      &boolean::to_string);
-        self.add_method_primitive(boolean, "__eq__",    [boolean, any], &boolean::eq);
-        self.add_method_primitive(boolean, "__not__",   [boolean],      &boolean::not);
-
-        self.add_method_primitive(class, "to_string", [class],         &class::to_string);
-        self.add_method_primitive(class, "__cn__",    [class, string], &class::cn);
-        self.add_method_primitive(class, "__id__",    [class],         &class::id);
-
-        self.add_method_primitive(function, "to_string", [function],        &function::to_string);
-        self.add_method_primitive(function, "__cl__",    [function, array], &function::cl);
-
-        self.add_method_primitive(generic, "to_string", [generic],        &generic::to_string);
-        self.add_method_primitive(generic, "__gn__",    [generic, array], &generic::gn);
-
-        self.add_method_primitive(integer, "to_string", [integer],          &integer::to_string);
-        self.add_method_primitive(integer, "__eq__",    [integer, any],     &integer::eq);
-        self.add_method_primitive(integer, "__lt__",    [integer, integer], &integer::lt);
-        self.add_method_primitive(integer, "__pos__",   [integer],          &integer::pos);
-        self.add_method_primitive(integer, "__neg__",   [integer],          &integer::neg);
-        self.add_method_primitive(integer, "__add__",   [integer, integer], &integer::add);
-        self.add_method_primitive(integer, "__sub__",   [integer, integer], &integer::sub);
-        self.add_method_primitive(integer, "__mul__",   [integer, integer], &integer::mul);
-        self.add_method_primitive(integer, "__div__",   [integer, integer], &integer::div);
-        self.add_method_primitive(integer, "__rem__",   [integer, integer], &integer::rem);
-        self.add_method_primitive(integer, "__bnot__",  [integer],          &integer::bnot);
-        self.add_method_primitive(integer, "__band__",  [integer, integer], &integer::band);
-        self.add_method_primitive(integer, "__bor__",   [integer, integer], &integer::bor);
-        self.add_method_primitive(integer, "__bxor__",  [integer, integer], &integer::bxor);
-        self.add_method_primitive(integer, "__bls__",   [integer, integer], &integer::bls);
-        self.add_method_primitive(integer, "__brs__",   [integer, integer], &integer::brs);
-        self.add_method_primitive(integer, "__bcls__",  [integer, integer], &integer::bcls);
-        self.add_method_primitive(integer, "__bcrs__",  [integer, integer], &integer::bcrs);
-
-        self.add_method_primitive(method, "to_string", [method],        &method::to_string);
-        self.add_method_primitive(method, "__gn__",    [method, array], &method::gn);
-        self.add_method_primitive(method, "__cl__",    [method, array], &method::cl);
-
-        self.add_method_primitive(object, "to_string", [object],         &object::to_string);
-        self.add_method_primitive(object, "__cn__",    [object, string], &object::cn);
-
-        self.add_method_primitive(string, "to_string", [string],      &string::to_string);
-        self.add_method_primitive(string, "__eq__",    [string, any], &string::eq);
-        self.add_method_primitive(string, "__add__",   [string, any], &string::add);
     }
 }
 

@@ -1,8 +1,16 @@
 use crate::runtime::ReturnReference;
 use crate::runtime::engine::Engine;
+use crate::runtime::primitives::Primitives;
 use crate::runtime::value::GcValue;
 
-pub fn to_string<'a>(engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> ReturnReference<'a> {
+pub fn populate(engine: &mut Engine) {
+    let Primitives { object, string, .. } = engine.primitives;
+    engine.add_constant_value("Object", object);
+    engine.add_method_primitive(object, "to_string", [object],         &to_string);
+    engine.add_method_primitive(object, "__cn__",    [object, string], &cn);
+}
+
+fn to_string<'a>(engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> ReturnReference<'a> {
     let mut string = String::from("{");
     let attributes = &arguments[0].data_object().attributes.clone();
     for (name, attribute) in attributes {
@@ -20,7 +28,7 @@ pub fn to_string<'a>(engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> Re
     Ok(engine.new_string(string))
 }
 
-pub fn cn<'a>(engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> ReturnReference<'a> {
+fn cn<'a>(engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> ReturnReference<'a> {
     let mut this = arguments[0];
     let name = arguments[1].data_string().clone();
     if let Some(method) = this.get_method(&name) {
