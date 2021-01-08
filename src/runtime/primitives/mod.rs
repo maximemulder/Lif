@@ -7,6 +7,7 @@ mod function;
 mod generic;
 mod integer;
 mod method;
+mod nullable;
 mod object;
 mod string;
 
@@ -28,6 +29,7 @@ pub struct Primitives<'a> {
     pub function: GcValue<'a>,
     pub generic:  GcValue<'a>,
     pub method:   GcValue<'a>,
+    pub nullable: GcValue<'a>,
     pub object:   GcValue<'a>,
     pub integer:  GcValue<'a>,
     pub string:   GcValue<'a>,
@@ -44,6 +46,7 @@ impl<'a> Primitives<'a> {
             function: GcValue::null(),
             generic:  GcValue::null(),
             method:   GcValue::null(),
+            nullable: GcValue::null(),
             object:   GcValue::null(),
             integer:  GcValue::null(),
             string:   GcValue::null(),
@@ -53,7 +56,20 @@ impl<'a> Primitives<'a> {
 
 impl GcTrace for Primitives<'_> {
     fn trace(&mut self) {
-        for class in [self.any, self.array, self.boolean, self.class, self.file, self.function, self.generic, self.integer, self.method, self.object, self.string].iter_mut() {
+        for class in [
+            self.any,
+            self.array,
+            self.boolean,
+            self.class,
+            self.file,
+            self.function,
+            self.generic,
+            self.integer,
+            self.method,
+            self.nullable,
+            self.object,
+            self.string
+        ].iter_mut() {
             class.trace();
         }
     }
@@ -91,6 +107,7 @@ impl<'a> Engine<'a> {
         self.primitives.generic  = self.new_class_primitive_value("Generic");
         self.primitives.integer  = self.new_class_primitive_value("Integer");
         self.primitives.method   = self.new_class_primitive_value("Method");
+        self.primitives.nullable = self.new_class_primitive_value("Option");
         self.primitives.object   = self.new_class_primitive_value("Object");
         self.primitives.string   = self.new_class_primitive_value("String");
 
@@ -108,6 +125,7 @@ impl<'a> Engine<'a> {
         integer::populate(self);
         method::populate(self);
         object::populate(self);
+        nullable::populate(self);
         string::populate(self);
 
         let Primitives { any, class, integer, string, .. } = self.primitives;

@@ -74,6 +74,10 @@ impl Error {
         Self::new(message)
     }
 
+    pub fn new_nullable() -> Self {
+        Self::new(String::from("RUNTIME ERROR: Cannot read the value of a null option."))
+    }
+
     pub fn get_message(&self) -> String {
         let mut message = String::new();
         message += &self.message;

@@ -47,6 +47,10 @@ impl<'a> Engine<'a> {
         self.new_value(parent, Data::new_object())
     }
 
+    pub fn new_nullable_value(&mut self, option: Option<GcValue<'a>>) -> GcValue<'a> {
+        self.new_value(self.primitives.nullable, Data::new_nullable(option))
+    }
+
     pub fn new_primitive_value(&mut self, name: &str, parameters: Box<[GcValue<'a>]>, callback: &'a dyn Fn(&mut Engine<'a>, Vec<GcValue<'a>>) -> ReturnReference<'a>) -> GcValue<'a> {
         let tag = self.taggers.functions.generate(Some(Box::from(name)));
         self.new_value(self.primitives.function, Data::new_primitive(tag, parameters, callback))
@@ -95,6 +99,11 @@ impl<'a> Engine<'a> {
 
     pub fn new_object(&mut self, parent: GcValue<'a>) -> GcReference<'a> {
         let value = self.new_object_value(parent);
+        self.new_constant(value)
+    }
+
+    pub fn new_nullable(&mut self, option: Option<GcValue<'a>>) -> GcReference<'a> {
+        let value = self.new_nullable_value(option);
         self.new_constant(value)
     }
 

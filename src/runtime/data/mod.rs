@@ -3,6 +3,7 @@ mod class;
 mod function;
 mod generic;
 mod method;
+mod nullable;
 mod object;
 mod primitive;
 mod tag;
@@ -12,6 +13,7 @@ pub use class::Class;
 pub use function::Function;
 pub use generic::Generic;
 pub use method::Method;
+pub use nullable::Nullable;
 pub use object::Object;
 pub use primitive::Primitive;
 pub use tag::{ Tag, Tagger };
@@ -33,9 +35,9 @@ pub enum Data<'a> {
     Generic(Generic),
     Integer(isize),
     Method(Method<'a>),
+    Nullable(Nullable<'a>),
     Object(Object<'a>),
     String(String),
-    Null,
 }
 
 impl<'a> Data<'a> {
@@ -67,6 +69,10 @@ impl<'a> Data<'a> {
         Data::Method(Method::new(function, this))
     }
 
+    pub fn new_nullable(value: Option<GcValue<'a>>) -> Self {
+        Data::Nullable(Nullable::new(value))
+    }
+
     pub fn new_object() -> Self {
         Data::Object(Object::new())
     }
@@ -89,6 +95,7 @@ impl GcTrace for Data<'_> {
             Data::Callable(callable) => callable.trace(),
             Data::Class(class)       => class.trace(),
             Data::Method(method)     => method.trace(),
+            Data::Nullable(nullable) => nullable.trace(),
             Data::Object(object)     => object.trace(),
             _ => (),
         }
