@@ -27,7 +27,6 @@ fn cn<'a>(engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> ReturnReferen
     let mut this = arguments[0];
     let name = arguments[1].data_string().clone();
     if let Some(method) = this.get_method(&name) {
-        println!("{}", name);
         return Ok(engine.new_method(method, this));
     }
 

@@ -8,8 +8,8 @@ pub fn populate(engine: &mut Engine) {
     let Primitives { any, nullable, .. } = engine.primitives;
     let null = engine.new_nullable_value(None);
     engine.add_constant_value("null", null);
-    engine.add_constant_primitive("some", [any], &new);
     engine.add_constant_value("Option", nullable);
+    engine.add_static_primitive(nullable, "__cl__",    [any], &new);
     engine.add_method_primitive(nullable, "to_string", [nullable],      &to_string);
     engine.add_method_primitive(nullable, "get",       [nullable],      &get);
 }

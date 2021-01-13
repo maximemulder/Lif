@@ -35,6 +35,8 @@ impl Executable for Sequence {
         }
 
         let array = engine.new_array_value(arguments);
-        value.call_method(engine, &self.operator, vec![array])
+        let operator = engine.new_string_value(self.operator.to_string());
+        let callable = value.call_method(engine, "__cn__", vec![operator])?.read()?;
+        callable.call_method(engine, &self.operator, vec![array])
     }
 }

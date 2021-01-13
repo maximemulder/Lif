@@ -1,10 +1,11 @@
 use crate::runtime::ReturnReference;
 use crate::runtime::engine::Engine;
+use crate::runtime::error::Error;
 use crate::runtime::primitives::Primitives;
 use crate::runtime::value::GcValue;
 
 pub fn populate(engine: &mut Engine) {
-    let Primitives { any, array, integer, .. } = engine.primitives;
+    let Primitives { any, array, integer, string, .. } = engine.primitives;
     engine.add_constant_value("Array", array);
     engine.add_method_primitive(array, "to_string", [array],               &to_string);
     engine.add_method_primitive(array, "copy",      [array],               &copy);
@@ -12,7 +13,22 @@ pub fn populate(engine: &mut Engine) {
     engine.add_method_primitive(array, "prepend",   [array, any],          &prepend);
     engine.add_method_primitive(array, "insert",    [array, integer, any], &insert);
     engine.add_method_primitive(array, "remove",    [array, integer],      &remove);
+    engine.add_method_primitive(array, "__cn__",    [array, string],       &cn);
     engine.add_method_primitive(array, "__id__",    [array, array],        &id);
+}
+
+fn cn<'a>(engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> ReturnReference<'a> {
+    let this = arguments[0];
+    let name = arguments[1].data_string();
+    if name == "__id__" {
+        return Ok(engine.new_constant(arguments[0]))
+    }
+
+    if let Some(method) = this.get_method(&name) {
+        return Ok(engine.new_method(method, this));
+    }
+
+    Err(Error::new_undefined_method(&name, this))
 }
 
 fn to_string<'a>(engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> ReturnReference<'a> {
