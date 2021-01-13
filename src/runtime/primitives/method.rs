@@ -17,13 +17,7 @@ fn to_string<'a>(engine: &mut Engine<'a>, _: Vec<GcValue<'a>>) -> ReturnReferenc
 
 fn gn<'a>(engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> ReturnReference<'a> {
     let method = arguments[0].data_method();
-    let mut elements = Vec::new();
-    for argument in arguments[1].data_array().iter() {
-        elements.push(*argument);
-    }
-
-    let array = engine.new_array_value(elements);
-    let function = method.function.call_method(engine, "__gn__", vec![array])?.read()?;
+    let function = method.function.call_method(engine, "__gn__", vec![arguments[1]])?.read()?;
     Ok(engine.new_method(function, method.this))
 }
 
