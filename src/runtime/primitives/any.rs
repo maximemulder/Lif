@@ -1,6 +1,5 @@
 use crate::runtime::ReturnReference;
 use crate::runtime::engine::Engine;
-use crate::runtime::error::Error;
 use crate::runtime::primitives::Primitives;
 use crate::runtime::value::GcValue;
 
@@ -18,11 +17,7 @@ pub fn populate(engine: &mut Engine) {
 fn cn<'a>(engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> ReturnReference<'a> {
     let this = arguments[0];
     let name = arguments[1].data_string();
-    if let Some(method) = this.get_method(&name) {
-        return Ok(engine.new_method(method, this));
-    }
-
-    Err(Error::new_undefined_method(&name, this))
+    Ok(engine.new_method(this.get_method(&name)?, this))
 }
 
 fn eq<'a>(engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> ReturnReference<'a> {

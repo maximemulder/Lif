@@ -46,8 +46,12 @@ impl<'a> GcValue<'a> {
 }
 
 impl<'a> GcValue<'a> {
-    pub fn get_method(&self, name: &str) -> Option<GcValue<'a>> {
-        self.class.data_class().get_method(name)
+    pub fn get_method(&self, name: &str) -> Return<GcValue<'a>> {
+        if let Some(method) = self.class.data_class().get_method(name) {
+            Ok(method)
+        } else {
+            Err(Error::new_undefined_method(name, self.class))
+        }
     }
 
     pub fn call(self, engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> ReturnReference<'a> {
@@ -61,7 +65,7 @@ impl<'a> GcValue<'a> {
     }
 
     pub fn call_method_self(self, engine: &mut Engine<'a>, name: &str, arguments: Vec<GcValue<'a>>) -> ReturnReference<'a> {
-        self.get_method(name).unwrap().call(engine, arguments)
+        self.get_method(name)?.call(engine, arguments)
     }
 
     pub fn call_to_string(self, engine: &mut Engine<'a>) -> Return<String> {

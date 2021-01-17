@@ -10,10 +10,10 @@ pub struct Error {
 }
 
 impl Error {
-    fn new(message: String) -> Self {
+    fn new(message: String, node: Option<Ref<Node>>) -> Self {
         Self {
-            message: Box::from(message),
-            node: None
+            message: message.into_boxed_str(),
+            node,
         }
     }
 
@@ -21,61 +21,61 @@ impl Error {
         let mut message = String::new();
         message += "RUNTIME ERROR: ";
         message += error;
-        Self::new(message)
+        Self::new(message, None)
     }
 
     pub fn new_undefined_method(method: &str, class: GcValue) -> Self {
         let mut message = String::new();
-        message += "RUNTIME ERROR: Method \"";
+        message += "Method \"";
         message += method;
         message += "\" is undefined in the type ";
         message += &class.data_class().tag.to_string();
         message += ".";
-        Self::new(message)
+        Self::new_runtime(&message)
     }
 
     pub fn new_undeclared_variable(variable: &str) -> Self {
         let mut message = String::new();
-        message += "RUNTIME ERROR: Variable \"";
+        message += "Variable \"";
         message += variable;
         message += "\" is not declared.";
-        Self::new(message)
+        Self::new_runtime(&message)
     }
 
     pub fn new_control() -> Self {
-        Self::new(String::from("RUNTIME ERROR: Cannot loop control out of a function."))
+        Self::new_runtime("Cannot loop control out of a function.")
     }
 
     pub fn new_undefined() -> Self {
-        Self::new(String::from("RUNTIME ERROR: Cannot read an undefined reference."))
+        Self::new_runtime("Cannot read an undefined reference.")
     }
 
     pub fn new_constant_write() -> Self {
-        Self::new(String::from("RUNTIME ERROR: Cannot write data into a constant."))
+        Self::new_runtime("Cannot write data into a constant.")
     }
 
     pub fn new_arguments(parameters: usize, arguments: usize) -> Self {
         let mut message = String::new();
-        message += "RUNTIME ERROR: Provided ";
+        message += "Provided ";
         message += &arguments.to_string();
         message += " arguments while the function expects ";
         message += &parameters.to_string();
         message += " parameters.";
-        Self::new(message)
+        Self::new_runtime(&message)
     }
 
     pub fn new_cast(value: GcValue, r#type: GcValue) -> Self {
         let mut message = String::new();
-        message += "RUNTIME ERROR: Cannot cast a value of the type ";
+        message += "Cannot cast a value of the type ";
         message += &value.class.data_class().tag.to_string();
         message += " to the type ";
         message += &r#type.data_class().tag.to_string();
         message += ".";
-        Self::new(message)
+        Self::new_runtime(&message)
     }
 
     pub fn new_nullable() -> Self {
-        Self::new(String::from("RUNTIME ERROR: Cannot read the value of a null option."))
+        Self::new_runtime("Cannot get the content of a null value.")
     }
 
     pub fn get_message(&self) -> String {
@@ -84,6 +84,7 @@ impl Error {
         if let Some(node) = self.node {
             let code = node.code;
             if let Some(name) = &code.name {
+                message += " ";
                 message += name;
             }
 

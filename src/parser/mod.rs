@@ -107,7 +107,6 @@ impl<'a> Parse<'a> {
     }
 
     pub fn parse(&mut self, program: usize) -> Option<Node> {
-        let begin = std::time::Instant::now();
         let node = if let Some(mut nodes) = self.parser.descents.get(program).descent(self) {
             nodes.pop()
         } else {
