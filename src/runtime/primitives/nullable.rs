@@ -9,9 +9,9 @@ pub fn populate(engine: &mut Engine) {
     let null = engine.new_nullable_value(None);
     engine.add_constant_value("null", null);
     engine.add_constant_value("Option", nullable);
-    engine.add_static_primitive(nullable, "__cl__",    [any], &new);
-    engine.add_method_primitive(nullable, "to_string", [nullable],      &to_string);
-    engine.add_method_primitive(nullable, "get",       [nullable],      &get);
+    engine.add_static_primitive(nullable, "new",       [any],      &new);
+    engine.add_method_primitive(nullable, "to_string", [nullable], &to_string);
+    engine.add_method_primitive(nullable, "get",       [nullable], &get);
 }
 
 fn to_string<'a>(engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> ReturnReference<'a> {

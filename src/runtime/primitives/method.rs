@@ -4,12 +4,11 @@ use crate::runtime::primitives::Primitives;
 use crate::runtime::value::GcValue;
 
 pub fn populate(engine: &mut Engine) {
-    let Primitives { array, method, string, .. } = engine.primitives;
+    let Primitives { array, method, .. } = engine.primitives;
     engine.add_constant_value("Method", method);
-    engine.add_method_primitive(method, "to_string", [method],         &to_string);
-    engine.add_method_primitive(method, "__gn__",    [method, array],  &gn);
-    engine.add_method_primitive(method, "__cl__",    [method, array],  &cl);
-    engine.add_method_primitive(method, "__cn__",    [method, string], &cn);
+    engine.add_method_primitive(method, "to_string", [method],        &to_string);
+    engine.add_method_primitive(method, "__gn__",    [method, array], &gn);
+    engine.add_method_primitive(method, "__cl__",    [method, array], &cl);
 }
 
 fn to_string<'a>(engine: &mut Engine<'a>, _: Vec<GcValue<'a>>) -> ReturnReference<'a> {
@@ -20,16 +19,6 @@ fn gn<'a>(engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> ReturnReferen
     let method = arguments[0].data_method();
     let function = method.function.call_method(engine, "__gn__", vec![arguments[1]])?.read()?;
     Ok(engine.new_method(function, method.this))
-}
-
-fn cn<'a>(engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> ReturnReference<'a> {
-    let this = arguments[0];
-    let name = arguments[1].data_string();
-    if name == "__cl__" || name == "__gn__" {
-        return Ok(engine.new_constant(this));
-    }
-
-    Ok(engine.new_method(this.get_method(&name)?, this))
 }
 
 fn cl<'a>(engine: &mut Engine<'a>, mut arguments: Vec<GcValue<'a>>) -> ReturnReference<'a> {

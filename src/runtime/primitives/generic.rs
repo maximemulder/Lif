@@ -5,25 +5,14 @@ use crate::runtime::primitives::Primitives;
 use crate::runtime::value::GcValue;
 
 pub fn populate(engine: &mut Engine) {
-    let Primitives { array, generic, string, .. } = engine.primitives;
+    let Primitives { array, generic, .. } = engine.primitives;
     engine.add_constant_value("Generic", generic);
-    engine.add_method_primitive(generic, "to_string", [generic],         &to_string);
-    engine.add_method_primitive(generic, "__cn__",    [generic, string], &cn);
-    engine.add_method_primitive(generic, "__gn__",    [generic, array],  &gn);
+    engine.add_method_primitive(generic, "to_string", [generic],        &to_string);
+    engine.add_method_primitive(generic, "__gn__",    [generic, array], &gn);
 }
 
 fn to_string<'a>(engine: &mut Engine<'a>, _: Vec<GcValue<'a>>) -> ReturnReference<'a> {
     Ok(engine.new_string("GENERIC".to_string()))
-}
-
-fn cn<'a>(engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> ReturnReference<'a> {
-    let this = arguments[0];
-    let name = arguments[1].data_string();
-    if name == "__gn__" {
-        return Ok(engine.new_constant(arguments[0]))
-    }
-
-    Ok(engine.new_method(this.get_method(&name)?, this))
 }
 
 fn gn<'a>(engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> ReturnReference<'a> {
