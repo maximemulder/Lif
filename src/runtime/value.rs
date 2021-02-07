@@ -54,18 +54,13 @@ impl<'a> GcValue<'a> {
         }
     }
 
-    pub fn call(self, engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> ReturnReference<'a> {
-        let callable = self.data_callable().duplicate();
-        callable.execute(engine, arguments)
-    }
-
     pub fn call_method(self, engine: &mut Engine<'a>, name: &str, mut arguments: Vec<GcValue<'a>>) -> ReturnReference<'a> {
         arguments.insert(0, self);
         self.call_method_self(engine, name, arguments)
     }
 
     pub fn call_method_self(self, engine: &mut Engine<'a>, name: &str, arguments: Vec<GcValue<'a>>) -> ReturnReference<'a> {
-        self.get_method(name)?.call(engine, arguments)
+        self.get_method(name)?.data_callable().call(engine, arguments)
     }
 
     pub fn call_to_string(self, engine: &mut Engine<'a>) -> Return<String> {

@@ -23,7 +23,7 @@ impl<'a> Primitive<'a> {
 }
 
 impl<'a> Callable<'a> for Primitive<'a> {
-    fn execute(&self, engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> ReturnReference<'a> {
+    fn call(&self, engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> ReturnReference<'a> {
         if arguments.len() != self.parameters.len() {
             return Err(Error::new_arguments(self.parameters.len(), arguments.len()));
         }
@@ -33,10 +33,6 @@ impl<'a> Callable<'a> for Primitive<'a> {
         }
 
         (self.callback)(engine, arguments)
-    }
-
-    fn duplicate<'c>(&'c self) -> Box<dyn Callable<'a> + 'c> {
-        Box::new(self.clone())
     }
 
     fn get_tag(&self) -> Tag {

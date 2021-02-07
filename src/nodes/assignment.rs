@@ -29,7 +29,7 @@ impl Executable for Assignment {
         let mut expression = execute!(engine, &self.expression).read()?;
         if let Some(operator) = &self.operator {
             let left = reference.read()?;
-            expression = left.get_method(operator)?.call(engine, vec![left, expression])?.read()?;
+            expression = left.call_method(engine, operator, vec![expression])?.read()?;
         }
 
         reference.write(expression)?;

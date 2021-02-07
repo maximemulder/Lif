@@ -5,7 +5,6 @@ use crate::runtime::gc::GcTrace;
 use crate::runtime::value::GcValue;
 
 pub trait Callable<'a>: GcTrace {
-    fn execute(&self, engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> ReturnReference<'a>;
-    fn duplicate<'c>(&'c self) -> Box<dyn Callable<'a> + 'c>;
+    fn call(&self, engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> ReturnReference<'a>;
     fn get_tag(&self) -> Tag;
 }

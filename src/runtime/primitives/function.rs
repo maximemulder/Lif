@@ -20,5 +20,5 @@ fn cl<'a>(engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> ReturnReferen
         array.push(argument.read()?);
     }
 
-    arguments[0].data_callable().duplicate().execute(engine, array)
+    arguments[0].data_callable().call(engine, array)
 }
