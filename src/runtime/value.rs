@@ -151,11 +151,11 @@ impl<'a> Value<'a> {
         data_mut!(self, Class);
     }
 
-    pub fn data_generic(&self) -> &Generic {
+    pub fn data_generic(&self) -> &Generic<'a> {
         data!(self, Generic);
     }
 
-    pub fn data_generic_mut(&mut self) -> &mut Generic {
+    pub fn data_generic_mut(&mut self) -> &mut Generic<'a> {
         data_mut!(self, Generic);
     }
 

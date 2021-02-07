@@ -32,7 +32,7 @@ impl<'a> Engine<'a> {
 
     pub fn new_generic_value(&mut self, name: Option<&str>, generics: Ref<[Ref<str>]>, node: Ref<dyn Executable>) -> GcValue<'a> {
         let tag = self.taggers.generics.generate(name.map(Box::from));
-        self.new_value(self.primitives.generic, Data::new_generic(tag, generics, node))
+        self.new_value(self.primitives.generic, Data::new_generic(tag, self.scope, generics, node))
     }
 
     pub fn new_integer_value(&mut self, integer: isize) -> GcValue<'a> {

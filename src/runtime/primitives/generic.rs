@@ -16,15 +16,14 @@ fn to_string<'a>(engine: &mut Engine<'a>, _: Vec<GcValue<'a>>) -> ReturnReferenc
 }
 
 fn gn<'a>(engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> ReturnReference<'a> {
-    engine.push_scope();
-    let value = arguments[0];
-    let generic = value.data_generic();
+    let generic = arguments[0].data_generic();
+    engine.push_frame(generic.scope);
     for (parameter, argument) in generic.generics.iter().zip(arguments[1].data_array()) {
         let reference = engine.new_reference(argument.read()?);
         engine.add_variable(parameter, reference);
     }
 
     let reference = engine.execute(Ref::as_ref(&generic.node))?;
-    engine.pop_scope();
+    engine.pop_frame();
     Ok(reference)
 }

@@ -32,7 +32,7 @@ pub enum Data<'a> {
     Boolean(bool),
     Callable(Box<dyn Callable<'a> + 'a>),
     Class(Class<'a>),
-    Generic(Generic),
+    Generic(Generic<'a>),
     Integer(isize),
     Method(Method<'a>),
     Nullable(Nullable<'a>),
@@ -61,8 +61,8 @@ impl<'a> Data<'a> {
         Data::Integer(integer)
     }
 
-    pub fn new_generic(tag: Tag, generics: Ref<[Ref<str>]>, node: Ref<dyn Executable>) -> Self {
-        Data::Generic(Generic::new(tag, generics, node))
+    pub fn new_generic(tag: Tag, scope: GcScope<'a>, generics: Ref<[Ref<str>]>, node: Ref<dyn Executable>) -> Self {
+        Data::Generic(Generic::new(tag, scope, generics, node))
     }
 
     pub fn new_method(function: GcValue<'a>, this: GcValue<'a>) -> Self {
@@ -94,6 +94,7 @@ impl GcTrace for Data<'_> {
             },
             Data::Callable(callable) => callable.trace(),
             Data::Class(class)       => class.trace(),
+            Data::Generic(generic)   => generic.trace(),
             Data::Method(method)     => method.trace(),
             Data::Nullable(nullable) => nullable.trace(),
             Data::Object(object)     => object.trace(),
