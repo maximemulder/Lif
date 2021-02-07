@@ -21,35 +21,37 @@ use crate::runtime::value::GcValue;
 use std::process;
 
 pub struct Primitives<'a> {
-    pub any:      GcValue<'a>,
-    pub array:    GcValue<'a>,
-    pub boolean:  GcValue<'a>,
-    pub class:    GcValue<'a>,
-    pub file:     GcValue<'a>,
-    pub function: GcValue<'a>,
-    pub generic:  GcValue<'a>,
-    pub method:   GcValue<'a>,
-    pub nullable: GcValue<'a>,
-    pub object:   GcValue<'a>,
-    pub integer:  GcValue<'a>,
-    pub string:   GcValue<'a>,
+    pub any:                GcValue<'a>,
+    pub array:              GcValue<'a>,
+    pub boolean:            GcValue<'a>,
+    pub class:              GcValue<'a>,
+    pub file:               GcValue<'a>,
+    pub function_primitive: GcValue<'a>,
+    pub function_standard:  GcValue<'a>,
+    pub generic:            GcValue<'a>,
+    pub method:             GcValue<'a>,
+    pub nullable:           GcValue<'a>,
+    pub object:             GcValue<'a>,
+    pub integer:            GcValue<'a>,
+    pub string:             GcValue<'a>,
 }
 
 impl<'a> Primitives<'a> {
     pub fn new() -> Self {
         Self {
-            any:      GcValue::null(),
-            array:    GcValue::null(),
-            boolean:  GcValue::null(),
-            class:    GcValue::null(),
-            file:     GcValue::null(),
-            function: GcValue::null(),
-            generic:  GcValue::null(),
-            method:   GcValue::null(),
-            nullable: GcValue::null(),
-            object:   GcValue::null(),
-            integer:  GcValue::null(),
-            string:   GcValue::null(),
+            any:                GcValue::null(),
+            array:              GcValue::null(),
+            boolean:            GcValue::null(),
+            class:              GcValue::null(),
+            file:               GcValue::null(),
+            function_primitive: GcValue::null(),
+            function_standard:  GcValue::null(),
+            generic:            GcValue::null(),
+            method:             GcValue::null(),
+            nullable:           GcValue::null(),
+            object:             GcValue::null(),
+            integer:            GcValue::null(),
+            string:             GcValue::null(),
         }
     }
 }
@@ -62,7 +64,8 @@ impl GcTrace for Primitives<'_> {
             self.boolean,
             self.class,
             self.file,
-            self.function,
+            self.function_primitive,
+            self.function_standard,
             self.generic,
             self.integer,
             self.method,
@@ -100,16 +103,17 @@ impl<'a> Engine<'a> {
         self.primitives.class = self.new_class_primitive_value("Class");
         self.primitives.any   = self.new_class_primitive_value("Any");
 
-        self.primitives.array    = self.new_class_primitive_value("Array");
-        self.primitives.boolean  = self.new_class_primitive_value("Boolean");
-        self.primitives.file     = self.new_class_primitive_value("File");
-        self.primitives.function = self.new_class_primitive_value("Function");
-        self.primitives.generic  = self.new_class_primitive_value("Generic");
-        self.primitives.integer  = self.new_class_primitive_value("Integer");
-        self.primitives.method   = self.new_class_primitive_value("Method");
-        self.primitives.nullable = self.new_class_primitive_value("Option");
-        self.primitives.object   = self.new_class_primitive_value("Object");
-        self.primitives.string   = self.new_class_primitive_value("String");
+        self.primitives.array              = self.new_class_primitive_value("Array");
+        self.primitives.boolean            = self.new_class_primitive_value("Boolean");
+        self.primitives.file               = self.new_class_primitive_value("File");
+        self.primitives.function_primitive = self.new_class_primitive_value("FunctionPrimitive");
+        self.primitives.function_standard  = self.new_class_primitive_value("FunctionStandard");
+        self.primitives.generic            = self.new_class_primitive_value("Generic");
+        self.primitives.integer            = self.new_class_primitive_value("Integer");
+        self.primitives.method             = self.new_class_primitive_value("Method");
+        self.primitives.nullable           = self.new_class_primitive_value("Option");
+        self.primitives.object             = self.new_class_primitive_value("Object");
+        self.primitives.string             = self.new_class_primitive_value("String");
 
         self.primitives.class.class = self.primitives.class;
         self.primitives.class.data_class_mut().parent = Some(self.primitives.any);

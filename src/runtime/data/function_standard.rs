@@ -1,7 +1,7 @@
 use crate::memory::Ref;
 use crate::nodes::Node;
 use crate::runtime::ReturnReference;
-use crate::runtime::data::{ Callable, Tag };
+use crate::runtime::data::Tag;
 use crate::runtime::engine::{ Control, Engine };
 use crate::runtime::error::Error;
 use crate::runtime::gc::GcTrace;
@@ -9,15 +9,15 @@ use crate::runtime::scope::GcScope;
 use crate::runtime::value::GcValue;
 
 #[derive(Clone)]
-pub struct Function<'a> {
-    tag: Tag,
+pub struct FunctionStandard<'a> {
+    pub tag: Tag,
     scope: GcScope<'a>,
     parameters: Ref<[Node]>,
     r#type: Option<GcValue<'a>>,
     block: Ref<Node>,
 }
 
-impl<'a> Function<'a> {
+impl<'a> FunctionStandard<'a> {
     pub fn new(tag: Tag, scope: GcScope<'a>, parameters: Ref<[Node]>, r#type: Option<GcValue<'a>>, block: Ref<Node>) -> Self {
         Self {
             tag,
@@ -27,10 +27,8 @@ impl<'a> Function<'a> {
             block,
         }
     }
-}
 
-impl<'a> Callable<'a> for Function<'a> {
-    fn call(&self, engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> ReturnReference<'a> {
+    pub fn call(&self, engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> ReturnReference<'a> {
         if arguments.len() != self.parameters.len() {
             return Err(Error::new_arguments(self.parameters.len(), arguments.len()));
         }
@@ -63,13 +61,9 @@ impl<'a> Callable<'a> for Function<'a> {
 
         Ok(engine.undefined())
     }
-
-    fn get_tag(&self) -> Tag {
-        self.tag.clone()
-    }
 }
 
-impl GcTrace for Function<'_> {
+impl GcTrace for FunctionStandard<'_> {
     fn trace(&mut self) {
         self.scope.trace();
         if let Some(mut r#type) = self.r#type {

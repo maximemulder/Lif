@@ -1,5 +1,5 @@
 use crate::runtime::{ Return, ReturnReference };
-use crate::runtime::data::{ Callable, Class, Data, Generic, Method, Nullable, Object, Tag };
+use crate::runtime::data::{ Class, Data, FunctionPrimitive, FunctionStandard, GenericStandard, Method, Nullable, Object, Tag };
 use crate::runtime::engine::Engine;
 use crate::runtime::error::Error;
 use crate::runtime::gc::{ GcRef, GcTrace };
@@ -60,7 +60,14 @@ impl<'a> GcValue<'a> {
     }
 
     pub fn call_method_self(self, engine: &mut Engine<'a>, name: &str, arguments: Vec<GcValue<'a>>) -> ReturnReference<'a> {
-        self.get_method(name)?.data_callable().call(engine, arguments)
+        let method = self.get_method(name)?;
+        let mut parameters = Vec::new();
+        for argument in arguments {
+            parameters.push(engine.new_constant(argument));
+        }
+
+        let array = engine.new_array_value(parameters);
+        method.get_method("__cl__")?.data_function_primitive().call(engine, vec![method, array])
     }
 
     pub fn call_to_string(self, engine: &mut Engine<'a>) -> Return<String> {
@@ -77,16 +84,6 @@ impl<'a> GcValue<'a> {
     pub fn get_cast_boolean(&self, engine: &Engine<'a>) -> Return<&bool> {
         self.cast(engine.primitives.boolean)?;
         Ok(self.data_boolean())
-    }
-
-    pub fn get_cast_callable(&self, engine: &Engine<'a>) -> Return<&dyn Callable<'a>> {
-        self.cast(engine.primitives.function)?;
-        Ok(self.data_callable())
-    }
-
-    pub fn get_cast_string(&self, engine: &Engine<'a>) -> Return<&String> {
-        self.cast(engine.primitives.string)?;
-        Ok(self.data_string())
     }
 }
 
@@ -120,9 +117,10 @@ macro_rules! data_mut {
 impl<'a> Value<'a> {
     pub fn data_tag(&self) -> Tag {
         match &self.data {
-            Data::Callable(callable) => callable.get_tag(),
-            Data::Class(class) => class.tag.clone(),
-            Data::Generic(generic) => generic.tag.clone(),
+            Data::Class(class)                => class.tag.clone(),
+            Data::FunctionPrimitive(function) => function.tag.clone(),
+            Data::FunctionStandard(function)  => function.tag.clone(),
+            Data::GenericStandard(generic)    => generic.tag.clone(),
             _ => panic!(),
         }
     }
@@ -151,12 +149,28 @@ impl<'a> Value<'a> {
         data_mut!(self, Class);
     }
 
-    pub fn data_generic(&self) -> &Generic<'a> {
-        data!(self, Generic);
+    pub fn data_function(&self) -> &FunctionStandard<'a> {
+        data!(self, FunctionStandard);
     }
 
-    pub fn data_generic_mut(&mut self) -> &mut Generic<'a> {
-        data_mut!(self, Generic);
+    pub fn data_function_mut(&mut self) -> &mut FunctionStandard<'a> {
+        data_mut!(self, FunctionStandard);
+    }
+
+    pub fn data_function_primitive(&self) -> &FunctionPrimitive<'a> {
+        data!(self, FunctionPrimitive);
+    }
+
+    pub fn data_function_primitive_mut(&mut self) -> &mut FunctionPrimitive<'a> {
+        data_mut!(self, FunctionPrimitive);
+    }
+
+    pub fn data_generic(&self) -> &GenericStandard<'a> {
+        data!(self, GenericStandard);
+    }
+
+    pub fn data_generic_mut(&mut self) -> &mut GenericStandard<'a> {
+        data_mut!(self, GenericStandard);
     }
 
     pub fn data_integer(&self) -> &isize {
@@ -197,21 +211,5 @@ impl<'a> Value<'a> {
 
     pub fn data_string_mut(&mut self) -> &mut String {
         data_mut!(self, String);
-    }
-
-    pub fn data_callable(&self) -> &dyn Callable<'a> {
-        if let Data::Callable(callable) = &self.data {
-            return callable.as_ref();
-        }
-
-        panic!();
-    }
-
-    pub fn data_callable_mut(&mut self) -> &mut dyn Callable<'a> {
-        if let Data::Callable(callable) = &mut self.data {
-            return callable.as_mut();
-        }
-
-        panic!();
     }
 }

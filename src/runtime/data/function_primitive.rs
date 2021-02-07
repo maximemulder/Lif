@@ -1,18 +1,18 @@
 use crate::runtime::ReturnReference;
-use crate::runtime::data::{ Callable, Tag };
+use crate::runtime::data::Tag;
 use crate::runtime::engine::Engine;
 use crate::runtime::error::Error;
 use crate::runtime::gc::GcTrace;
 use crate::runtime::value::GcValue;
 
 #[derive(Clone)]
-pub struct Primitive<'a> {
-    tag: Tag,
+pub struct FunctionPrimitive<'a> {
+    pub tag: Tag,
     parameters: Box<[GcValue<'a>]>,
     callback: &'a dyn Fn(&mut Engine<'a>, Vec<GcValue<'a>>) -> ReturnReference<'a>,
 }
 
-impl<'a> Primitive<'a> {
+impl<'a> FunctionPrimitive<'a> {
     pub fn new(tag: Tag, parameters: Box<[GcValue<'a>]>, callback: &'a dyn Fn(&mut Engine<'a>, Vec<GcValue<'a>>) -> ReturnReference<'a>) -> Self {
         Self {
             tag,
@@ -20,11 +20,17 @@ impl<'a> Primitive<'a> {
             callback,
         }
     }
-}
 
-impl<'a> Callable<'a> for Primitive<'a> {
-    fn call(&self, engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> ReturnReference<'a> {
+    pub fn call(&self, engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> ReturnReference<'a> {
         if arguments.len() != self.parameters.len() {
+            for parameter in self.parameters.iter() {
+                println!("PARAMETER: {}", parameter.data_class().tag);
+            }
+
+            for argument in arguments.iter() {
+                println!("ARGUMENT: {}", argument.class.data_class().tag);
+            }
+
             return Err(Error::new_arguments(self.parameters.len(), arguments.len()));
         }
 
@@ -34,13 +40,9 @@ impl<'a> Callable<'a> for Primitive<'a> {
 
         (self.callback)(engine, arguments)
     }
-
-    fn get_tag(&self) -> Tag {
-        self.tag.clone()
-    }
 }
 
-impl GcTrace for Primitive<'_> {
+impl GcTrace for FunctionPrimitive<'_> {
     fn trace(&mut self) {
         for parameter in self.parameters.iter_mut() {
             parameter.trace();
