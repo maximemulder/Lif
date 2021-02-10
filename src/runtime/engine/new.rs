@@ -32,7 +32,7 @@ impl<'a> Engine<'a> {
 
     pub fn new_function_primitive_value(&mut self, name: &str, parameters: Box<[GcValue<'a>]>, callback: &'a dyn Fn(&mut Engine<'a>, Vec<GcValue<'a>>) -> ReturnReference<'a>) -> GcValue<'a> {
         let tag = self.taggers.functions.generate(Some(Box::from(name)));
-        self.new_value(self.primitives.function_primitive, Data::new_primitive(tag, parameters, callback))
+        self.new_value(self.primitives.function_primitive, Data::new_function_primitive(tag, parameters, callback))
     }
 
     pub fn new_generic_value(&mut self, name: Option<&str>, generics: Ref<[Ref<str>]>, node: Ref<dyn Executable>) -> GcValue<'a> {

@@ -59,6 +59,10 @@ impl<'a> Data<'a> {
         Data::FunctionCode(FunctionCode::new(tag, scope, parameters, r#type, block))
     }
 
+    pub fn new_function_primitive(tag: Tag, parameters: Box<[GcValue<'a>]>, callback: &'a dyn Fn(&mut Engine<'a>, Vec<GcValue<'a>>) -> ReturnReference<'a>) -> Self {
+        Data::FunctionPrimitive(FunctionPrimitive::new(tag, parameters, callback))
+    }
+
     pub fn new_integer(integer: isize) -> Self {
         Data::Integer(integer)
     }
@@ -77,10 +81,6 @@ impl<'a> Data<'a> {
 
     pub fn new_object() -> Self {
         Data::Object(Object::new())
-    }
-
-    pub fn new_primitive(tag: Tag, parameters: Box<[GcValue<'a>]>, callback: &'a dyn Fn(&mut Engine<'a>, Vec<GcValue<'a>>) -> ReturnReference<'a>) -> Self {
-        Data::FunctionPrimitive(FunctionPrimitive::new(tag, parameters, callback))
     }
 
     pub fn new_string(string: String) -> Self {
