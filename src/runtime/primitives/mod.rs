@@ -88,17 +88,17 @@ impl<'a> Engine<'a> {
     }
 
     fn add_constant_primitive<const N: usize>(&mut self, name: &str, parameters: [GcValue<'a>; N], callback: &'a dyn Fn(&mut Engine<'a>, Vec<GcValue<'a>>) -> ReturnReference<'a>) {
-        let primitive = self.new_primitive(name, Box::new(parameters), callback);
+        let primitive = self.new_function_primitive(name, Box::new(parameters), callback);
         self.add_variable(name, primitive);
     }
 
     fn add_method_primitive<const N: usize>(&mut self, mut value: GcValue<'a>, name: &str, parameters: [GcValue<'a>; N], callback: &'a dyn Fn(&mut Engine<'a>, Vec<GcValue<'a>>) -> ReturnReference<'a>) {
-        let primitive = self.new_primitive(&name, Box::new(parameters), callback).get_value();
+        let primitive = self.new_function_primitive(&name, Box::new(parameters), callback).get_value();
         value.data_class_mut().methods.insert(name.to_string(), primitive);
     }
 
     fn add_static_primitive<const N: usize>(&mut self, mut value: GcValue<'a>, name: &str, parameters: [GcValue<'a>; N], callback: &'a dyn Fn(&mut Engine<'a>, Vec<GcValue<'a>>) -> ReturnReference<'a>) {
-        let primitive = self.new_primitive(&name, Box::new(parameters), callback).get_value();
+        let primitive = self.new_function_primitive(&name, Box::new(parameters), callback).get_value();
         value.data_class_mut().statics.insert(name.to_string(), self.new_constant(primitive));
     }
 

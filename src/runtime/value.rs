@@ -1,5 +1,5 @@
 use crate::runtime::{ Return, ReturnReference };
-use crate::runtime::data::{ Class, Data, FunctionPrimitive, FunctionCode, GenericStandard, Method, Nullable, Object, Tag };
+use crate::runtime::data::{ Class, Data, FunctionCode, FunctionPrimitive, GenericCode, GenericPrimitive, Method, Nullable, Object, Tag };
 use crate::runtime::engine::Engine;
 use crate::runtime::error::Error;
 use crate::runtime::gc::{ GcRef, GcTrace };

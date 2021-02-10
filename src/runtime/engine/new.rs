@@ -30,6 +30,11 @@ impl<'a> Engine<'a> {
         self.new_value(self.primitives.function_code, Data::new_function(tag, self.scope, parameters, r#type, block))
     }
 
+    pub fn new_function_primitive_value(&mut self, name: &str, parameters: Box<[GcValue<'a>]>, callback: &'a dyn Fn(&mut Engine<'a>, Vec<GcValue<'a>>) -> ReturnReference<'a>) -> GcValue<'a> {
+        let tag = self.taggers.functions.generate(Some(Box::from(name)));
+        self.new_value(self.primitives.function_primitive, Data::new_primitive(tag, parameters, callback))
+    }
+
     pub fn new_generic_value(&mut self, name: Option<&str>, generics: Ref<[Ref<str>]>, node: Ref<dyn Executable>) -> GcValue<'a> {
         let tag = self.taggers.generics.generate(name.map(Box::from));
         self.new_value(self.primitives.generic, Data::new_generic(tag, self.scope, generics, node))
@@ -49,11 +54,6 @@ impl<'a> Engine<'a> {
 
     pub fn new_nullable_value(&mut self, option: Option<GcValue<'a>>) -> GcValue<'a> {
         self.new_value(self.primitives.nullable, Data::new_nullable(option))
-    }
-
-    pub fn new_primitive_value(&mut self, name: &str, parameters: Box<[GcValue<'a>]>, callback: &'a dyn Fn(&mut Engine<'a>, Vec<GcValue<'a>>) -> ReturnReference<'a>) -> GcValue<'a> {
-        let tag = self.taggers.functions.generate(Some(Box::from(name)));
-        self.new_value(self.primitives.function_primitive, Data::new_primitive(tag, parameters, callback))
     }
 
     pub fn new_string_value(&mut self, string: String) -> GcValue<'a> {
@@ -82,6 +82,11 @@ impl<'a> Engine<'a> {
         self.new_constant(value)
     }
 
+    pub fn new_function_primitive(&mut self, name: &str, parameters: Box<[GcValue<'a>]>, callback: &'a dyn Fn(&mut Engine<'a>, Vec<GcValue<'a>>) -> ReturnReference<'a>) -> GcReference<'a> {
+        let value = self.new_function_primitive_value(name, parameters, callback);
+        self.new_constant(value)
+    }
+
     pub fn new_generic(&mut self, name: Option<&str>, generics: Ref<[Ref<str>]>, node: Ref<dyn Executable>) -> GcReference<'a> {
         let value = self.new_generic_value(name, generics, node);
         self.new_constant(value)
@@ -104,11 +109,6 @@ impl<'a> Engine<'a> {
 
     pub fn new_nullable(&mut self, option: Option<GcValue<'a>>) -> GcReference<'a> {
         let value = self.new_nullable_value(option);
-        self.new_constant(value)
-    }
-
-    pub fn new_primitive(&mut self, name: &str, parameters: Box<[GcValue<'a>]>, callback: &'a dyn Fn(&mut Engine<'a>, Vec<GcValue<'a>>) -> ReturnReference<'a>) -> GcReference<'a> {
-        let value = self.new_primitive_value(name, parameters, callback);
         self.new_constant(value)
     }
 
