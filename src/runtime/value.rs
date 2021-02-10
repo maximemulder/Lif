@@ -120,7 +120,8 @@ impl<'a> Value<'a> {
             Data::Class(class)                => class.tag.clone(),
             Data::FunctionCode(function)      => function.tag.clone(),
             Data::FunctionPrimitive(function) => function.tag.clone(),
-            Data::GenericStandard(generic)    => generic.tag.clone(),
+            Data::GenericCode(generic)        => generic.tag.clone(),
+            Data::GenericPrimitive(generic)   => generic.tag.clone(),
             _ => panic!(),
         }
     }
@@ -165,12 +166,20 @@ impl<'a> Value<'a> {
         data_mut!(self, FunctionPrimitive);
     }
 
-    pub fn data_generic(&self) -> &GenericStandard<'a> {
-        data!(self, GenericStandard);
+    pub fn data_generic(&self) -> &GenericCode<'a> {
+        data!(self, GenericCode);
     }
 
-    pub fn data_generic_mut(&mut self) -> &mut GenericStandard<'a> {
-        data_mut!(self, GenericStandard);
+    pub fn data_generic_mut(&mut self) -> &mut GenericCode<'a> {
+        data_mut!(self, GenericCode);
+    }
+
+    pub fn data_generic_primitive(&self) -> &GenericPrimitive<'a> {
+        data!(self, GenericPrimitive);
+    }
+
+    pub fn data_generic_primitive_mut(&mut self) -> &mut GenericPrimitive<'a> {
+        data_mut!(self, GenericPrimitive);
     }
 
     pub fn data_integer(&self) -> &isize {

@@ -35,9 +35,14 @@ impl<'a> Engine<'a> {
         self.new_value(self.primitives.function_primitive, Data::new_function_primitive(tag, parameters, callback))
     }
 
-    pub fn new_generic_value(&mut self, name: Option<&str>, generics: Ref<[Ref<str>]>, node: Ref<dyn Executable>) -> GcValue<'a> {
+    pub fn new_generic_value(&mut self, name: Option<&str>, parameters: Ref<[Ref<str>]>, node: Ref<dyn Executable>) -> GcValue<'a> {
         let tag = self.taggers.generics.generate(name.map(Box::from));
-        self.new_value(self.primitives.generic, Data::new_generic(tag, self.scope, generics, node))
+        self.new_value(self.primitives.generic_code, Data::new_generic(tag, self.scope, parameters, node))
+    }
+
+    pub fn new_generic_primitive_value(&mut self, name: &str, parameters: usize, callback: &'a dyn Fn(&mut Engine<'a>, Vec<GcValue<'a>>) -> ReturnReference<'a>) -> GcValue<'a> {
+        let tag = self.taggers.generics.generate(Some(Box::from(name)));
+        self.new_value(self.primitives.generic_code, Data::new_generic_primitive(tag, parameters, callback))
     }
 
     pub fn new_integer_value(&mut self, integer: isize) -> GcValue<'a> {
@@ -87,8 +92,13 @@ impl<'a> Engine<'a> {
         self.new_constant(value)
     }
 
-    pub fn new_generic(&mut self, name: Option<&str>, generics: Ref<[Ref<str>]>, node: Ref<dyn Executable>) -> GcReference<'a> {
-        let value = self.new_generic_value(name, generics, node);
+    pub fn new_generic(&mut self, name: Option<&str>, parameters: Ref<[Ref<str>]>, node: Ref<dyn Executable>) -> GcReference<'a> {
+        let value = self.new_generic_value(name, parameters, node);
+        self.new_constant(value)
+    }
+
+    pub fn new_generic_primitive(&mut self, name: &str, parameters: usize, callback: &'a dyn Fn(&mut Engine<'a>, Vec<GcValue<'a>>) -> ReturnReference<'a>) -> GcReference<'a> {
+        let value = self.new_generic_primitive_value(name, parameters, callback);
         self.new_constant(value)
     }
 

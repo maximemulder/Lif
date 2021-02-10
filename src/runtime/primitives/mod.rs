@@ -30,6 +30,8 @@ pub struct Primitives<'a> {
     pub function_code:      GcValue<'a>,
     pub function_primitive: GcValue<'a>,
     pub generic:            GcValue<'a>,
+    pub generic_code:       GcValue<'a>,
+    pub generic_primitive:  GcValue<'a>,
     pub method:             GcValue<'a>,
     pub nullable:           GcValue<'a>,
     pub object:             GcValue<'a>,
@@ -49,6 +51,8 @@ impl<'a> Primitives<'a> {
             function_code:      GcValue::null(),
             function_primitive: GcValue::null(),
             generic:            GcValue::null(),
+            generic_code:       GcValue::null(),
+            generic_primitive:  GcValue::null(),
             method:             GcValue::null(),
             nullable:           GcValue::null(),
             object:             GcValue::null(),
@@ -117,6 +121,8 @@ impl<'a> Engine<'a> {
         self.primitives.function_code      = self.new_class_primitive_value(Some(self.primitives.function), "FunctionCode");
         self.primitives.function_primitive = self.new_class_primitive_value(Some(self.primitives.function), "FunctionPrimitive");
         self.primitives.generic            = self.new_class_primitive_value(Some(self.primitives.any),      "Generic");
+        self.primitives.generic_code       = self.new_class_primitive_value(Some(self.primitives.generic),  "GenericCode");
+        self.primitives.generic_primitive  = self.new_class_primitive_value(Some(self.primitives.generic),  "GenericPrimitive");
         self.primitives.integer            = self.new_class_primitive_value(Some(self.primitives.any),      "Integer");
         self.primitives.method             = self.new_class_primitive_value(Some(self.primitives.any),      "Method");
         self.primitives.nullable           = self.new_class_primitive_value(Some(self.primitives.any),      "Option");

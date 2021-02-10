@@ -1,8 +1,8 @@
 mod class;
 mod function_primitive;
 mod function_code;
-// mod generic_primitive;
-mod generic_standard;
+mod generic_primitive;
+mod generic_code;
 mod method;
 mod nullable;
 mod object;
@@ -11,8 +11,8 @@ mod tag;
 pub use class::Class;
 pub use function_code::FunctionCode;
 pub use function_primitive::FunctionPrimitive;
-// pub use generic_primitive::GenericPrimitive;
-pub use generic_standard::GenericStandard;
+pub use generic_code::GenericCode;
+pub use generic_primitive::GenericPrimitive;
 pub use method::Method;
 pub use nullable::Nullable;
 pub use object::Object;
@@ -33,8 +33,8 @@ pub enum Data<'a> {
     Class(Class<'a>),
     FunctionCode(FunctionCode<'a>),
     FunctionPrimitive(FunctionPrimitive<'a>),
-//  GenericPrimitive(GenericPrimitive<'a>),
-    GenericStandard(GenericStandard<'a>),
+    GenericCode(GenericCode<'a>),
+    GenericPrimitive(GenericPrimitive<'a>),
     Integer(isize),
     Method(Method<'a>),
     Nullable(Nullable<'a>),
@@ -63,12 +63,16 @@ impl<'a> Data<'a> {
         Data::FunctionPrimitive(FunctionPrimitive::new(tag, parameters, callback))
     }
 
-    pub fn new_integer(integer: isize) -> Self {
-        Data::Integer(integer)
+    pub fn new_generic(tag: Tag, scope: GcScope<'a>, parameters: Ref<[Ref<str>]>, node: Ref<dyn Executable>) -> Self {
+        Data::GenericCode(GenericCode::new(tag, scope, parameters, node))
     }
 
-    pub fn new_generic(tag: Tag, scope: GcScope<'a>, generics: Ref<[Ref<str>]>, node: Ref<dyn Executable>) -> Self {
-        Data::GenericStandard(GenericStandard::new(tag, scope, generics, node))
+    pub fn new_generic_primitive(tag: Tag, parameters: usize, callback: &'a dyn Fn(&mut Engine<'a>, Vec<GcValue<'a>>) -> ReturnReference<'a>) -> Self {
+        Data::GenericPrimitive(GenericPrimitive::new(tag, parameters, callback))
+    }
+
+    pub fn new_integer(integer: isize) -> Self {
+        Data::Integer(integer)
     }
 
     pub fn new_method(function: GcValue<'a>, this: GcValue<'a>) -> Self {
@@ -94,11 +98,11 @@ impl GcTrace for Data<'_> {
             Data::Array(references)  => for reference in references.iter_mut() {
                 reference.trace();
             },
+            Data::Class(class)                => class.trace(),
             Data::FunctionCode(function)      => function.trace(),
             Data::FunctionPrimitive(function) => function.trace(),
-            Data::Class(class)                => class.trace(),
-//            Data::GenericPrimitive(generic)   => generic.trace(),
-            Data::GenericStandard(generic)    => generic.trace(),
+            Data::GenericCode(generic)        => generic.trace(),
+            Data::GenericPrimitive(generic)   => generic.trace(),
             Data::Method(method)              => method.trace(),
             Data::Nullable(nullable)          => nullable.trace(),
             Data::Object(object)              => object.trace(),
