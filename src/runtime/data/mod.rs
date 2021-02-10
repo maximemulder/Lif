@@ -67,8 +67,8 @@ impl<'a> Data<'a> {
         Data::GenericCode(GenericCode::new(tag, scope, parameters, node))
     }
 
-    pub fn new_generic_primitive(tag: Tag, parameters: usize, callback: &'a dyn Fn(&mut Engine<'a>, Vec<GcValue<'a>>) -> ReturnReference<'a>) -> Self {
-        Data::GenericPrimitive(GenericPrimitive::new(tag, parameters, callback))
+    pub fn new_generic_primitive(tag: Tag, scope: GcScope<'a>, parameters: Vec<Box<str>>, callback: &'a dyn Fn(&mut Engine<'a>, Vec<GcValue<'a>>) -> ReturnReference<'a>) -> Self {
+        Data::GenericPrimitive(GenericPrimitive::new(tag, scope, parameters, callback))
     }
 
     pub fn new_integer(integer: isize) -> Self {

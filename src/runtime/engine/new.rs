@@ -40,9 +40,9 @@ impl<'a> Engine<'a> {
         self.new_value(self.primitives.generic_code, Data::new_generic(tag, self.scope, parameters, node))
     }
 
-    pub fn new_generic_primitive_value(&mut self, name: &str, parameters: usize, callback: &'a dyn Fn(&mut Engine<'a>, Vec<GcValue<'a>>) -> ReturnReference<'a>) -> GcValue<'a> {
+    pub fn new_generic_primitive_value(&mut self, name: &str, parameters: Vec<Box<str>>, callback: &'a dyn Fn(&mut Engine<'a>, Vec<GcValue<'a>>) -> ReturnReference<'a>) -> GcValue<'a> {
         let tag = self.taggers.generics.generate(Some(Box::from(name)));
-        self.new_value(self.primitives.generic_code, Data::new_generic_primitive(tag, parameters, callback))
+        self.new_value(self.primitives.generic_primitive, Data::new_generic_primitive(tag, self.scope, parameters, callback))
     }
 
     pub fn new_integer_value(&mut self, integer: isize) -> GcValue<'a> {
@@ -57,8 +57,8 @@ impl<'a> Engine<'a> {
         self.new_value(parent, Data::new_object())
     }
 
-    pub fn new_nullable_value(&mut self, option: Option<GcValue<'a>>) -> GcValue<'a> {
-        self.new_value(self.primitives.nullable, Data::new_nullable(option))
+    pub fn new_nullable_value(&mut self, class: GcValue<'a>, option: Option<GcValue<'a>>) -> GcValue<'a> {
+        self.new_value(class, Data::new_nullable(option))
     }
 
     pub fn new_string_value(&mut self, string: String) -> GcValue<'a> {
@@ -97,7 +97,7 @@ impl<'a> Engine<'a> {
         self.new_constant(value)
     }
 
-    pub fn new_generic_primitive(&mut self, name: &str, parameters: usize, callback: &'a dyn Fn(&mut Engine<'a>, Vec<GcValue<'a>>) -> ReturnReference<'a>) -> GcReference<'a> {
+    pub fn new_generic_primitive(&mut self, name: &str, parameters: Vec<Box<str>>, callback: &'a dyn Fn(&mut Engine<'a>, Vec<GcValue<'a>>) -> ReturnReference<'a>) -> GcReference<'a> {
         let value = self.new_generic_primitive_value(name, parameters, callback);
         self.new_constant(value)
     }
@@ -117,8 +117,8 @@ impl<'a> Engine<'a> {
         self.new_constant(value)
     }
 
-    pub fn new_nullable(&mut self, option: Option<GcValue<'a>>) -> GcReference<'a> {
-        let value = self.new_nullable_value(option);
+    pub fn new_nullable(&mut self, class: GcValue<'a>, option: Option<GcValue<'a>>) -> GcReference<'a> {
+        let value = self.new_nullable_value(class, option);
         self.new_constant(value)
     }
 

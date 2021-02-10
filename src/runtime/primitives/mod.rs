@@ -125,9 +125,10 @@ impl<'a> Engine<'a> {
         self.primitives.generic_primitive  = self.new_class_primitive_value(Some(self.primitives.generic),  "GenericPrimitive");
         self.primitives.integer            = self.new_class_primitive_value(Some(self.primitives.any),      "Integer");
         self.primitives.method             = self.new_class_primitive_value(Some(self.primitives.any),      "Method");
-        self.primitives.nullable           = self.new_class_primitive_value(Some(self.primitives.any),      "Option");
         self.primitives.object             = self.new_class_primitive_value(Some(self.primitives.any),      "Object");
         self.primitives.string             = self.new_class_primitive_value(Some(self.primitives.any),      "String");
+
+        self.primitives.nullable = self.new_generic_primitive_value("Option", vec![Box::from("__type__")], &nullable::create);
 
         any::populate(self);
         array::populate(self);
