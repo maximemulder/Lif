@@ -9,7 +9,7 @@ use crate::runtime::scope::GcScope;
 use crate::runtime::value::GcValue;
 
 #[derive(Clone)]
-pub struct FunctionStandard<'a> {
+pub struct FunctionCode<'a> {
     pub tag: Tag,
     scope: GcScope<'a>,
     parameters: Ref<[Node]>,
@@ -17,7 +17,7 @@ pub struct FunctionStandard<'a> {
     block: Ref<Node>,
 }
 
-impl<'a> FunctionStandard<'a> {
+impl<'a> FunctionCode<'a> {
     pub fn new(tag: Tag, scope: GcScope<'a>, parameters: Ref<[Node]>, r#type: Option<GcValue<'a>>, block: Ref<Node>) -> Self {
         Self {
             tag,
@@ -63,7 +63,7 @@ impl<'a> FunctionStandard<'a> {
     }
 }
 
-impl GcTrace for FunctionStandard<'_> {
+impl GcTrace for FunctionCode<'_> {
     fn trace(&mut self) {
         self.scope.trace();
         if let Some(mut r#type) = self.r#type {

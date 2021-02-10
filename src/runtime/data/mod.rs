@@ -1,6 +1,6 @@
 mod class;
 mod function_primitive;
-mod function_standard;
+mod function_code;
 // mod generic_primitive;
 mod generic_standard;
 mod method;
@@ -9,8 +9,8 @@ mod object;
 mod tag;
 
 pub use class::Class;
+pub use function_code::FunctionCode;
 pub use function_primitive::FunctionPrimitive;
-pub use function_standard::FunctionStandard;
 // pub use generic_primitive::GenericPrimitive;
 pub use generic_standard::GenericStandard;
 pub use method::Method;
@@ -31,9 +31,9 @@ pub enum Data<'a> {
     Array(Vec<GcReference<'a>>),
     Boolean(bool),
     Class(Class<'a>),
+    FunctionCode(FunctionCode<'a>),
     FunctionPrimitive(FunctionPrimitive<'a>),
-    FunctionStandard(FunctionStandard<'a>),
-//    GenericPrimitive(GenericPrimitive<'a>),
+//  GenericPrimitive(GenericPrimitive<'a>),
     GenericStandard(GenericStandard<'a>),
     Integer(isize),
     Method(Method<'a>),
@@ -56,7 +56,7 @@ impl<'a> Data<'a> {
     }
 
     pub fn new_function(tag: Tag, scope: GcScope<'a>, parameters: Ref<[Node]>, r#type: Option<GcValue<'a>>, block: Ref<Node>) -> Self {
-        Data::FunctionStandard(FunctionStandard::new(tag, scope, parameters, r#type, block))
+        Data::FunctionCode(FunctionCode::new(tag, scope, parameters, r#type, block))
     }
 
     pub fn new_integer(integer: isize) -> Self {
@@ -94,8 +94,8 @@ impl GcTrace for Data<'_> {
             Data::Array(references)  => for reference in references.iter_mut() {
                 reference.trace();
             },
+            Data::FunctionCode(function)      => function.trace(),
             Data::FunctionPrimitive(function) => function.trace(),
-            Data::FunctionStandard(function)  => function.trace(),
             Data::Class(class)                => class.trace(),
 //            Data::GenericPrimitive(generic)   => generic.trace(),
             Data::GenericStandard(generic)    => generic.trace(),

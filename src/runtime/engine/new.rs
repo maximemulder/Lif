@@ -20,14 +20,14 @@ impl<'a> Engine<'a> {
         self.new_value(self.primitives.class, Data::new_class(tag, Some(parent)))
     }
 
-    pub fn new_class_primitive_value(&mut self, name: &str) -> GcValue<'a> {
+    pub fn new_class_primitive_value(&mut self, parent: Option<GcValue<'a>>, name: &str) -> GcValue<'a> {
         let tag = self.taggers.classes.generate(Some(Box::from(name)));
-        self.new_value(self.primitives.class, Data::new_class(tag, Some(self.primitives.any)))
+        self.new_value(self.primitives.class, Data::new_class(tag, parent))
     }
 
     pub fn new_function_value(&mut self, name: Option<&str>, parameters: Ref<[Node]>, r#type: Option<GcValue<'a>>, block: Ref<Node>) -> GcValue<'a> {
         let tag = self.taggers.functions.generate(name.map(Box::from));
-        self.new_value(self.primitives.function_standard, Data::new_function(tag, self.scope, parameters, r#type, block))
+        self.new_value(self.primitives.function_code, Data::new_function(tag, self.scope, parameters, r#type, block))
     }
 
     pub fn new_generic_value(&mut self, name: Option<&str>, generics: Ref<[Ref<str>]>, node: Ref<dyn Executable>) -> GcValue<'a> {

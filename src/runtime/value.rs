@@ -1,5 +1,5 @@
 use crate::runtime::{ Return, ReturnReference };
-use crate::runtime::data::{ Class, Data, FunctionPrimitive, FunctionStandard, GenericStandard, Method, Nullable, Object, Tag };
+use crate::runtime::data::{ Class, Data, FunctionPrimitive, FunctionCode, GenericStandard, Method, Nullable, Object, Tag };
 use crate::runtime::engine::Engine;
 use crate::runtime::error::Error;
 use crate::runtime::gc::{ GcRef, GcTrace };
@@ -118,8 +118,8 @@ impl<'a> Value<'a> {
     pub fn data_tag(&self) -> Tag {
         match &self.data {
             Data::Class(class)                => class.tag.clone(),
+            Data::FunctionCode(function)      => function.tag.clone(),
             Data::FunctionPrimitive(function) => function.tag.clone(),
-            Data::FunctionStandard(function)  => function.tag.clone(),
             Data::GenericStandard(generic)    => generic.tag.clone(),
             _ => panic!(),
         }
@@ -149,12 +149,12 @@ impl<'a> Value<'a> {
         data_mut!(self, Class);
     }
 
-    pub fn data_function(&self) -> &FunctionStandard<'a> {
-        data!(self, FunctionStandard);
+    pub fn data_function(&self) -> &FunctionCode<'a> {
+        data!(self, FunctionCode);
     }
 
-    pub fn data_function_mut(&mut self) -> &mut FunctionStandard<'a> {
-        data_mut!(self, FunctionStandard);
+    pub fn data_function_mut(&mut self) -> &mut FunctionCode<'a> {
+        data_mut!(self, FunctionCode);
     }
 
     pub fn data_function_primitive(&self) -> &FunctionPrimitive<'a> {
