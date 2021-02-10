@@ -23,14 +23,6 @@ impl<'a> FunctionPrimitive<'a> {
 
     pub fn call(&self, engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> ReturnReference<'a> {
         if arguments.len() != self.parameters.len() {
-            for parameter in self.parameters.iter() {
-                println!("PARAMETER: {}", parameter.data_class().tag);
-            }
-
-            for argument in arguments.iter() {
-                println!("ARGUMENT: {}", argument.class.data_class().tag);
-            }
-
             return Err(Error::new_arguments(self.parameters.len(), arguments.len()));
         }
 
