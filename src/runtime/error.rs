@@ -88,7 +88,7 @@ impl Error {
                 message += name;
             }
 
-            message += "\n";
+            message += "\n\n";
             message += code.node_line(&node);
             message += "\n";
             message += &" ".repeat(code.node_shift_left(&node));
