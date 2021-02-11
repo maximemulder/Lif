@@ -13,9 +13,10 @@ mod string;
 
 use crate::code::Code;
 use crate::nodes::build;
-use crate::runtime::ReturnReference;
 use crate::runtime::engine::Engine;
 use crate::runtime::gc::GcTrace;
+use crate::runtime::utilities::ReturnReference;
+use crate::runtime::utilities::builder;
 use crate::runtime::value::GcValue;
 
 use std::process;
@@ -86,26 +87,6 @@ impl GcTrace for Primitives<'_> {
 }
 
 impl<'a> Engine<'a> {
-    pub fn add_constant_value(&mut self, name: &str, value: GcValue<'a>) {
-        let reference = self.new_constant(value);
-        self.add_variable(name, reference);
-    }
-
-    fn add_constant_primitive<const N: usize>(&mut self, name: &str, parameters: [GcValue<'a>; N], callback: &'a dyn Fn(&mut Engine<'a>, Vec<GcValue<'a>>) -> ReturnReference<'a>) {
-        let primitive = self.new_function_primitive(name, Box::new(parameters), callback);
-        self.add_variable(name, primitive);
-    }
-
-    fn add_method_primitive<const N: usize>(&mut self, mut value: GcValue<'a>, name: &str, parameters: [GcValue<'a>; N], callback: &'a dyn Fn(&mut Engine<'a>, Vec<GcValue<'a>>) -> ReturnReference<'a>) {
-        let primitive = self.new_function_primitive(&name, Box::new(parameters), callback).get_value();
-        value.data_class_mut().methods.insert(name.to_string(), primitive);
-    }
-
-    fn add_static_primitive<const N: usize>(&mut self, mut value: GcValue<'a>, name: &str, parameters: [GcValue<'a>; N], callback: &'a dyn Fn(&mut Engine<'a>, Vec<GcValue<'a>>) -> ReturnReference<'a>) {
-        let primitive = self.new_function_primitive(&name, Box::new(parameters), callback).get_value();
-        value.data_class_mut().statics.insert(name.to_string(), self.new_constant(primitive));
-    }
-
     pub fn populate(&mut self) {
         self.primitives.class = self.new_class_primitive_value(None, "Class");
         self.primitives.any   = self.new_class_primitive_value(None, "Any");
@@ -144,14 +125,14 @@ impl<'a> Engine<'a> {
         string::populate(self);
 
         let Primitives { any, class, integer, string, .. } = self.primitives;
-        self.add_constant_primitive("assert",  [any],     &assert);
-        self.add_constant_primitive("error",   [any],     &error);
-        self.add_constant_primitive("eval",    [string],  &eval);
-        self.add_constant_primitive("exec",    [string],  &exec);
-        self.add_constant_primitive("exit",    [integer], &exit);
-        self.add_constant_primitive("include", [string],  &include);
-        self.add_constant_primitive("new",     [class],   &new);
-        self.add_constant_primitive("print",   [any],     &print);
+        builder::function(self, "assert",  [any],     &assert);
+        builder::function(self, "error",   [any],     &error);
+        builder::function(self, "eval",    [string],  &eval);
+        builder::function(self, "exec",    [string],  &exec);
+        builder::function(self, "exit",    [integer], &exit);
+        builder::function(self, "include", [string],  &include);
+        builder::function(self, "new",     [class],   &new);
+        builder::function(self, "print",   [any],     &print);
     }
 }
 

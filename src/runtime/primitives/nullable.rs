@@ -1,6 +1,7 @@
-use crate::runtime::ReturnReference;
 use crate::runtime::engine::Engine;
 use crate::runtime::error::Error;
+use crate::runtime::utilities::ReturnReference;
+use crate::runtime::utilities::builder;
 use crate::runtime::value::GcValue;
 
 pub fn populate(engine: &mut Engine) {
@@ -11,10 +12,10 @@ pub fn create<'a>(engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> Retur
     let class = arguments[0];
     class.cast(engine.primitives.class)?;
     let nullable = engine.new_class_value(None, engine.primitives.any);
-    engine.add_static_primitive(nullable, "new",       [class],    &new);
-    engine.add_static_primitive(nullable, "null",      [],    &null);
-    engine.add_method_primitive(nullable, "to_string", [nullable], &to_string);
-    engine.add_method_primitive(nullable, "get",       [nullable], &get);
+    builder::r#static(engine, nullable, "new",       [class],    &new);
+    builder::r#static(engine, nullable, "null",      [],    &null);
+    builder::method(engine, nullable, "to_string", [nullable], &to_string);
+    builder::method(engine, nullable, "get",       [nullable], &get);
     Ok(engine.new_constant(nullable))
 }
 

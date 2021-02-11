@@ -5,7 +5,6 @@ use crate::code::Code;
 use crate::memory::{ Own, Ref };
 use crate::nodes::Executable;
 use crate::parser::Parser;
-use crate::runtime::ReturnReference;
 use crate::runtime::data::{ Data, Tagger };
 use crate::runtime::primitives::Primitives;
 use crate::runtime::error::Error;
@@ -13,6 +12,7 @@ use crate::runtime::gc::{ GC_THRESHOLD, Gc, GcRef, GcTrace };
 use crate::runtime::reference::{ GcReference, Reference };
 use crate::runtime::registries::Registries;
 use crate::runtime::scope::{ GcScope, Scope };
+use crate::runtime::utilities::ReturnReference;
 use crate::runtime::value::{ GcValue, Value };
 
 use std::io::{ Read, Write };
@@ -112,25 +112,44 @@ impl<'a> Engine<'a> {
 }
 
 impl<'a> Engine<'a> {
-    pub fn push_scope(&mut self) {
-        self.scope = self.alloc(Scope::new_child(self.scope));
+    pub fn frame(&mut self, scope: GcScope<'a>, callback: &dyn Fn(&mut Engine<'a>) -> ReturnReference<'a>) -> ReturnReference<'a> {
+        self.push_frame(scope);
+        let reference = callback(self);
+        self.pop_frame();
+        reference
     }
 
-    pub fn pop_scope(&mut self) {
-        self.scope = self.scope.parent.unwrap();
+    pub fn scope(&mut self, callback: &dyn Fn(&mut Engine<'a>) -> ReturnReference<'a>) -> ReturnReference<'a> {
+        self.push_scope();
+        let reference = callback(self);
+        self.pop_scope();
+        reference
     }
 
-    pub fn push_frame(&mut self, frame: GcScope<'a>) {
+    fn push_frame(&mut self, frame: GcScope<'a>) {
         self.frames.push(self.scope);
         self.scope = frame;
     }
 
-    pub fn pop_frame(&mut self) {
+    fn pop_frame(&mut self) {
         self.scope = self.frames.pop().unwrap();
+    }
+
+    fn push_scope(&mut self) {
+        self.scope = self.alloc(Scope::new_child(self.scope));
+    }
+
+    fn pop_scope(&mut self) {
+        self.scope = self.scope.parent.unwrap();
     }
 }
 
 impl<'a> Engine<'a> {
+    pub fn add_constant_value(&mut self, name: &str, value: GcValue<'a>) {
+        let reference = self.new_constant(value);
+        self.add_variable(name, reference);
+    }
+
     pub fn add_variable(&mut self, name: &str, reference: GcReference<'a>) {
         self.scope.add_variable(name, reference);
     }

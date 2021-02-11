@@ -1,11 +1,11 @@
 use crate::memory::Ref;
 use crate::nodes::Node;
-use crate::runtime::ReturnReference;
 use crate::runtime::data::Tag;
 use crate::runtime::engine::{ Control, Engine };
 use crate::runtime::error::Error;
 use crate::runtime::gc::GcTrace;
 use crate::runtime::scope::GcScope;
+use crate::runtime::utilities::ReturnReference;
 use crate::runtime::utilities::parameters;
 use crate::runtime::value::GcValue;
 
@@ -30,15 +30,15 @@ impl<'a> FunctionCode<'a> {
 
     pub fn call(&self, engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> ReturnReference<'a> {
         parameters::length(arguments.len(), self.parameters.len())?;
-        engine.push_frame(self.scope);
-        for (parameter, argument) in self.parameters.iter().zip(arguments) {
-            let mut reference = engine.execute(parameter)?;
-            reference.write(argument)?;
-        }
+        let reference = engine.frame(self.scope, &|engine| {
+            for (parameter, argument) in self.parameters.iter().zip(arguments.iter()) {
+                let mut reference = engine.execute(parameter)?;
+                reference.write(*argument)?;
+            }
 
-        let executable = Ref::as_ref(&self.block);
-        let reference = engine.execute(executable)?;
-        engine.pop_frame();
+            let executable = Ref::as_ref(&self.block);
+            engine.execute(executable)
+        })?;
 
         if engine.control_is(Control::Break) || engine.control_is(Control::Continue) {
             return Err(Error::new_control());

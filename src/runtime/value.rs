@@ -1,9 +1,9 @@
-use crate::runtime::{ Return, ReturnReference };
 use crate::runtime::data::{ Class, Data, FunctionCode, FunctionPrimitive, GenericCode, GenericPrimitive, Method, Nullable, Object, Tag };
 use crate::runtime::engine::Engine;
 use crate::runtime::error::Error;
 use crate::runtime::gc::{ GcRef, GcTrace };
 use crate::runtime::reference::GcReference;
+use crate::runtime::utilities::{ Return, ReturnReference };
 use crate::runtime::utilities::parameters;
 
 pub type GcValue<'a> = GcRef<Value<'a>>;

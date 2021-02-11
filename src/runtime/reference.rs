@@ -1,6 +1,6 @@
-use crate::runtime::Return;
 use crate::runtime::error::Error;
 use crate::runtime::gc::{ GcRef, GcTrace };
+use crate::runtime::utilities::Return;
 use crate::runtime::value::GcValue;
 
 pub type GcReference<'a> = GcRef<Reference<'a>>;

@@ -1,6 +1,6 @@
 use crate::nodes::Node;
-use crate::runtime::ReturnReference;
 use crate::runtime::engine::{ Control, Engine };
+use crate::runtime::utilities::ReturnReference;
 
 impl<'a> Engine<'a> {
     pub fn control_new(&mut self, control: Control, node: Option<&Node>) -> ReturnReference<'a> {

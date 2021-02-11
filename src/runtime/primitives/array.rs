@@ -1,18 +1,19 @@
-use crate::runtime::ReturnReference;
 use crate::runtime::engine::Engine;
 use crate::runtime::primitives::Primitives;
+use crate::runtime::utilities::ReturnReference;
+use crate::runtime::utilities::builder;
 use crate::runtime::value::GcValue;
 
 pub fn populate(engine: &mut Engine) {
     let Primitives { any, array, integer, .. } = engine.primitives;
     engine.add_constant_value("Array", array);
-    engine.add_method_primitive(array, "to_string", [array],               &to_string);
-    engine.add_method_primitive(array, "copy",      [array],               &copy);
-    engine.add_method_primitive(array, "append",    [array, any],          &append);
-    engine.add_method_primitive(array, "prepend",   [array, any],          &prepend);
-    engine.add_method_primitive(array, "insert",    [array, integer, any], &insert);
-    engine.add_method_primitive(array, "remove",    [array, integer],      &remove);
-    engine.add_method_primitive(array, "__id__",    [array, array],        &id);
+    builder::method(engine, array, "to_string", [array],               &to_string);
+    builder::method(engine, array, "copy",      [array],               &copy);
+    builder::method(engine, array, "append",    [array, any],          &append);
+    builder::method(engine, array, "prepend",   [array, any],          &prepend);
+    builder::method(engine, array, "insert",    [array, integer, any], &insert);
+    builder::method(engine, array, "remove",    [array, integer],      &remove);
+    builder::method(engine, array, "__id__",    [array, array],        &id);
 }
 
 fn to_string<'a>(engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> ReturnReference<'a> {

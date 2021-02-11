@@ -44,8 +44,8 @@ pub mod r#continue;
 pub mod build;
 
 use crate::memory::Ref;
-use crate::runtime::ReturnReference;
 use crate::runtime::engine::Engine;
+use crate::runtime::utilities::ReturnReference;
 
 pub use crate::node::Node as SyntaxNode;
 

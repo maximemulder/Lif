@@ -1,18 +1,18 @@
-use crate::runtime::ReturnReference;
 use crate::runtime::data::Tag;
 use crate::runtime::engine::Engine;
 use crate::runtime::gc::GcTrace;
+use crate::runtime::utilities::{ Callable, ReturnReference };
 use crate::runtime::utilities::parameters;
 use crate::runtime::value::GcValue;
 
 pub struct FunctionPrimitive<'a> {
     pub tag: Tag,
     parameters: Box<[GcValue<'a>]>,
-    callback: &'a dyn Fn(&mut Engine<'a>, Vec<GcValue<'a>>) -> ReturnReference<'a>,
+    callback: &'a Callable<'a>,
 }
 
 impl<'a> FunctionPrimitive<'a> {
-    pub fn new(tag: Tag, parameters: Box<[GcValue<'a>]>, callback: &'a dyn Fn(&mut Engine<'a>, Vec<GcValue<'a>>) -> ReturnReference<'a>) -> Self {
+    pub fn new(tag: Tag, parameters: Box<[GcValue<'a>]>, callback: &'a Callable<'a>) -> Self {
         Self {
             tag,
             parameters,

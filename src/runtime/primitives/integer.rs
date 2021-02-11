@@ -1,6 +1,7 @@
-use crate::runtime::ReturnReference;
 use crate::runtime::engine::Engine;
 use crate::runtime::primitives::Primitives;
+use crate::runtime::utilities::ReturnReference;
+use crate::runtime::utilities::builder;
 use crate::runtime::value::GcValue;
 
 use std::mem::size_of;
@@ -8,24 +9,24 @@ use std::mem::size_of;
 pub fn populate(engine: &mut Engine) {
     let Primitives { any, integer, .. } = engine.primitives;
     engine.add_constant_value("Integer", integer);
-    engine.add_method_primitive(integer, "to_string", [integer],          &to_string);
-    engine.add_method_primitive(integer, "__eq__",    [integer, any],     &eq);
-    engine.add_method_primitive(integer, "__lt__",    [integer, integer], &lt);
-    engine.add_method_primitive(integer, "__pos__",   [integer],          &pos);
-    engine.add_method_primitive(integer, "__neg__",   [integer],          &neg);
-    engine.add_method_primitive(integer, "__add__",   [integer, integer], &add);
-    engine.add_method_primitive(integer, "__sub__",   [integer, integer], &sub);
-    engine.add_method_primitive(integer, "__mul__",   [integer, integer], &mul);
-    engine.add_method_primitive(integer, "__div__",   [integer, integer], &div);
-    engine.add_method_primitive(integer, "__rem__",   [integer, integer], &rem);
-    engine.add_method_primitive(integer, "__bnot__",  [integer],          &bnot);
-    engine.add_method_primitive(integer, "__band__",  [integer, integer], &band);
-    engine.add_method_primitive(integer, "__bor__",   [integer, integer], &bor);
-    engine.add_method_primitive(integer, "__bxor__",  [integer, integer], &bxor);
-    engine.add_method_primitive(integer, "__bls__",   [integer, integer], &bls);
-    engine.add_method_primitive(integer, "__brs__",   [integer, integer], &brs);
-    engine.add_method_primitive(integer, "__bcls__",  [integer, integer], &bcls);
-    engine.add_method_primitive(integer, "__bcrs__",  [integer, integer], &bcrs);
+    builder::method(engine, integer, "to_string", [integer],          &to_string);
+    builder::method(engine, integer, "__eq__",    [integer, any],     &eq);
+    builder::method(engine, integer, "__lt__",    [integer, integer], &lt);
+    builder::method(engine, integer, "__pos__",   [integer],          &pos);
+    builder::method(engine, integer, "__neg__",   [integer],          &neg);
+    builder::method(engine, integer, "__add__",   [integer, integer], &add);
+    builder::method(engine, integer, "__sub__",   [integer, integer], &sub);
+    builder::method(engine, integer, "__mul__",   [integer, integer], &mul);
+    builder::method(engine, integer, "__div__",   [integer, integer], &div);
+    builder::method(engine, integer, "__rem__",   [integer, integer], &rem);
+    builder::method(engine, integer, "__bnot__",  [integer],          &bnot);
+    builder::method(engine, integer, "__band__",  [integer, integer], &band);
+    builder::method(engine, integer, "__bor__",   [integer, integer], &bor);
+    builder::method(engine, integer, "__bxor__",  [integer, integer], &bxor);
+    builder::method(engine, integer, "__bls__",   [integer, integer], &bls);
+    builder::method(engine, integer, "__brs__",   [integer, integer], &brs);
+    builder::method(engine, integer, "__bcls__",  [integer, integer], &bcls);
+    builder::method(engine, integer, "__bcrs__",  [integer, integer], &bcrs);
 }
 
 fn to_string<'a>(engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> ReturnReference<'a> {

@@ -1,7 +1,7 @@
 use crate::memory::Ref;
 use crate::nodes::{ Executable, Node };
-use crate::runtime::ReturnReference;
 use crate::runtime::engine::Engine;
+use crate::runtime::utilities::ReturnReference;
 
 pub struct Declaration {
     identifier: Ref<str>,

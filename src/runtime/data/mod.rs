@@ -20,11 +20,10 @@ pub use tag::{ Tag, Tagger };
 
 use crate::memory::Ref;
 use crate::nodes::{ Executable, Node };
-use crate::runtime::ReturnReference;
-use crate::runtime::engine::Engine;
 use crate::runtime::gc::GcTrace;
 use crate::runtime::scope::GcScope;
 use crate::runtime::reference::GcReference;
+use crate::runtime::utilities::Callable;
 use crate::runtime::value::GcValue;
 
 pub enum Data<'a> {
@@ -59,7 +58,7 @@ impl<'a> Data<'a> {
         Data::FunctionCode(FunctionCode::new(tag, scope, parameters, r#type, block))
     }
 
-    pub fn new_function_primitive(tag: Tag, parameters: Box<[GcValue<'a>]>, callback: &'a dyn Fn(&mut Engine<'a>, Vec<GcValue<'a>>) -> ReturnReference<'a>) -> Self {
+    pub fn new_function_primitive(tag: Tag, parameters: Box<[GcValue<'a>]>, callback: &'a Callable<'a>) -> Self {
         Data::FunctionPrimitive(FunctionPrimitive::new(tag, parameters, callback))
     }
 
@@ -67,7 +66,7 @@ impl<'a> Data<'a> {
         Data::GenericCode(GenericCode::new(tag, scope, parameters, node))
     }
 
-    pub fn new_generic_primitive(tag: Tag, scope: GcScope<'a>, parameters: Vec<Box<str>>, callback: &'a dyn Fn(&mut Engine<'a>, Vec<GcValue<'a>>) -> ReturnReference<'a>) -> Self {
+    pub fn new_generic_primitive(tag: Tag, scope: GcScope<'a>, parameters: Vec<Box<str>>, callback: &'a Callable<'a>) -> Self {
         Data::GenericPrimitive(GenericPrimitive::new(tag, scope, parameters, callback))
     }
 

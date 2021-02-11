@@ -1,8 +1,8 @@
-use crate::runtime::ReturnReference;
 use crate::runtime::data::Tag;
 use crate::runtime::engine::Engine;
 use crate::runtime::gc::GcTrace;
 use crate::runtime::scope::GcScope;
+use crate::runtime::utilities::{ Callable, ReturnReference };
 use crate::runtime::utilities::memoizes::Memoizes;
 use crate::runtime::utilities::parameters;
 use crate::runtime::value::GcValue;
@@ -11,12 +11,12 @@ pub struct GenericPrimitive<'a> {
     pub tag: Tag,
     scope: GcScope<'a>,
     parameters: Vec<Box<str>>,
-    callback: &'a dyn Fn(&mut Engine<'a>, Vec<GcValue<'a>>) -> ReturnReference<'a>,
+    callback: &'a Callable<'a>,
     memoizes: Memoizes<'a>,
 }
 
 impl<'a> GenericPrimitive<'a> {
-    pub fn new(tag: Tag, scope: GcScope<'a>, parameters: Vec<Box<str>>, callback: &'a dyn Fn(&mut Engine<'a>, Vec<GcValue<'a>>) -> ReturnReference<'a>) -> Self {
+    pub fn new(tag: Tag, scope: GcScope<'a>, parameters: Vec<Box<str>>, callback: &'a Callable<'a>) -> Self {
         Self {
             tag,
             scope,
@@ -32,15 +32,16 @@ impl<'a> GenericPrimitive<'a> {
             return Ok(reference);
         }
 
-        engine.push_frame(self.scope);
-        for (parameter, argument) in self.parameters.iter().zip(arguments.iter()) {
-            let reference = engine.new_constant(*argument);
-            engine.add_variable(parameter, reference);
-        }
+        let reference = engine.frame(self.scope, &|engine| {
+            for (parameter, argument) in self.parameters.iter().zip(arguments.iter()) {
+                let reference = engine.new_constant(*argument);
+                engine.add_variable(parameter, reference);
+            }
 
-        let reference = (self.callback)(engine, arguments.clone())?;
+             (self.callback)(engine, arguments.clone())
+        })?;
+
         self.memoizes.record(arguments.into_boxed_slice(), reference);
-        engine.pop_frame();
         Ok(reference)
     }
 }

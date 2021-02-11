@@ -1,9 +1,9 @@
 use crate::memory::Ref;
 use crate::nodes::{ Executable, Node };
-use crate::runtime::ReturnReference;
 use crate::runtime::data::Data;
 use crate::runtime::engine::Engine;
 use crate::runtime::reference::GcReference;
+use crate::runtime::utilities::Callable;
 use crate::runtime::value::GcValue;
 
 impl<'a> Engine<'a> {
@@ -30,7 +30,7 @@ impl<'a> Engine<'a> {
         self.new_value(self.primitives.function_code, Data::new_function(tag, self.scope, parameters, r#type, block))
     }
 
-    pub fn new_function_primitive_value(&mut self, name: &str, parameters: Box<[GcValue<'a>]>, callback: &'a dyn Fn(&mut Engine<'a>, Vec<GcValue<'a>>) -> ReturnReference<'a>) -> GcValue<'a> {
+    pub fn new_function_primitive_value(&mut self, name: &str, parameters: Box<[GcValue<'a>]>, callback: &'a Callable<'a>) -> GcValue<'a> {
         let tag = self.taggers.functions.generate(Some(Box::from(name)));
         self.new_value(self.primitives.function_primitive, Data::new_function_primitive(tag, parameters, callback))
     }
@@ -40,7 +40,7 @@ impl<'a> Engine<'a> {
         self.new_value(self.primitives.generic_code, Data::new_generic(tag, self.scope, parameters, node))
     }
 
-    pub fn new_generic_primitive_value(&mut self, name: &str, parameters: Vec<Box<str>>, callback: &'a dyn Fn(&mut Engine<'a>, Vec<GcValue<'a>>) -> ReturnReference<'a>) -> GcValue<'a> {
+    pub fn new_generic_primitive_value(&mut self, name: &str, parameters: Vec<Box<str>>, callback: &'a Callable<'a>) -> GcValue<'a> {
         let tag = self.taggers.generics.generate(Some(Box::from(name)));
         self.new_value(self.primitives.generic_primitive, Data::new_generic_primitive(tag, self.scope, parameters, callback))
     }
@@ -87,7 +87,7 @@ impl<'a> Engine<'a> {
         self.new_constant(value)
     }
 
-    pub fn new_function_primitive(&mut self, name: &str, parameters: Box<[GcValue<'a>]>, callback: &'a dyn Fn(&mut Engine<'a>, Vec<GcValue<'a>>) -> ReturnReference<'a>) -> GcReference<'a> {
+    pub fn new_function_primitive(&mut self, name: &str, parameters: Box<[GcValue<'a>]>, callback: &'a Callable<'a>) -> GcReference<'a> {
         let value = self.new_function_primitive_value(name, parameters, callback);
         self.new_constant(value)
     }
@@ -97,7 +97,7 @@ impl<'a> Engine<'a> {
         self.new_constant(value)
     }
 
-    pub fn new_generic_primitive(&mut self, name: &str, parameters: Vec<Box<str>>, callback: &'a dyn Fn(&mut Engine<'a>, Vec<GcValue<'a>>) -> ReturnReference<'a>) -> GcReference<'a> {
+    pub fn new_generic_primitive(&mut self, name: &str, parameters: Vec<Box<str>>, callback: &'a Callable<'a>) -> GcReference<'a> {
         let value = self.new_generic_primitive_value(name, parameters, callback);
         self.new_constant(value)
     }

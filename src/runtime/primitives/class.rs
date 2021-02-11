@@ -1,14 +1,15 @@
-use crate::runtime::ReturnReference;
 use crate::runtime::engine::Engine;
 use crate::runtime::primitives::Primitives;
+use crate::runtime::utilities::ReturnReference;
+use crate::runtime::utilities::builder;
 use crate::runtime::value::GcValue;
 
 pub fn populate(engine: &mut Engine) {
     let Primitives { class, string, .. } = engine.primitives;
     engine.add_constant_value("Class", class);
-    engine.add_method_primitive(class, "to_string", [class],         &to_string);
-    engine.add_method_primitive(class, "__cn__",    [class, string], &cn);
-    engine.add_method_primitive(class, "__id__",    [class],         &id);
+    builder::method(engine, class, "to_string", [class],         &to_string);
+    builder::method(engine, class, "__cn__",    [class, string], &cn);
+    builder::method(engine, class, "__id__",    [class],         &id);
 }
 
 fn to_string<'a>(engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> ReturnReference<'a> {

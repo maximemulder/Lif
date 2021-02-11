@@ -1,10 +1,10 @@
 use crate::memory::Ref;
 use crate::nodes::Executable;
-use crate::runtime::ReturnReference;
 use crate::runtime::data::Tag;
 use crate::runtime::engine::Engine;
 use crate::runtime::gc::GcTrace;
 use crate::runtime::scope::GcScope;
+use crate::runtime::utilities::ReturnReference;
 use crate::runtime::utilities::memoizes::Memoizes;
 use crate::runtime::utilities::parameters;
 use crate::runtime::value::GcValue;
@@ -34,15 +34,16 @@ impl<'a> GenericCode<'a> {
             return Ok(reference);
         }
 
-        engine.push_frame(self.scope);
-        for (parameter, argument) in self.parameters.iter().zip(arguments.iter()) {
-            let reference = engine.new_reference(*argument);
-            engine.add_variable(parameter, reference);
-        }
+        let reference = engine.frame(self.scope, &|engine| {
+            for (parameter, argument) in self.parameters.iter().zip(arguments.iter()) {
+                let reference = engine.new_reference(*argument);
+                engine.add_variable(parameter, reference);
+            }
 
-        let reference = engine.execute(Ref::as_ref(&self.node))?;
+            engine.execute(Ref::as_ref(&self.node))
+        })?;
+
         self.memoizes.record(arguments.into_boxed_slice(), reference);
-        engine.pop_frame();
         Ok(reference)
     }
 }
