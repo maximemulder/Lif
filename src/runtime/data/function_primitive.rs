@@ -1,11 +1,10 @@
 use crate::runtime::ReturnReference;
 use crate::runtime::data::Tag;
 use crate::runtime::engine::Engine;
-use crate::runtime::error::Error;
 use crate::runtime::gc::GcTrace;
+use crate::runtime::utilities::parameters;
 use crate::runtime::value::GcValue;
 
-#[derive(Clone)]
 pub struct FunctionPrimitive<'a> {
     pub tag: Tag,
     parameters: Box<[GcValue<'a>]>,
@@ -22,10 +21,7 @@ impl<'a> FunctionPrimitive<'a> {
     }
 
     pub fn call(&self, engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> ReturnReference<'a> {
-        if arguments.len() != self.parameters.len() {
-            return Err(Error::new_arguments(self.parameters.len(), arguments.len()));
-        }
-
+        parameters::length(arguments.len(), self.parameters.len())?;
         for (parameter, argument) in self.parameters.iter().zip(&arguments) {
             argument.cast(*parameter)?;
         }

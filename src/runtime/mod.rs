@@ -7,6 +7,7 @@ pub mod reference;
 pub mod registries;
 pub mod scope;
 pub mod value;
+pub mod utilities;
 
 use error::Error;
 use reference::GcReference;

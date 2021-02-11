@@ -3,10 +3,10 @@ use crate::nodes::Executable;
 use crate::runtime::ReturnReference;
 use crate::runtime::data::Tag;
 use crate::runtime::engine::Engine;
-use crate::runtime::error::Error;
 use crate::runtime::gc::GcTrace;
-use crate::runtime::reference::GcReference;
 use crate::runtime::scope::GcScope;
+use crate::runtime::utilities::memoizes::Memoizes;
+use crate::runtime::utilities::parameters;
 use crate::runtime::value::GcValue;
 
 pub struct GenericCode<'a> {
@@ -14,7 +14,7 @@ pub struct GenericCode<'a> {
     scope: GcScope<'a>,
     parameters: Ref<[Ref<str>]>,
     node: Ref<dyn Executable>,
-    memoizes: Vec<(Box<[GcValue<'a>]>, GcReference<'a>)>,
+    memoizes: Memoizes<'a>,
 }
 
 impl<'a> GenericCode<'a> {
@@ -24,23 +24,14 @@ impl<'a> GenericCode<'a> {
             scope,
             parameters,
             node,
-            memoizes: Vec::new(),
+            memoizes: Memoizes::new(),
         }
     }
 
     pub fn call(&mut self, engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> ReturnReference<'a> {
-        if arguments.len() != self.parameters.len() {
-            return Err(Error::new_arguments(self.parameters.len(), arguments.len()));
-        }
-
-        'outer: for memoize in self.memoizes.iter() {
-            for (value, argument) in memoize.0.iter().zip(arguments.iter()) {
-                if !value.is(*argument) {
-                    continue 'outer;
-                }
-            }
-
-            return Ok(memoize.1);
+        parameters::length(arguments.len(), self.parameters.len())?;
+        if let Some(reference) = self.memoizes.get(&arguments) {
+            return Ok(reference);
         }
 
         engine.push_frame(self.scope);
@@ -50,7 +41,7 @@ impl<'a> GenericCode<'a> {
         }
 
         let reference = engine.execute(Ref::as_ref(&self.node))?;
-        self.memoizes.push((arguments.into_boxed_slice(), reference));
+        self.memoizes.record(arguments.into_boxed_slice(), reference);
         engine.pop_frame();
         Ok(reference)
     }
@@ -59,11 +50,6 @@ impl<'a> GenericCode<'a> {
 impl GcTrace for GenericCode<'_> {
     fn trace(&mut self) {
         self.scope.trace();
-        for memoize in self.memoizes.iter_mut() {
-            memoize.1.trace();
-            for value in memoize.0.iter_mut() {
-                value.trace()
-            }
-        }
+        self.memoizes.trace();
     }
 }

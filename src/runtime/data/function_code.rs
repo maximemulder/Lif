@@ -6,9 +6,9 @@ use crate::runtime::engine::{ Control, Engine };
 use crate::runtime::error::Error;
 use crate::runtime::gc::GcTrace;
 use crate::runtime::scope::GcScope;
+use crate::runtime::utilities::parameters;
 use crate::runtime::value::GcValue;
 
-#[derive(Clone)]
 pub struct FunctionCode<'a> {
     pub tag: Tag,
     scope: GcScope<'a>,
@@ -29,10 +29,7 @@ impl<'a> FunctionCode<'a> {
     }
 
     pub fn call(&self, engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> ReturnReference<'a> {
-        if arguments.len() != self.parameters.len() {
-            return Err(Error::new_arguments(self.parameters.len(), arguments.len()));
-        }
-
+        parameters::length(arguments.len(), self.parameters.len())?;
         engine.push_frame(self.scope);
         for (parameter, argument) in self.parameters.iter().zip(arguments) {
             let mut reference = engine.execute(parameter)?;

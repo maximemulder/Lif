@@ -4,6 +4,7 @@ use crate::runtime::engine::Engine;
 use crate::runtime::error::Error;
 use crate::runtime::gc::{ GcRef, GcTrace };
 use crate::runtime::reference::GcReference;
+use crate::runtime::utilities::parameters;
 
 pub type GcValue<'a> = GcRef<Value<'a>>;
 
@@ -61,12 +62,7 @@ impl<'a> GcValue<'a> {
 
     pub fn call_method_self(self, engine: &mut Engine<'a>, name: &str, arguments: Vec<GcValue<'a>>) -> ReturnReference<'a> {
         let method = self.get_method(name)?;
-        let mut parameters = Vec::new();
-        for argument in arguments {
-            parameters.push(engine.new_constant(argument));
-        }
-
-        let array = engine.new_array_value(parameters);
+        let array = parameters::pack(engine, arguments);
         method.get_method("__cl__")?.data_function_primitive().call(engine, vec![method, array])
     }
 
