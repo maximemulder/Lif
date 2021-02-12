@@ -1,0 +1,17 @@
+// Generic classes and functions can be defined using square brackets.
+function my_print<T>(value: T) {
+    print(value);
+}
+
+class StaticArray<T, N> {
+    // Some code.
+}
+
+// Specialized classes and functions can be used using square brackets.
+my_print<String>("Hello World !"); // Expected output: "Hello World !".
+
+let array = new(StaticArray<Integer, 5>);
+
+// Potential issues:
+// There is currently no way to type generics.
+// There is currently no inference mechanism, thus generics must always be specified.

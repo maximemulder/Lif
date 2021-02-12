@@ -1,0 +1,14 @@
+// Functions can be defined using the keyword "class".
+function my_print(value) {
+    print(value);
+}
+
+// Functions are first-class citizens and can also be anonymous.
+let closure = function(value) {
+    print(value);
+};
+
+// Functions can optionally have parameters and return types.
+function greeting(person: String): String {
+    return "Hello " + person + " !";
+}

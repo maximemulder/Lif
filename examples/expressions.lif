@@ -1,0 +1,19 @@
+// A block can return an expression.
+print({
+    "Hello World !"
+}); // Expected output: "Hello World !".
+
+// An if is an expression.
+print(if 1 < 2 {
+    0
+} else {
+    1
+}); // Expected output: "0".
+
+// A loop is also an expression and can be used an array.
+let doubles = for number in [0, 1, 2] {
+    number * 2
+};
+
+// Potential issues:
+// Maybe creating arrays in loops is excessive.

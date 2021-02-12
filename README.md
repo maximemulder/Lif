@@ -21,7 +21,8 @@ Then, you can use this interpreter by providing it the file path as a command li
 
 ## Language
 
-You can check the "src/tests/" directory to see examples of working Lif code. There is currently no better documentation because I like to experiment freely with the language.
+Examples of working Lif code can be found in the `examples` directory. It is also possible to find additional Lif code in the tests.
+Because I like to experiment on this language, these examples are subject to change, and there is currently no formal documentation of the language features or libraries.
 
 ## Maintainance
 
