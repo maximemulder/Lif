@@ -1,4 +1,4 @@
-// Functions can be defined using the keyword "class".
+// Functions can be defined using the keyword "function".
 function my_print(value) {
     print(value);
 }

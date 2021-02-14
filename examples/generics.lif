@@ -7,7 +7,7 @@ class StaticArray<T, N> {
     // Some code.
 }
 
-// Specialized classes and functions can be used using square brackets.
+// Generic functions and classes can be specialized using square brackets.
 my_print<String>("Hello World !"); // Expected output: "Hello World !".
 
 let array = new(StaticArray<Integer, 5>);

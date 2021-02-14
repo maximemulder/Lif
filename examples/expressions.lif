@@ -10,7 +10,7 @@ print(if 1 < 2 {
     1
 }); // Expected output: "0".
 
-// A loop is also an expression and can be used an array.
+// A loop is also an expression and can be used to create an array.
 let doubles = for number in [0, 1, 2] {
     number * 2
 };
