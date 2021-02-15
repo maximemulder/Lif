@@ -1,8 +1,7 @@
 mod class;
 mod function_primitive;
 mod function_code;
-mod generic_primitive;
-mod generic_code;
+mod generic;
 mod method;
 mod nullable;
 mod object;
@@ -11,8 +10,7 @@ mod tag;
 pub use class::Class;
 pub use function_code::FunctionCode;
 pub use function_primitive::FunctionPrimitive;
-pub use generic_code::GenericCode;
-pub use generic_primitive::GenericPrimitive;
+pub use generic::{ Generic, GenericCode, GenericPrimitive };
 pub use method::Method;
 pub use nullable::Nullable;
 pub use object::Object;
@@ -63,11 +61,11 @@ impl<'a> Data<'a> {
     }
 
     pub fn new_generic(tag: Tag, scope: GcScope<'a>, parameters: Ref<[Ref<str>]>, node: Ref<dyn Executable>) -> Self {
-        Data::GenericCode(GenericCode::new(tag, scope, parameters, node))
+        Data::GenericCode(Generic::new_code(tag, scope, parameters, node))
     }
 
     pub fn new_generic_primitive(tag: Tag, scope: GcScope<'a>, parameters: Vec<Box<str>>, callback: &'a Callable<'a>) -> Self {
-        Data::GenericPrimitive(GenericPrimitive::new(tag, scope, parameters, callback))
+        Data::GenericPrimitive(Generic::new_primitive(tag, scope, parameters, callback))
     }
 
     pub fn new_integer(integer: isize) -> Self {
