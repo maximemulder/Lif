@@ -1,8 +1,7 @@
 use crate::runtime::engine::Engine;
 use crate::runtime::primitives::Primitives;
-use crate::runtime::utilities::ReturnReference;
+use crate::runtime::utilities::{ Arguments, ReturnReference };
 use crate::runtime::utilities::builder;
-use crate::runtime::value::GcValue;
 
 pub fn populate(engine: &mut Engine) {
     let Primitives { any, boolean, .. } = engine.primitives;
@@ -12,11 +11,11 @@ pub fn populate(engine: &mut Engine) {
     builder::method(engine, boolean, "__not__",   [boolean],      &not);
 }
 
-fn to_string<'a>(engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> ReturnReference<'a> {
+fn to_string<'a>(engine: &mut Engine<'a>, arguments: Arguments<'a>) -> ReturnReference<'a> {
     Ok(engine.new_string(arguments[0].data_boolean().to_string()))
 }
 
-fn eq<'a>(engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> ReturnReference<'a> {
+fn eq<'a>(engine: &mut Engine<'a>, arguments: Arguments<'a>) -> ReturnReference<'a> {
     Ok(engine.new_boolean(if arguments[1].isa(engine.primitives.boolean) {
         arguments[0].data_boolean() == arguments[1].data_boolean()
     } else {
@@ -24,6 +23,6 @@ fn eq<'a>(engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> ReturnReferen
     }))
 }
 
-fn not<'a>(engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> ReturnReference<'a> {
+fn not<'a>(engine: &mut Engine<'a>, arguments: Arguments<'a>) -> ReturnReference<'a> {
     Ok(engine.new_boolean(!arguments[0].data_boolean()))
 }

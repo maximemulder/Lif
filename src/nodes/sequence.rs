@@ -35,6 +35,6 @@ impl Executable for Sequence {
         }
 
         let array = engine.new_array_value(arguments);
-        value.call_method(engine, &self.operator, vec![array])
+        value.call_method(engine, &self.operator, Box::new([array]))
     }
 }

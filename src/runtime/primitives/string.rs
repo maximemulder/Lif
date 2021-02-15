@@ -1,8 +1,7 @@
 use crate::runtime::engine::Engine;
 use crate::runtime::primitives::Primitives;
-use crate::runtime::utilities::ReturnReference;
+use crate::runtime::utilities::{ Arguments, ReturnReference };
 use crate::runtime::utilities::builder;
-use crate::runtime::value::GcValue;
 
 pub fn populate(engine: &mut Engine) {
     let Primitives { any, string, .. } = engine.primitives;
@@ -12,11 +11,11 @@ pub fn populate(engine: &mut Engine) {
     builder::method(engine, string, "__add__",   [string, any], &add);
 }
 
-fn to_string<'a>(engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> ReturnReference<'a> {
+fn to_string<'a>(engine: &mut Engine<'a>, arguments: Arguments<'a>) -> ReturnReference<'a> {
     Ok(engine.new_constant(arguments[0]))
 }
 
-fn eq<'a>(engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> ReturnReference<'a> {
+fn eq<'a>(engine: &mut Engine<'a>, arguments: Arguments<'a>) -> ReturnReference<'a> {
     Ok(engine.new_boolean(if arguments[1].isa(engine.primitives.string) {
         arguments[0].data_string() == arguments[1].data_string()
     } else {
@@ -24,7 +23,7 @@ fn eq<'a>(engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> ReturnReferen
     }))
 }
 
-fn add<'a>(engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> ReturnReference<'a> {
+fn add<'a>(engine: &mut Engine<'a>, arguments: Arguments<'a>) -> ReturnReference<'a> {
     let right = arguments[1].call_to_string(engine)?;
     Ok(engine.new_string(format!("{}{}", arguments[0].data_string(), right)))
 }

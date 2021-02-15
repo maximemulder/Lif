@@ -1,7 +1,7 @@
 use crate::runtime::data::Tag;
 use crate::runtime::engine::Engine;
 use crate::runtime::gc::GcTrace;
-use crate::runtime::utilities::{ Callable, ReturnReference };
+use crate::runtime::utilities::{ Arguments, Callable, ReturnReference };
 use crate::runtime::utilities::parameters;
 use crate::runtime::value::GcValue;
 
@@ -20,9 +20,9 @@ impl<'a> FunctionPrimitive<'a> {
         }
     }
 
-    pub fn call(&self, engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> ReturnReference<'a> {
+    pub fn call(&self, engine: &mut Engine<'a>, arguments: Arguments<'a>) -> ReturnReference<'a> {
         parameters::length(arguments.len(), self.parameters.len())?;
-        for (parameter, argument) in self.parameters.iter().zip(&arguments) {
+        for (parameter, argument) in self.parameters.iter().zip(arguments.as_ref()) {
             argument.cast(*parameter)?;
         }
 

@@ -73,7 +73,7 @@ impl Executable for Binop {
             },
             _ => {
                 let right = execute!(engine, &self.right).read()?;
-                left.call_method(engine, &self.operator, vec![right])
+                left.call_method(engine, &self.operator, Box::new([right]))
             },
         }
     }

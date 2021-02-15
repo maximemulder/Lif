@@ -5,7 +5,7 @@ use crate::runtime::engine::{ Control, Engine };
 use crate::runtime::error::Error;
 use crate::runtime::gc::GcTrace;
 use crate::runtime::scope::GcScope;
-use crate::runtime::utilities::ReturnReference;
+use crate::runtime::utilities::{ Arguments, ReturnReference };
 use crate::runtime::utilities::parameters;
 use crate::runtime::value::GcValue;
 
@@ -28,7 +28,7 @@ impl<'a> FunctionCode<'a> {
         }
     }
 
-    pub fn call(&self, engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> ReturnReference<'a> {
+    pub fn call(&self, engine: &mut Engine<'a>, arguments: Arguments<'a>) -> ReturnReference<'a> {
         parameters::length(arguments.len(), self.parameters.len())?;
         let reference = engine.frame(self.scope, &|engine| {
             for (parameter, argument) in self.parameters.iter().zip(arguments.iter()) {

@@ -15,7 +15,7 @@ use crate::code::Code;
 use crate::nodes::build;
 use crate::runtime::engine::Engine;
 use crate::runtime::gc::GcTrace;
-use crate::runtime::utilities::ReturnReference;
+use crate::runtime::utilities::{ Arguments, ReturnReference };
 use crate::runtime::utilities::builder;
 use crate::runtime::value::GcValue;
 
@@ -136,7 +136,7 @@ impl<'a> Engine<'a> {
     }
 }
 
-fn assert<'a>(engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> ReturnReference<'a> {
+fn assert<'a>(engine: &mut Engine<'a>, arguments: Arguments<'a>) -> ReturnReference<'a> {
     if !arguments[0].data_boolean() {
         panic!();
     }
@@ -144,13 +144,13 @@ fn assert<'a>(engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> ReturnRef
     Ok(engine.undefined())
 }
 
-fn error<'a>(engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> ReturnReference<'a> {
+fn error<'a>(engine: &mut Engine<'a>, arguments: Arguments<'a>) -> ReturnReference<'a> {
     let message = arguments[0].call_to_string(engine)?;
     writeln!(engine.error, "{}", message).unwrap();
     Ok(engine.undefined())
 }
 
-fn eval<'a>(engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> ReturnReference<'a> {
+fn eval<'a>(engine: &mut Engine<'a>, arguments: Arguments<'a>) -> ReturnReference<'a> {
     let code = Code::from_string(&engine.parser, 1, &build::expression, &arguments[0].data_string());
     Ok(match engine.run(code) {
         Some(reference) => reference,
@@ -158,27 +158,27 @@ fn eval<'a>(engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> ReturnRefer
     })
 }
 
-fn exec<'a>(engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> ReturnReference<'a> {
+fn exec<'a>(engine: &mut Engine<'a>, arguments: Arguments<'a>) -> ReturnReference<'a> {
     let code = Code::from_string(&engine.parser, 0, &build::program, &arguments[0].data_string());
     engine.run(code);
     Ok(engine.undefined())
 }
 
-fn exit<'a>(_: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> ReturnReference<'a> {
+fn exit<'a>(_: &mut Engine<'a>, arguments: Arguments<'a>) -> ReturnReference<'a> {
     process::exit(*arguments[0].data_integer() as i32);
 }
 
-fn include<'a>(engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> ReturnReference<'a> {
+fn include<'a>(engine: &mut Engine<'a>, arguments: Arguments<'a>) -> ReturnReference<'a> {
     let code = Code::from_file(&engine.parser, 0, &build::program, &arguments[0].data_string()).unwrap();
     engine.run(code);
     Ok(engine.undefined())
 }
 
-fn new<'a>(engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> ReturnReference<'a> {
+fn new<'a>(engine: &mut Engine<'a>, arguments: Arguments<'a>) -> ReturnReference<'a> {
     Ok(engine.new_object(arguments[0]))
 }
 
-fn print<'a>(engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> ReturnReference<'a> {
+fn print<'a>(engine: &mut Engine<'a>, arguments: Arguments<'a>) -> ReturnReference<'a> {
     let message = arguments[0].call_to_string(engine)?;
     writeln!(engine.output, "{}", message).unwrap();
     Ok(engine.undefined())

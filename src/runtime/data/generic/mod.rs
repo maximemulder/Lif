@@ -7,10 +7,9 @@ use crate::runtime::data::Tag;
 use crate::runtime::engine::Engine;
 use crate::runtime::gc::GcTrace;
 use crate::runtime::scope::GcScope;
-use crate::runtime::utilities::{ Callable, ReturnReference };
+use crate::runtime::utilities::{ Arguments, Callable, ReturnReference };
 use crate::runtime::utilities::memoizes::Memoizes;
 use crate::runtime::utilities::parameters;
-use crate::runtime::value::GcValue;
 
 use code::GenericImplementationCode;
 use primitive::GenericImplementationPrimitive;
@@ -20,7 +19,7 @@ pub type GenericPrimitive<'a> = Generic<'a, GenericImplementationPrimitive<'a>>;
 
 pub trait GenericImplementation<'a> {
     fn length(&self) -> usize;
-    fn call(&self, engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> ReturnReference<'a>;
+    fn call(&self, engine: &mut Engine<'a>, arguments: Arguments<'a>) -> ReturnReference<'a>;
 }
 
 pub struct Generic<'a, T: GenericImplementation<'a>> {
@@ -54,7 +53,7 @@ impl<'a> GenericPrimitive<'a> {
 }
 
 impl<'a, T: GenericImplementation<'a>> Generic<'a, T> {
-    pub fn call(&mut self, engine: &mut Engine<'a>, arguments: Vec<GcValue<'a>>) -> ReturnReference<'a> {
+    pub fn call(&mut self, engine: &mut Engine<'a>, arguments: Arguments<'a>) -> ReturnReference<'a> {
         parameters::length(arguments.len(), self.implementation.length())?;
         if let Some(reference) = self.memoizes.get(&arguments) {
             return Ok(reference);
@@ -62,7 +61,7 @@ impl<'a, T: GenericImplementation<'a>> Generic<'a, T> {
 
         let reference = engine.frame(self.scope, &|engine| self.implementation.call(engine, arguments.clone()))?;
 
-        self.memoizes.record(arguments.into_boxed_slice(), reference);
+        self.memoizes.record(arguments, reference);
         Ok(reference)
     }
 }

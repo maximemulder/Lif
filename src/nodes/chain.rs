@@ -21,6 +21,6 @@ impl Executable for Chain {
     fn execute<'a>(&self, engine: &mut Engine<'a>) -> ReturnReference<'a> {
         let value = execute!(engine, &self.expression).read()?;
         let name = engine.new_string(self.member.to_string());
-        value.call_method(engine, "__cn__", vec![name.read()?])
+        value.call_method(engine, "__cn__", Box::new([name.read()?]))
     }
 }

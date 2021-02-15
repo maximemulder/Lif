@@ -1,5 +1,6 @@
 use crate::runtime::gc::GcTrace;
 use crate::runtime::reference::GcReference;
+use crate::runtime::utilities::Arguments;
 use crate::runtime::value::GcValue;
 
 pub struct Memoizes<'a> {
@@ -13,7 +14,7 @@ impl<'a> Memoizes<'a> {
         }
     }
 
-    pub fn record(&mut self, arguments: Box<[GcValue<'a>]>, reference: GcReference<'a>) {
+    pub fn record(&mut self, arguments: Arguments<'a>, reference: GcReference<'a>) {
         self.memoizes.push(Memoize::new(arguments, reference));
     }
 
@@ -37,12 +38,12 @@ impl GcTrace for Memoizes<'_> {
 }
 
 struct Memoize<'a> {
-    arguments: Box<[GcValue<'a>]>,
+    arguments: Arguments<'a>,
     reference: GcReference<'a>,
 }
 
 impl<'a> Memoize<'a> {
-    fn new(arguments: Box<[GcValue<'a>]>, reference: GcReference<'a>) -> Self {
+    fn new(arguments: Arguments<'a>, reference: GcReference<'a>) -> Self {
         Self {
             arguments,
             reference,
