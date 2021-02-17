@@ -60,7 +60,6 @@ impl<'a, T: GenericImplementation<'a>> Generic<'a, T> {
         }
 
         let reference = engine.frame(self.scope, &|engine| self.implementation.call(engine, arguments.clone()))?;
-
         self.memoizes.record(arguments, reference);
         Ok(reference)
     }
