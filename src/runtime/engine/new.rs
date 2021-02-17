@@ -27,12 +27,12 @@ impl<'a> Engine<'a> {
 
     pub fn new_function_value(&mut self, name: Option<&str>, parameters: Ref<[Node]>, r#type: Option<GcValue<'a>>, block: Ref<Node>) -> GcValue<'a> {
         let tag = self.taggers.functions.generate(name.map(Box::from));
-        self.new_value(self.primitives.function_code, Data::new_function(tag, self.scope, parameters, r#type, block))
+        self.new_value(self.primitives.function_code, Data::new_function(tag, r#type, self.scope, parameters, block))
     }
 
     pub fn new_function_primitive_value(&mut self, name: &str, parameters: Box<[GcValue<'a>]>, callback: &'a Callable<'a>) -> GcValue<'a> {
         let tag = self.taggers.functions.generate(Some(Box::from(name)));
-        self.new_value(self.primitives.function_primitive, Data::new_function_primitive(tag, parameters, callback))
+        self.new_value(self.primitives.function_primitive, Data::new_function_primitive(tag, None, parameters, callback))
     }
 
     pub fn new_generic_value(&mut self, name: Option<&str>, parameters: Ref<[Ref<str>]>, node: Ref<dyn Executable>) -> GcValue<'a> {

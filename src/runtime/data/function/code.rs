@@ -1,34 +1,35 @@
 use crate::memory::Ref;
 use crate::nodes::Node;
-use crate::runtime::data::Tag;
+use crate::runtime::data::function::FunctionImplementation;
 use crate::runtime::engine::{ Control, Engine };
 use crate::runtime::error::Error;
 use crate::runtime::gc::GcTrace;
 use crate::runtime::scope::GcScope;
 use crate::runtime::utilities::{ Arguments, ReturnReference };
 use crate::runtime::utilities::parameters;
-use crate::runtime::value::GcValue;
 
-pub struct FunctionCode<'a> {
-    pub tag: Tag,
+pub struct FunctionImplementationCode<'a> {
     scope: GcScope<'a>,
     parameters: Ref<[Node]>,
-    r#type: Option<GcValue<'a>>,
     block: Ref<Node>,
 }
 
-impl<'a> FunctionCode<'a> {
-    pub fn new(tag: Tag, scope: GcScope<'a>, parameters: Ref<[Node]>, r#type: Option<GcValue<'a>>, block: Ref<Node>) -> Self {
+impl<'a> FunctionImplementationCode<'a> {
+    pub fn new(scope: GcScope<'a>, parameters: Ref<[Node]>, block: Ref<Node>) -> Self {
         Self {
-            tag,
             scope,
             parameters,
-            r#type,
             block,
         }
     }
+}
 
-    pub fn call(&self, engine: &mut Engine<'a>, arguments: Arguments<'a>) -> ReturnReference<'a> {
+impl<'a> FunctionImplementation<'a> for FunctionImplementationCode<'a> {
+    fn length(&self) -> usize {
+        self.parameters.len()
+    }
+
+    fn call(&self, engine: &mut Engine<'a>, arguments: Arguments<'a>) -> ReturnReference<'a> {
         parameters::length(arguments.len(), self.parameters.len())?;
         let reference = engine.frame(self.scope, &|engine| {
             for (parameter, argument) in self.parameters.iter().zip(arguments.iter()) {
@@ -44,27 +45,16 @@ impl<'a> FunctionCode<'a> {
             return Err(Error::new_control());
         }
 
-        if engine.control_consume(Control::Return) {
-            if let Some(r#type) = self.r#type {
-                let value = reference.read()?;
-                value.cast(r#type)?;
-                return Ok(engine.new_constant(value));
-            }
-
-            if reference.is_defined() {
-                return Ok(engine.new_constant(reference.get_value()));
-            }
+        if engine.control_consume(Control::Return) && reference.is_defined() {
+            return Ok(engine.new_constant(reference.get_value()));
         }
 
         Ok(engine.undefined())
     }
 }
 
-impl GcTrace for FunctionCode<'_> {
+impl GcTrace for FunctionImplementationCode<'_> {
     fn trace(&mut self) {
         self.scope.trace();
-        if let Some(mut r#type) = self.r#type {
-            r#type.trace();
-        }
     }
 }

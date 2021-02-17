@@ -1,6 +1,5 @@
 mod class;
-mod function_primitive;
-mod function_code;
+mod function;
 mod generic;
 mod method;
 mod nullable;
@@ -8,8 +7,7 @@ mod object;
 mod tag;
 
 pub use class::Class;
-pub use function_code::FunctionCode;
-pub use function_primitive::FunctionPrimitive;
+pub use function::{ Function, FunctionCode, FunctionPrimitive };
 pub use generic::{ Generic, GenericCode, GenericPrimitive };
 pub use method::Method;
 pub use nullable::Nullable;
@@ -52,12 +50,12 @@ impl<'a> Data<'a> {
         Data::Class(Class::new(tag, parent))
     }
 
-    pub fn new_function(tag: Tag, scope: GcScope<'a>, parameters: Ref<[Node]>, r#type: Option<GcValue<'a>>, block: Ref<Node>) -> Self {
-        Data::FunctionCode(FunctionCode::new(tag, scope, parameters, r#type, block))
+    pub fn new_function(tag: Tag, r#type: Option<GcValue<'a>>,scope: GcScope<'a>, parameters: Ref<[Node]>,  block: Ref<Node>) -> Self {
+        Data::FunctionCode(Function::new_code(tag, r#type, scope, parameters, block))
     }
 
-    pub fn new_function_primitive(tag: Tag, parameters: Box<[GcValue<'a>]>, callback: &'a Callable<'a>) -> Self {
-        Data::FunctionPrimitive(FunctionPrimitive::new(tag, parameters, callback))
+    pub fn new_function_primitive(tag: Tag, r#type: Option<GcValue<'a>>,parameters: Box<[GcValue<'a>]>, callback: &'a Callable<'a>) -> Self {
+        Data::FunctionPrimitive(Function::new_primitive(tag, r#type, parameters, callback))
     }
 
     pub fn new_generic(tag: Tag, scope: GcScope<'a>, parameters: Ref<[Ref<str>]>, node: Ref<dyn Executable>) -> Self {
