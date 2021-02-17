@@ -21,7 +21,7 @@ impl<'a> Memoizes<'a> {
     pub fn get(&self, values: &[GcValue<'a>]) -> Option<GcReference<'a>> {
         for memoize in self.memoizes.iter() {
             if let Some(reference) = memoize.get(values) {
-                return Some(reference)
+                return Some(reference);
             }
         }
 
