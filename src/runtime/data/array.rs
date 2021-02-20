@@ -1,10 +1,8 @@
-use crate::runtime::engine::Engine;
 use crate::runtime::gc::GcTrace;
 use crate::runtime::reference::GcReference;
-use crate::runtime::value::GcValue;
 
 pub struct Array<'a> {
-    elements: Vec<GcReference<'a>>,
+    pub elements: Vec<GcReference<'a>>,
 }
 
 impl<'a> Array<'a> {
@@ -14,7 +12,7 @@ impl<'a> Array<'a> {
         }
     }
 
-    pub fn get(&self, index: usize) -> GcReference<'a> {
+    /*pub fn get(&self, index: usize) -> GcReference<'a> {
         self.elements[index]
     }
 
@@ -32,7 +30,7 @@ impl<'a> Array<'a> {
 
     pub fn slice(&self) -> &[GcReference<'a>] {
         &self.elements
-    }
+    } */
 }
 
 impl GcTrace for Array<'_> {

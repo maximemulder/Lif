@@ -16,8 +16,8 @@ pub fn populate(engine: &mut Engine) {
 
 fn to_string<'a>(engine: &mut Engine<'a>, arguments: Arguments<'a>) -> ReturnReference<'a> {
     let mut string = String::from("[");
-    let elements = arguments[0].data_array().clone();
-    for element in elements.slice() {
+    let elements = arguments[0].data_array().elements.clone();
+    for element in elements.iter() {
         string.push_str(&element.read()?.call_to_string(engine)?);
         string.push_str(", ");
     }
@@ -31,27 +31,30 @@ fn to_string<'a>(engine: &mut Engine<'a>, arguments: Arguments<'a>) -> ReturnRef
 }
 
 fn append<'a>(engine: &mut Engine<'a>, mut arguments: Arguments<'a>) -> ReturnReference<'a> {
-    arguments[0].data_array_mut().push(engine, arguments[1]);
+    let reference = engine.new_reference(arguments[1]);
+    arguments[0].data_array_mut().elements.push(reference);
     Ok(engine.undefined())
 }
 
 fn prepend<'a>(engine: &mut Engine<'a>, mut arguments: Arguments<'a>) -> ReturnReference<'a> {
-    arguments[0].data_array_mut().insert(engine, 0, arguments[1]);
+    let reference = engine.new_reference(arguments[1]);
+    arguments[0].data_array_mut().elements.insert(0, reference);
     Ok(engine.undefined())
 }
 
 fn insert<'a>(engine: &mut Engine<'a>, mut arguments: Arguments<'a>) -> ReturnReference<'a> {
     let index = *arguments[1].data_integer() as usize;
-    arguments[0].data_array_mut().insert(engine, index, arguments[2]);
+    let reference = engine.new_reference(arguments[2]);
+    arguments[0].data_array_mut().elements.insert(index, reference);
     Ok(engine.undefined())
 }
 
 fn remove<'a>(engine: &mut Engine<'a>, mut arguments: Arguments<'a>) -> ReturnReference<'a> {
     let index = *arguments[1].data_integer() as usize;
-    arguments[0].data_array_mut().remove(index);
+    arguments[0].data_array_mut().elements.remove(index);
     Ok(engine.undefined())
 }
 
 fn id<'a>(_: &mut Engine<'a>, arguments: Arguments<'a>) -> ReturnReference<'a> {
-    Ok(arguments[0].data_array().get(*arguments[1].data_array().get(0).read()?.data_integer() as usize))
+    Ok(arguments[0].data_array().elements[*arguments[1].data_array().elements[0].read()?.data_integer() as usize])
 }

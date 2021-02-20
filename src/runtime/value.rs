@@ -2,7 +2,6 @@ use crate::runtime::data::{ Array, Class, Data, FunctionCode, FunctionPrimitive,
 use crate::runtime::engine::Engine;
 use crate::runtime::error::Error;
 use crate::runtime::gc::{ GcRef, GcTrace };
-use crate::runtime::reference::GcReference;
 use crate::runtime::utilities::{ Arguments, Return, ReturnReference };
 use crate::runtime::utilities::parameters;
 
@@ -73,9 +72,9 @@ impl<'a> GcValue<'a> {
 }
 
 impl<'a> GcValue<'a> {
-    pub fn get_cast_array(&self, engine: &Engine<'a>) -> Return<&[GcReference<'a>]> {
+    pub fn get_cast_array(&self, engine: &Engine<'a>) -> Return<&Array<'a>> {
         self.cast(engine.primitives.array)?;
-        Ok(&self.data_array().slice())
+        Ok(&self.data_array())
     }
 
     pub fn get_cast_boolean(&self, engine: &Engine<'a>) -> Return<&bool> {
