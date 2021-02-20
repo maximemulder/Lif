@@ -25,7 +25,7 @@ impl<'a> GenericImplementation<'a> for GenericImplementationCode {
 
     fn call(&self, engine: &mut Engine<'a>, arguments: Arguments<'a>) -> ReturnReference<'a> {
         for (parameter, argument) in self.parameters.iter().zip(arguments.iter()) {
-            let reference = engine.new_reference(*argument);
+            let reference = engine.new_constant(*argument);
             engine.add_variable(parameter, reference);
         }
 
