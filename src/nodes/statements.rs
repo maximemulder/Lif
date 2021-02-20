@@ -3,11 +3,11 @@ use crate::runtime::engine::Engine;
 use crate::runtime::utilities::ReturnReference;
 
 pub struct Statements {
-    statements: Vec<Node>,
+    statements: Box<[Node]>,
 }
 
 impl Statements {
-    pub fn new(statements: Vec<Node>) -> Self {
+    pub fn new(statements: Box<[Node]>) -> Self {
         Self {
             statements,
         }

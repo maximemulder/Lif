@@ -41,7 +41,7 @@ fn statements<'a>(node: Ref<SyntaxNode>) -> Node {
         statements.push(statement(Ref::from_ref(child)));
     }
 
-    Node::new(node, Statements::new(statements))
+    Node::new(node, Statements::new(statements.into_boxed_slice()))
 }
 
 fn statement<'a>(node: Ref<SyntaxNode>) -> Node {
