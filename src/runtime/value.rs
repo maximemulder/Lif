@@ -1,4 +1,4 @@
-use crate::runtime::data::{ Class, Data, FunctionCode, FunctionPrimitive, GenericCode, GenericPrimitive, Method, Nullable, Object, Tag };
+use crate::runtime::data::{ Array, Class, Data, FunctionCode, FunctionPrimitive, GenericCode, GenericPrimitive, Method, Nullable, Object, Tag };
 use crate::runtime::engine::Engine;
 use crate::runtime::error::Error;
 use crate::runtime::gc::{ GcRef, GcTrace };
@@ -73,9 +73,9 @@ impl<'a> GcValue<'a> {
 }
 
 impl<'a> GcValue<'a> {
-    pub fn get_cast_array(&self, engine: &Engine<'a>) -> Return<&Vec<GcReference<'a>>> {
+    pub fn get_cast_array(&self, engine: &Engine<'a>) -> Return<&[GcReference<'a>]> {
         self.cast(engine.primitives.array)?;
-        Ok(self.data_array())
+        Ok(&self.data_array().slice())
     }
 
     pub fn get_cast_boolean(&self, engine: &Engine<'a>) -> Return<&bool> {
@@ -123,11 +123,11 @@ impl<'a> Value<'a> {
         }
     }
 
-    pub fn data_array(&self) -> &Vec<GcReference<'a>> {
+    pub fn data_array(&self) -> &Array<'a> {
         data!(self, Array);
     }
 
-    pub fn data_array_mut(&mut self) -> &mut Vec<GcReference<'a>> {
+    pub fn data_array_mut(&mut self) -> &mut Array<'a> {
         data_mut!(self, Array);
     }
 

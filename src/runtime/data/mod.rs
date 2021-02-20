@@ -1,3 +1,4 @@
+mod array;
 mod class;
 mod function;
 mod generic;
@@ -6,6 +7,7 @@ mod nullable;
 mod object;
 mod tag;
 
+pub use array::Array;
 pub use class::Class;
 pub use function::{ Function, FunctionCode, FunctionPrimitive };
 pub use generic::{ Generic, GenericCode, GenericPrimitive };
@@ -23,7 +25,7 @@ use crate::runtime::utilities::Callable;
 use crate::runtime::value::GcValue;
 
 pub enum Data<'a> {
-    Array(Vec<GcReference<'a>>),
+    Array(Array<'a>),
     Boolean(bool),
     Class(Class<'a>),
     FunctionCode(FunctionCode<'a>),
@@ -39,7 +41,7 @@ pub enum Data<'a> {
 
 impl<'a> Data<'a> {
     pub fn new_array(elements: Vec<GcReference<'a>>) -> Self {
-        Data::Array(elements)
+        Data::Array(Array::new(elements))
     }
 
     pub fn new_boolean(boolean: bool) -> Self {
@@ -90,9 +92,7 @@ impl<'a> Data<'a> {
 impl GcTrace for Data<'_> {
     fn trace(&mut self) {
         match self {
-            Data::Array(references)  => for reference in references.iter_mut() {
-                reference.trace();
-            },
+            Data::Array(array)                => array.trace(),
             Data::Class(class)                => class.trace(),
             Data::FunctionCode(function)      => function.trace(),
             Data::FunctionPrimitive(function) => function.trace(),

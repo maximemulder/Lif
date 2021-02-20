@@ -22,7 +22,7 @@ pub fn pack<'a>(engine: &mut Engine<'a>, values: Arguments<'a>) -> GcValue<'a> {
 
 pub fn unpack<'a>(value: GcValue<'a>) -> Return<Arguments<'a>> {
     let mut elements = Vec::new();
-    for reference in value.data_array().iter() {
+    for reference in value.data_array().slice() {
         elements.push(reference.read()?);
     }
 
