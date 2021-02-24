@@ -258,13 +258,17 @@ fn function_named<'a>(node: Ref<SyntaxNode>) -> Node {
     }
 }
 
-fn parameters<'a>(node: Ref<SyntaxNode>) -> Box<[Node]> {
-    let mut declarations = Vec::new();
+fn parameters<'a>(node: Ref<SyntaxNode>) -> Box<[(Ref<str>, Option<Node>)]> {
+    let mut parameters = Vec::new();
     for child in node.children().iter().step_by(2)  {
-        declarations.push(declaration(Ref::from_ref(child)));
+        parameters.push(parameter(Ref::from_ref(child)));
     }
 
-    declarations.into_boxed_slice()
+    parameters.into_boxed_slice()
+}
+
+fn parameter<'a>(node: Ref<SyntaxNode>) -> (Ref<str>, Option<Node>) {
+    (token(node.child(0)), r#type(node.child(1)))
 }
 
 fn array<'a>(node: Ref<SyntaxNode>) -> Node {

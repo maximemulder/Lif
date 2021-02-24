@@ -5,13 +5,13 @@ use crate::runtime::utilities::ReturnReference;
 
 pub struct Function {
     name: Option<Ref<str>>,
-    parameters: Box<[Node]>,
+    parameters: Box<[(Ref<str>, Option<Node>)]>,
     r#type: Option<Node>,
     block: Node,
 }
 
 impl Function {
-    pub fn new(name: Option<Ref<str>>, parameters: Box<[Node]>, r#type: Option<Node>, block: Node) -> Self {
+    pub fn new(name: Option<Ref<str>>, parameters: Box<[(Ref<str>, Option<Node>)]>, r#type: Option<Node>, block: Node) -> Self {
         Self {
             name,
             parameters,
@@ -23,12 +23,23 @@ impl Function {
 
 impl Executable for Function {
     fn execute<'a>(&self, engine: &mut Engine<'a>) -> ReturnReference<'a> {
+        let mut parameters = Vec::new();
+        let mut names = Vec::new();
+        for (name, parameter) in self.parameters.iter() {
+            names.push(*name);
+            parameters.push(if let Some(parameter) = parameter.as_ref() {
+                engine.execute(parameter)?.read()?
+            } else {
+                engine.primitives.any
+            })
+        }
+
         let r#type = if let Some(r#type) = self.r#type.as_ref() {
             Some(engine.execute(r#type)?.read()?)
         } else {
             None
         };
 
-        Ok(engine.new_function(Ref::as_option(&self.name), Ref::from_ref(&self.parameters), r#type, Ref::from_ref(&self.block)))
+        Ok(engine.new_function(Ref::as_option(&self.name), parameters.into_boxed_slice(), names.into_boxed_slice(), r#type, Ref::from_ref(&self.block)))
     }
 }

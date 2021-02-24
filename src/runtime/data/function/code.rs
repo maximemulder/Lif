@@ -6,35 +6,30 @@ use crate::runtime::error::Error;
 use crate::runtime::gc::GcTrace;
 use crate::runtime::scope::GcScope;
 use crate::runtime::utilities::{ Arguments, ReturnReference };
-use crate::runtime::utilities::parameters;
+use crate::runtime::value::GcValue;
 
 pub struct FunctionImplementationCode<'a> {
     scope: GcScope<'a>,
-    parameters: Ref<[Node]>,
+    names: Box<[Ref<str>]>,
     block: Ref<Node>,
 }
 
 impl<'a> FunctionImplementationCode<'a> {
-    pub fn new(scope: GcScope<'a>, parameters: Ref<[Node]>, block: Ref<Node>) -> Self {
+    pub fn new(scope: GcScope<'a>, names: Box<[Ref<str>]>, block: Ref<Node>) -> Self {
         Self {
             scope,
-            parameters,
+            names,
             block,
         }
     }
 }
 
 impl<'a> FunctionImplementation<'a> for FunctionImplementationCode<'a> {
-    fn length(&self) -> usize {
-        self.parameters.len()
-    }
-
-    fn call(&self, engine: &mut Engine<'a>, arguments: Arguments<'a>) -> ReturnReference<'a> {
-        parameters::length(arguments.len(), self.parameters.len())?;
+    fn call(&self, engine: &mut Engine<'a>, parameters: &[GcValue<'a>], arguments: Arguments<'a>) -> ReturnReference<'a> {
         let reference = engine.frame(self.scope, &|engine| {
-            for (parameter, argument) in self.parameters.iter().zip(arguments.iter()) {
-                let mut reference = engine.execute(parameter)?;
-                reference.write(*argument)?;
+            for ((name, parameter), argument) in self.names.iter().zip(parameters.iter()).zip(arguments.iter()) {
+                let reference = engine.new_variable(Some(*argument), *parameter);
+                engine.add_variable(name, reference);
             }
 
             let executable = Ref::as_ref(&self.block);

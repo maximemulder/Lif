@@ -18,20 +18,21 @@ pub type FunctionCode<'a>      = Function<'a, FunctionImplementationCode<'a>>;
 pub type FunctionPrimitive<'a> = Function<'a, FunctionImplementationPrimitive<'a>>;
 
 pub trait FunctionImplementation<'a> {
-    fn length(&self) -> usize;
-    fn call(&self, engine: &mut Engine<'a>, arguments: Arguments<'a>) -> ReturnReference<'a>;
+    fn call(&self, engine: &mut Engine<'a>, parameters: &[GcValue<'a>], arguments: Arguments<'a>) -> ReturnReference<'a>;
 }
 
 pub struct Function<'a, T: FunctionImplementation<'a>> {
     pub tag: Tag,
+    parameters: Box<[GcValue<'a>]>,
     r#type: Option<GcValue<'a>>,
     implementation: T,
 }
 
 impl<'a, T: FunctionImplementation<'a>> Function<'a, T> {
-    pub fn new(tag: Tag, r#type: Option<GcValue<'a>>, implementation: T) -> Self {
+    pub fn new(tag: Tag, parameters: Box<[GcValue<'a>]>, r#type: Option<GcValue<'a>>, implementation: T) -> Self {
         Self {
             tag,
+            parameters,
             r#type,
             implementation
         }
@@ -39,21 +40,25 @@ impl<'a, T: FunctionImplementation<'a>> Function<'a, T> {
 }
 
 impl<'a> FunctionCode<'a> {
-    pub fn new_code(tag: Tag, r#type: Option<GcValue<'a>>, scope: GcScope<'a>, parameters: Ref<[Node]>, block: Ref<Node>) -> Self {
-        Self::new(tag, r#type, FunctionImplementationCode::new(scope, parameters, block))
+    pub fn new_code(tag: Tag, parameters: Box<[GcValue<'a>]>, names: Box<[Ref<str>]>, r#type: Option<GcValue<'a>>, scope: GcScope<'a>, block: Ref<Node>) -> Self {
+        Self::new(tag, parameters, r#type, FunctionImplementationCode::new(scope, names, block))
     }
 }
 
 impl<'a> FunctionPrimitive<'a> {
-    pub fn new_primitive(tag: Tag, r#type: Option<GcValue<'a>>, parameters: Box<[GcValue<'a>]>, callback: &'a Callable<'a>) -> Self {
-        Self::new(tag, r#type, FunctionImplementationPrimitive::new(parameters, callback))
+    pub fn new_primitive(tag: Tag, parameters: Box<[GcValue<'a>]>, r#type: Option<GcValue<'a>>, callback: &'a Callable<'a>) -> Self {
+        Self::new(tag, parameters, r#type, FunctionImplementationPrimitive::new(callback))
     }
 }
 
 impl<'a, T: FunctionImplementation<'a>> Function<'a, T> {
     pub fn call(&self, engine: &mut Engine<'a>, arguments: Arguments<'a>) -> ReturnReference<'a> {
-        parameters::length(arguments.len(), self.implementation.length())?;
-        let reference = self.implementation.call(engine, arguments.clone())?;
+        parameters::length(arguments.len(), self.parameters.len())?;
+        for (parameter, argument) in self.parameters.iter().zip(arguments.as_ref()) {
+            argument.cast(*parameter)?;
+        }
+
+        let reference = self.implementation.call(engine, &self.parameters, arguments.clone())?;
         if let Some(r#type) = self.r#type {
             reference.read()?.cast(r#type)?;
         }
@@ -66,6 +71,9 @@ impl<'a, T: FunctionImplementation<'a>> GcTrace for Function<'a, T> {
     fn trace(&mut self) {
         if let Some(mut r#type) = self.r#type {
             r#type.trace();
+            for parameter in self.parameters.iter_mut() {
+                parameter.trace();
+            }
         }
     }
 }
