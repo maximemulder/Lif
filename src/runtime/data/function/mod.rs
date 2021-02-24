@@ -17,7 +17,7 @@ use primitive::FunctionImplementationPrimitive;
 pub type FunctionCode<'a>      = Function<'a, FunctionImplementationCode<'a>>;
 pub type FunctionPrimitive<'a> = Function<'a, FunctionImplementationPrimitive<'a>>;
 
-pub trait FunctionImplementation<'a> {
+pub trait FunctionImplementation<'a>: GcTrace {
     fn call(&self, engine: &mut Engine<'a>, parameters: &[GcValue<'a>], arguments: Arguments<'a>) -> ReturnReference<'a>;
 }
 
@@ -69,11 +69,13 @@ impl<'a, T: FunctionImplementation<'a>> Function<'a, T> {
 
 impl<'a, T: FunctionImplementation<'a>> GcTrace for Function<'a, T> {
     fn trace(&mut self) {
+        self.implementation.trace();
+        for parameter in self.parameters.iter_mut() {
+            parameter.trace();
+        }
+
         if let Some(mut r#type) = self.r#type {
             r#type.trace();
-            for parameter in self.parameters.iter_mut() {
-                parameter.trace();
-            }
         }
     }
 }
