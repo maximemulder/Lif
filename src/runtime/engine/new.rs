@@ -25,14 +25,14 @@ impl<'a> Engine<'a> {
         self.new_value(self.primitives.class, Data::new_class(tag, parent))
     }
 
-    pub fn new_function_value(&mut self, name: Option<&str>, parameters: Box<[GcValue<'a>]>, names: Box<[Ref<str>]>, r#type: Option<GcValue<'a>>, block: Ref<Node>) -> GcValue<'a> {
+    pub fn new_function_value(&mut self, name: Option<&str>, parameters: Box<[GcValue<'a>]>, rest: Option<GcValue<'a>>, names: Box<[Ref<str>]>, r#type: Option<GcValue<'a>>, block: Ref<Node>) -> GcValue<'a> {
         let tag = self.taggers.functions.generate(name.map(Box::from));
-        self.new_value(self.primitives.function_code, Data::new_function(tag, parameters, names, r#type, self.scope, block))
+        self.new_value(self.primitives.function_code, Data::new_function(tag, parameters, rest, names, r#type, self.scope, block))
     }
 
-    pub fn new_function_primitive_value(&mut self, name: &str, parameters: Box<[GcValue<'a>]>, callback: &'a Callable<'a>) -> GcValue<'a> {
+    pub fn new_function_primitive_value(&mut self, name: &str, parameters: Box<[GcValue<'a>]>, rest: Option<GcValue<'a>>, callback: &'a Callable<'a>) -> GcValue<'a> {
         let tag = self.taggers.functions.generate(Some(Box::from(name)));
-        self.new_value(self.primitives.function_primitive, Data::new_function_primitive(tag, None, parameters, callback))
+        self.new_value(self.primitives.function_primitive, Data::new_function_primitive(tag, parameters, rest, None, callback))
     }
 
     pub fn new_generic_value(&mut self, name: Option<&str>, parameters: Ref<[Ref<str>]>, node: Ref<dyn Executable>) -> GcValue<'a> {
@@ -82,13 +82,13 @@ impl<'a> Engine<'a> {
         self.new_constant(value)
     }
 
-    pub fn new_function(&mut self, name: Option<&str>, parameters: Box<[GcValue<'a>]>, names: Box<[Ref<str>]>, r#type: Option<GcValue<'a>>, block: Ref<Node>) -> GcReference<'a> {
-       let value = self.new_function_value(name, parameters, names, r#type, block);
+    pub fn new_function(&mut self, name: Option<&str>, parameters: Box<[GcValue<'a>]>, rest: Option<GcValue<'a>>, names: Box<[Ref<str>]>, r#type: Option<GcValue<'a>>, block: Ref<Node>) -> GcReference<'a> {
+       let value = self.new_function_value(name, parameters, rest, names, r#type, block);
         self.new_constant(value)
     }
 
-    pub fn new_function_primitive(&mut self, name: &str, parameters: Box<[GcValue<'a>]>, callback: &'a Callable<'a>) -> GcReference<'a> {
-        let value = self.new_function_primitive_value(name, parameters, callback);
+    pub fn new_function_primitive(&mut self, name: &str, parameters: Box<[GcValue<'a>]>, rest: Option<GcValue<'a>>, callback: &'a Callable<'a>) -> GcReference<'a> {
+        let value = self.new_function_primitive_value(name, parameters, rest, callback);
         self.new_constant(value)
     }
 

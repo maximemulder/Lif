@@ -52,12 +52,12 @@ impl<'a> Data<'a> {
         Data::Class(Class::new(tag, parent))
     }
 
-    pub fn new_function(tag: Tag, parameters: Box<[GcValue<'a>]>, names: Box<[Ref<str>]>, r#type: Option<GcValue<'a>>, scope: GcScope<'a>, block: Ref<Node>) -> Self {
-        Data::FunctionCode(Function::new_code(tag, parameters, names, r#type, scope, block))
+    pub fn new_function(tag: Tag, parameters: Box<[GcValue<'a>]>, rest: Option<GcValue<'a>>, names: Box<[Ref<str>]>, r#return: Option<GcValue<'a>>, scope: GcScope<'a>, block: Ref<Node>) -> Self {
+        Data::FunctionCode(Function::new_code(tag, parameters, rest, names, r#return, scope, block))
     }
 
-    pub fn new_function_primitive(tag: Tag, r#type: Option<GcValue<'a>>,parameters: Box<[GcValue<'a>]>, callback: &'a Callable<'a>) -> Self {
-        Data::FunctionPrimitive(Function::new_primitive(tag, parameters, r#type, callback))
+    pub fn new_function_primitive(tag: Tag, parameters: Box<[GcValue<'a>]>, rest: Option<GcValue<'a>>, r#return: Option<GcValue<'a>>, callback: &'a Callable<'a>) -> Self {
+        Data::FunctionPrimitive(Function::new_primitive(tag, parameters, rest, r#return, callback))
     }
 
     pub fn new_generic(tag: Tag, scope: GcScope<'a>, parameters: Ref<[Ref<str>]>, node: Ref<dyn Executable>) -> Self {
