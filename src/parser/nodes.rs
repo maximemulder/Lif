@@ -286,13 +286,38 @@ pub fn get() -> (Arena::<dyn Descent>, Arena::<dyn Ascent>) {
         ))
     ));
 
+    let rest = descents.create(DescentElement::new(
+        descents.create(DescentSequence::new([
+            symbol_dot_t,
+            declaration,
+        ])),
+        &elements::productions::REST
+    ));
+
     let parameters = descents.create(DescentElement::new(
         descents.create(DescentSequence::new([
             symbol_parenthesis_l,
-            descents.create(DescentElement::new(
-                create_list_option!(declaration, symbol_comma),
-                &elements::productions::PARAMETERS_LIST
-            )),
+            descents.create(DescentChoice::new([
+                descents.create(DescentSequence::new([
+                    descents.create(DescentElement::new(
+                        create_list!(declaration, symbol_comma),
+                        &elements::productions::PARAMETERS_LIST
+                    )),
+                    symbol_comma,
+                    rest,
+                ])),
+                descents.create(DescentSequence::new([
+                    descents.create(DescentElement::new(
+                        descents.create(DescentNone::new()),
+                        &elements::productions::PARAMETERS_LIST
+                    )),
+                    rest,
+                ])),
+                descents.create(DescentElement::new(
+                    create_list_option!(declaration, symbol_comma),
+                    &elements::productions::PARAMETERS_LIST
+                )),
+            ])),
             symbol_parenthesis_r,
         ])),
         &elements::productions::PARAMETERS

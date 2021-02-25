@@ -17,7 +17,7 @@ impl<'a> FunctionImplementationPrimitive<'a> {
 }
 
 impl<'a> FunctionImplementation<'a> for FunctionImplementationPrimitive<'a> {
-    fn call(&self, engine: &mut Engine<'a>, _: &[GcValue<'a>], arguments: Arguments<'a>) -> ReturnReference<'a> {
+    fn call(&self, engine: &mut Engine<'a>, _: &[GcValue<'a>], _: &Option<GcValue<'a>>, arguments: Arguments<'a>) -> ReturnReference<'a> {
         (self.callback)(engine, arguments)
     }
 }

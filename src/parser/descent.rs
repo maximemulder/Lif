@@ -24,6 +24,20 @@ impl Descent for DescentAlias {
     }
 }
 
+pub struct DescentNone;
+
+impl DescentNone {
+    pub fn new() -> Self {
+        Self
+    }
+}
+
+impl Descent for DescentNone {
+    fn descent(&self, parse: &mut Parse) -> Option<Vec<Node>> {
+        Some(Vec::new())
+    }
+}
+
 pub struct DescentAscent {
     descent: usize,
     ascent: usize,

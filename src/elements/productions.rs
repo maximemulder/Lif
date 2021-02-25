@@ -10,6 +10,7 @@ pub const DECLARATION:     Element = Element::new("DECLARATION");
 pub const EXPRESSIONS:     Element = Element::new("EXPRESSIONS");
 pub const PARAMETERS:      Element = Element::new("PARAMETERS");
 pub const PARAMETERS_LIST: Element = Element::new("PARAMETERS_LIST");
+pub const REST:            Element = Element::new("REST");
 pub const GENERICS:        Element = Element::new("GENERICS");
 pub const GENERICS_LIST:   Element = Element::new("GENERICS_LIST");
 pub const TYPE:            Element = Element::new("TYPE");

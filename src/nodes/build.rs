@@ -258,13 +258,21 @@ fn function_named<'a>(node: Ref<SyntaxNode>) -> Node {
     }
 }
 
-fn parameters<'a>(node: Ref<SyntaxNode>) -> Box<[(Ref<str>, Option<Node>)]> {
+fn rest<'a>(node: Ref<SyntaxNode>) -> Option<(Ref<str>, Option<Node>)> {
+    node.children().get(1).map(|child| parameter(Ref::from_ref(child)))
+}
+
+fn parameters<'a>(node: Ref<SyntaxNode>) -> (Box<[(Ref<str>, Option<Node>)]>, Option<(Ref<str>, Option<Node>)>) {
     let mut parameters = Vec::new();
     for child in node.child(1).children().iter().step_by(2)  {
         parameters.push(parameter(Ref::from_ref(child)));
     }
 
-    parameters.into_boxed_slice()
+    (parameters.into_boxed_slice(), if node.children().len() >= 4 {
+        rest(Ref::from_ref(&node.children()[node.children().len() - 2]))
+    } else {
+        None
+    })
 }
 
 fn parameter<'a>(node: Ref<SyntaxNode>) -> (Ref<str>, Option<Node>) {

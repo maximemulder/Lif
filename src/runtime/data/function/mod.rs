@@ -18,7 +18,7 @@ pub type FunctionCode<'a>      = Function<'a, FunctionImplementationCode<'a>>;
 pub type FunctionPrimitive<'a> = Function<'a, FunctionImplementationPrimitive<'a>>;
 
 pub trait FunctionImplementation<'a>: GcTrace {
-    fn call(&self, engine: &mut Engine<'a>, parameters: &[GcValue<'a>], arguments: Arguments<'a>) -> ReturnReference<'a>;
+    fn call(&self, engine: &mut Engine<'a>, parameters: &[GcValue<'a>], rest: &Option<GcValue<'a>>, arguments: Arguments<'a>) -> ReturnReference<'a>;
 }
 
 pub struct Function<'a, T: FunctionImplementation<'a>> {
@@ -68,7 +68,7 @@ impl<'a, T: FunctionImplementation<'a>> Function<'a, T> {
             argument.cast(*parameter)?;
         }
 
-        let reference = self.implementation.call(engine, &self.parameters, arguments.clone())?;
+        let reference = self.implementation.call(engine, &self.parameters, &self.rest, arguments.clone())?;
         if let Some(r#return) = self.r#return {
             reference.read()?.cast(r#return)?;
         }

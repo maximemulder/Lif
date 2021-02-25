@@ -25,11 +25,23 @@ impl<'a> FunctionImplementationCode<'a> {
 }
 
 impl<'a> FunctionImplementation<'a> for FunctionImplementationCode<'a> {
-    fn call(&self, engine: &mut Engine<'a>, parameters: &[GcValue<'a>], arguments: Arguments<'a>) -> ReturnReference<'a> {
+    fn call(&self, engine: &mut Engine<'a>, parameters: &[GcValue<'a>], rest: &Option<GcValue<'a>>, arguments: Arguments<'a>) -> ReturnReference<'a> {
         let reference = engine.frame(self.scope, &|engine| {
             for ((name, parameter), argument) in self.names.iter().zip(parameters.iter()).zip(arguments.iter()) {
                 let reference = engine.new_variable(Some(*argument), *parameter);
                 engine.add_variable(name, reference);
+            }
+
+            if let Some(rest) = rest {
+                let mut elements = Vec::new();
+                for i in parameters.len() .. arguments.len() {
+                    elements.push(engine.new_reference(arguments[i]))
+                }
+
+                let value = engine.new_array_value(elements);
+                value.cast(*rest)?;
+                let reference = engine.new_variable(Some(value), *rest);
+                engine.add_variable(self.names.last().unwrap(), reference)
             }
 
             let executable = Ref::as_ref(&self.block);
