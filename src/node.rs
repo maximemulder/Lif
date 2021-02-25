@@ -40,8 +40,17 @@ impl Node {
         panic!();
     }
 
-    pub fn child(&self, index: usize) -> Ref<Node>{
+    pub fn length(&self) -> usize {
+        self.children().len()
+    }
+
+    pub fn front(&self, index: usize) -> Ref<Node>{
         Ref::from_ref(&self.children()[index])
+    }
+
+    pub fn back(&self, index: usize) -> Ref<Node> {
+        let children = self.children();
+        Ref::from_ref(&children[children.len() - index])
     }
 
     pub fn text(&self) -> Ref<str> {
