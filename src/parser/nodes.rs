@@ -273,30 +273,38 @@ pub fn get() -> (Arena::<dyn Descent>, Arena::<dyn Ascent>) {
     ));
 
     let generics = descents.create(DescentOption::new(
-        descents.create(DescentSequence::new([
-            symbol_guillemet_l,
-            descents.create(DescentAscent::new(
-                descents.create(DescentOneOrMore::new(
-                    create_list!(variable_identifier, symbol_comma)
+        descents.create(DescentElement::new(
+            descents.create(DescentSequence::new([
+                symbol_guillemet_l,
+                descents.create(DescentElement::new(
+                    create_list!(variable_identifier, symbol_comma),
+                    &elements::productions::GENERICS_LIST
                 )),
-                ascents.create(AscentElement::new(&elements::productions::GENERICS))
-            )),
-            symbol_guillemet_r,
-        ]))
+                symbol_guillemet_r,
+            ])),
+            &elements::productions::GENERICS
+        ))
     ));
 
     let parameters = descents.create(DescentElement::new(
-        create_list_option!(declaration, symbol_comma),
+        descents.create(DescentSequence::new([
+            symbol_parenthesis_l,
+            descents.create(DescentElement::new(
+                create_list_option!(declaration, symbol_comma),
+                &elements::productions::PARAMETERS_LIST
+            )),
+            symbol_parenthesis_r,
+        ])),
         &elements::productions::PARAMETERS
     ));
 
     let function = descents.create(DescentElement::new(
-        descents.create(DescentSequence::new([keyword_function, name, generics, symbol_parenthesis_l, parameters, symbol_parenthesis_r, r#type, block])),
+        descents.create(DescentSequence::new([keyword_function, name, generics, parameters, r#type, block])),
         &elements::structures::FUNCTION
     ));
 
     let function_named = descents.create(DescentElement::new(
-        descents.create(DescentSequence::new([keyword_function, variable_identifier, generics, symbol_parenthesis_l, parameters, symbol_parenthesis_r, r#type, block])),
+        descents.create(DescentSequence::new([keyword_function, variable_identifier, generics, parameters, r#type, block])),
         &elements::structures::FUNCTION
     ));
 

@@ -90,7 +90,7 @@ fn literal<'a>(node: Ref<SyntaxNode>) -> Node {
         elements::variables::NUMBER     => integer(child),
         elements::variables::STRING     => string(child),
         elements::variables::IDENTIFIER => identifier(child),
-        _ => { panic!() },
+        _ => panic!(),
     }
 }
 
@@ -196,7 +196,7 @@ fn r#continue<'a>(node: Ref<SyntaxNode>) -> Node {
 
 fn generics<'a>(node: Ref<SyntaxNode>) -> Box<[Ref<str>]> {
     let mut identifiers = Vec::new();
-    for child in node.children().iter().step_by(2)  {
+    for child in node.child(1).children().iter().step_by(2)  {
         identifiers.push(token(Ref::from_ref(child)));
     }
 
@@ -208,7 +208,7 @@ fn class<'a>(node: Ref<SyntaxNode>) -> Node {
     let name = name(Ref::from_ref(&children[1]));
     let class = Node::new(node, Class::new(name, r#type(Ref::from_ref(&children[children.len() - 4])), methods(Ref::from_ref(&children[children.len() - 2]))));
     if children.len() >= 7 {
-        Node::new(node, Generic::new(name, generics(Ref::from_ref(&children[3])), class))
+        Node::new(node, Generic::new(name, generics(Ref::from_ref(&children[2])), class))
     } else {
         class
     }
@@ -219,7 +219,7 @@ fn class_named<'a>(node: Ref<SyntaxNode>) -> Node {
     let name = Some(token(Ref::from_ref(&children[1])));
     let class = Node::new(node, Class::new(name, r#type(Ref::from_ref(&children[children.len() - 4])), methods(Ref::from_ref(&children[children.len() - 2]))));
     if children.len() >= 7 {
-        Node::new(node, Generic::new(name, generics(Ref::from_ref(&children[3])), class))
+        Node::new(node, Generic::new(name, generics(Ref::from_ref(&children[2])), class))
     } else {
         class
     }
@@ -237,10 +237,10 @@ fn methods<'a>(node: Ref<SyntaxNode>) -> Box<[Node]> {
 fn function<'a>(node: Ref<SyntaxNode>) -> Node {
     let children = node.children();
     let name = name(Ref::from_ref(&children[1]));
-    let function = Node::new(node, Function::new(name, parameters(Ref::from_ref(&children[children.len() - 4])), r#type(Ref::from_ref(&children[children.len() - 2])), block(Ref::from_ref(&children.last().unwrap()))));
+    let function = Node::new(node, Function::new(name, parameters(Ref::from_ref(&children[children.len() - 3])), r#type(Ref::from_ref(&children[children.len() - 2])), block(Ref::from_ref(&children.last().unwrap()))));
 
-    if children.len() >= 9 {
-        Node::new(node, Generic::new(name, generics(Ref::from_ref(&children[3])), function))
+    if children.len() >= 6 {
+        Node::new(node, Generic::new(name, generics(Ref::from_ref(&children[2])), function))
     } else {
         function
     }
@@ -249,10 +249,10 @@ fn function<'a>(node: Ref<SyntaxNode>) -> Node {
 fn function_named<'a>(node: Ref<SyntaxNode>) -> Node {
     let children = node.children();
     let name = Some(token(Ref::from_ref(&children[1])));
-    let function = Node::new(node, Function::new(name, parameters(Ref::from_ref(&children[children.len() - 4])), r#type(Ref::from_ref(&children[children.len() - 2])), block(Ref::from_ref(&children.last().unwrap()))));
+    let function = Node::new(node, Function::new(name, parameters(Ref::from_ref(&children[children.len() - 3])), r#type(Ref::from_ref(&children[children.len() - 2])), block(Ref::from_ref(&children.last().unwrap()))));
 
-    if children.len() >= 9 {
-        Node::new(node, Generic::new(name, generics(Ref::from_ref(&children[3])), function))
+    if children.len() >= 6 {
+        Node::new(node, Generic::new(name, generics(Ref::from_ref(&children[2])), function))
     } else {
         function
     }
@@ -260,7 +260,7 @@ fn function_named<'a>(node: Ref<SyntaxNode>) -> Node {
 
 fn parameters<'a>(node: Ref<SyntaxNode>) -> Box<[(Ref<str>, Option<Node>)]> {
     let mut parameters = Vec::new();
-    for child in node.children().iter().step_by(2)  {
+    for child in node.child(1).children().iter().step_by(2)  {
         parameters.push(parameter(Ref::from_ref(child)));
     }
 
