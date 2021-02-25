@@ -1,3 +1,9 @@
+macro_rules! declare_node {
+    ( $name:ident ) => {
+        pub const $name: Element = Element::new(stringify!($name));
+    }
+}
+
 pub mod controls;
 pub mod expressions;
 pub mod flows;
