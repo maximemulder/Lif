@@ -132,10 +132,10 @@ pub fn get() -> (Arena::<dyn Descent>, Arena::<dyn Ascent>) {
                     descents.create(DescentChoice::new($tokens)),
                     $child,
                 ])),
-                ascents.create(AscentList::new([
-                    ascent,
-                    ascents.create(AscentElement::new(&elements::expressions::EXPRESSION)),
+                ascents.create(AscentSequence::new([
                     ascents.create(AscentElement::new(&elements::expressions::BINOP)),
+                    ascents.create(AscentElement::new(&elements::expressions::EXPRESSION)),
+                    ascent,
                 ]))
             ));
 
@@ -158,10 +158,10 @@ pub fn get() -> (Arena::<dyn Descent>, Arena::<dyn Ascent>) {
                         descents.create(DescentChoice::new($tokens)),
                         $child,
                     ])),
-                    ascents.create(AscentList::new([
-                        ascent,
-                        ascents.create(AscentElement::new(&elements::expressions::EXPRESSION)),
+                    ascents.create(AscentSequence::new([
                         ascents.create(AscentElement::new(&elements::expressions::ASSIGNMENT)),
+                        ascents.create(AscentElement::new(&elements::expressions::EXPRESSION)),
+                        ascent,
                     ]))
                 ));
 
@@ -358,10 +358,10 @@ pub fn get() -> (Arena::<dyn Descent>, Arena::<dyn Ascent>) {
             symbol_dot,
             variable_identifier,
         ])),
-        ascents.create(AscentList::new([
-            extension,
-            ascents.create(AscentElement::new(&elements::expressions::EXPRESSION)),
+        ascents.create(AscentSequence::new([
             ascents.create(AscentElement::new(&elements::expressions::CHAIN)),
+            ascents.create(AscentElement::new(&elements::expressions::EXPRESSION)),
+            extension,
         ]))
     ));
 
@@ -378,10 +378,10 @@ pub fn get() -> (Arena::<dyn Descent>, Arena::<dyn Ascent>) {
                 symbol_guillemet_r,
             ])),
         ])),
-        ascents.create(AscentList::new([
-            extension,
-            ascents.create(AscentElement::new(&elements::expressions::EXPRESSION)),
+        ascents.create(AscentSequence::new([
             ascents.create(AscentElement::new(&elements::expressions::SEQUENCE)),
+            ascents.create(AscentElement::new(&elements::expressions::EXPRESSION)),
+            extension,
         ]))
     ));
 
@@ -398,7 +398,7 @@ pub fn get() -> (Arena::<dyn Descent>, Arena::<dyn Ascent>) {
         &elements::expressions::EXPRESSION
     ));
 
-    ascents.define(extension, AscentList::new([chain, sequence]));
+    ascents.define(extension, AscentSequence::new([chain, sequence]));
 
     let binop_1 = create_binop!(descents.create(DescentAscent::new(
         expression_base,

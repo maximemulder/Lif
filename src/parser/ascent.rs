@@ -6,11 +6,11 @@ pub trait Ascent {
     fn ascent(&self, parse: &mut Parse, nodes: Vec<Node>) -> Option<Vec<Node>>;
 }
 
-pub struct AscentList {
+pub struct AscentSequence {
     ascents: Box<[usize]>,
 }
 
-impl AscentList {
+impl AscentSequence {
     pub fn new<const N: usize>(ascents: [usize; N]) -> Self {
         Self {
             ascents: Box::new(ascents),
@@ -18,9 +18,9 @@ impl AscentList {
     }
 }
 
-impl Ascent for AscentList {
+impl Ascent for AscentSequence {
     fn ascent(&self, parse: &mut Parse, mut nodes: Vec<Node>) -> Option<Vec<Node>> {
-        for ascent in self.ascents.iter().rev() {
+        for ascent in self.ascents.iter() {
             if let Some(others) = parse.ascent(*ascent, nodes) {
                 nodes = others;
             } else {
