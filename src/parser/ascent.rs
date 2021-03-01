@@ -1,5 +1,7 @@
 use crate::element::Element;
 use crate::parser::Parse;
+use crate::parser::arena::ArenaRef;
+use crate::parser::descent::Descent;
 use crate::node::Node;
 
 pub trait Ascent {
@@ -7,11 +9,11 @@ pub trait Ascent {
 }
 
 pub struct AscentDescent {
-    descent: usize,
+    descent: ArenaRef<dyn Descent>,
 }
 
 impl AscentDescent {
-    pub fn new(descent: usize) -> Self {
+    pub fn new(descent: ArenaRef<dyn Descent>) -> Self {
         Self {
             descent,
         }
@@ -28,11 +30,11 @@ impl Ascent for AscentDescent {
 }
 
 pub struct AscentChoice {
-    ascents: Box<[usize]>,
+    ascents: Box<[ArenaRef<dyn Ascent>]>,
 }
 
 impl AscentChoice {
-    pub fn new<const N: usize>(ascents: [usize; N]) -> Self {
+    pub fn new<const N: usize>(ascents: [ArenaRef<dyn Ascent>; N]) -> Self {
         Self {
             ascents: Box::new(ascents),
         }
@@ -52,11 +54,11 @@ impl Ascent for AscentChoice {
 }
 
 pub struct AscentSequence {
-    ascents: Box<[usize]>,
+    ascents: Box<[ArenaRef<dyn Ascent>]>,
 }
 
 impl AscentSequence {
-    pub fn new<const N: usize>(ascents: [usize; N]) -> Self {
+    pub fn new<const N: usize>(ascents: [ArenaRef<dyn Ascent>; N]) -> Self {
         Self {
             ascents: Box::new(ascents),
         }
@@ -74,11 +76,11 @@ impl Ascent for AscentSequence {
 }
 
 pub struct AscentOption {
-    ascent: usize,
+    ascent: ArenaRef<dyn Ascent>,
 }
 
 impl AscentOption {
-    pub fn new(ascent: usize) -> Self {
+    pub fn new(ascent: ArenaRef<dyn Ascent>) -> Self {
         Self {
             ascent,
         }

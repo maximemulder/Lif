@@ -10,7 +10,7 @@ use crate::code::Code;
 use crate::memory::Ref;
 use crate::lexer::lex;
 use crate::node::Node;
-use arena::Arena;
+use arena::{ Arena, ArenaRef };
 use ascent::Ascent;
 use descent::Descent;
 use std::cmp::min;
@@ -32,7 +32,7 @@ impl Parser {
     pub fn parse(&self, production: usize, code: Ref<Code>) -> Option<Node> {
         let tokens = lex(code);
         let mut parse = Parse::new(self, code, &tokens);
-        parse.parse(production)
+        parse.parse(ArenaRef::new(production))
     }
 }
 
@@ -90,24 +90,24 @@ impl<'a> Parse<'a> {
         nodes.is_some()
     }
 
-    fn descent(&mut self, index: usize) -> Option<Vec<Node>> {
-        self.run(|parse| parse.parser.descents.get(index).descent(parse))
+    fn descent(&mut self, r#ref: ArenaRef<dyn Descent>) -> Option<Vec<Node>> {
+        self.run(|parse| parse.parser.descents.get(r#ref).descent(parse))
     }
 
-    fn descent_predicate(&mut self, index: usize) -> bool {
-        self.run_predicate(|parse| parse.parser.descents.get(index).descent(parse))
+    fn descent_predicate(&mut self, r#ref: ArenaRef<dyn Descent>) -> bool {
+        self.run_predicate(|parse| parse.parser.descents.get(r#ref).descent(parse))
     }
 
-    fn ascent(&mut self, index: usize, nodes: Vec<Node>) -> Option<Vec<Node>> {
-        self.run(|parse| parse.parser.ascents.get(index).ascent(parse, nodes))
+    fn ascent(&mut self, r#ref: ArenaRef<dyn Ascent>, nodes: Vec<Node>) -> Option<Vec<Node>> {
+        self.run(|parse| parse.parser.ascents.get(r#ref).ascent(parse, nodes))
     }
 
-    fn ascent_predicate(&mut self, index: usize, nodes: Vec<Node>) -> bool {
-        self.run_predicate(|parse| parse.parser.ascents.get(index).ascent(parse, nodes))
+    fn ascent_predicate(&mut self, r#ref: ArenaRef<dyn Ascent>, nodes: Vec<Node>) -> bool {
+        self.run_predicate(|parse| parse.parser.ascents.get(r#ref).ascent(parse, nodes))
     }
 
-    pub fn parse(&mut self, program: usize) -> Option<Node> {
-        let node = if let Some(mut nodes) = self.parser.descents.get(program).descent(self) {
+    pub fn parse(&mut self, production: ArenaRef<dyn Descent>) -> Option<Node> {
+        let node = if let Some(mut nodes) = self.parser.descents.get(production).descent(self) {
             nodes.pop()
         } else {
             return None;
