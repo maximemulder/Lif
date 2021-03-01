@@ -40,14 +40,14 @@ impl<T: ?Sized> Arena<T> {
         ArenaRef::new(index)
     }
 
-    pub fn define<N: Unsize<T>>(&self, r#ref: ArenaRef<T>, element: N) {
+    pub fn define<N: Unsize<T>>(&self, element: N) -> ArenaRef<T> {
+        let r#ref = self.declare();
         self.elements_mut()[r#ref.index] = Some(Box::<N>::new(element));
+        r#ref
     }
 
-    pub fn create<N: Unsize<T>>(&self, element: N) -> ArenaRef<T> {
-        let index = self.declare();
-        self.define(index, element);
-        index
+    pub fn swap(&self, r#ref: ArenaRef<T>, other: ArenaRef<T>) {
+        self.elements_mut().swap(r#ref.index, other.index);
     }
 
     pub fn get(&self, r#ref: ArenaRef<T>) -> Ref<T> {
