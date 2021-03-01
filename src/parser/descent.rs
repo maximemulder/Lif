@@ -82,11 +82,7 @@ impl Descent for DescentSequence {
     fn descent(&self, parse: &mut Parse) -> Option<Vec<Node>> {
         let mut nodes = Vec::new();
         for descent in self.descents.iter() {
-            if let Some(children) = parse.descent(*descent) {
-                nodes.extend(children);
-            } else {
-                return None;
-            }
+            nodes.extend(parse.descent(*descent)?);
         }
 
         Some(nodes)
@@ -157,12 +153,7 @@ impl DescentOption {
 
 impl Descent for DescentOption {
     fn descent(&self, parse: &mut Parse) -> Option<Vec<Node>> {
-        let nodes = parse.descent(self.descent);
-        if nodes.is_some() {
-            return nodes;
-        }
-
-        Some(Vec::new())
+        parse.descent(self.descent).or_else(|| Some(Vec::new()))
     }
 }
 
@@ -226,11 +217,7 @@ impl DescentElement {
 
 impl Descent for DescentElement {
     fn descent(&self, parse: &mut Parse) -> Option<Vec<Node>> {
-        if let Some(nodes) = parse.descent(self.descent) {
-            Some(vec![Node::new_production(parse.code, self.element, nodes.into_boxed_slice())])
-        } else {
-            None
-        }
+        parse.descent(self.descent).map(|nodes| vec![Node::new_production(parse.code, self.element, nodes.into_boxed_slice())])
     }
 }
 
