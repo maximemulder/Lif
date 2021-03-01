@@ -127,15 +127,19 @@ pub fn get() -> (Arena::<dyn Descent>, Arena::<dyn Ascent>) {
     macro_rules! create_binop_ascent {
         ( $child:expr, $tokens:expr ) => {{
             let ascent = ascents.declare();
-            ascents.define(ascent, AscentExtension::new(
-                descents.create(DescentSequence::new([
-                    descents.create(DescentChoice::new($tokens)),
-                    $child,
-                ])),
+            ascents.define(ascent, AscentOption::new(
                 ascents.create(AscentSequence::new([
-                    ascents.create(AscentElement::new(&elements::expressions::BINOP)),
-                    ascents.create(AscentElement::new(&elements::expressions::EXPRESSION)),
-                    ascent,
+                    ascents.create(AscentDescent::new(
+                        descents.create(DescentSequence::new([
+                            descents.create(DescentChoice::new($tokens)),
+                            $child,
+                        ]))
+                    )),
+                    ascents.create(AscentSequence::new([
+                        ascents.create(AscentElement::new(&elements::expressions::BINOP)),
+                        ascents.create(AscentElement::new(&elements::expressions::EXPRESSION)),
+                        ascent,
+                    ])),
                 ]))
             ));
 
@@ -145,29 +149,41 @@ pub fn get() -> (Arena::<dyn Descent>, Arena::<dyn Ascent>) {
 
     macro_rules! create_binop {
         ( $child:expr, $tokens:expr ) => {{
-            descents.create(DescentAscent::new($child, create_binop_ascent!($child, $tokens)))
+            descents.create(DescentAscent::new(
+                ascents.create(AscentSequence::new([
+                    ascents.create(AscentDescent::new($child)),
+                    create_binop_ascent!($child, $tokens),
+                ]))
+            ))
         }}
     }
 
     macro_rules! create_assignment {
-        ( $child:expr, $tokens:expr ) => {
-            descents.create(DescentAscent::new($child, {
-                let ascent = ascents.declare();
-                ascents.define(ascent, AscentExtension::new(
-                    descents.create(DescentSequence::new([
-                        descents.create(DescentChoice::new($tokens)),
-                        $child,
-                    ])),
+        ( $child:expr, $tokens:expr ) => {{
+            let ascent = ascents.declare();
+            ascents.define(ascent, AscentOption::new(
+                ascents.create(AscentSequence::new([
+                    ascents.create(AscentDescent::new(
+                        descents.create(DescentSequence::new([
+                            descents.create(DescentChoice::new($tokens)),
+                            $child,
+                        ]))
+                    )),
                     ascents.create(AscentSequence::new([
                         ascents.create(AscentElement::new(&elements::expressions::ASSIGNMENT)),
                         ascents.create(AscentElement::new(&elements::expressions::EXPRESSION)),
                         ascent,
                     ]))
-                ));
+                ]))
+            ));
 
-                ascent
-            }))
-        }
+            descents.create(DescentAscent::new(
+                ascents.create(AscentSequence::new([
+                    ascents.create(AscentDescent::new($child)),
+                    ascent,
+                ]))
+            ))
+        }}
     }
 
     macro_rules! create_list {
@@ -298,35 +314,28 @@ pub fn get() -> (Arena::<dyn Descent>, Arena::<dyn Ascent>) {
 
     let parameters_end = ascents.create(AscentSequence::new([
         ascents.create(AscentElement::new(&elements::productions::PARAMETERS_LIST)),
-        ascents.create(AscentExtension::new(
-            rest,
-            ascents.create(AscentNone::new())
-        )),
+        ascents.create(AscentDescent::new(rest)),
     ]));
 
     let parameters_more = ascents.declare();
-
     ascents.define(parameters_more, AscentChoice::new([
-        ascents.create(AscentExtension2::new(
-            declaration,
+        ascents.create(AscentSequence::new([
+            ascents.create(AscentDescent::new(declaration)),
             ascents.create(AscentChoice::new([
-                ascents.create(AscentExtension2::new(
-                    symbol_comma,
+                ascents.create(AscentSequence::new([
+                    ascents.create(AscentDescent::new(symbol_comma)),
                     parameters_more,
-                )),
+                ])),
                 parameters_end,
             ]))
-        )),
+        ])),
         parameters_end,
     ]));
 
     let parameters = descents.create(DescentElement::new(
         descents.create(DescentSequence::new([
             symbol_parenthesis_l,
-            descents.create(DescentAscent::new(
-                descents.create(DescentNone::new()),
-                parameters_more,
-            )),
+            descents.create(DescentAscent::new(parameters_more)),
             symbol_parenthesis_r,
         ])),
         &elements::productions::PARAMETERS
@@ -362,35 +371,43 @@ pub fn get() -> (Arena::<dyn Descent>, Arena::<dyn Ascent>) {
         &elements::structures::STRUCTURE
     ));
 
-    let chain = ascents.create(AscentExtension::new(
-        descents.create(DescentSequence::new([
-            symbol_dot,
-            variable_identifier,
-        ])),
+    let chain = ascents.create(AscentOption::new(
         ascents.create(AscentSequence::new([
-            ascents.create(AscentElement::new(&elements::expressions::CHAIN)),
-            ascents.create(AscentElement::new(&elements::expressions::EXPRESSION)),
-            extension,
+            ascents.create(AscentDescent::new(
+                descents.create(DescentSequence::new([
+                    symbol_dot,
+                    variable_identifier,
+                ]))
+            )),
+            ascents.create(AscentSequence::new([
+                ascents.create(AscentElement::new(&elements::expressions::CHAIN)),
+                ascents.create(AscentElement::new(&elements::expressions::EXPRESSION)),
+                ascents.create(AscentOption::new(extension)),
+            ])),
         ]))
     ));
 
-    let sequence = ascents.create(AscentExtension::new(
-        descents.create(DescentChoice::new([
-            descents.create(DescentSequence::new([symbol_parenthesis_l, expressions, symbol_parenthesis_r])),
-            descents.create(DescentSequence::new([symbol_crotchet_l, expressions, symbol_crotchet_r])),
-            descents.create(DescentSequence::new([
-                symbol_guillemet_l,
-                descents.create(DescentElement::new(
-                    create_list!(expression_base, symbol_comma),
-                    &elements::productions::EXPRESSIONS
-                )),
-                symbol_guillemet_r,
-            ])),
-        ])),
+    let sequence = ascents.create(AscentOption::new(
         ascents.create(AscentSequence::new([
-            ascents.create(AscentElement::new(&elements::expressions::SEQUENCE)),
-            ascents.create(AscentElement::new(&elements::expressions::EXPRESSION)),
-            extension,
+            ascents.create(AscentDescent::new(
+                descents.create(DescentChoice::new([
+                    descents.create(DescentSequence::new([symbol_parenthesis_l, expressions, symbol_parenthesis_r])),
+                    descents.create(DescentSequence::new([symbol_crotchet_l, expressions, symbol_crotchet_r])),
+                    descents.create(DescentSequence::new([
+                        symbol_guillemet_l,
+                        descents.create(DescentElement::new(
+                            create_list!(expression_base, symbol_comma),
+                            &elements::productions::EXPRESSIONS
+                        )),
+                        symbol_guillemet_r,
+                    ])),
+                ]))
+            )),
+            ascents.create(AscentSequence::new([
+                ascents.create(AscentElement::new(&elements::expressions::SEQUENCE)),
+                ascents.create(AscentElement::new(&elements::expressions::EXPRESSION)),
+                extension,
+            ])),
         ]))
     ));
 
@@ -410,8 +427,10 @@ pub fn get() -> (Arena::<dyn Descent>, Arena::<dyn Ascent>) {
     ascents.define(extension, AscentSequence::new([chain, sequence]));
 
     let binop_1 = create_binop!(descents.create(DescentAscent::new(
-        expression_base,
-        extension,
+        ascents.create(AscentSequence::new([
+            ascents.create(AscentDescent::new(expression_base)),
+            extension,
+        ]))
     )), [symbol_asterisk, symbol_slash, symbol_percent, symbol_asterisk_d]);
 
     descents.define(binop_base, DescentAlias::new(binop_1));
@@ -432,13 +451,23 @@ pub fn get() -> (Arena::<dyn Descent>, Arena::<dyn Ascent>) {
 
     let binop_7 = descents.create(DescentChoice::new([
         descents.create(DescentSequence::new([
-            descents.create(DescentAscent::new(binop_6, binop_7_l)),
+            descents.create(DescentAscent::new(
+                ascents.create(AscentSequence::new([
+                    ascents.create(AscentDescent::new(binop_6)),
+                    binop_7_l,
+                ]))
+            )),
             descents.create(DescentPredicateNot::new(
                 descents.create(DescentChoice::new([symbol_guillemet_r, symbol_guillemet_r_eq]))
             )),
         ])),
         descents.create(DescentSequence::new([
-            descents.create(DescentAscent::new(binop_6, binop_7_r)),
+            descents.create(DescentAscent::new(
+                ascents.create(AscentSequence::new([
+                    ascents.create(AscentDescent::new(binop_6)),
+                    binop_7_r,
+                ]))
+            )),
             descents.create(DescentPredicateNot::new(
                 descents.create(DescentChoice::new([symbol_guillemet_l, symbol_guillemet_l_eq]))
             )),

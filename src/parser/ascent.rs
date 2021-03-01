@@ -6,17 +6,26 @@ pub trait Ascent {
     fn ascent(&self, parse: &mut Parse, nodes: Vec<Node>) -> Option<Vec<Node>>;
 }
 
-pub struct AscentNone;
+pub struct AscentDescent {
+    descent: usize,
+}
 
-impl AscentNone {
-    pub fn new() -> Self {
-        Self
+impl AscentDescent {
+    pub fn new(descent: usize) -> Self {
+        Self {
+            descent,
+        }
     }
 }
 
-impl Ascent for AscentNone {
-    fn ascent(&self, parse: &mut Parse, nodes: Vec<Node>) -> Option<Vec<Node>> {
-        Some(nodes)
+impl Ascent for AscentDescent {
+    fn ascent(&self, parse: &mut Parse, mut nodes: Vec<Node>) -> Option<Vec<Node>> {
+        if let Some(others) = parse.descent(self.descent) {
+            nodes.extend(others);
+            return Some(nodes);
+        }
+
+        None
     }
 }
 
@@ -70,50 +79,22 @@ impl Ascent for AscentSequence {
     }
 }
 
-pub struct AscentExtension2 {
-    descent: usize,
+pub struct AscentOption {
     ascent: usize,
 }
 
-impl AscentExtension2 {
-    pub fn new(descent: usize, ascent: usize) -> Self {
+impl AscentOption {
+    pub fn new(ascent: usize) -> Self {
         Self {
-            descent,
             ascent,
         }
     }
 }
 
-impl Ascent for AscentExtension2 {
-    fn ascent(&self, parse: &mut Parse, mut nodes: Vec<Node>) -> Option<Vec<Node>> {
-        if let Some(children) = parse.descent(self.descent) {
-            nodes.extend(children);
-            return parse.ascent(self.ascent, nodes);
-        }
-
-        None
-    }
-}
-
-pub struct AscentExtension {
-    descent: usize,
-    ascent: usize,
-}
-
-impl AscentExtension {
-    pub fn new(descent: usize, ascent: usize) -> Self {
-        Self {
-            descent,
-            ascent,
-        }
-    }
-}
-
-impl Ascent for AscentExtension {
-    fn ascent(&self, parse: &mut Parse, mut nodes: Vec<Node>) -> Option<Vec<Node>> {
-        if let Some(children) = parse.descent(self.descent) {
-            nodes.extend(children);
-            return parse.ascent(self.ascent, nodes);
+impl Ascent for AscentOption {
+    fn ascent(&self, parse: &mut Parse, nodes: Vec<Node>) -> Option<Vec<Node>> {
+        if let Some(others) = parse.ascent(self.ascent, nodes.clone()) {
+            return Some(others);
         }
 
         Some(nodes)
