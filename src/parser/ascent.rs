@@ -115,6 +115,6 @@ impl AscentElement {
 
 impl Ascent for AscentElement {
     fn ascent(&self, parse: &mut Parse, nodes: Vec<Node>) -> Option<Vec<Node>> {
-        Some(vec![Node::new_production(parse.code, self.element, nodes)])
+        Some(vec![Node::new_production(parse.code, self.element, nodes.into_boxed_slice())])
     }
 }

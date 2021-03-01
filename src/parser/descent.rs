@@ -227,7 +227,7 @@ impl DescentElement {
 impl Descent for DescentElement {
     fn descent(&self, parse: &mut Parse) -> Option<Vec<Node>> {
         if let Some(nodes) = parse.descent(self.descent) {
-            Some(vec![Node::new_production(parse.code, self.element, nodes)])
+            Some(vec![Node::new_production(parse.code, self.element, nodes.into_boxed_slice())])
         } else {
             None
         }
