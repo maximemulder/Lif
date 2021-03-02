@@ -49,9 +49,9 @@ pub struct DescentChoice {
 }
 
 impl DescentChoice {
-    pub fn new<const N: usize>(descents: [ArenaRef<dyn Descent>; N]) -> Self {
+    pub fn new(descents: Box<[ArenaRef<dyn Descent>]>) -> Self {
         Self {
-            descents: Box::new(descents),
+            descents,
         }
     }
 }
@@ -73,9 +73,9 @@ pub struct DescentSequence {
 }
 
 impl DescentSequence {
-    pub fn new<const N: usize>(descents: [ArenaRef<dyn Descent>; N]) -> Self {
+    pub fn new(descents: Box<[ArenaRef<dyn Descent>]>) -> Self {
         Self {
-            descents: Box::from(descents),
+            descents,
         }
     }
 }

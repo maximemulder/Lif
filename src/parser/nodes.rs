@@ -30,11 +30,11 @@ pub fn get() -> (Arena::<dyn Descent>, Arena::<dyn Ascent>) {
     }
 
     macro_rules! descent_sequence {
-        [ $($descents:expr),+ $(,)? ] => { descents.define(DescentSequence::new([$($descents),+])) }
+        [ $($descents:expr),+ $(,)? ] => { descents.define(DescentSequence::new(Box::from([$($descents),+]))) }
     }
 
     macro_rules! descent_choice {
-        [ $($descents:expr),+ $(,)? ] => { descents.define(DescentChoice::new([$($descents),+])) }
+        [ $($descents:expr),+ $(,)? ] => { descents.define(DescentChoice::new(Box::from([$($descents),+]))) }
     }
 
     macro_rules! descent_zero_or_more {
@@ -62,11 +62,11 @@ pub fn get() -> (Arena::<dyn Descent>, Arena::<dyn Ascent>) {
     }
 
     macro_rules! ascent_sequence {
-        [ $($ascents:expr),+ $(,)? ] => { ascents.define(AscentSequence::new([$($ascents),+])) }
+        [ $($ascents:expr),+ $(,)? ] => { ascents.define(AscentSequence::new(Box::from([$($ascents),+]))) }
     }
 
     macro_rules! ascent_choice {
-        [ $($ascents:expr),+ $(,)? ] => { ascents.define(AscentChoice::new([$($ascents),+])) }
+        [ $($ascents:expr),+ $(,)? ] => { ascents.define(AscentChoice::new(Box::from([$($ascents),+]))) }
     }
 
     macro_rules! ascent_option {
@@ -215,7 +215,7 @@ pub fn get() -> (Arena::<dyn Descent>, Arena::<dyn Ascent>) {
                 ascent_sequence![
                     ascent_descent!(
                         descent_sequence![
-                            descents.define(DescentChoice::new($tokens)),
+                            $tokens,
                             $child,
                         ]
                     ),
@@ -531,7 +531,7 @@ pub fn get() -> (Arena::<dyn Descent>, Arena::<dyn Ascent>) {
 
     let binop_11 = macro_binop_2!(binop_10, descent_choice![symbol_dot_d, symbol_dot_d_eq]);
 
-    let binop_12 = macro_assignment!(binop_11, [symbol_equal, symbol_plus_eq, symbol_minus_eq, symbol_asterisk_eq, symbol_slash_eq,
+    let binop_12 = macro_assignment!(binop_11, descent_choice![symbol_equal, symbol_plus_eq, symbol_minus_eq, symbol_asterisk_eq, symbol_slash_eq,
         symbol_percent_eq, symbol_asterisk_d_eq, symbol_guillemet_l_d_eq, symbol_guillemet_r_d_eq, symbol_guillemet_l_t_eq, symbol_guillemet_r_t_eq,
         symbol_ampersand_eq, symbol_caret_eq, symbol_pipe_eq, symbol_ampersand_d_eq, symbol_pipe_d_eq
     ]);

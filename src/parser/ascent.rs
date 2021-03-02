@@ -34,9 +34,9 @@ pub struct AscentChoice {
 }
 
 impl AscentChoice {
-    pub fn new<const N: usize>(ascents: [ArenaRef<dyn Ascent>; N]) -> Self {
+    pub fn new(ascents: Box<[ArenaRef<dyn Ascent>]>) -> Self {
         Self {
-            ascents: Box::new(ascents),
+            ascents,
         }
     }
 }
@@ -58,9 +58,9 @@ pub struct AscentSequence {
 }
 
 impl AscentSequence {
-    pub fn new<const N: usize>(ascents: [ArenaRef<dyn Ascent>; N]) -> Self {
+    pub fn new(ascents: Box<[ArenaRef<dyn Ascent>]>) -> Self {
         Self {
-            ascents: Box::new(ascents),
+            ascents,
         }
     }
 }
