@@ -1,6 +1,6 @@
 use crate::runtime::error::Error;
 use crate::runtime::gc::{ GcRef, GcTrace };
-use crate::runtime::utilities::Return;
+use crate::runtime::utilities::{ Return, ReturnValue };
 use crate::runtime::value::GcValue;
 
 pub type GcReference<'a> = GcRef<Reference<'a>>;
@@ -30,7 +30,7 @@ impl<'a> Reference<'a> {
         }
     }
 
-    pub fn read(&self) -> Return<GcValue<'a>> {
+    pub fn read(&self) -> ReturnValue<'a> {
         self.value.ok_or_else(Error::new_undefined)
     }
 

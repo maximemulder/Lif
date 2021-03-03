@@ -2,7 +2,7 @@ use crate::runtime::data::{ Array, Class, Data, FunctionCode, FunctionPrimitive,
 use crate::runtime::engine::Engine;
 use crate::runtime::error::Error;
 use crate::runtime::gc::{ GcRef, GcTrace };
-use crate::runtime::utilities::{ Arguments, Return, ReturnReference };
+use crate::runtime::utilities::{ Arguments, Return, ReturnReference, ReturnValue };
 use crate::runtime::utilities::parameters;
 
 pub type GcValue<'a> = GcRef<Value<'a>>;
@@ -46,7 +46,7 @@ impl<'a> GcValue<'a> {
 }
 
 impl<'a> GcValue<'a> {
-    pub fn get_method(&self, name: &str) -> Return<GcValue<'a>> {
+    pub fn get_method(&self, name: &str) -> ReturnValue<'a> {
         if let Some(method) = self.class.data_class().get_method(name) {
             Ok(method)
         } else {

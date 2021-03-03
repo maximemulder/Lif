@@ -14,3 +14,5 @@ pub type Callable<'a> = dyn Fn(&mut Engine<'a>, Arguments<'a>) -> ReturnReferenc
 pub type Return<T> = Result<T, Error>;
 
 pub type ReturnReference<'a> = Return<GcReference<'a>>;
+
+pub type ReturnValue<'a> = Return<GcValue<'a>>;

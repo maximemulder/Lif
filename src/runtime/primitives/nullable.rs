@@ -1,6 +1,6 @@
 use crate::runtime::engine::Engine;
 use crate::runtime::error::Error;
-use crate::runtime::utilities::{ Arguments, ReturnReference };
+use crate::runtime::utilities::{ Arguments, ReturnReference, ReturnValue };
 use crate::runtime::utilities::builder;
 
 pub fn populate(engine: &mut Engine) {
@@ -11,11 +11,15 @@ pub fn create<'a>(engine: &mut Engine<'a>, arguments: Arguments<'a>) -> ReturnRe
     let class = arguments[0];
     class.cast(engine.primitives.class)?;
     let nullable = engine.new_class_value(None, engine.primitives.any);
-    builder::r#static(engine, nullable, "new",       [class],    &new);
-    builder::r#static(engine, nullable, "null",      [],    &null);
+    builder::r#static(engine, nullable, "new",     [class],    &new);
+    builder::r#static(engine, nullable, "null",    [],         &null);
     builder::method(engine, nullable, "to_string", [nullable], &to_string);
     builder::method(engine, nullable, "get",       [nullable], &get);
     Ok(engine.new_constant(nullable))
+}
+
+fn get_type<'a>(engine: &mut Engine<'a>) -> ReturnValue<'a> {
+    engine.get_variable("__type__")?.read()
 }
 
 fn to_string<'a>(engine: &mut Engine<'a>, arguments: Arguments<'a>) -> ReturnReference<'a> {
@@ -32,14 +36,14 @@ fn to_string<'a>(engine: &mut Engine<'a>, arguments: Arguments<'a>) -> ReturnRef
 }
 
 fn new<'a>(engine: &mut Engine<'a>, arguments: Arguments<'a>) -> ReturnReference<'a> {
-    let class = engine.get_variable("__type__")?.read()?;
+    let class = get_type(engine)?;
     let mut generic = engine.primitives.nullable;
     let nullable = generic.data_generic_primitive_mut().call(engine, Box::new([class]))?.read()?;
     Ok(engine.new_nullable(nullable, Some(arguments[0])))
 }
 
 fn null<'a>(engine: &mut Engine<'a>, _: Arguments<'a>) -> ReturnReference<'a> {
-    let class = engine.get_variable("__type__")?.read()?;
+    let class = get_type(engine)?;
     let mut generic = engine.primitives.nullable;
     let nullable = generic.data_generic_primitive_mut().call(engine, Box::new([class]))?.read()?;
     Ok(engine.new_nullable(nullable, None))
