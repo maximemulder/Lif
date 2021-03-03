@@ -22,7 +22,7 @@ impl Code {
 
         let ast = parser.parse(production, code.get_ref()).unwrap();
         code.ast = Some(ast);
-        code.cst = Some(program(Ref::from_ref(&code.ast.as_ref().unwrap())));
+        code.cst = Some(program(Ref::new(code.ast.as_ref().unwrap())));
         code
     }
 

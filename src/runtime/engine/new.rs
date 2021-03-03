@@ -40,7 +40,7 @@ impl<'a> Engine<'a> {
         self.new_value(self.primitives.generic_code, Data::new_generic(tag, self.scope, parameters, node))
     }
 
-    pub fn new_generic_primitive_value(&mut self, name: &str, parameters: Vec<Box<str>>, callback: &'a Callable<'a>) -> GcValue<'a> {
+    pub fn new_generic_primitive_value(&mut self, name: &str, parameters: Ref<[Ref<str>]>, callback: &'a Callable<'a>) -> GcValue<'a> {
         let tag = self.taggers.generics.generate(Some(Box::from(name)));
         self.new_value(self.primitives.generic_primitive, Data::new_generic_primitive(tag, self.scope, parameters, callback))
     }
@@ -97,7 +97,7 @@ impl<'a> Engine<'a> {
         self.new_constant(value)
     }
 
-    pub fn new_generic_primitive(&mut self, name: &str, parameters: Vec<Box<str>>, callback: &'a Callable<'a>) -> GcReference<'a> {
+    pub fn new_generic_primitive(&mut self, name: &str, parameters: Ref<[Ref<str>]>, callback: &'a Callable<'a>) -> GcReference<'a> {
         let value = self.new_generic_primitive_value(name, parameters, callback);
         self.new_constant(value)
     }

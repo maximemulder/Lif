@@ -16,7 +16,7 @@ impl Sequence {
         Self {
             expression,
             expressions,
-            operator: Ref::from_ref(match format!("{}{}", open.deref(), close.deref()).as_str() {
+            operator: Ref::new(match format!("{}{}", open.deref(), close.deref()).as_str() {
                 "()" => "__cl__",
                 "[]" => "__id__",
                 "<>" => "__gn__",

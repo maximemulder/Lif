@@ -10,7 +10,7 @@ pub struct String {
 impl String {
     pub fn new(string: Ref<str>) -> Self {
         Self {
-            string: Ref::from_ref(&string[1 .. string.len() - 1]),
+            string: Ref::new(&string[1 .. string.len() - 1]),
         }
     }
 }

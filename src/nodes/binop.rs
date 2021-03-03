@@ -16,7 +16,7 @@ impl Binop {
         Self {
             left,
             right,
-            operator: Ref::from_ref(match operator.deref() {
+            operator: Ref::new(match operator.deref() {
                 "=="  => "__eq__",
                 "!="  => "__ne__",
                 "<"   => "__lt__",

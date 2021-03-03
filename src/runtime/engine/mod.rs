@@ -188,7 +188,7 @@ impl<'a> Engine<'a> {
 
     pub fn run(&mut self, code: Own<Code>) -> Option<GcReference<'a>> {
         self.codes.push(code);
-        let node = Ref::from_ref(self.codes.last().unwrap().cst.as_ref().unwrap());
+        let node = Ref::new(self.codes.last().unwrap().cst.as_ref().unwrap());
         let executable = Ref::as_ref(&node);
         match self.execute(executable) {
             Ok(reference) => Some(reference),

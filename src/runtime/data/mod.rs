@@ -64,7 +64,7 @@ impl<'a> Data<'a> {
         Data::GenericCode(Generic::new_code(tag, scope, parameters, node))
     }
 
-    pub fn new_generic_primitive(tag: Tag, scope: GcScope<'a>, parameters: Vec<Box<str>>, callback: &'a Callable<'a>) -> Self {
+    pub fn new_generic_primitive(tag: Tag, scope: GcScope<'a>, parameters: Ref<[Ref<str>]>, callback: &'a Callable<'a>) -> Self {
         Data::GenericPrimitive(Generic::new_primitive(tag, scope, parameters, callback))
     }
 

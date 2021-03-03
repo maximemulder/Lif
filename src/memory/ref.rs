@@ -14,15 +14,9 @@ impl<T> Ref<T> {
 }
 
 impl<T: ?Sized> Ref<T> {
-    pub fn new(pointer: *const T) -> Self {
+    pub const fn new(pointer: *const T) -> Self {
         Self {
             pointer,
-        }
-    }
-
-    pub fn from_ref(reference: &T) -> Self {
-        Self {
-            pointer: reference as *const T
         }
     }
 

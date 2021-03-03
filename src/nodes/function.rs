@@ -53,6 +53,6 @@ impl Executable for Function {
             None
         };
 
-        Ok(engine.new_function(Ref::as_option(&self.name), parameters.into_boxed_slice(), rest, names.into_boxed_slice(), r#type, Ref::from_ref(&self.block)))
+        Ok(engine.new_function(Ref::as_option(&self.name), parameters.into_boxed_slice(), rest, names.into_boxed_slice(), r#type, Ref::new(&self.block)))
     }
 }

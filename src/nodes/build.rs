@@ -38,7 +38,7 @@ pub fn program<'a>(node: Ref<SyntaxNode>) -> Node {
 fn statements<'a>(node: Ref<SyntaxNode>) -> Node {
     let mut statements = Vec::new();
     for child in node.children() {
-        statements.push(statement(Ref::from_ref(child)));
+        statements.push(statement(Ref::new(child)));
     }
 
     Node::new(node, Statements::new(statements.into_boxed_slice()))
@@ -75,11 +75,11 @@ pub fn expression<'a>(node: Ref<SyntaxNode>) -> Node {
 }
 
 fn r#type<'a>(node: Ref<SyntaxNode>) -> Option<Node> {
-    node.children().get(1).map(|child| expression(Ref::from_ref(child)))
+    node.children().get(1).map(|child| expression(Ref::new(child)))
 }
 
 fn name<'a>(node: Ref<SyntaxNode>) -> Option<Ref<str>> {
-    node.children().get(0).map(|child| token(Ref::from_ref(child)))
+    node.children().get(0).map(|child| token(Ref::new(child)))
 }
 
 fn literal<'a>(node: Ref<SyntaxNode>) -> Node {
@@ -145,7 +145,7 @@ fn block<'a>(node: Ref<SyntaxNode>) -> Node {
 }
 
 fn r#if<'a>(node: Ref<SyntaxNode>) -> Node {
-    Node::new(node, If::new(expression(node.front(1)), block(node.front(2)), node.children().get(4).map(|child| block(Ref::from_ref(child)))))
+    Node::new(node, If::new(expression(node.front(1)), block(node.front(2)), node.children().get(4).map(|child| block(Ref::new(child)))))
 }
 
 fn r#loop<'a>(node: Ref<SyntaxNode>) -> Node {
@@ -183,21 +183,21 @@ fn control<'a>(node: Ref<SyntaxNode>) -> Node {
 }
 
 fn r#return<'a>(node: Ref<SyntaxNode>) -> Node {
-    Node::new(node, Return::new(node.children().get(1).map(|child| expression(Ref::from_ref(child)))))
+    Node::new(node, Return::new(node.children().get(1).map(|child| expression(Ref::new(child)))))
 }
 
 fn r#break<'a>(node: Ref<SyntaxNode>) -> Node {
-    Node::new(node, Break::new(node.children().get(1).map(|child| expression(Ref::from_ref(child)))))
+    Node::new(node, Break::new(node.children().get(1).map(|child| expression(Ref::new(child)))))
 }
 
 fn r#continue<'a>(node: Ref<SyntaxNode>) -> Node {
-    Node::new(node, Continue::new(node.children().get(1).map(|child| expression(Ref::from_ref(child)))))
+    Node::new(node, Continue::new(node.children().get(1).map(|child| expression(Ref::new(child)))))
 }
 
 fn generics<'a>(node: Ref<SyntaxNode>) -> Box<[Ref<str>]> {
     let mut identifiers = Vec::new();
     for child in node.front(1).children().iter().step_by(2)  {
-        identifiers.push(token(Ref::from_ref(child)));
+        identifiers.push(token(Ref::new(child)));
     }
 
     identifiers.into_boxed_slice()
@@ -226,7 +226,7 @@ fn class_named<'a>(node: Ref<SyntaxNode>) -> Node {
 fn methods<'a>(node: Ref<SyntaxNode>) -> Box<[Node]> {
     let mut functions = Vec::new();
     for child in node.children().iter() {
-        functions.push(function_named(Ref::from_ref(child)));
+        functions.push(function_named(Ref::new(child)));
     }
 
     functions.into_boxed_slice()
@@ -253,13 +253,13 @@ fn function_named<'a>(node: Ref<SyntaxNode>) -> Node {
 }
 
 fn rest<'a>(node: Ref<SyntaxNode>) -> Option<(Ref<str>, Option<Node>)> {
-    node.children().get(1).map(|child| parameter(Ref::from_ref(child)))
+    node.children().get(1).map(|child| parameter(Ref::new(child)))
 }
 
 fn parameters<'a>(node: Ref<SyntaxNode>) -> (Box<[(Ref<str>, Option<Node>)]>, Option<(Ref<str>, Option<Node>)>) {
     let mut parameters = Vec::new();
     for child in node.front(1).children().iter().step_by(2)  {
-        parameters.push(parameter(Ref::from_ref(child)));
+        parameters.push(parameter(Ref::new(child)));
     }
 
     (parameters.into_boxed_slice(), rest(node.back(2)))
@@ -288,7 +288,7 @@ fn sequence<'a>(node: Ref<SyntaxNode>) -> Node {
 fn expressions<'a>(node: Ref<SyntaxNode>) -> Box<[Node]> {
     let mut expressions = Vec::new();
     for child in node.children().iter().step_by(2)  {
-        expressions.push(expression(Ref::from_ref(child)));
+        expressions.push(expression(Ref::new(child)));
     }
 
     expressions.into_boxed_slice()

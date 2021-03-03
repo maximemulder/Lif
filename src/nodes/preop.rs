@@ -14,7 +14,7 @@ impl Preop {
     pub fn new(operator: Ref<str>, expression: Node) -> Self {
         Self {
             expression,
-            operator: Ref::from_ref(match operator.deref() {
+            operator: Ref::new(match operator.deref() {
                 "~" => "__bnot__",
                 "+" => "__pos__",
                 "-" => "__neg__",

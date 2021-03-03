@@ -15,7 +15,7 @@ impl Assignment {
             reference,
             expression,
             operator: if operator.len() > 1 {
-                Some(Ref::from_ref(&operator[.. operator.len() - 1]))
+                Some(Ref::new(&operator[.. operator.len() - 1]))
             } else {
                 None
             },
