@@ -1,17 +1,19 @@
 use crate::node::Node;
 use crate::element::Element;
 use crate::parser::Parse;
+use crate::parser::arena::ArenaRef;
+use crate::parser::ascent::Ascent;
 
 pub trait Descent {
     fn descent(&self, parse: &mut Parse) -> Option<Vec<Node>>;
 }
 
 pub struct DescentAlias {
-    descent: usize,
+    descent: ArenaRef<dyn Descent>,
 }
 
 impl DescentAlias {
-    pub fn new(descent: usize) -> Self {
+    pub fn new(descent: ArenaRef<dyn Descent>) -> Self {
         Self {
             descent,
         }
@@ -24,29 +26,13 @@ impl Descent for DescentAlias {
     }
 }
 
-pub struct DescentNone;
-
-impl DescentNone {
-    pub fn new() -> Self {
-        Self
-    }
-}
-
-impl Descent for DescentNone {
-    fn descent(&self, parse: &mut Parse) -> Option<Vec<Node>> {
-        Some(Vec::new())
-    }
-}
-
 pub struct DescentAscent {
-    descent: usize,
-    ascent: usize,
+    ascent: ArenaRef<dyn Ascent>,
 }
 
 impl DescentAscent {
-    pub fn new(descent: usize, ascent: usize) -> Self {
+    pub fn new(ascent: ArenaRef<dyn Ascent>) -> Self {
         Self {
-            descent,
             ascent,
         }
     }
@@ -54,22 +40,18 @@ impl DescentAscent {
 
 impl Descent for DescentAscent {
     fn descent(&self, parse: &mut Parse) -> Option<Vec<Node>> {
-        if let Some(nodes) = parse.descent(self.descent) {
-            return parse.ascent(self.ascent, nodes);
-        }
-
-        None
+        parse.ascent(self.ascent, Vec::new())
     }
 }
 
 pub struct DescentChoice {
-    descents: Box<[usize]>,
+    descents: Box<[ArenaRef<dyn Descent>]>,
 }
 
 impl DescentChoice {
-    pub fn new<const N: usize>(descents: [usize; N]) -> Self {
+    pub fn new(descents: Box<[ArenaRef<dyn Descent>]>) -> Self {
         Self {
-            descents: Box::new(descents),
+            descents,
         }
     }
 }
@@ -87,13 +69,13 @@ impl Descent for DescentChoice {
 }
 
 pub struct DescentSequence {
-    descents: Box<[usize]>,
+    descents: Box<[ArenaRef<dyn Descent>]>,
 }
 
 impl DescentSequence {
-    pub fn new<const N: usize>(descents: [usize; N]) -> Self {
+    pub fn new(descents: Box<[ArenaRef<dyn Descent>]>) -> Self {
         Self {
-            descents: Box::from(descents),
+            descents,
         }
     }
 }
@@ -102,11 +84,7 @@ impl Descent for DescentSequence {
     fn descent(&self, parse: &mut Parse) -> Option<Vec<Node>> {
         let mut nodes = Vec::new();
         for descent in self.descents.iter() {
-            if let Some(children) = parse.descent(*descent) {
-                nodes.extend(children);
-            } else {
-                return None;
-            }
+            nodes.extend(parse.descent(*descent)?);
         }
 
         Some(nodes)
@@ -114,11 +92,11 @@ impl Descent for DescentSequence {
 }
 
 pub struct DescentZeroOrMore {
-    descent: usize,
+    descent: ArenaRef<dyn Descent>,
 }
 
 impl DescentZeroOrMore {
-    pub fn new(descent: usize) -> Self {
+    pub fn new(descent: ArenaRef<dyn Descent>) -> Self {
         Self {
             descent,
         }
@@ -137,11 +115,11 @@ impl Descent for DescentZeroOrMore {
 }
 
 pub struct DescentOneOrMore {
-    descent:   usize,
+    descent: ArenaRef<dyn Descent>,
 }
 
 impl DescentOneOrMore {
-    pub fn new(descent: usize) -> Self {
+    pub fn new(descent: ArenaRef<dyn Descent>) -> Self {
         Self {
             descent,
         }
@@ -164,11 +142,11 @@ impl Descent for DescentOneOrMore {
 }
 
 pub struct DescentOption {
-    descent: usize,
+    descent: ArenaRef<dyn Descent>,
 }
 
 impl DescentOption {
-    pub fn new(descent: usize) -> Self {
+    pub fn new(descent: ArenaRef<dyn Descent>) -> Self {
         Self {
             descent,
         }
@@ -177,21 +155,16 @@ impl DescentOption {
 
 impl Descent for DescentOption {
     fn descent(&self, parse: &mut Parse) -> Option<Vec<Node>> {
-        let nodes = parse.descent(self.descent);
-        if nodes.is_some() {
-            return nodes;
-        }
-
-        Some(Vec::new())
+        parse.descent(self.descent).or_else(|| Some(Vec::new()))
     }
 }
 
 pub struct DescentPredicateAnd {
-    descent: usize,
+    descent: ArenaRef<dyn Descent>,
 }
 
 impl DescentPredicateAnd {
-    pub fn new(descent: usize) -> Self {
+    pub fn new(descent: ArenaRef<dyn Descent>) -> Self {
         Self {
             descent,
         }
@@ -209,11 +182,11 @@ impl Descent for DescentPredicateAnd {
 }
 
 pub struct DescentPredicateNot {
-    descent: usize,
+    descent: ArenaRef<dyn Descent>,
 }
 
 impl DescentPredicateNot {
-    pub fn new(descent: usize) -> Self {
+    pub fn new(descent: ArenaRef<dyn Descent>) -> Self {
         Self {
             descent,
         }
@@ -231,12 +204,12 @@ impl Descent for DescentPredicateNot {
 }
 
 pub struct DescentElement {
-    descent: usize,
+    descent: ArenaRef<dyn Descent>,
     element: &'static Element,
 }
 
 impl DescentElement {
-    pub fn new(descent: usize, element: &'static Element) -> Self {
+    pub fn new(descent: ArenaRef<dyn Descent>, element: &'static Element) -> Self {
         Self {
             descent,
             element,
@@ -246,11 +219,7 @@ impl DescentElement {
 
 impl Descent for DescentElement {
     fn descent(&self, parse: &mut Parse) -> Option<Vec<Node>> {
-        if let Some(nodes) = parse.descent(self.descent) {
-            Some(vec![Node::new_production(parse.code, self.element, nodes)])
-        } else {
-            None
-        }
+        parse.descent(self.descent).map(|nodes| vec![Node::new_production(parse.code, self.element, nodes.into_boxed_slice())])
     }
 }
 

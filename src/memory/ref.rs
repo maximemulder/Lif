@@ -53,9 +53,7 @@ impl<T: ?Sized> Eq for Ref<T> {}
 
 impl<T: ?Sized> Clone for Ref<T> {
     fn clone(&self) -> Self {
-        Self {
-            pointer: self.pointer,
-        }
+        Self::new(self.pointer)
     }
 }
 

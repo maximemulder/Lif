@@ -21,455 +21,542 @@ pub fn get() -> (Arena::<dyn Descent>, Arena::<dyn Ascent>) {
 
     let extension = ascents.declare();
 
-    let keyword_as              = descents.create(DescentToken::new(&elements::keywords::AS));
-    let keyword_catch           = descents.create(DescentToken::new(&elements::keywords::CATCH));
-    let keyword_class           = descents.create(DescentToken::new(&elements::keywords::CLASS));
-    let keyword_default         = descents.create(DescentToken::new(&elements::keywords::DEFAULT));
-    let keyword_do              = descents.create(DescentToken::new(&elements::keywords::DO));
-    let keyword_else            = descents.create(DescentToken::new(&elements::keywords::ELSE));
-    let keyword_export          = descents.create(DescentToken::new(&elements::keywords::EXPORT));
-    let keyword_false           = descents.create(DescentToken::new(&elements::keywords::FALSE));
-    let keyword_finally         = descents.create(DescentToken::new(&elements::keywords::FINALLY));
-    let keyword_for             = descents.create(DescentToken::new(&elements::keywords::FOR));
-    let keyword_from            = descents.create(DescentToken::new(&elements::keywords::FROM));
-    let keyword_function        = descents.create(DescentToken::new(&elements::keywords::FUNCTION));
-    let keyword_if              = descents.create(DescentToken::new(&elements::keywords::IF));
-    let keyword_import          = descents.create(DescentToken::new(&elements::keywords::IMPORT));
-    let keyword_in              = descents.create(DescentToken::new(&elements::keywords::IN));
-    let keyword_let             = descents.create(DescentToken::new(&elements::keywords::LET));
-    let keyword_loop            = descents.create(DescentToken::new(&elements::keywords::LOOP));
-    let keyword_private         = descents.create(DescentToken::new(&elements::keywords::PRIVATE));
-    let keyword_protected       = descents.create(DescentToken::new(&elements::keywords::PROTECTED));
-    let keyword_public          = descents.create(DescentToken::new(&elements::keywords::PUBLIC));
-    let keyword_continue        = descents.create(DescentToken::new(&elements::keywords::CONTINUE));
-    let keyword_break           = descents.create(DescentToken::new(&elements::keywords::BREAK));
-    let keyword_return          = descents.create(DescentToken::new(&elements::keywords::RETURN));
-    let keyword_static          = descents.create(DescentToken::new(&elements::keywords::STATIC));
-    let keyword_then            = descents.create(DescentToken::new(&elements::keywords::THEN));
-    let keyword_throw           = descents.create(DescentToken::new(&elements::keywords::THROW));
-    let keyword_true            = descents.create(DescentToken::new(&elements::keywords::TRUE));
-    let keyword_try             = descents.create(DescentToken::new(&elements::keywords::TRY));
-    let keyword_while           = descents.create(DescentToken::new(&elements::keywords::WHILE));
-    let symbol_plus             = descents.create(DescentToken::new(&elements::symbols::PLUS));
-    let symbol_plus_eq          = descents.create(DescentToken::new(&elements::symbols::PLUS_EQ));
-    let symbol_minus            = descents.create(DescentToken::new(&elements::symbols::MINUS));
-    let symbol_minus_eq         = descents.create(DescentToken::new(&elements::symbols::MINUS_EQ));
-    let symbol_asterisk         = descents.create(DescentToken::new(&elements::symbols::ASTERISK));
-    let symbol_asterisk_eq      = descents.create(DescentToken::new(&elements::symbols::ASTERISK_EQ));
-    let symbol_asterisk_d       = descents.create(DescentToken::new(&elements::symbols::ASTERISK_D));
-    let symbol_asterisk_d_eq    = descents.create(DescentToken::new(&elements::symbols::ASTERISK_D_EQ));
-    let symbol_slash            = descents.create(DescentToken::new(&elements::symbols::SLASH));
-    let symbol_slash_eq         = descents.create(DescentToken::new(&elements::symbols::SLASH_EQ));
-    let symbol_percent          = descents.create(DescentToken::new(&elements::symbols::PERCENT));
-    let symbol_percent_eq       = descents.create(DescentToken::new(&elements::symbols::PERCENT_EQ));
-    let symbol_caret            = descents.create(DescentToken::new(&elements::symbols::CARET));
-    let symbol_caret_eq         = descents.create(DescentToken::new(&elements::symbols::CARET_EQ));
-    let symbol_exclamation      = descents.create(DescentToken::new(&elements::symbols::EXCLAMATION));
-    let symbol_exclamation_eq   = descents.create(DescentToken::new(&elements::symbols::EXCLAMATION_EQ));
-    let symbol_equal            = descents.create(DescentToken::new(&elements::symbols::EQUAL));
-    let symbol_equal_d          = descents.create(DescentToken::new(&elements::symbols::EQUAL_D));
-    let symbol_arrow            = descents.create(DescentToken::new(&elements::symbols::ARROW));
-    let symbol_pipe             = descents.create(DescentToken::new(&elements::symbols::PIPE));
-    let symbol_pipe_eq          = descents.create(DescentToken::new(&elements::symbols::PIPE_EQ));
-    let symbol_pipe_d           = descents.create(DescentToken::new(&elements::symbols::PIPE_D));
-    let symbol_pipe_d_eq        = descents.create(DescentToken::new(&elements::symbols::PIPE_D_EQ));
-    let symbol_ampersand        = descents.create(DescentToken::new(&elements::symbols::AMPERSAND));
-    let symbol_ampersand_eq     = descents.create(DescentToken::new(&elements::symbols::AMPERSAND_EQ));
-    let symbol_ampersand_d      = descents.create(DescentToken::new(&elements::symbols::AMPERSAND_D));
-    let symbol_ampersand_d_eq   = descents.create(DescentToken::new(&elements::symbols::AMPERSAND_D_EQ));
-    let symbol_guillemet_l      = descents.create(DescentToken::new(&elements::symbols::GUILLEMET_L));
-    let symbol_guillemet_r      = descents.create(DescentToken::new(&elements::symbols::GUILLEMET_R));
-    let symbol_guillemet_l_eq   = descents.create(DescentToken::new(&elements::symbols::GUILLEMET_L_EQ));
-    let symbol_guillemet_r_eq   = descents.create(DescentToken::new(&elements::symbols::GUILLEMET_R_EQ));
-    let symbol_guillemet_l_d    = descents.create(DescentToken::new(&elements::symbols::GUILLEMET_L_D));
-    let symbol_guillemet_r_d    = descents.create(DescentToken::new(&elements::symbols::GUILLEMET_R_D));
-    let symbol_guillemet_l_d_eq = descents.create(DescentToken::new(&elements::symbols::GUILLEMET_L_D_EQ));
-    let symbol_guillemet_r_d_eq = descents.create(DescentToken::new(&elements::symbols::GUILLEMET_R_D_EQ));
-    let symbol_guillemet_l_t    = descents.create(DescentToken::new(&elements::symbols::GUILLEMET_L_T));
-    let symbol_guillemet_r_t    = descents.create(DescentToken::new(&elements::symbols::GUILLEMET_R_T));
-    let symbol_guillemet_l_t_eq = descents.create(DescentToken::new(&elements::symbols::GUILLEMET_L_T_EQ));
-    let symbol_guillemet_r_t_eq = descents.create(DescentToken::new(&elements::symbols::GUILLEMET_R_T_EQ));
-    let symbol_parenthesis_l    = descents.create(DescentToken::new(&elements::symbols::PARENTHESIS_L));
-    let symbol_parenthesis_r    = descents.create(DescentToken::new(&elements::symbols::PARENTHESIS_R));
-    let symbol_brace_l          = descents.create(DescentToken::new(&elements::symbols::BRACE_L));
-    let symbol_brace_r          = descents.create(DescentToken::new(&elements::symbols::BRACE_R));
-    let symbol_crotchet_l       = descents.create(DescentToken::new(&elements::symbols::CROTCHET_L));
-    let symbol_crotchet_r       = descents.create(DescentToken::new(&elements::symbols::CROTCHET_R));
-    let symbol_dot              = descents.create(DescentToken::new(&elements::symbols::DOT));
-    let symbol_dot_d            = descents.create(DescentToken::new(&elements::symbols::DOT_D));
-    let symbol_dot_d_eq         = descents.create(DescentToken::new(&elements::symbols::DOT_D_EQ));
-    let symbol_dot_t            = descents.create(DescentToken::new(&elements::symbols::DOT_T));
-    let symbol_comma            = descents.create(DescentToken::new(&elements::symbols::COMMA));
-    let symbol_tilde            = descents.create(DescentToken::new(&elements::symbols::TILDE));
-    let symbol_dollar           = descents.create(DescentToken::new(&elements::symbols::DOLLAR));
-    let symbol_interrogation    = descents.create(DescentToken::new(&elements::symbols::INTERROGATION));
-    let symbol_colon            = descents.create(DescentToken::new(&elements::symbols::COLON));
-    let symbol_semicolon        = descents.create(DescentToken::new(&elements::symbols::SEMICOLON));
-    let symbol_backslash        = descents.create(DescentToken::new(&elements::symbols::BACKSLASH));
-    let variable_identifier     = descents.create(DescentToken::new(&elements::variables::IDENTIFIER));
-    let variable_string         = descents.create(DescentToken::new(&elements::variables::STRING));
-    let variable_number         = descents.create(DescentToken::new(&elements::variables::NUMBER));
+    macro_rules! descent_alias {
+        ( $descent:expr ) => { descents.define(DescentAlias::new($descent)) }
+    }
 
-    let name = descents.create(DescentElement::new(
-        descents.create(DescentOption::new(variable_identifier)),
-        &elements::productions::NAME
-    ));
+    macro_rules! descent_ascent {
+        ( $ascent:expr ) => { descents.define(DescentAscent::new($ascent)) }
+    }
 
-    macro_rules! create_control {
+    macro_rules! descent_sequence {
+        [ $($descents:expr),+ $(,)? ] => { descents.define(DescentSequence::new(Box::from([$($descents),+]))) }
+    }
+
+    macro_rules! descent_choice {
+        [ $($descents:expr),+ $(,)? ] => { descents.define(DescentChoice::new(Box::from([$($descents),+]))) }
+    }
+
+    macro_rules! descent_zero_or_more {
+        ( $descent:expr ) => { descents.define(DescentZeroOrMore::new($descent)) }
+    }
+
+    macro_rules! descent_option {
+        ( $descent:expr ) => { descents.define(DescentOption::new($descent)) }
+    }
+
+    macro_rules! descent_predicate_not {
+        ( $descent:expr ) => { descents.define(DescentPredicateNot::new($descent)) }
+    }
+
+    macro_rules! descent_element {
+        ( $descent:expr, $element:expr ) => { descents.define(DescentElement::new($descent, $element)) }
+    }
+
+    macro_rules! descent_token {
+        ( $element:expr ) => { descents.define(DescentToken::new($element)) }
+    }
+
+    macro_rules! ascent_descent {
+        ( $descent:expr ) => { ascents.define(AscentDescent::new($descent)) }
+    }
+
+    macro_rules! ascent_sequence {
+        [ $($ascents:expr),+ $(,)? ] => { ascents.define(AscentSequence::new(Box::from([$($ascents),+]))) }
+    }
+
+    macro_rules! ascent_choice {
+        [ $($ascents:expr),+ $(,)? ] => { ascents.define(AscentChoice::new(Box::from([$($ascents),+]))) }
+    }
+
+    macro_rules! ascent_option {
+        ( $ascent:expr ) => { ascents.define(AscentOption::new($ascent)) }
+    }
+    macro_rules! ascent_element {
+        ( $element:expr ) => { ascents.define(AscentElement::new($element)) }
+    }
+
+    let keyword_as              = descent_token!(&elements::keywords::AS);
+    let keyword_catch           = descent_token!(&elements::keywords::CATCH);
+    let keyword_class           = descent_token!(&elements::keywords::CLASS);
+    let keyword_default         = descent_token!(&elements::keywords::DEFAULT);
+    let keyword_do              = descent_token!(&elements::keywords::DO);
+    let keyword_else            = descent_token!(&elements::keywords::ELSE);
+    let keyword_export          = descent_token!(&elements::keywords::EXPORT);
+    let keyword_false           = descent_token!(&elements::keywords::FALSE);
+    let keyword_finally         = descent_token!(&elements::keywords::FINALLY);
+    let keyword_for             = descent_token!(&elements::keywords::FOR);
+    let keyword_from            = descent_token!(&elements::keywords::FROM);
+    let keyword_function        = descent_token!(&elements::keywords::FUNCTION);
+    let keyword_if              = descent_token!(&elements::keywords::IF);
+    let keyword_import          = descent_token!(&elements::keywords::IMPORT);
+    let keyword_in              = descent_token!(&elements::keywords::IN);
+    let keyword_let             = descent_token!(&elements::keywords::LET);
+    let keyword_loop            = descent_token!(&elements::keywords::LOOP);
+    let keyword_private         = descent_token!(&elements::keywords::PRIVATE);
+    let keyword_protected       = descent_token!(&elements::keywords::PROTECTED);
+    let keyword_public          = descent_token!(&elements::keywords::PUBLIC);
+    let keyword_continue        = descent_token!(&elements::keywords::CONTINUE);
+    let keyword_break           = descent_token!(&elements::keywords::BREAK);
+    let keyword_return          = descent_token!(&elements::keywords::RETURN);
+    let keyword_static          = descent_token!(&elements::keywords::STATIC);
+    let keyword_then            = descent_token!(&elements::keywords::THEN);
+    let keyword_throw           = descent_token!(&elements::keywords::THROW);
+    let keyword_true            = descent_token!(&elements::keywords::TRUE);
+    let keyword_try             = descent_token!(&elements::keywords::TRY);
+    let keyword_while           = descent_token!(&elements::keywords::WHILE);
+    let symbol_plus             = descent_token!(&elements::symbols::PLUS);
+    let symbol_plus_eq          = descent_token!(&elements::symbols::PLUS_EQ);
+    let symbol_minus            = descent_token!(&elements::symbols::MINUS);
+    let symbol_minus_eq         = descent_token!(&elements::symbols::MINUS_EQ);
+    let symbol_asterisk         = descent_token!(&elements::symbols::ASTERISK);
+    let symbol_asterisk_eq      = descent_token!(&elements::symbols::ASTERISK_EQ);
+    let symbol_asterisk_d       = descent_token!(&elements::symbols::ASTERISK_D);
+    let symbol_asterisk_d_eq    = descent_token!(&elements::symbols::ASTERISK_D_EQ);
+    let symbol_slash            = descent_token!(&elements::symbols::SLASH);
+    let symbol_slash_eq         = descent_token!(&elements::symbols::SLASH_EQ);
+    let symbol_percent          = descent_token!(&elements::symbols::PERCENT);
+    let symbol_percent_eq       = descent_token!(&elements::symbols::PERCENT_EQ);
+    let symbol_caret            = descent_token!(&elements::symbols::CARET);
+    let symbol_caret_eq         = descent_token!(&elements::symbols::CARET_EQ);
+    let symbol_exclamation      = descent_token!(&elements::symbols::EXCLAMATION);
+    let symbol_exclamation_eq   = descent_token!(&elements::symbols::EXCLAMATION_EQ);
+    let symbol_equal            = descent_token!(&elements::symbols::EQUAL);
+    let symbol_equal_d          = descent_token!(&elements::symbols::EQUAL_D);
+    let symbol_arrow            = descent_token!(&elements::symbols::ARROW);
+    let symbol_pipe             = descent_token!(&elements::symbols::PIPE);
+    let symbol_pipe_eq          = descent_token!(&elements::symbols::PIPE_EQ);
+    let symbol_pipe_d           = descent_token!(&elements::symbols::PIPE_D);
+    let symbol_pipe_d_eq        = descent_token!(&elements::symbols::PIPE_D_EQ);
+    let symbol_ampersand        = descent_token!(&elements::symbols::AMPERSAND);
+    let symbol_ampersand_eq     = descent_token!(&elements::symbols::AMPERSAND_EQ);
+    let symbol_ampersand_d      = descent_token!(&elements::symbols::AMPERSAND_D);
+    let symbol_ampersand_d_eq   = descent_token!(&elements::symbols::AMPERSAND_D_EQ);
+    let symbol_guillemet_l      = descent_token!(&elements::symbols::GUILLEMET_L);
+    let symbol_guillemet_r      = descent_token!(&elements::symbols::GUILLEMET_R);
+    let symbol_guillemet_l_eq   = descent_token!(&elements::symbols::GUILLEMET_L_EQ);
+    let symbol_guillemet_r_eq   = descent_token!(&elements::symbols::GUILLEMET_R_EQ);
+    let symbol_guillemet_l_d    = descent_token!(&elements::symbols::GUILLEMET_L_D);
+    let symbol_guillemet_r_d    = descent_token!(&elements::symbols::GUILLEMET_R_D);
+    let symbol_guillemet_l_d_eq = descent_token!(&elements::symbols::GUILLEMET_L_D_EQ);
+    let symbol_guillemet_r_d_eq = descent_token!(&elements::symbols::GUILLEMET_R_D_EQ);
+    let symbol_guillemet_l_t    = descent_token!(&elements::symbols::GUILLEMET_L_T);
+    let symbol_guillemet_r_t    = descent_token!(&elements::symbols::GUILLEMET_R_T);
+    let symbol_guillemet_l_t_eq = descent_token!(&elements::symbols::GUILLEMET_L_T_EQ);
+    let symbol_guillemet_r_t_eq = descent_token!(&elements::symbols::GUILLEMET_R_T_EQ);
+    let symbol_parenthesis_l    = descent_token!(&elements::symbols::PARENTHESIS_L);
+    let symbol_parenthesis_r    = descent_token!(&elements::symbols::PARENTHESIS_R);
+    let symbol_brace_l          = descent_token!(&elements::symbols::BRACE_L);
+    let symbol_brace_r          = descent_token!(&elements::symbols::BRACE_R);
+    let symbol_crotchet_l       = descent_token!(&elements::symbols::CROTCHET_L);
+    let symbol_crotchet_r       = descent_token!(&elements::symbols::CROTCHET_R);
+    let symbol_dot              = descent_token!(&elements::symbols::DOT);
+    let symbol_dot_d            = descent_token!(&elements::symbols::DOT_D);
+    let symbol_dot_d_eq         = descent_token!(&elements::symbols::DOT_D_EQ);
+    let symbol_dot_t            = descent_token!(&elements::symbols::DOT_T);
+    let symbol_comma            = descent_token!(&elements::symbols::COMMA);
+    let symbol_tilde            = descent_token!(&elements::symbols::TILDE);
+    let symbol_dollar           = descent_token!(&elements::symbols::DOLLAR);
+    let symbol_interrogation    = descent_token!(&elements::symbols::INTERROGATION);
+    let symbol_colon            = descent_token!(&elements::symbols::COLON);
+    let symbol_semicolon        = descent_token!(&elements::symbols::SEMICOLON);
+    let symbol_backslash        = descent_token!(&elements::symbols::BACKSLASH);
+    let variable_identifier     = descent_token!(&elements::variables::IDENTIFIER);
+    let variable_string         = descent_token!(&elements::variables::STRING);
+    let variable_number         = descent_token!(&elements::variables::NUMBER);
+
+    macro_rules! macro_control {
         ( $keyword:expr, $element:expr ) => {
-            descents.create(DescentElement::new(
-                descents.create(DescentSequence::new([$keyword, expression_option])),
+            descent_element!(
+                descent_sequence![$keyword, expression_option],
                 $element
-            ))
+            )
         }
     }
 
-    macro_rules! create_binop_ascent {
+    macro_rules! macro_binop_1 {
         ( $child:expr, $tokens:expr ) => {{
             let ascent = ascents.declare();
-            ascents.define(ascent, AscentExtension::new(
-                descents.create(DescentSequence::new([
-                    descents.create(DescentChoice::new($tokens)),
-                    $child,
-                ])),
-                ascents.create(AscentSequence::new([
-                    ascents.create(AscentElement::new(&elements::expressions::BINOP)),
-                    ascents.create(AscentElement::new(&elements::expressions::EXPRESSION)),
-                    ascent,
-                ]))
+            ascents.swap(ascent, ascent_option!(
+                ascent_sequence![
+                    ascent_descent!(
+                        descent_sequence![
+                            descent_choice![$tokens],
+                            $child,
+                        ]
+                    ),
+                    ascent_sequence![
+                        ascent_element!(&elements::expressions::BINOP),
+                        ascent_element!(&elements::expressions::EXPRESSION),
+                        ascent,
+                    ],
+                ]
             ));
 
             ascent
         }}
     }
 
-    macro_rules! create_binop {
+    macro_rules! macro_binop_2 {
         ( $child:expr, $tokens:expr ) => {{
-            descents.create(DescentAscent::new($child, create_binop_ascent!($child, $tokens)))
+            descent_ascent!(
+                ascent_sequence![
+                    ascent_descent!($child),
+                    macro_binop_1!($child, $tokens),
+                ]
+            )
         }}
     }
 
-    macro_rules! create_assignment {
-        ( $child:expr, $tokens:expr ) => {
-            descents.create(DescentAscent::new($child, {
-                let ascent = ascents.declare();
-                ascents.define(ascent, AscentExtension::new(
-                    descents.create(DescentSequence::new([
-                        descents.create(DescentChoice::new($tokens)),
-                        $child,
-                    ])),
-                    ascents.create(AscentSequence::new([
-                        ascents.create(AscentElement::new(&elements::expressions::ASSIGNMENT)),
-                        ascents.create(AscentElement::new(&elements::expressions::EXPRESSION)),
+    macro_rules! macro_assignment {
+        ( $child:expr, $tokens:expr ) => {{
+            let ascent = ascents.declare();
+            ascents.swap(ascent, ascent_option!(
+                ascent_sequence![
+                    ascent_descent!(
+                        descent_sequence![
+                            $tokens,
+                            $child,
+                        ]
+                    ),
+                    ascent_sequence![
+                        ascent_element!(&elements::expressions::ASSIGNMENT),
+                        ascent_element!(&elements::expressions::EXPRESSION),
                         ascent,
-                    ]))
-                ));
+                    ],
+                ]
+            ));
 
-                ascent
-            }))
-        }
+            descent_ascent!(
+                ascent_sequence![
+                    ascent_descent!($child),
+                    ascent,
+                ]
+            )
+        }}
     }
 
-    macro_rules! create_list {
+    macro_rules! macro_list {
         ( $element:expr, $separator:expr ) => {{
-            descents.create(DescentSequence::new([
+            descent_sequence![
                 $element,
-                descents.create(DescentZeroOrMore::new(
-                    descents.create(DescentSequence::new([$separator, $element]))
-                ))
-            ]))
+                descent_zero_or_more!(
+                    descent_sequence![$separator, $element]
+                )
+            ]
         }}
     }
 
-    macro_rules! create_list_option {
-        ( $element:expr, $separator:expr ) => {{
-            descents.create(DescentOption::new(
-                create_list!($element, $separator)
-            ))
-        }}
-    }
+    let name = descent_element!(
+        descent_option!(variable_identifier),
+        &elements::productions::NAME
+    );
 
-    let expressions = descents.create(DescentElement::new(
-        create_list_option!(expression, symbol_comma),
+    let expressions = descent_element!(
+        descent_option!(
+            macro_list!(expression, symbol_comma)
+        ),
         &elements::productions::EXPRESSIONS
-    ));
+    );
 
-    let r#type = descents.create(DescentElement::new(
-        descents.create(DescentOption::new(
-            descents.create(DescentSequence::new([symbol_colon, binop_base])),
-        )),
+    let r#type = descent_element!(
+        descent_option!(
+            descent_sequence![symbol_colon, binop_base]
+        ),
         &elements::productions::TYPE
-    ));
+    );
 
-    let literal = descents.create(DescentElement::new(
-        descents.create(DescentChoice::new([variable_identifier, variable_string, variable_number, keyword_true, keyword_false])),
+    let literal = descent_element!(
+        descent_choice![variable_identifier, variable_string, variable_number, keyword_true, keyword_false],
         &elements::expressions::LITERAL
-    ));
+    );
 
-    let array = descents.create(DescentElement::new(
-        descents.create(DescentSequence::new([symbol_crotchet_l, expressions, symbol_crotchet_r])),
+    let array = descent_element!(
+        descent_sequence![symbol_crotchet_l, expressions, symbol_crotchet_r],
         &elements::expressions::ARRAY
-    ));
+    );
 
-    let group = descents.create(DescentElement::new(
-        descents.create(DescentSequence::new([symbol_parenthesis_l, expression, symbol_parenthesis_r])),
+    let group = descent_element!(
+        descent_sequence![symbol_parenthesis_l, expression, symbol_parenthesis_r],
         &elements::expressions::GROUP
-    ));
+    );
 
-    let declaration = descents.create(DescentElement::new(
-        descents.create(DescentSequence::new([variable_identifier, r#type])),
+    let declaration = descent_element!(
+        descent_sequence![variable_identifier, r#type],
         &elements::productions::DECLARATION
-    ));
+    );
 
-    let r#let = descents.create(DescentElement::new(
-        descents.create(DescentSequence::new([keyword_let, declaration])),
+    let r#let = descent_element!(
+        descent_sequence![keyword_let, declaration],
         &elements::expressions::LET
-    ));
+    );
 
-    let control = descents.create(DescentElement::new(
-        descents.create(DescentChoice::new([
-            create_control!(keyword_return,   &elements::controls::RETURN),
-            create_control!(keyword_break,    &elements::controls::BREAK),
-            create_control!(keyword_continue, &elements::controls::CONTINUE),
-        ])),
+    let control = descent_element!(
+        descent_choice![
+            macro_control!(keyword_return,   &elements::controls::RETURN),
+            macro_control!(keyword_break,    &elements::controls::BREAK),
+            macro_control!(keyword_continue, &elements::controls::CONTINUE),
+        ],
         &elements::controls::CONTROL
-    ));
+    );
 
-    let block = descents.create(DescentElement::new(
-        descents.create(DescentSequence::new([symbol_brace_l, statements, expression_option, symbol_brace_r])),
+    let block = descent_element!(
+        descent_sequence![symbol_brace_l, statements, expression_option, symbol_brace_r],
         &elements::flows::BLOCK
-    ));
+    );
 
-    let r#if = descents.create(DescentElement::new(
-        descents.create(DescentSequence::new([
+    let r#if = descent_element!(
+        descent_sequence![
             keyword_if,
             expression,
             block,
-            descents.create(DescentOption::new(
-                descents.create(DescentSequence::new([keyword_else, block])),
-            )),
-        ])),
+            descent_option!(
+                descent_sequence![keyword_else, block]
+            ),
+        ],
         &elements::flows::IF
-    ));
+    );
 
-    let r#loop = descents.create(DescentElement::new(
-        descents.create(DescentSequence::new([keyword_loop, block])),
+    let r#loop = descent_element!(
+        descent_sequence![keyword_loop, block],
         &elements::flows::LOOP
-    ));
+    );
 
-    let r#while = descents.create(DescentElement::new(
-        descents.create(DescentSequence::new([keyword_while, expression, block])),
+    let r#while = descent_element!(
+        descent_sequence![keyword_while, expression, block],
         &elements::flows::WHILE
-    ));
+    );
 
-    let for_in = descents.create(DescentElement::new(
-        descents.create(DescentSequence::new([keyword_for, variable_identifier, keyword_in, expression, block])),
+    let for_in = descent_element!(
+        descent_sequence![keyword_for, variable_identifier, keyword_in, expression, block],
         &elements::flows::FOR_IN
-    ));
+    );
 
-    let flow = descents.create(DescentElement::new(
-        descents.create(DescentChoice::new([block, r#if, r#loop, r#while, for_in])),
+    let flow = descent_element!(
+        descent_choice![block, r#if, r#loop, r#while, for_in],
         &elements::flows::FLOW
-    ));
+    );
 
-    let generics = descents.create(DescentOption::new(
-        descents.create(DescentElement::new(
-            descents.create(DescentSequence::new([
+    let generics = descent_option!(
+        descent_element!(
+            descent_sequence![
                 symbol_guillemet_l,
-                descents.create(DescentElement::new(
-                    create_list!(variable_identifier, symbol_comma),
+                descent_element!(
+                    macro_list!(variable_identifier, symbol_comma),
                     &elements::productions::GENERICS_LIST
-                )),
+                ),
                 symbol_guillemet_r,
-            ])),
+            ],
             &elements::productions::GENERICS
-        ))
-    ));
+        )
+    );
 
-    let rest = descents.create(DescentElement::new(
-        descents.create(DescentSequence::new([
-            symbol_dot_t,
-            declaration,
-        ])),
+    let rest = descent_element!(
+        descent_option!(
+            descent_sequence![
+                symbol_dot_t,
+                declaration,
+            ]
+        ),
         &elements::productions::REST
-    ));
+    );
 
-    let parameters = descents.create(DescentElement::new(
-        descents.create(DescentSequence::new([
+    let parameters_end = ascent_sequence![
+        ascent_element!(&elements::productions::PARAMETERS_LIST),
+        ascent_descent!(rest),
+    ];
+
+    let parameters_more = ascents.declare();
+    ascents.swap(parameters_more, ascent_choice![
+        ascent_sequence![
+            ascent_descent!(declaration),
+            ascent_choice![
+                ascent_sequence![
+                    ascent_descent!(symbol_comma),
+                    parameters_more,
+                ],
+                parameters_end,
+            ]
+        ],
+        parameters_end,
+    ]);
+
+    let parameters = descent_element!(
+        descent_sequence![
             symbol_parenthesis_l,
-            descents.create(DescentChoice::new([
-                descents.create(DescentSequence::new([
-                    descents.create(DescentElement::new(
-                        create_list!(declaration, symbol_comma),
-                        &elements::productions::PARAMETERS_LIST
-                    )),
-                    symbol_comma,
-                    rest,
-                ])),
-                descents.create(DescentSequence::new([
-                    descents.create(DescentElement::new(
-                        descents.create(DescentNone::new()),
-                        &elements::productions::PARAMETERS_LIST
-                    )),
-                    rest,
-                ])),
-                descents.create(DescentElement::new(
-                    create_list_option!(declaration, symbol_comma),
-                    &elements::productions::PARAMETERS_LIST
-                )),
-            ])),
+            descent_ascent!(parameters_more),
             symbol_parenthesis_r,
-        ])),
+        ],
         &elements::productions::PARAMETERS
-    ));
+    );
 
-    let function = descents.create(DescentElement::new(
-        descents.create(DescentSequence::new([keyword_function, name, generics, parameters, r#type, block])),
+    let function = descent_element!(
+        descent_sequence![keyword_function, name, generics, parameters, r#type, block],
         &elements::structures::FUNCTION
-    ));
+    );
 
-    let function_named = descents.create(DescentElement::new(
-        descents.create(DescentSequence::new([keyword_function, variable_identifier, generics, parameters, r#type, block])),
+    let function_named = descent_element!(
+        descent_sequence![keyword_function, variable_identifier, generics, parameters, r#type, block],
         &elements::structures::FUNCTION
-    ));
+    );
 
-    let methods = descents.create(DescentElement::new(
-        descents.create(DescentZeroOrMore::new(function_named)),
+    let methods = descent_element!(
+        descent_zero_or_more!(function_named),
         &elements::productions::METHODS
-    ));
+    );
 
-    let class = descents.create(DescentElement::new(
-        descents.create(DescentSequence::new([keyword_class, name, generics, r#type, symbol_brace_l, methods, symbol_brace_r])),
+    let class = descent_element!(
+        descent_sequence![keyword_class, name, generics, r#type, symbol_brace_l, methods, symbol_brace_r],
         &elements::structures::CLASS
-    ));
+    );
 
-    let class_named = descents.create(DescentElement::new(
-        descents.create(DescentSequence::new([keyword_class, variable_identifier, generics, r#type, symbol_brace_l, methods, symbol_brace_r])),
+    let class_named = descent_element!(
+        descent_sequence![keyword_class, variable_identifier, generics, r#type, symbol_brace_l, methods, symbol_brace_r],
         &elements::structures::CLASS
-    ));
+    );
 
-    let structure = descents.create(DescentElement::new(
-        descents.create(DescentChoice::new([class_named, function_named])),
+    let structure = descent_element!(
+        descent_choice![class_named, function_named],
         &elements::structures::STRUCTURE
-    ));
+    );
 
-    let chain = ascents.create(AscentExtension::new(
-        descents.create(DescentSequence::new([
-            symbol_dot,
-            variable_identifier,
-        ])),
-        ascents.create(AscentSequence::new([
-            ascents.create(AscentElement::new(&elements::expressions::CHAIN)),
-            ascents.create(AscentElement::new(&elements::expressions::EXPRESSION)),
-            extension,
-        ]))
-    ));
+    let chain = ascent_option!(
+        ascent_sequence![
+            ascent_descent!(
+                descent_sequence![
+                    symbol_dot,
+                    variable_identifier,
+                ]
+            ),
+            ascent_sequence![
+                ascent_element!(&elements::expressions::CHAIN),
+                ascent_element!(&elements::expressions::EXPRESSION),
+                ascent_option!(extension),
+            ],
+        ]
+    );
 
-    let sequence = ascents.create(AscentExtension::new(
-        descents.create(DescentChoice::new([
-            descents.create(DescentSequence::new([symbol_parenthesis_l, expressions, symbol_parenthesis_r])),
-            descents.create(DescentSequence::new([symbol_crotchet_l, expressions, symbol_crotchet_r])),
-            descents.create(DescentSequence::new([
-                symbol_guillemet_l,
-                descents.create(DescentElement::new(
-                    create_list!(expression_base, symbol_comma),
-                    &elements::productions::EXPRESSIONS
-                )),
-                symbol_guillemet_r,
-            ])),
-        ])),
-        ascents.create(AscentSequence::new([
-            ascents.create(AscentElement::new(&elements::expressions::SEQUENCE)),
-            ascents.create(AscentElement::new(&elements::expressions::EXPRESSION)),
-            extension,
-        ]))
-    ));
+    let sequence = ascent_option!(
+        ascent_sequence![
+            ascent_descent!(
+                descent_choice![
+                    descent_sequence![symbol_parenthesis_l, expressions, symbol_parenthesis_r],
+                    descent_sequence![symbol_crotchet_l, expressions, symbol_crotchet_r],
+                    descent_sequence![
+                        symbol_guillemet_l,
+                        descent_element!(
+                            macro_list!(expression_base, symbol_comma),
+                            &elements::productions::EXPRESSIONS
+                        ),
+                        symbol_guillemet_r,
+                    ],
+                ]
+            ),
+            ascent_sequence![
+                ascent_element!(&elements::expressions::SEQUENCE),
+                ascent_element!(&elements::expressions::EXPRESSION),
+                extension,
+            ],
+        ]
+    );
 
-    let preop = descents.create(DescentElement::new(
-        descents.create(DescentSequence::new([
-            descents.create(DescentChoice::new([symbol_tilde, symbol_minus, symbol_plus, symbol_exclamation])),
+    let preop = descent_element!(
+        descent_sequence![
+            descent_choice![symbol_tilde, symbol_minus, symbol_plus, symbol_exclamation],
             expression_base
-        ])),
+        ],
         &elements::expressions::PREOP
-    ));
+    );
 
-    descents.define(expression_base, DescentElement::new(
-        descents.create(DescentChoice::new([class, function, flow, control, r#let, array, group, literal, preop])),
+    descents.swap(expression_base, descent_element!(
+        descent_choice![class, function, flow, control, r#let, array, group, literal, preop],
         &elements::expressions::EXPRESSION
     ));
 
-    ascents.define(extension, AscentSequence::new([chain, sequence]));
+    ascents.swap(extension, ascent_sequence![chain, sequence]);
 
-    let binop_1 = create_binop!(descents.create(DescentAscent::new(
-        expression_base,
-        extension,
-    )), [symbol_asterisk, symbol_slash, symbol_percent, symbol_asterisk_d]);
+    let binop_1 = macro_binop_2!(descent_ascent!(
+        ascent_sequence![
+            ascent_descent!(expression_base),
+            extension,
+        ]
+    ), descent_choice![symbol_asterisk, symbol_slash, symbol_percent, symbol_asterisk_d]);
 
-    descents.define(binop_base, DescentAlias::new(binop_1));
+    descents.swap(binop_base, descent_alias!(binop_1));
 
-    let binop_2  = create_binop!(binop_1, [symbol_plus, symbol_minus]);
+    let binop_2  = macro_binop_2!(binop_1, descent_choice![symbol_plus, symbol_minus]);
 
-    let binop_3  = create_binop!(binop_2, [symbol_guillemet_l_d, symbol_guillemet_r_d, symbol_guillemet_l_t, symbol_guillemet_l_t]);
+    let binop_3  = macro_binop_2!(binop_2, descent_choice![symbol_guillemet_l_d, symbol_guillemet_r_d, symbol_guillemet_l_t, symbol_guillemet_l_t]);
 
-    let binop_4  = create_binop!(binop_3, [symbol_ampersand]);
+    let binop_4  = macro_binop_2!(binop_3, descent_choice![symbol_ampersand]);
 
-    let binop_5  = create_binop!(binop_4, [symbol_caret]);
+    let binop_5  = macro_binop_2!(binop_4, descent_choice![symbol_caret]);
 
-    let binop_6  = create_binop!(binop_5, [symbol_pipe]);
+    let binop_6  = macro_binop_2!(binop_5, descent_choice![symbol_pipe]);
 
-    let binop_7_l = create_binop_ascent!(binop_6, [symbol_guillemet_l, symbol_guillemet_l_eq]);
+    let binop_7_l = macro_binop_1!(binop_6, descent_choice![symbol_guillemet_l, symbol_guillemet_l_eq]);
 
-    let binop_7_r = create_binop_ascent!(binop_6, [symbol_guillemet_r, symbol_guillemet_r_eq]);
+    let binop_7_r = macro_binop_1!(binop_6, descent_choice![symbol_guillemet_r, symbol_guillemet_r_eq]);
 
-    let binop_7 = descents.create(DescentChoice::new([
-        descents.create(DescentSequence::new([
-            descents.create(DescentAscent::new(binop_6, binop_7_l)),
-            descents.create(DescentPredicateNot::new(
-                descents.create(DescentChoice::new([symbol_guillemet_r, symbol_guillemet_r_eq]))
-            )),
-        ])),
-        descents.create(DescentSequence::new([
-            descents.create(DescentAscent::new(binop_6, binop_7_r)),
-            descents.create(DescentPredicateNot::new(
-                descents.create(DescentChoice::new([symbol_guillemet_l, symbol_guillemet_l_eq]))
-            )),
-        ])),
-    ]));
+    let binop_7 = descent_choice![
+        descent_sequence![
+            descent_ascent!(
+                ascent_sequence![
+                    ascent_descent!(binop_6),
+                    binop_7_l,
+                ]
+            ),
+            descent_predicate_not!(
+                descent_choice![symbol_guillemet_r, symbol_guillemet_r_eq]
+            ),
+        ],
+        descent_sequence![
+            descent_ascent!(
+                ascent_sequence![
+                    ascent_descent!(binop_6),
+                    binop_7_r,
+                ]
+            ),
+            descent_predicate_not!(
+                descent_choice![symbol_guillemet_l, symbol_guillemet_l_eq]
+            ),
+        ],
+    ];
 
-    let binop_8  = create_binop!(binop_7,  [symbol_equal_d, symbol_exclamation_eq]);
+    let binop_8  = macro_binop_2!(binop_7,  descent_choice![symbol_equal_d, symbol_exclamation_eq]);
 
-    let binop_9  = create_binop!(binop_8,  [symbol_ampersand_d]);
+    let binop_9  = macro_binop_2!(binop_8,  descent_choice![symbol_ampersand_d]);
 
-    let binop_10 = create_binop!(binop_9,  [symbol_pipe_d]);
+    let binop_10 = macro_binop_2!(binop_9,  descent_choice![symbol_pipe_d]);
 
-    let binop_11 = create_binop!(binop_10, [symbol_dot_d, symbol_dot_d_eq]);
+    let binop_11 = macro_binop_2!(binop_10, descent_choice![symbol_dot_d, symbol_dot_d_eq]);
 
-    let binop_12 = create_assignment!(binop_11, [symbol_equal, symbol_plus_eq, symbol_minus_eq, symbol_asterisk_eq, symbol_slash_eq,
+    let binop_12 = macro_assignment!(binop_11, descent_choice![symbol_equal, symbol_plus_eq, symbol_minus_eq, symbol_asterisk_eq, symbol_slash_eq,
         symbol_percent_eq, symbol_asterisk_d_eq, symbol_guillemet_l_d_eq, symbol_guillemet_r_d_eq, symbol_guillemet_l_t_eq, symbol_guillemet_r_t_eq,
         symbol_ampersand_eq, symbol_caret_eq, symbol_pipe_eq, symbol_ampersand_d_eq, symbol_pipe_d_eq
     ]);
 
-    descents.define(expression, DescentAlias::new(binop_12));
+    descents.swap(expression, descent_alias!(binop_12));
 
-    descents.define(expression_option, DescentOption::new(expression));
+    descents.swap(expression_option, descent_option!(expression));
 
-    let no_semicolon = descents.create(DescentPredicateNot::new(symbol_semicolon));
+    let no_semicolon = descent_predicate_not!(symbol_semicolon);
 
-    let statement = descents.create(DescentElement::new(
-        descents.create(DescentChoice::new([
-            descents.create(DescentSequence::new([structure, no_semicolon])),
-            descents.create(DescentSequence::new([flow, no_semicolon])),
-            descents.create(DescentSequence::new([expression, symbol_semicolon])),
-        ])),
+    let statement = descent_element!(
+        descent_choice![
+            descent_sequence![structure, no_semicolon],
+            descent_sequence![flow, no_semicolon],
+            descent_sequence![expression, symbol_semicolon],
+        ],
         &elements::productions::STATEMENT
-    ));
+    );
 
-    descents.define(statements, DescentElement::new(
-        descents.create(DescentZeroOrMore::new(statement)),
+    descents.swap(statements, descent_element!(
+        descent_zero_or_more!(statement),
         &elements::productions::STATEMENTS
     ));
 
-    descents.define(program, DescentElement::new(
+    descents.swap(program, descent_element!(
         statements,
         &elements::productions::PROGRAM
     ));

@@ -1,30 +1,51 @@
 use crate::element::Element;
 use crate::parser::Parse;
+use crate::parser::arena::ArenaRef;
+use crate::parser::descent::Descent;
 use crate::node::Node;
 
 pub trait Ascent {
     fn ascent(&self, parse: &mut Parse, nodes: Vec<Node>) -> Option<Vec<Node>>;
 }
 
-pub struct AscentSequence {
-    ascents: Box<[usize]>,
+pub struct AscentDescent {
+    descent: ArenaRef<dyn Descent>,
 }
 
-impl AscentSequence {
-    pub fn new<const N: usize>(ascents: [usize; N]) -> Self {
+impl AscentDescent {
+    pub fn new(descent: ArenaRef<dyn Descent>) -> Self {
         Self {
-            ascents: Box::new(ascents),
+            descent,
         }
     }
 }
 
-impl Ascent for AscentSequence {
+impl Ascent for AscentDescent {
     fn ascent(&self, parse: &mut Parse, mut nodes: Vec<Node>) -> Option<Vec<Node>> {
+        parse.descent(self.descent).map(|others| {
+            nodes.extend(others);
+            nodes
+        })
+    }
+}
+
+pub struct AscentChoice {
+    ascents: Box<[ArenaRef<dyn Ascent>]>,
+}
+
+impl AscentChoice {
+    pub fn new(ascents: Box<[ArenaRef<dyn Ascent>]>) -> Self {
+        Self {
+            ascents,
+        }
+    }
+}
+
+impl Ascent for AscentChoice {
+    fn ascent(&self, parse: &mut Parse, nodes: Vec<Node>) -> Option<Vec<Node>> {
         for ascent in self.ascents.iter() {
-            if let Some(others) = parse.ascent(*ascent, nodes) {
-                nodes = others;
-            } else {
-                return None;
+            if let Some(others) = parse.ascent(*ascent, nodes.clone()) {
+                return Some(others);
             }
         }
 
@@ -32,28 +53,43 @@ impl Ascent for AscentSequence {
     }
 }
 
-pub struct AscentExtension {
-    descent: usize,
-    ascent: usize,
+pub struct AscentSequence {
+    ascents: Box<[ArenaRef<dyn Ascent>]>,
 }
 
-impl AscentExtension {
-    pub fn new(descent: usize, ascent: usize) -> Self {
+impl AscentSequence {
+    pub fn new(ascents: Box<[ArenaRef<dyn Ascent>]>) -> Self {
         Self {
-            descent,
+            ascents,
+        }
+    }
+}
+
+impl Ascent for AscentSequence {
+    fn ascent(&self, parse: &mut Parse, mut nodes: Vec<Node>) -> Option<Vec<Node>> {
+        for ascent in self.ascents.iter() {
+            nodes = parse.ascent(*ascent, nodes)?;
+        }
+
+        Some(nodes)
+    }
+}
+
+pub struct AscentOption {
+    ascent: ArenaRef<dyn Ascent>,
+}
+
+impl AscentOption {
+    pub fn new(ascent: ArenaRef<dyn Ascent>) -> Self {
+        Self {
             ascent,
         }
     }
 }
 
-impl Ascent for AscentExtension {
-    fn ascent(&self, parse: &mut Parse, mut nodes: Vec<Node>) -> Option<Vec<Node>> {
-        if let Some(children) = parse.descent(self.descent) {
-            nodes.extend(children);
-            return parse.ascent(self.ascent, nodes);
-        }
-
-        Some(nodes)
+impl Ascent for AscentOption {
+    fn ascent(&self, parse: &mut Parse, nodes: Vec<Node>) -> Option<Vec<Node>> {
+        parse.ascent(self.ascent, nodes.clone()).or_else(|| Some(nodes))
     }
 }
 
@@ -71,6 +107,6 @@ impl AscentElement {
 
 impl Ascent for AscentElement {
     fn ascent(&self, parse: &mut Parse, nodes: Vec<Node>) -> Option<Vec<Node>> {
-        Some(vec![Node::new_production(parse.code, self.element, nodes)])
+        Some(vec![Node::new_production(parse.code, self.element, nodes.into_boxed_slice())])
     }
 }

@@ -45,9 +45,7 @@ impl<T: ?Sized> Eq for Mut<T> {}
 
 impl<T: ?Sized> Clone for Mut<T> {
     fn clone(&self) -> Self {
-        Self {
-            pointer: self.pointer,
-        }
+        Self::new(self.pointer)
     }
 }
 

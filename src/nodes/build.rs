@@ -262,11 +262,7 @@ fn parameters<'a>(node: Ref<SyntaxNode>) -> (Box<[(Ref<str>, Option<Node>)]>, Op
         parameters.push(parameter(Ref::from_ref(child)));
     }
 
-    (parameters.into_boxed_slice(), if node.length() >= 4 {
-        rest(node.back(2))
-    } else {
-        None
-    })
+    (parameters.into_boxed_slice(), rest(node.back(2)))
 }
 
 fn parameter<'a>(node: Ref<SyntaxNode>) -> (Ref<str>, Option<Node>) {

@@ -4,7 +4,7 @@ use crate::memory::Ref;
 
 #[derive(Clone)]
 pub enum Content {
-    Production(Vec<Node>),
+    Production(Box<[Node]>),
     Token(usize, usize),
 }
 
@@ -24,7 +24,7 @@ impl Node {
         }
     }
 
-    pub fn new_production(code: Ref<Code>, element: &'static Element, children: Vec<Node>) -> Self {
+    pub fn new_production(code: Ref<Code>, element: &'static Element, children: Box<[Node]>) -> Self {
         Self {
             code,
             element,
@@ -32,7 +32,7 @@ impl Node {
         }
     }
 
-    pub fn children(&self) -> &Vec<Node> {
+    pub fn children(&self) -> &[Node] {
         if let Content::Production(children) = &self.content {
             return children;
         }
