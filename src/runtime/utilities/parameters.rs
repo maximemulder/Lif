@@ -17,7 +17,7 @@ pub fn pack<'a>(engine: &mut Engine<'a>, values: Arguments<'a>) -> GcValue<'a> {
         references.push(engine.new_constant(*value));
     }
 
-    engine.new_array_value(references)
+    engine.new_array_any_value(references)
 }
 
 pub fn unpack<'a>(value: GcValue<'a>) -> Return<Arguments<'a>> {

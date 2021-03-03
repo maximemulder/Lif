@@ -25,6 +25,7 @@ use std::process;
 pub struct Primitives<'a> {
     pub any:                GcValue<'a>,
     pub array:              GcValue<'a>,
+    pub array_any:          GcValue<'a>,
     pub boolean:            GcValue<'a>,
     pub class:              GcValue<'a>,
     pub file:               GcValue<'a>,
@@ -46,6 +47,7 @@ impl<'a> Primitives<'a> {
         Self {
             any:                GcValue::null(),
             array:              GcValue::null(),
+            array_any:          GcValue::null(),
             boolean:            GcValue::null(),
             class:              GcValue::null(),
             file:               GcValue::null(),
@@ -69,6 +71,7 @@ impl GcTrace for Primitives<'_> {
         for class in [
             self.any,
             self.array,
+            self.array_any,
             self.boolean,
             self.class,
             self.file,
@@ -87,7 +90,7 @@ impl GcTrace for Primitives<'_> {
     }
 }
 
-const NULLABLE_PARAMETERS: Ref<[Ref<str>]> = Ref::new(&[Ref::new("__type__")]);
+const GENERIC_PARAMETERS: Ref<[Ref<str>]> = Ref::new(&[Ref::new("__type__")]);
 
 impl<'a> Engine<'a> {
     pub fn populate(&mut self) {
@@ -98,7 +101,6 @@ impl<'a> Engine<'a> {
         self.primitives.class.data_class_mut().parent = Some(self.primitives.any);
         self.primitives.any.data_class_mut().parent = None;
 
-        self.primitives.array              = self.new_class_primitive_value(Some(self.primitives.any),      "Array");
         self.primitives.boolean            = self.new_class_primitive_value(Some(self.primitives.any),      "Boolean");
         self.primitives.file               = self.new_class_primitive_value(Some(self.primitives.any),      "File");
         self.primitives.function           = self.new_class_primitive_value(Some(self.primitives.any),      "Function");
@@ -112,7 +114,13 @@ impl<'a> Engine<'a> {
         self.primitives.object             = self.new_class_primitive_value(Some(self.primitives.any),      "Object");
         self.primitives.string             = self.new_class_primitive_value(Some(self.primitives.any),      "String");
 
-        self.primitives.nullable = self.new_generic_primitive_value("Option", NULLABLE_PARAMETERS, &nullable::create);
+        self.primitives.array    = self.new_generic_primitive_value("Array",  GENERIC_PARAMETERS, &array::create);
+        self.primitives.nullable = self.new_generic_primitive_value("Option", GENERIC_PARAMETERS, &nullable::create);
+
+        self.primitives.array_any = {
+            let mut array = self.primitives.array;
+            array.data_generic_primitive_mut().call(self, Box::new([self.primitives.any])).ok().unwrap().read().ok().unwrap()
+        };
 
         any::populate(self);
         array::populate(self);

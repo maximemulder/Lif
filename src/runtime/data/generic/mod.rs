@@ -60,7 +60,6 @@ impl<'a, T: GenericImplementation<'a>> Generic<'a, T> {
             return Ok(reference);
         }
 
-
         let reference = engine.frame(self.scope, &|engine| {
             for (parameter, argument) in self.parameters.iter().zip(arguments.iter()) {
                 let reference = engine.new_constant(*argument);

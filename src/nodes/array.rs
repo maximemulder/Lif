@@ -22,6 +22,6 @@ impl Executable for Array {
             references.push(engine.new_reference(value));
         }
 
-        Ok(engine.new_array(references))
+        Ok(engine.new_array_any(references))
     }
 }

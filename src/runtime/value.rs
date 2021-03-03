@@ -73,7 +73,7 @@ impl<'a> GcValue<'a> {
 
 impl<'a> GcValue<'a> {
     pub fn get_cast_array(&self, engine: &Engine<'a>) -> Return<&Array<'a>> {
-        self.cast(engine.primitives.array)?;
+        self.cast(engine.primitives.array_any)?;
         Ok(&self.data_array())
     }
 

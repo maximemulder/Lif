@@ -4,11 +4,11 @@ use crate::runtime::utilities::{ Arguments, ReturnReference };
 use crate::runtime::utilities::builder;
 
 pub fn populate(engine: &mut Engine) {
-    let Primitives { array, method, .. } = engine.primitives;
+    let Primitives { array_any, method, .. } = engine.primitives;
     engine.add_constant_value("Method", method);
     builder::method(engine, method, "to_string", [method],        &to_string);
-    builder::method(engine, method, "__gn__",    [method, array], &gn);
-    builder::method(engine, method, "__cl__",    [method, array], &cl);
+    builder::method(engine, method, "__gn__",    [method, array_any], &gn);
+    builder::method(engine, method, "__cl__",    [method, array_any], &cl);
 }
 
 fn to_string<'a>(engine: &mut Engine<'a>, _: Arguments<'a>) -> ReturnReference<'a> {
