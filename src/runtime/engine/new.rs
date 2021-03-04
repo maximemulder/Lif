@@ -7,8 +7,12 @@ use crate::runtime::utilities::Callable;
 use crate::runtime::value::GcValue;
 
 impl<'a> Engine<'a> {
-    pub fn new_array_value(&mut self, elements: Vec<GcReference<'a>>) -> GcValue<'a> {
-        self.new_value(self.primitives.array, Data::new_array(elements))
+    pub fn new_array_value(&mut self, class: GcValue<'a>, elements: Vec<GcReference<'a>>) -> GcValue<'a> {
+        self.new_value(class, Data::new_array(elements))
+    }
+
+    pub fn new_array_any_value(&mut self, elements: Vec<GcReference<'a>>) -> GcValue<'a> {
+        self.new_array_value(self.primitives.array_any, elements)
     }
 
     pub fn new_boolean_value(&mut self, boolean: bool) -> GcValue<'a> {
@@ -67,9 +71,13 @@ impl<'a> Engine<'a> {
 }
 
 impl<'a> Engine<'a> {
-    pub fn new_array(&mut self, elements: Vec<GcReference<'a>>) -> GcReference<'a> {
-        let value = self.new_array_value(elements);
+    pub fn new_array(&mut self, class: GcValue<'a>, elements: Vec<GcReference<'a>>) -> GcReference<'a> {
+        let value = self.new_array_value(class, elements);
         self.new_constant(value)
+    }
+
+    pub fn new_array_any(&mut self, elements: Vec<GcReference<'a>>) -> GcReference<'a> {
+        self.new_array(self.primitives.array_any, elements)
     }
 
     pub fn new_boolean(&mut self, boolean: bool) -> GcReference<'a> {

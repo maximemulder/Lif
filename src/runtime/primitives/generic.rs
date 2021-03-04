@@ -5,11 +5,11 @@ use crate::runtime::utilities::builder;
 use crate::runtime::utilities::parameters;
 
 pub fn populate(engine: &mut Engine) {
-    let Primitives { array, generic, generic_code, generic_primitive, .. } = engine.primitives;
+    let Primitives { array_any, generic, generic_code, generic_primitive, .. } = engine.primitives;
     engine.add_constant_value("Generic", generic);
     builder::method(engine, generic,           "to_string", [generic],                  &to_string);
-    builder::method(engine, generic_code,      "__gn__",    [generic_code, array],      &gn_code);
-    builder::method(engine, generic_primitive, "__gn__",    [generic_primitive, array], &gn_primitive);
+    builder::method(engine, generic_code,      "__gn__",    [generic_code, array_any],      &gn_code);
+    builder::method(engine, generic_primitive, "__gn__",    [generic_primitive, array_any], &gn_primitive);
 }
 
 fn to_string<'a>(engine: &mut Engine<'a>, _: Arguments<'a>) -> ReturnReference<'a> {

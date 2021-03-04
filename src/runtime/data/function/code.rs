@@ -38,7 +38,7 @@ impl<'a> FunctionImplementation<'a> for FunctionImplementationCode<'a> {
                     elements.push(engine.new_reference(arguments[i]))
                 }
 
-                let value = engine.new_array_value(elements);
+                let value = engine.new_array_any_value(elements);
                 value.cast(*rest)?;
                 let reference = engine.new_variable(Some(value), *rest);
                 engine.add_variable(self.names.last().unwrap(), reference)

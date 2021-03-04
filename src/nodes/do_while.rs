@@ -44,6 +44,6 @@ impl Executable for DoWhile {
             }
         }
 
-        Ok(engine.new_array(array))
+        Ok(engine.new_array_any(array))
     }
 }

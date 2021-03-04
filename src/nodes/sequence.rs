@@ -34,7 +34,7 @@ impl Executable for Sequence {
             arguments.push(execute!(engine, argument));
         }
 
-        let array = engine.new_array_value(arguments);
+        let array = engine.new_array_any_value(arguments);
         value.call_method(engine, &self.operator, Box::new([array]))
     }
 }
