@@ -49,7 +49,7 @@ impl Ascent for AscentChoice {
             }
         }
 
-        Some(nodes)
+        None
     }
 }
 
