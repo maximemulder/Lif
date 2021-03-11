@@ -420,46 +420,6 @@ pub fn get() -> (Arena::<dyn Descent>, Arena::<dyn Ascent>) {
         &elements::structures::STRUCTURE
     );
 
-    let chain = ascent_option!(
-        ascent_sequence![
-            ascent_descent!(
-                descent_sequence![
-                    symbol_dot,
-                    variable_identifier,
-                ]
-            ),
-            ascent_sequence![
-                ascent_element!(&elements::expressions::CHAIN),
-                ascent_element!(&elements::expressions::EXPRESSION),
-                ascent_option!(extension),
-            ],
-        ]
-    );
-
-    let sequence = ascent_option!(
-        ascent_sequence![
-            ascent_descent!(
-                descent_choice![
-                    descent_sequence![symbol_parenthesis_l, expressions, symbol_parenthesis_r],
-                    descent_sequence![symbol_crotchet_l, expressions, symbol_crotchet_r],
-                    descent_sequence![
-                        symbol_guillemet_l,
-                        descent_element!(
-                            macro_list!(expression_base, symbol_comma),
-                            &elements::productions::EXPRESSIONS
-                        ),
-                        symbol_guillemet_r,
-                    ],
-                ]
-            ),
-            ascent_sequence![
-                ascent_element!(&elements::expressions::SEQUENCE),
-                ascent_element!(&elements::expressions::EXPRESSION),
-                extension,
-            ],
-        ]
-    );
-
     let preop = descent_element!(
         descent_sequence![
             descent_choice![symbol_tilde, symbol_minus, symbol_plus, symbol_exclamation],
@@ -468,19 +428,59 @@ pub fn get() -> (Arena::<dyn Descent>, Arena::<dyn Ascent>) {
         &elements::expressions::PREOP
     );
 
-    descents.swap(expression_base, descent_element!(
+    let expression_core = descent_element!(
         descent_choice![class, function, flow, control, r#let, array, group, literal, preop],
         &elements::expressions::EXPRESSION
+    );
+
+    let chain = ascent_sequence![
+        ascent_descent!(
+            descent_sequence![
+                symbol_dot,
+                variable_identifier,
+            ]
+        ),
+        ascent_sequence![
+            ascent_element!(&elements::expressions::CHAIN),
+            ascent_element!(&elements::expressions::EXPRESSION),
+            extension,
+        ],
+    ];
+
+    let sequence = ascent_sequence![
+        ascent_descent!(
+            descent_choice![
+                descent_sequence![symbol_parenthesis_l, expressions, symbol_parenthesis_r],
+                descent_sequence![symbol_crotchet_l, expressions, symbol_crotchet_r],
+                descent_sequence![
+                    symbol_guillemet_l,
+                    descent_element!(
+                        macro_list!(expression_base, symbol_comma),
+                        &elements::productions::EXPRESSIONS
+                    ),
+                    symbol_guillemet_r,
+                ],
+            ]
+        ),
+        ascent_sequence![
+            ascent_element!(&elements::expressions::SEQUENCE),
+            ascent_element!(&elements::expressions::EXPRESSION),
+            extension,
+        ],
+    ];
+
+    ascents.swap(extension, ascent_option!(
+        ascent_choice![chain, sequence]
     ));
 
-    ascents.swap(extension, ascent_sequence![chain, sequence]);
-
-    let binop_1 = macro_binop_2!(descent_ascent!(
+    descents.swap(expression_base, descent_ascent!(
         ascent_sequence![
-            ascent_descent!(expression_base),
+            ascent_descent!(expression_core),
             extension,
         ]
-    ), descent_choice![symbol_asterisk, symbol_slash, symbol_percent, symbol_asterisk_d]);
+    ));
+
+    let binop_1 = macro_binop_2!(expression_base, descent_choice![symbol_asterisk, symbol_slash, symbol_percent, symbol_asterisk_d]);
 
     descents.swap(binop_base, descent_alias!(binop_1));
 
