@@ -36,7 +36,7 @@ fn main() {
     let args: Vec<String> = args().collect();
     if args.len() != 2 {
         eprintln!("Incorrect arguments length.");
-        panic!();
+        return;
     }
 
     let parser = Parser::new();
