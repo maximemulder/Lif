@@ -43,7 +43,7 @@ pub const ROOT: Node = Node::new_null(&|character| {
         ';' =>  &SYMBOL_SEMICOLON,
         '\\' =>  &SYMBOL_BACKSLASH,
         '"' => &STRING_CONTENT,
-        '0' ..= '9' => &NUMBER,
+        '0' ..= '9' => &NUMBER_BASE,
         ' ' | '\t' => &WHITESPACE,
         '\r' | '\n' => &ENDLINE,
         _ => match character {
@@ -1281,9 +1281,63 @@ const STRING_CONTENT: Node = Node::new_null(&|character| {
 
 const STRING: Node = Node::new_final(&elements::variables::STRING);
 
-const NUMBER: Node = Node::new(&elements::variables::NUMBER, &|character| {
+const NUMBER_BASE: Node = Node::new(&elements::variables::NUMBER, &|character| {
     match character {
-        '0' ..= '9' => Some(&NUMBER),
+        'b' => Some(&BINARY_START),
+        'o' => Some(&OCTAL_START),
+        'x' => Some(&HEXADECIMAL_START),
+        '0' ..= '9' => Some(&DECIMAL),
+        _ => None,
+    }
+});
+
+const BINARY_START: Node = Node::new_null(&|character| {
+    match character {
+        '0' | '1' => Some(&BINARY),
+        _ => None,
+    }
+});
+
+const BINARY: Node = Node::new(&elements::variables::NUMBER, &|character| {
+    match character {
+        '0' | '1' => Some(&BINARY),
+        _ => None,
+    }
+});
+
+const OCTAL_START: Node = Node::new_null(&|character| {
+    match character {
+        '0' ..= '7' => Some(&OCTAL),
+        _ => None,
+    }
+});
+
+const OCTAL: Node = Node::new(&elements::variables::NUMBER, &|character| {
+    match character {
+        '0' ..= '7' => Some(&OCTAL),
+        _ => None,
+    }
+});
+
+const HEXADECIMAL_START: Node = Node::new_null(&|character| {
+    match character {
+        '0' ..= '9' => Some(&HEXADECIMAL),
+        'A' ..= 'F' => Some(&HEXADECIMAL),
+        _ => None,
+    }
+});
+
+const HEXADECIMAL: Node = Node::new(&elements::variables::NUMBER, &|character| {
+    match character {
+        '0' ..= '9' => Some(&HEXADECIMAL),
+        'A' ..= 'F' => Some(&HEXADECIMAL),
+        _ => None,
+    }
+});
+
+const DECIMAL: Node = Node::new(&elements::variables::NUMBER, &|character| {
+    match character {
+        '0' ..= '9' => Some(&DECIMAL),
         _ => None,
     }
 });

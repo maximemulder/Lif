@@ -103,7 +103,7 @@ fn r#false<'a>(node: Ref<SyntaxNode>) -> Node {
 }
 
 fn integer<'a>(node: Ref<SyntaxNode>) -> Node {
-    Node::new(node, Integer::new(node.text().parse::<isize>().unwrap()))
+    Node::new(node, Integer::new(node.text()))
 }
 
 fn string<'a>(node: Ref<SyntaxNode>) -> Node {
