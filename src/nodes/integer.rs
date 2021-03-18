@@ -8,7 +8,8 @@ pub struct Integer {
 }
 
 impl Integer {
-    pub fn new(string: Ref<str>) -> Self {
+    pub fn new(integer: Ref<str>) -> Self {
+        let string = integer.replace("_", "");
         Self {
             integer: match string.chars().nth(1) {
                 Some('b') => isize::from_str_radix(&string[2..], 2).unwrap(),

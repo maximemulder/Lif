@@ -56,6 +56,9 @@ fn test() {
     assert_output("print(0o20);", "16");
     assert_output("print(0x10);", "16");
 
+    assert_output("print(1_000);", "1000");
+    assert_output("print(0b1000_1000);", "136");
+
     assert_output("print(12 + 2);", "14");
     assert_output("print(12 - 2);", "10");
     assert_output("print(12 * 2);", "24");

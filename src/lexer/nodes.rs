@@ -1275,6 +1275,7 @@ const NUMBER_BASE: Node = Node::new(&elements::variables::NUMBER, &|character| {
         'o' => &OCTAL_START,
         'x' => &HEXADECIMAL_START,
         '0' ..= '9' => &DECIMAL,
+        '_' => &DECIMAL_SEPARATOR,
         _ => return None,
     })
 });
@@ -1289,6 +1290,15 @@ const BINARY_START: Node = Node::new_null(&|character| {
 const BINARY: Node = Node::new(&elements::variables::NUMBER, &|character| {
     Some(match character {
         '0' | '1' => &BINARY,
+        '_' => &BINARY_SEPARATOR,
+        _ => return None,
+    })
+});
+
+const BINARY_SEPARATOR: Node = Node::new_null(&|character| {
+    Some(match character {
+        '0' | '1' => &BINARY,
+        '_' => &BINARY_SEPARATOR,
         _ => return None,
     })
 });
@@ -1303,6 +1313,15 @@ const OCTAL_START: Node = Node::new_null(&|character| {
 const OCTAL: Node = Node::new(&elements::variables::NUMBER, &|character| {
     Some(match character {
         '0' ..= '7' => &OCTAL,
+        '_' => &OCTAL_SEPARATOR,
+        _ => return None,
+    })
+});
+
+const OCTAL_SEPARATOR: Node = Node::new_null(&|character| {
+    Some(match character {
+        '0' ..= '7' => &OCTAL,
+        '_' => &OCTAL_SEPARATOR,
         _ => return None,
     })
 });
@@ -1317,6 +1336,15 @@ const HEXADECIMAL_START: Node = Node::new_null(&|character| {
 const HEXADECIMAL: Node = Node::new(&elements::variables::NUMBER, &|character| {
     Some(match character {
         '0' ..= '9' | 'A' ..= 'F' | 'a' ..= 'f' => &HEXADECIMAL,
+        '_' => &HEXADECIMAL_SEPARATOR,
+        _ => return None,
+    })
+});
+
+const HEXADECIMAL_SEPARATOR: Node = Node::new_null(&|character| {
+    Some(match character {
+        '0' ..= '9' | 'A' ..= 'F' | 'a' ..= 'f' => &HEXADECIMAL,
+        '_' => &HEXADECIMAL_SEPARATOR,
         _ => return None,
     })
 });
@@ -1324,6 +1352,15 @@ const HEXADECIMAL: Node = Node::new(&elements::variables::NUMBER, &|character| {
 const DECIMAL: Node = Node::new(&elements::variables::NUMBER, &|character| {
     Some(match character {
         '0' ..= '9' => &DECIMAL,
+        '_' => &DECIMAL_SEPARATOR,
+        _ => return None,
+    })
+});
+
+const DECIMAL_SEPARATOR: Node = Node::new_null(&|character| {
+    Some(match character {
+        '0' ..= '9' => &DECIMAL,
+        '_' => &DECIMAL_SEPARATOR,
         _ => return None,
     })
 });
