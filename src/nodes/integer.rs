@@ -9,19 +9,13 @@ pub struct Integer {
 
 impl Integer {
     pub fn new(string: Ref<str>) -> Self {
-        let integer = if string.len() > 2 {
-            match string.chars().nth(1).unwrap() {
-                'b' => isize::from_str_radix(&string[2..], 2).unwrap(),
-                'o' => isize::from_str_radix(&string[2..], 8).unwrap(),
-                'x' => isize::from_str_radix(&string[2..], 16).unwrap(),
-                _   => string.parse::<isize>().unwrap(),
-            }
-        } else {
-            string.parse::<isize>().unwrap()
-        };
-
         Self {
-            integer,
+            integer: match string.chars().nth(1) {
+                Some('b') => isize::from_str_radix(&string[2..], 2).unwrap(),
+                Some('o') => isize::from_str_radix(&string[2..], 8).unwrap(),
+                Some('x') => isize::from_str_radix(&string[2..], 16).unwrap(),
+                _ => string.parse::<isize>().unwrap(),
+            }
         }
     }
 }

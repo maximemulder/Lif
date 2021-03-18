@@ -51,6 +51,11 @@ fn test() {
     assert_output("print(-1);", "-1");
     assert_output("print(--1);", "1");
 
+    assert_output("print(0016);", "16");
+    assert_output("print(0b10000);", "16");
+    assert_output("print(0o20);", "16");
+    assert_output("print(0x10);", "16");
+
     assert_output("print(12 + 2);", "14");
     assert_output("print(12 - 2);", "10");
     assert_output("print(12 * 2);", "24");
