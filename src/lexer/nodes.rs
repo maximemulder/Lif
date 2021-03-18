@@ -1033,92 +1033,86 @@ const KEYWORD_WHILE: Node = Node::new(&elements::keywords::WHILE, &|character| {
 });
 
 const SYMBOL_PLUS: Node = Node::new(&elements::symbols::PLUS, &|character| {
-    if character == '=' {
-        Some(&SYMBOL_PLUS_EQ)
-    } else {
-        None
-    }
+    Some(match character {
+        '=' => &SYMBOL_PLUS_EQ,
+        _ => return None,
+    })
 });
 
 const SYMBOL_PLUS_EQ: Node = Node::new_final(&elements::symbols::PLUS_EQ);
 
 const SYMBOL_MINUS: Node = Node::new(&elements::symbols::MINUS, &|character| {
-    if character == '=' {
-        Some(&SYMBOL_MINUS_EQ)
-    } else {
-        None
-    }
+    Some(match character {
+        '=' => &SYMBOL_MINUS_EQ,
+        _ => return None,
+    })
 });
 
 const SYMBOL_MINUS_EQ: Node = Node::new_final(&elements::symbols::MINUS_EQ);
 
 const SYMBOL_ASTERISK: Node = Node::new(&elements::symbols::ASTERISK, &|character| {
-    match character {
-        '=' => Some(&SYMBOL_ASTERISK_EQ),
-        '*' => Some(&SYMBOL_ASTERISK_D),
-        _ => None,
-    }
+    Some(match character {
+        '=' => &SYMBOL_ASTERISK_EQ,
+        '*' => &SYMBOL_ASTERISK_D,
+        _ => return None,
+    })
 });
 
 const SYMBOL_ASTERISK_EQ: Node = Node::new_final(&elements::symbols::ASTERISK_EQ);
 
 const SYMBOL_ASTERISK_D: Node = Node::new(&elements::symbols::ASTERISK_D, &|character| {
-    if character == '=' {
-        Some(&SYMBOL_ASTERISK_D_EQ)
-    } else {
-        None
-    }
+    Some(match character {
+        '=' => &SYMBOL_ASTERISK_D_EQ,
+        _ => return None,
+    })
 });
 
 const SYMBOL_ASTERISK_D_EQ: Node = Node::new_final(&elements::symbols::ASTERISK_D_EQ);
 
 const SYMBOL_SLASH: Node = Node::new(&elements::symbols::SLASH, &|character| {
-    match character {
-        '=' => Some(&SYMBOL_SLASH_EQ),
-        '/' => Some(&COMMENT_LINE),
-        '*' => Some(&COMMENT_BLOCK_1),
-        _ => None,
-    }
+    Some(match character {
+        '=' => &SYMBOL_SLASH_EQ,
+        '/' => &COMMENT_LINE,
+        '*' => &COMMENT_BLOCK_1,
+        _ => return None,
+    })
 });
 
 const SYMBOL_SLASH_EQ: Node = Node::new_final(&elements::symbols::SLASH_EQ);
 
 const SYMBOL_PERCENT: Node = Node::new(&elements::symbols::PERCENT, &|character| {
-    if character == '=' {
-        Some(&SYMBOL_PERCENT_EQ)
-    } else {
-        None
-    }
+    Some(match character {
+        '=' => &SYMBOL_PERCENT_EQ,
+        _ => return None,
+    })
 });
 
 const SYMBOL_PERCENT_EQ: Node = Node::new_final(&elements::symbols::PERCENT_EQ);
 
 const SYMBOL_CARET: Node = Node::new(&elements::symbols::CARET, &|character| {
-    if character == '=' {
-        Some(&SYMBOL_CARET_EQ)
-    } else {
-        None
-    }
+    Some(match character {
+        '=' => &SYMBOL_CARET_EQ,
+        _ => return None,
+    })
 });
 
 const SYMBOL_CARET_EQ: Node = Node::new_final(&elements::symbols::CARET_EQ);
 
 const SYMBOL_EXCLAMATION: Node = Node::new(&elements::symbols::EXCLAMATION, &|character| {
-    if character == '=' {
-        Some(&SYMBOL_EXCLAMATION_EQ)
-    } else {
-        None
-    }
+    Some(match character {
+        '=' => &SYMBOL_EXCLAMATION_EQ,
+        _ => return None,
+    })
 });
 
 const SYMBOL_EXCLAMATION_EQ: Node = Node::new_final(&elements::symbols::EXCLAMATION_EQ);
 
 const SYMBOL_EQUAL: Node = Node::new(&elements::symbols::EQUAL, &|character| {
-    match character {
-        '=' => Some(&SYMBOL_EQUAL_D),
-        '>' => Some(&SYMBOL_ARROW),
-        _ => None,
-    }
+    Some(match character {
+        '=' => &SYMBOL_EQUAL_D,
+        '>' => &SYMBOL_ARROW,
+        _ => return None,
+    })
 });
 
 const SYMBOL_EQUAL_D: Node = Node::new_final(&elements::symbols::EQUAL_D);
@@ -1126,101 +1120,97 @@ const SYMBOL_EQUAL_D: Node = Node::new_final(&elements::symbols::EQUAL_D);
 const SYMBOL_ARROW: Node = Node::new_final(&elements::symbols::ARROW);
 
 const SYMBOL_PIPE: Node = Node::new(&elements::symbols::PIPE, &|character| {
-    match character {
-        '=' => Some(&SYMBOL_PIPE_EQ),
-        '|' => Some(&SYMBOL_PIPE_D),
-        _ => None,
-    }
+    Some(match character {
+        '=' => &SYMBOL_PIPE_EQ,
+        '|' => &SYMBOL_PIPE_D,
+        _ => return None,
+    })
 });
 
 const SYMBOL_PIPE_EQ: Node = Node::new_final(&elements::symbols::PIPE_EQ);
 
 const SYMBOL_PIPE_D: Node = Node::new(&elements::symbols::PIPE_D, &|character| {
-    if character == '=' {
-        Some(&SYMBOL_PIPE_D_EQ)
-    } else {
-        None
-    }
+    Some(match character {
+        '=' => &SYMBOL_PIPE_D_EQ,
+        _ => return None,
+    })
 });
 
 const SYMBOL_PIPE_D_EQ: Node = Node::new_final(&elements::symbols::PIPE_D_EQ);
 
 const SYMBOL_AMPERSAND: Node = Node::new(&elements::symbols::AMPERSAND, &|character| {
-    match character {
-        '=' => Some(&SYMBOL_AMPERSAND_EQ),
-        '&' => Some(&SYMBOL_AMPERSAND_D),
-        _ => None,
-    }
+    Some(match character {
+        '=' => &SYMBOL_AMPERSAND_EQ,
+        '&' => &SYMBOL_AMPERSAND_D,
+        _ => return None,
+    })
 });
 
 const SYMBOL_AMPERSAND_EQ: Node = Node::new_final(&elements::symbols::AMPERSAND_EQ);
 
 const SYMBOL_AMPERSAND_D: Node = Node::new(&elements::symbols::AMPERSAND_D, &|character| {
-    if character == '=' {
-        Some(&SYMBOL_AMPERSAND_D_EQ)
-    } else {
-        None
-    }
+    Some(match character {
+        '=' => &SYMBOL_AMPERSAND_D_EQ,
+        _ => return None,
+    })
 });
 
 const SYMBOL_AMPERSAND_D_EQ: Node = Node::new_final(&elements::symbols::AMPERSAND_D_EQ);
 
 const SYMBOL_GUILLEMET_L: Node = Node::new(&elements::symbols::GUILLEMET_L, &|character| {
-    match character {
-        '=' => Some(&SYMBOL_GUILLEMET_L_EQ),
-        '<' => Some(&SYMBOL_GUILLEMET_L_D),
-        _ => None,
-    }
+    Some(match character {
+        '=' => &SYMBOL_GUILLEMET_L_EQ,
+        '<' => &SYMBOL_GUILLEMET_L_D,
+        _ => return None,
+    })
 });
 
 const SYMBOL_GUILLEMET_L_EQ: Node = Node::new_final(&elements::symbols::GUILLEMET_L_EQ);
 
 const SYMBOL_GUILLEMET_L_D: Node = Node::new(&elements::symbols::GUILLEMET_L_D, &|character| {
-    match character {
-        '=' => Some(&SYMBOL_GUILLEMET_L_D_EQ),
-        '<' => Some(&SYMBOL_GUILLEMET_L_T),
-        _ => None,
-    }
+    Some(match character {
+        '=' => &SYMBOL_GUILLEMET_L_D_EQ,
+        '<' => &SYMBOL_GUILLEMET_L_T,
+        _ => return None,
+    })
 });
 
 const SYMBOL_GUILLEMET_L_D_EQ: Node = Node::new_final(&elements::symbols::GUILLEMET_L_D_EQ);
 
 const SYMBOL_GUILLEMET_L_T: Node = Node::new(&elements::symbols::GUILLEMET_L_T, &|character| {
-    if character == '=' {
-        Some(&SYMBOL_GUILLEMET_L_T_EQ)
-    } else {
-        None
-    }
+    Some(match character {
+        '=' => &SYMBOL_GUILLEMET_L_T_EQ,
+        _ => return None,
+    })
 });
 
 const SYMBOL_GUILLEMET_L_T_EQ: Node = Node::new_final(&elements::symbols::GUILLEMET_L_T_EQ);
 
 const SYMBOL_GUILLEMET_R: Node = Node::new(&elements::symbols::GUILLEMET_R, &|character| {
-    match character {
-        '=' => Some(&SYMBOL_GUILLEMET_R_EQ),
-        '>' => Some(&SYMBOL_GUILLEMET_R_D),
-        _ => None,
-    }
+    Some(match character {
+        '=' => &SYMBOL_GUILLEMET_R_EQ,
+        '>' => &SYMBOL_GUILLEMET_R_D,
+        _ => return None,
+    })
 });
 
 const SYMBOL_GUILLEMET_R_EQ: Node = Node::new_final(&elements::symbols::GUILLEMET_R_EQ);
 
 const SYMBOL_GUILLEMET_R_D: Node = Node::new(&elements::symbols::GUILLEMET_R_D, &|character| {
-    match character {
-        '=' => Some(&SYMBOL_GUILLEMET_R_D_EQ),
-        '>' => Some(&SYMBOL_GUILLEMET_R_T),
-        _ => None,
-    }
+    Some(match character {
+        '=' => &SYMBOL_GUILLEMET_R_D_EQ,
+        '>' => &SYMBOL_GUILLEMET_R_T,
+        _ => return None,
+    })
 });
 
 const SYMBOL_GUILLEMET_R_D_EQ: Node = Node::new_final(&elements::symbols::GUILLEMET_R_D_EQ);
 
 const SYMBOL_GUILLEMET_R_T: Node = Node::new(&elements::symbols::GUILLEMET_R_T, &|character| {
-    if character == '=' {
-        Some(&SYMBOL_GUILLEMET_R_T_EQ)
-    } else {
-        None
-    }
+    Some(match character {
+        '=' => &SYMBOL_GUILLEMET_R_T_EQ,
+        _ => return None,
+    })
 });
 
 const SYMBOL_GUILLEMET_R_T_EQ: Node = Node::new_final(&elements::symbols::GUILLEMET_R_T_EQ);
@@ -1238,19 +1228,18 @@ const SYMBOL_CROTCHET_L: Node = Node::new_final(&elements::symbols::CROTCHET_L);
 const SYMBOL_CROTCHET_R: Node = Node::new_final(&elements::symbols::CROTCHET_R);
 
 const SYMBOL_DOT: Node = Node::new(&elements::symbols::DOT, &|character| {
-    if character == '.' {
-        Some(&SYMBOL_DOT_D)
-    } else {
-        None
-    }
+    Some(match character {
+        '.' => &SYMBOL_DOT_D,
+        _ => return None,
+    })
 });
 
 const SYMBOL_DOT_D: Node = Node::new(&elements::symbols::DOT_D, &|character| {
-    match character {
-        '=' => Some(&SYMBOL_DOT_D_EQ),
-        '.' => Some(&SYMBOL_DOT_T),
-        _ => None,
-    }
+    Some(match character {
+        '=' => &SYMBOL_DOT_D_EQ,
+        '.' => &SYMBOL_DOT_T,
+        _ => return None,
+    })
 });
 
 const SYMBOL_DOT_D_EQ: Node = Node::new_final(&elements::symbols::DOT_D_EQ);
@@ -1272,117 +1261,112 @@ const SYMBOL_SEMICOLON: Node = Node::new_final(&elements::symbols::SEMICOLON);
 const SYMBOL_BACKSLASH: Node = Node::new_final(&elements::symbols::BACKSLASH);
 
 const STRING_CONTENT: Node = Node::new_null(&|character| {
-    Some(if character == '"' {
-        &STRING
-    } else {
-        &STRING_CONTENT
+    Some(match character {
+        '"' => &STRING,
+        _ => &STRING_CONTENT,
     })
 });
 
 const STRING: Node = Node::new_final(&elements::variables::STRING);
 
 const NUMBER_BASE: Node = Node::new(&elements::variables::NUMBER, &|character| {
-    match character {
-        'b' => Some(&BINARY_START),
-        'o' => Some(&OCTAL_START),
-        'x' => Some(&HEXADECIMAL_START),
-        '0' ..= '9' => Some(&DECIMAL),
-        _ => None,
-    }
+    Some(match character {
+        'b' => &BINARY_START,
+        'o' => &OCTAL_START,
+        'x' => &HEXADECIMAL_START,
+        '0' ..= '9' => &DECIMAL,
+        _ => return None,
+    })
 });
 
 const BINARY_START: Node = Node::new_null(&|character| {
-    match character {
-        '0' | '1' => Some(&BINARY),
-        _ => None,
-    }
+    Some(match character {
+        '0' | '1' => &BINARY,
+        _ => return None,
+    })
 });
 
 const BINARY: Node = Node::new(&elements::variables::NUMBER, &|character| {
-    match character {
-        '0' | '1' => Some(&BINARY),
-        _ => None,
-    }
+    Some(match character {
+        '0' | '1' => &BINARY,
+        _ => return None,
+    })
 });
 
 const OCTAL_START: Node = Node::new_null(&|character| {
-    match character {
-        '0' ..= '7' => Some(&OCTAL),
-        _ => None,
-    }
+    Some(match character {
+        '0' ..= '7' => &OCTAL,
+        _ => return None,
+    })
 });
 
 const OCTAL: Node = Node::new(&elements::variables::NUMBER, &|character| {
-    match character {
-        '0' ..= '7' => Some(&OCTAL),
-        _ => None,
-    }
+    Some(match character {
+        '0' ..= '7' => &OCTAL,
+        _ => return None,
+    })
 });
 
 const HEXADECIMAL_START: Node = Node::new_null(&|character| {
-    match character {
-        '0' ..= '9' => Some(&HEXADECIMAL),
-        'A' ..= 'F' => Some(&HEXADECIMAL),
-        _ => None,
-    }
+    Some(match character {
+        '0' ..= '9' | 'A' ..= 'F' | 'a' ..= 'f' => &HEXADECIMAL,
+        _ => return None,
+    })
 });
 
 const HEXADECIMAL: Node = Node::new(&elements::variables::NUMBER, &|character| {
-    match character {
-        '0' ..= '9' => Some(&HEXADECIMAL),
-        'A' ..= 'F' => Some(&HEXADECIMAL),
-        _ => None,
-    }
+    Some(match character {
+        '0' ..= '9' | 'A' ..= 'F' | 'a' ..= 'f' => &HEXADECIMAL,
+        _ => return None,
+    })
 });
 
 const DECIMAL: Node = Node::new(&elements::variables::NUMBER, &|character| {
-    match character {
-        '0' ..= '9' => Some(&DECIMAL),
-        _ => None,
-    }
+    Some(match character {
+        '0' ..= '9' => &DECIMAL,
+        _ => return None,
+    })
 });
 
 const IDENTIFIER: Node = Node::new(&elements::variables::IDENTIFIER, &|character| {
-    match character {
-        'a' ..= 'z' | 'A' ..= 'Z' | '0' ..= '9' | '_' => Some(&IDENTIFIER),
-        _ => None,
-    }
+    Some(match character {
+        'a' ..= 'z' | 'A' ..= 'Z' | '0' ..= '9' | '_' => &IDENTIFIER,
+        _ => return None,
+    })
 });
 
 const WHITESPACE: Node = Node::new(&elements::ignores::WHITESPACE, &|character| {
-    match character {
-        ' ' | '\t' => Some(&WHITESPACE),
-        _ => None,
-    }
+    Some(match character {
+        ' ' | '\t' => &WHITESPACE,
+        _ => return None,
+    })
 });
 
 const ENDLINE: Node = Node::new(&elements::ignores::ENDLINE, &|character| {
-    match character {
-        '\r' | '\n' => Some(&ENDLINE),
-        _ => None,
-    }
+    Some(match character {
+        '\r' | '\n' => &ENDLINE,
+        _ => return None,
+    })
 });
 
 const COMMENT_LINE: Node = Node::new(&elements::ignores::COMMENT_LINE, &|character| {
-    match character {
-        '\r' | '\n' => None,
-        _ => Some(&COMMENT_LINE),
-    }
+    Some(match character {
+        '\r' | '\n' => return None,
+        _ => &COMMENT_LINE,
+    })
 });
 
 const COMMENT_BLOCK_1: Node = Node::new_null(&|character| {
-    Some(if character == '*' {
-        &COMMENT_BLOCK_2
-    } else {
-        &COMMENT_BLOCK_1
+    Some(match character {
+        '*' => &COMMENT_BLOCK_2,
+        _ => &COMMENT_BLOCK_1,
     })
 });
 
 const COMMENT_BLOCK_2: Node = Node::new_null(&|character| {
-    Some(if character == '/' {
-        &COMMENT_BLOCK_3
-    } else {
-        &COMMENT_BLOCK_1
+    Some(match character {
+        '/' => &COMMENT_BLOCK_3,
+        _ => &COMMENT_BLOCK_1,
     })
 });
 
