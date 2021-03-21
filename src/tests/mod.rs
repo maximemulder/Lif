@@ -74,6 +74,9 @@ fn test() {
     assert_output("print(17 >> 1);", "8");
     assert_output("print(17 << 1);", "34");
 
+    assert_output("print(5.6);", "5.6");
+    assert_output("print(-5.6);", "-5.6");
+
     assert_output("print(true);", "true");
     assert_output("print(false);", "false");
 

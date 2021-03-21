@@ -3,6 +3,7 @@ mod array;
 mod boolean;
 mod class;
 mod file;
+mod float;
 mod function;
 mod generic;
 mod integer;
@@ -29,6 +30,7 @@ pub struct Primitives<'a> {
     pub boolean:            GcValue<'a>,
     pub class:              GcValue<'a>,
     pub file:               GcValue<'a>,
+    pub float:              GcValue<'a>,
     pub function:           GcValue<'a>,
     pub function_code:      GcValue<'a>,
     pub function_primitive: GcValue<'a>,
@@ -51,6 +53,7 @@ impl<'a> Primitives<'a> {
             boolean:            GcValue::null(),
             class:              GcValue::null(),
             file:               GcValue::null(),
+            float:              GcValue::null(),
             function:           GcValue::null(),
             function_code:      GcValue::null(),
             function_primitive: GcValue::null(),
@@ -75,6 +78,7 @@ impl GcTrace for Primitives<'_> {
             self.boolean,
             self.class,
             self.file,
+            self.float,
             self.function,
             self.function_code,
             self.function_primitive,
@@ -103,6 +107,7 @@ impl<'a> Engine<'a> {
 
         self.primitives.boolean            = self.new_class_primitive_value(Some(self.primitives.any),      "Boolean");
         self.primitives.file               = self.new_class_primitive_value(Some(self.primitives.any),      "File");
+        self.primitives.float              = self.new_class_primitive_value(Some(self.primitives.any),      "Float");
         self.primitives.function           = self.new_class_primitive_value(Some(self.primitives.any),      "Function");
         self.primitives.function_code      = self.new_class_primitive_value(Some(self.primitives.function), "FunctionCode");
         self.primitives.function_primitive = self.new_class_primitive_value(Some(self.primitives.function), "FunctionPrimitive");
@@ -126,6 +131,7 @@ impl<'a> Engine<'a> {
         array::populate(self);
         boolean::populate(self);
         class::populate(self);
+        float::populate(self);
         function::populate(self);
         file::populate(self);
         generic::populate(self);

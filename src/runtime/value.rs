@@ -146,6 +146,14 @@ impl<'a> Value<'a> {
         data_mut!(self, Class);
     }
 
+    pub fn data_float(&self) -> &f64 {
+        data!(self, Float);
+    }
+
+    pub fn data_float_mut(&mut self) -> &mut f64 {
+        data_mut!(self, Float);
+    }
+
     pub fn data_function(&self) -> &FunctionCode<'a> {
         data!(self, FunctionCode);
     }

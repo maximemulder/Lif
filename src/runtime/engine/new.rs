@@ -29,6 +29,10 @@ impl<'a> Engine<'a> {
         self.new_value(self.primitives.class, Data::new_class(tag, parent))
     }
 
+    pub fn new_float_value(&mut self, float: f64) -> GcValue<'a> {
+        self.new_value(self.primitives.float, Data::new_float(float))
+    }
+
     pub fn new_function_value(&mut self, name: Option<&str>, parameters: Box<[GcValue<'a>]>, rest: Option<GcValue<'a>>, names: Box<[Ref<str>]>, r#type: Option<GcValue<'a>>, block: Ref<Node>) -> GcValue<'a> {
         let tag = self.taggers.functions.generate(name.map(Box::from));
         self.new_value(self.primitives.function_code, Data::new_function(tag, parameters, rest, names, r#type, self.scope, block))
@@ -87,6 +91,11 @@ impl<'a> Engine<'a> {
 
     pub fn new_class(&mut self, name: Option<&str>, parent: GcValue<'a>) -> GcReference<'a> {
         let value = self.new_class_value(name, parent);
+        self.new_constant(value)
+    }
+
+    pub fn new_float(&mut self, float: f64) -> GcReference<'a> {
+        let value = self.new_float_value(float);
         self.new_constant(value)
     }
 

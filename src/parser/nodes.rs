@@ -161,9 +161,10 @@ pub fn get() -> (Arena::<dyn Descent>, Arena::<dyn Ascent>) {
     let symbol_colon            = descent_token!(&elements::symbols::COLON);
     let symbol_semicolon        = descent_token!(&elements::symbols::SEMICOLON);
     let symbol_backslash        = descent_token!(&elements::symbols::BACKSLASH);
-    let variable_identifier     = descent_token!(&elements::variables::IDENTIFIER);
+    let variable_integer        = descent_token!(&elements::variables::INTEGER);
+    let variable_float          = descent_token!(&elements::variables::FLOAT);
     let variable_string         = descent_token!(&elements::variables::STRING);
-    let variable_number         = descent_token!(&elements::variables::NUMBER);
+    let variable_identifier     = descent_token!(&elements::variables::IDENTIFIER);
 
     macro_rules! macro_control {
         ( $keyword:expr, $element:expr ) => {
@@ -267,7 +268,7 @@ pub fn get() -> (Arena::<dyn Descent>, Arena::<dyn Ascent>) {
     );
 
     let literal = descent_element!(
-        descent_choice![variable_identifier, variable_string, variable_number, keyword_true, keyword_false],
+        descent_choice![keyword_true, keyword_false, variable_integer, variable_float, variable_string, variable_identifier],
         &elements::expressions::LITERAL
     );
 

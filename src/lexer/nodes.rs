@@ -1269,13 +1269,14 @@ const STRING_CONTENT: Node = Node::new_null(&|character| {
 
 const STRING: Node = Node::new_final(&elements::variables::STRING);
 
-const NUMBER_BASE: Node = Node::new(&elements::variables::NUMBER, &|character| {
+const NUMBER_BASE: Node = Node::new(&elements::variables::INTEGER, &|character| {
     Some(match character {
         'b' => &BINARY_START,
         'o' => &OCTAL_START,
         'x' => &HEXADECIMAL_START,
-        '0' ..= '9' => &DECIMAL,
+        '.' => &FLOAT_START,
         '_' => &DECIMAL_SEPARATOR,
+        '0' ..= '9' => &DECIMAL,
         _ => return None,
     })
 });
@@ -1287,7 +1288,7 @@ const BINARY_START: Node = Node::new_null(&|character| {
     })
 });
 
-const BINARY: Node = Node::new(&elements::variables::NUMBER, &|character| {
+const BINARY: Node = Node::new(&elements::variables::INTEGER, &|character| {
     Some(match character {
         '0' | '1' => &BINARY,
         '_' => &BINARY_SEPARATOR,
@@ -1310,7 +1311,7 @@ const OCTAL_START: Node = Node::new_null(&|character| {
     })
 });
 
-const OCTAL: Node = Node::new(&elements::variables::NUMBER, &|character| {
+const OCTAL: Node = Node::new(&elements::variables::INTEGER, &|character| {
     Some(match character {
         '0' ..= '7' => &OCTAL,
         '_' => &OCTAL_SEPARATOR,
@@ -1333,7 +1334,7 @@ const HEXADECIMAL_START: Node = Node::new_null(&|character| {
     })
 });
 
-const HEXADECIMAL: Node = Node::new(&elements::variables::NUMBER, &|character| {
+const HEXADECIMAL: Node = Node::new(&elements::variables::INTEGER, &|character| {
     Some(match character {
         '0' ..= '9' | 'A' ..= 'F' | 'a' ..= 'f' => &HEXADECIMAL,
         '_' => &HEXADECIMAL_SEPARATOR,
@@ -1349,9 +1350,10 @@ const HEXADECIMAL_SEPARATOR: Node = Node::new_null(&|character| {
     })
 });
 
-const DECIMAL: Node = Node::new(&elements::variables::NUMBER, &|character| {
+const DECIMAL: Node = Node::new(&elements::variables::INTEGER, &|character| {
     Some(match character {
         '0' ..= '9' => &DECIMAL,
+        '.' => &FLOAT_START,
         '_' => &DECIMAL_SEPARATOR,
         _ => return None,
     })
@@ -1361,6 +1363,29 @@ const DECIMAL_SEPARATOR: Node = Node::new_null(&|character| {
     Some(match character {
         '0' ..= '9' => &DECIMAL,
         '_' => &DECIMAL_SEPARATOR,
+        _ => return None,
+    })
+});
+
+const FLOAT_START: Node = Node::new_null(&|character| {
+    Some(match character {
+        '0' ..= '9' => &FLOAT,
+        _ => return None,
+    })
+});
+
+const FLOAT: Node = Node::new(&elements::variables::FLOAT, &|character| {
+    Some(match character {
+        '0' ..= '9' => &FLOAT,
+        '_' => &FLOAT_SEPARATOR,
+        _ => return None,
+    })
+});
+
+const FLOAT_SEPARATOR: Node = Node::new_null(&|character| {
+    Some(match character {
+        '0' ..= '9' => &FLOAT,
+        '_' => &FLOAT_SEPARATOR,
         _ => return None,
     })
 });

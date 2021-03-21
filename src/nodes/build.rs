@@ -22,11 +22,12 @@ use crate::nodes::function::Function;
 use crate::nodes::array::Array;
 use crate::nodes::block::Block;
 use crate::nodes::group::Group;
-use crate::nodes::integer::Integer;
-use crate::nodes::identifier::Identifier;
-use crate::nodes::string::String;
 use crate::nodes::r#true::True;
 use crate::nodes::r#false::False;
+use crate::nodes::integer::Integer;
+use crate::nodes::float::Float;
+use crate::nodes::string::String;
+use crate::nodes::identifier::Identifier;
 use crate::nodes::r#return::Return;
 use crate::nodes::r#break::Break;
 use crate::nodes::r#continue::Continue;
@@ -87,7 +88,8 @@ fn literal<'a>(node: Ref<SyntaxNode>) -> Node {
     match *child.element {
         elements::keywords::TRUE        => r#true(child),
         elements::keywords::FALSE       => r#false(child),
-        elements::variables::NUMBER     => integer(child),
+        elements::variables::INTEGER    => integer(child),
+        elements::variables::FLOAT      => float(child),
         elements::variables::STRING     => string(child),
         elements::variables::IDENTIFIER => identifier(child),
         _ => panic!(),
@@ -104,6 +106,10 @@ fn r#false<'a>(node: Ref<SyntaxNode>) -> Node {
 
 fn integer<'a>(node: Ref<SyntaxNode>) -> Node {
     Node::new(node, Integer::new(node.text()))
+}
+
+fn float<'a>(node: Ref<SyntaxNode>) -> Node {
+    Node::new(node, Float::new(node.text()))
 }
 
 fn string<'a>(node: Ref<SyntaxNode>) -> Node {

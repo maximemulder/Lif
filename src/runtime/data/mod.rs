@@ -28,6 +28,7 @@ pub enum Data<'a> {
     Array(Array<'a>),
     Boolean(bool),
     Class(Class<'a>),
+    Float(f64),
     FunctionCode(FunctionCode<'a>),
     FunctionPrimitive(FunctionPrimitive<'a>),
     GenericCode(GenericCode<'a>),
@@ -50,6 +51,10 @@ impl<'a> Data<'a> {
 
     pub fn new_class(tag: Tag, parent: Option<GcValue<'a>>) -> Self {
         Data::Class(Class::new(tag, parent))
+    }
+
+    pub fn new_float(float: f64) -> Self {
+        Data::Float(float)
     }
 
     pub fn new_function(tag: Tag, parameters: Box<[GcValue<'a>]>, rest: Option<GcValue<'a>>, names: Box<[Ref<str>]>, r#return: Option<GcValue<'a>>, scope: GcScope<'a>, block: Ref<Node>) -> Self {
