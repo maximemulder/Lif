@@ -1,8 +1,7 @@
-use crate::runtime::data::function::FunctionImplementation;
+use crate::runtime::data::function::{ FunctionImplementation, Parameter };
 use crate::runtime::engine::Engine;
 use crate::runtime::gc::GcTrace;
 use crate::runtime::utilities::{ Arguments, Callable, ReturnReference };
-use crate::runtime::value::GcValue;
 
 pub struct FunctionImplementationPrimitive<'a> {
     callback: &'a Callable<'a>,
@@ -17,7 +16,7 @@ impl<'a> FunctionImplementationPrimitive<'a> {
 }
 
 impl<'a> FunctionImplementation<'a> for FunctionImplementationPrimitive<'a> {
-    fn call(&self, engine: &mut Engine<'a>, _: &[GcValue<'a>], _: &Option<GcValue<'a>>, arguments: Arguments<'a>) -> ReturnReference<'a> {
+    fn call(&self, engine: &mut Engine<'a>, _: &[Parameter<'a>], _: &Option<Parameter<'a>>, arguments: Arguments<'a>) -> ReturnReference<'a> {
         (self.callback)(engine, arguments)
     }
 }

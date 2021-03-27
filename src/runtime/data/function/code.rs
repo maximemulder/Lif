@@ -1,35 +1,32 @@
 use crate::memory::Ref;
 use crate::nodes::Node;
-use crate::runtime::data::function::FunctionImplementation;
+use crate::runtime::data::function::{ FunctionImplementation, Parameter };
 use crate::runtime::engine::{ Control, Engine };
 use crate::runtime::error::Error;
 use crate::runtime::gc::GcTrace;
 use crate::runtime::scope::GcScope;
 use crate::runtime::utilities::{ Arguments, ReturnReference };
-use crate::runtime::value::GcValue;
 
 pub struct FunctionImplementationCode<'a> {
     scope: GcScope<'a>,
-    names: Box<[Box<str>]>,
     block: Ref<Node>,
 }
 
 impl<'a> FunctionImplementationCode<'a> {
-    pub fn new(scope: GcScope<'a>, names: Box<[Box<str>]>, block: Ref<Node>) -> Self {
+    pub fn new(scope: GcScope<'a>, block: Ref<Node>) -> Self {
         Self {
             scope,
-            names,
             block,
         }
     }
 }
 
 impl<'a> FunctionImplementation<'a> for FunctionImplementationCode<'a> {
-    fn call(&self, engine: &mut Engine<'a>, parameters: &[GcValue<'a>], rest: &Option<GcValue<'a>>, arguments: Arguments<'a>) -> ReturnReference<'a> {
+    fn call(&self, engine: &mut Engine<'a>, parameters: &[Parameter<'a>], rest: &Option<Parameter<'a>>, arguments: Arguments<'a>) -> ReturnReference<'a> {
         let reference = engine.frame(self.scope, &|engine| {
-            for ((name, parameter), argument) in self.names.iter().zip(parameters.iter()).zip(arguments.iter()) {
-                let reference = engine.new_variable(Some(*argument), *parameter);
-                engine.add_variable(name, reference);
+            for (parameter, argument) in parameters.into_iter().zip(arguments.iter()) {
+                let reference = engine.new_variable(Some(*argument), parameter.r#type);
+                engine.add_variable(&parameter.name, reference);
             }
 
             if let Some(rest) = rest {
@@ -39,9 +36,9 @@ impl<'a> FunctionImplementation<'a> for FunctionImplementationCode<'a> {
                 }
 
                 let value = engine.new_array_any_value(elements);
-                value.cast(*rest)?;
-                let reference = engine.new_variable(Some(value), *rest);
-                engine.add_variable(self.names.last().unwrap(), reference)
+                value.cast(rest.r#type)?;
+                let reference = engine.new_variable(Some(value), rest.r#type);
+                engine.add_variable(&rest.name, reference)
             }
 
             let executable = Ref::as_ref(&self.block);

@@ -1,5 +1,6 @@
 use crate::memory::Ref;
 use crate::nodes::{ Executable, Node };
+use crate::runtime::data::Parameter;
 use crate::runtime::engine::Engine;
 use crate::runtime::utilities::ReturnReference;
 
@@ -26,23 +27,20 @@ impl Function {
 impl Executable for Function {
     fn execute<'a>(&self, engine: &mut Engine<'a>) -> ReturnReference<'a> {
         let mut parameters = Vec::new();
-        let mut names = Vec::new();
         for (name, parameter) in self.parameters.iter() {
-            names.push(*name);
-            parameters.push(if let Some(parameter) = parameter.as_ref() {
+            parameters.push(Parameter::new(Box::from(name.as_ref()), if let Some(parameter) = parameter.as_ref() {
                 engine.execute(parameter)?.read()?
             } else {
                 engine.primitives.any
-            })
+            }));
         }
 
         let rest = if let Some(rest) = self.rest.as_ref() {
-            names.push(rest.0);
-            if let Some(r#type) = rest.1.as_ref() {
-                Some(engine.execute(r#type)?.read()?)
+            Some(Parameter::new(Box::from(rest.0.as_ref()), if let Some(r#type) = rest.1.as_ref() {
+                engine.execute(r#type)?.read()?
             } else {
-                None
-            }
+                engine.primitives.any
+            }))
         } else {
             None
         };
@@ -53,6 +51,6 @@ impl Executable for Function {
             None
         };
 
-        Ok(engine.new_function(Ref::as_option(&self.name), parameters.into_boxed_slice(), rest, names.into_boxed_slice(), r#type, Ref::new(&self.block)))
+        Ok(engine.new_function(Ref::as_option(&self.name), parameters.into_boxed_slice(), rest, r#type, Ref::new(&self.block)))
     }
 }

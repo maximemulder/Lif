@@ -9,7 +9,7 @@ mod tag;
 
 pub use array::Array;
 pub use class::Class;
-pub use function::{ Function, FunctionCode, FunctionPrimitive };
+pub use function::{ Function, FunctionCode, FunctionPrimitive, Parameter };
 pub use generic::{ Generic, GenericCode, GenericPrimitive };
 pub use method::Method;
 pub use nullable::Nullable;
@@ -57,11 +57,11 @@ impl<'a> Data<'a> {
         Data::Float(float)
     }
 
-    pub fn new_function(tag: Tag, parameters: Box<[GcValue<'a>]>, rest: Option<GcValue<'a>>, names: Box<[Box<str>]>, r#return: Option<GcValue<'a>>, scope: GcScope<'a>, block: Ref<Node>) -> Self {
-        Data::FunctionCode(Function::new_code(tag, parameters, rest, names, r#return, scope, block))
+    pub fn new_function(tag: Tag, parameters: Box<[Parameter<'a>]>, rest: Option<Parameter<'a>>, r#return: Option<GcValue<'a>>, scope: GcScope<'a>, block: Ref<Node>) -> Self {
+        Data::FunctionCode(Function::new_code(tag, parameters, rest, r#return, scope, block))
     }
 
-    pub fn new_function_primitive(tag: Tag, parameters: Box<[GcValue<'a>]>, rest: Option<GcValue<'a>>, r#return: Option<GcValue<'a>>, callback: &'a Callable<'a>) -> Self {
+    pub fn new_function_primitive(tag: Tag, parameters: Box<[Parameter<'a>]>, rest: Option<Parameter<'a>>, r#return: Option<GcValue<'a>>, callback: &'a Callable<'a>) -> Self {
         Data::FunctionPrimitive(Function::new_primitive(tag, parameters, rest, r#return, callback))
     }
 

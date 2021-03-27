@@ -21,6 +21,11 @@ impl Generic {
 
 impl Executable for Generic {
     fn execute<'a>(&self, engine: &mut Engine<'a>) -> ReturnReference<'a> {
-        Ok(engine.new_generic(Ref::as_option(&self.name), Ref::new(self.parameters.as_ref()), Ref::new(&self.node)))
+        let mut parameters = Vec::new();
+        for parameter in self.parameters.iter() {
+            parameters.push(Box::from(parameter.as_ref()));
+        }
+
+        Ok(engine.new_generic(Ref::as_option(&self.name), parameters.into_boxed_slice(), Ref::new(&self.node)))
     }
 }
