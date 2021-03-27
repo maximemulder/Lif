@@ -51,8 +51,8 @@ impl<'a> Memoize<'a> {
     }
 
     fn get(&self, values: &[GcValue<'a>]) -> Option<GcReference<'a>> {
-        for (argument, value) in self.arguments.iter().zip(values) {
-            if !value.is(*argument) {
+        for (argument, value) in self.arguments.iter().copied().zip(values) {
+            if !value.is(argument) {
                 return None;
             }
         }

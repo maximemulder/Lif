@@ -43,8 +43,8 @@ impl AscentChoice {
 
 impl Ascent for AscentChoice {
     fn ascent(&self, parse: &mut Parse, nodes: Vec<Node>) -> Option<Vec<Node>> {
-        for ascent in self.ascents.iter() {
-            if let Some(others) = parse.ascent(*ascent, nodes.clone()) {
+        for ascent in self.ascents.iter().copied() {
+            if let Some(others) = parse.ascent(ascent, nodes.clone()) {
                 return Some(others);
             }
         }
@@ -67,8 +67,8 @@ impl AscentSequence {
 
 impl Ascent for AscentSequence {
     fn ascent(&self, parse: &mut Parse, mut nodes: Vec<Node>) -> Option<Vec<Node>> {
-        for ascent in self.ascents.iter() {
-            nodes = parse.ascent(*ascent, nodes)?;
+        for ascent in self.ascents.iter().copied() {
+            nodes = parse.ascent(ascent, nodes)?;
         }
 
         Some(nodes)

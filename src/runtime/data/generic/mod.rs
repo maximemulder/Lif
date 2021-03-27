@@ -61,8 +61,8 @@ impl<'a, T: GenericImplementation<'a>> Generic<'a, T> {
         }
 
         let reference = engine.frame(self.scope, &|engine| {
-            for (parameter, argument) in self.parameters.iter().zip(arguments.iter()) {
-                let reference = engine.new_constant(*argument);
+            for (parameter, argument) in self.parameters.iter().zip(arguments.iter().copied()) {
+                let reference = engine.new_constant(argument);
                 engine.add_variable(parameter, reference);
             }
 

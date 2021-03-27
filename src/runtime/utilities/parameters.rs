@@ -13,8 +13,8 @@ pub fn length(arguments: usize, parameters: usize) -> Return<()> {
 
 pub fn pack<'a>(engine: &mut Engine<'a>, values: Arguments<'a>) -> GcValue<'a> {
     let mut references = Vec::new();
-    for value in values.as_ref() {
-        references.push(engine.new_constant(*value));
+    for value in values.iter().copied() {
+        references.push(engine.new_constant(value));
     }
 
     engine.new_array_any_value(references)

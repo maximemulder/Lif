@@ -24,8 +24,8 @@ impl<'a> FunctionImplementationCode<'a> {
 impl<'a> FunctionImplementation<'a> for FunctionImplementationCode<'a> {
     fn call(&self, engine: &mut Engine<'a>, parameters: &[Parameter<'a>], rest: &Option<Parameter<'a>>, arguments: Arguments<'a>) -> ReturnReference<'a> {
         let reference = engine.frame(self.scope, &|engine| {
-            for (parameter, argument) in parameters.into_iter().zip(arguments.iter()) {
-                let reference = engine.new_variable(Some(*argument), parameter.r#type);
+            for (parameter, argument) in parameters.into_iter().zip(arguments.iter().copied()) {
+                let reference = engine.new_variable(Some(argument), parameter.r#type);
                 engine.add_variable(&parameter.name, reference);
             }
 
