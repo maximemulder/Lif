@@ -42,7 +42,7 @@ impl<'a, T: FunctionImplementation<'a>> Function<'a, T> {
 }
 
 impl<'a> FunctionCode<'a> {
-    pub fn new_code(tag: Tag, parameters: Box<[GcValue<'a>]>, rest: Option<GcValue<'a>>, names: Box<[Ref<str>]>, r#return: Option<GcValue<'a>>, scope: GcScope<'a>, block: Ref<Node>) -> Self {
+    pub fn new_code(tag: Tag, parameters: Box<[GcValue<'a>]>, rest: Option<GcValue<'a>>, names: Box<[Box<str>]>, r#return: Option<GcValue<'a>>, scope: GcScope<'a>, block: Ref<Node>) -> Self {
         Self::new(tag, parameters, rest, r#return, FunctionImplementationCode::new(scope, names, block))
     }
 }

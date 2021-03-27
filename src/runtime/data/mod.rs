@@ -57,7 +57,7 @@ impl<'a> Data<'a> {
         Data::Float(float)
     }
 
-    pub fn new_function(tag: Tag, parameters: Box<[GcValue<'a>]>, rest: Option<GcValue<'a>>, names: Box<[Ref<str>]>, r#return: Option<GcValue<'a>>, scope: GcScope<'a>, block: Ref<Node>) -> Self {
+    pub fn new_function(tag: Tag, parameters: Box<[GcValue<'a>]>, rest: Option<GcValue<'a>>, names: Box<[Box<str>]>, r#return: Option<GcValue<'a>>, scope: GcScope<'a>, block: Ref<Node>) -> Self {
         Data::FunctionCode(Function::new_code(tag, parameters, rest, names, r#return, scope, block))
     }
 
@@ -65,11 +65,11 @@ impl<'a> Data<'a> {
         Data::FunctionPrimitive(Function::new_primitive(tag, parameters, rest, r#return, callback))
     }
 
-    pub fn new_generic(tag: Tag, scope: GcScope<'a>, parameters: Ref<[Ref<str>]>, node: Ref<dyn Executable>) -> Self {
+    pub fn new_generic(tag: Tag, scope: GcScope<'a>, parameters: Box<[Box<str>]>, node: Ref<dyn Executable>) -> Self {
         Data::GenericCode(Generic::new_code(tag, scope, parameters, node))
     }
 
-    pub fn new_generic_primitive(tag: Tag, scope: GcScope<'a>, parameters: Ref<[Ref<str>]>, callback: &'a Callable<'a>) -> Self {
+    pub fn new_generic_primitive(tag: Tag, scope: GcScope<'a>, parameters: Box<[Box<str>]>, callback: &'a Callable<'a>) -> Self {
         Data::GenericPrimitive(Generic::new_primitive(tag, scope, parameters, callback))
     }
 

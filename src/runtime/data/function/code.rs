@@ -10,12 +10,12 @@ use crate::runtime::value::GcValue;
 
 pub struct FunctionImplementationCode<'a> {
     scope: GcScope<'a>,
-    names: Box<[Ref<str>]>,
+    names: Box<[Box<str>]>,
     block: Ref<Node>,
 }
 
 impl<'a> FunctionImplementationCode<'a> {
-    pub fn new(scope: GcScope<'a>, names: Box<[Ref<str>]>, block: Ref<Node>) -> Self {
+    pub fn new(scope: GcScope<'a>, names: Box<[Box<str>]>, block: Ref<Node>) -> Self {
         Self {
             scope,
             names,

@@ -25,7 +25,7 @@ fn to_string<'a>(engine: &mut Engine<'a>, arguments: Arguments<'a>) -> ReturnRef
 
 fn cn<'a>(engine: &mut Engine<'a>, arguments: Arguments<'a>) -> ReturnReference<'a> {
     let mut this = arguments[0];
-    let name = arguments[1].data_string().clone();
+    let name = arguments[1].data_string().clone().into_boxed_str();
     if let Some(method) = this.class.data_class().get_method(&name) {
         return Ok(engine.new_method(method, this));
     }

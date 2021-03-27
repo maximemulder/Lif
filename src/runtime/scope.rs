@@ -6,7 +6,7 @@ pub type GcScope<'a> = GcRef<Scope<'a>>;
 
 pub struct Scope<'a> {
     pub parent: Option<GcScope<'a>>,
-    variables: HashMap<String, GcReference<'a>>,
+    variables: HashMap<Box<str>, GcReference<'a>>,
 }
 
 impl<'a> Scope<'a> {
@@ -33,7 +33,7 @@ impl<'a> Scope<'a> {
     }
 
     pub fn add_variable(&mut self, name: &str, reference: GcReference<'a>) {
-        self.variables.insert(name.to_string(), reference);
+        self.variables.insert(Box::from(name), reference);
     }
 }
 

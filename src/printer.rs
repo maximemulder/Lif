@@ -12,10 +12,10 @@ pub fn tokens(code: &Code, nodes: &[Node]) {
 }
 
 pub fn tree(tree: &Node) {
-    node(tree, String::from(""), String::from(""));
+    node(tree, "", "");
 }
 
-fn node(tree: &Node, prefix: String, infix: String) {
+fn node(tree: &Node, prefix: &str, infix: &str) {
     element(&prefix, tree.element);
     if let Content::Production(children) = &tree.content {
         for i in 0 .. children.len() {
@@ -25,7 +25,7 @@ fn node(tree: &Node, prefix: String, infix: String) {
                 (format!("{}{}", infix, "├─"), format!("{}{}", infix, "│ "))
             };
 
-            node(&children[i], next_prefix, next_suffix);
+            node(&children[i], &next_prefix, &next_suffix);
         }
     }
 }

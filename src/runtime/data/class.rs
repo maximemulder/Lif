@@ -7,8 +7,8 @@ use std::collections::HashMap;
 pub struct Class<'a> {
     pub tag: Tag,
     pub parent:  Option<GcValue<'a>>,
-    pub statics: HashMap<String, GcReference<'a>>,
-    pub methods: HashMap<String, GcValue<'a>>,
+    pub statics: HashMap<Box<str>, GcReference<'a>>,
+    pub methods: HashMap<Box<str>, GcValue<'a>>,
 }
 
 impl<'a> Class<'a> {

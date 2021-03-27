@@ -25,12 +25,12 @@ pub struct Generic<'a, T: GenericImplementation<'a>> {
     pub tag: Tag,
     scope: GcScope<'a>,
     memoizes: Memoizes<'a>,
-    parameters: Ref<[Ref<str>]>,
+    parameters: Box<[Box<str>]>,
     implementation: T,
 }
 
 impl<'a, T: GenericImplementation<'a>> Generic<'a, T> {
-    fn new(tag: Tag, scope: GcScope<'a>, parameters: Ref<[Ref<str>]>, implementation: T) -> Self {
+    fn new(tag: Tag, scope: GcScope<'a>, parameters: Box<[Box<str>]>, implementation: T) -> Self {
         Self {
             tag,
             scope,
@@ -42,13 +42,13 @@ impl<'a, T: GenericImplementation<'a>> Generic<'a, T> {
 }
 
 impl<'a> GenericCode<'a> {
-    pub fn new_code(tag: Tag, scope: GcScope<'a>, parameters: Ref<[Ref<str>]>, node: Ref<dyn Executable>) -> Self {
+    pub fn new_code(tag: Tag, scope: GcScope<'a>, parameters: Box<[Box<str>]>, node: Ref<dyn Executable>) -> Self {
         Self::new(tag, scope, parameters, GenericImplementationCode::new(node))
     }
 }
 
 impl<'a> GenericPrimitive<'a> {
-    pub fn new_primitive(tag: Tag, scope: GcScope<'a>, parameters: Ref<[Ref<str>]>, callback: &'a Callable<'a>) -> Self {
+    pub fn new_primitive(tag: Tag, scope: GcScope<'a>, parameters: Box<[Box<str>]>, callback: &'a Callable<'a>) -> Self {
         Self::new(tag, scope, parameters, GenericImplementationPrimitive::new(callback))
     }
 }
