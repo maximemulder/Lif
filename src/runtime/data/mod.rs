@@ -9,7 +9,7 @@ mod tag;
 
 pub use array::Array;
 pub use class::{ Class, Constructor };
-pub use function::{ Function, FunctionCode, FunctionPrimitive, Parameter };
+pub use function::{ Function, FunctionCode, FunctionPrimitive };
 pub use generic::{ Generic, GenericCode, GenericPrimitive };
 pub use method::Method;
 pub use nullable::Nullable;
@@ -22,6 +22,7 @@ use crate::runtime::gc::GcTrace;
 use crate::runtime::scope::GcScope;
 use crate::runtime::reference::GcReference;
 use crate::runtime::utilities::Callable;
+use crate::runtime::utilities::variable::Variable;
 use crate::runtime::value::GcValue;
 
 pub enum Data<'a> {
@@ -57,11 +58,11 @@ impl<'a> Data<'a> {
         Data::Float(float)
     }
 
-    pub fn new_function(tag: Tag, parameters: Box<[Parameter<'a>]>, rest: Option<Parameter<'a>>, r#return: Option<GcValue<'a>>, scope: GcScope<'a>, block: Ref<Node>) -> Self {
+    pub fn new_function(tag: Tag, parameters: Box<[Variable<'a>]>, rest: Option<Variable<'a>>, r#return: Option<GcValue<'a>>, scope: GcScope<'a>, block: Ref<Node>) -> Self {
         Data::FunctionCode(Function::new_code(tag, parameters, rest, r#return, scope, block))
     }
 
-    pub fn new_function_primitive(tag: Tag, parameters: Box<[Parameter<'a>]>, rest: Option<Parameter<'a>>, r#return: Option<GcValue<'a>>, callback: &'a Callable<'a>) -> Self {
+    pub fn new_function_primitive(tag: Tag, parameters: Box<[Variable<'a>]>, rest: Option<Variable<'a>>, r#return: Option<GcValue<'a>>, callback: &'a Callable<'a>) -> Self {
         Data::FunctionPrimitive(Function::new_primitive(tag, parameters, rest, r#return, callback))
     }
 

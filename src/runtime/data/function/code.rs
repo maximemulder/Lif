@@ -1,11 +1,12 @@
 use crate::memory::Ref;
 use crate::nodes::Node;
-use crate::runtime::data::function::{ FunctionImplementation, Parameter };
+use crate::runtime::data::function::FunctionImplementation;
 use crate::runtime::engine::{ Control, Engine };
 use crate::runtime::error::Error;
 use crate::runtime::gc::GcTrace;
 use crate::runtime::scope::GcScope;
 use crate::runtime::utilities::{ Arguments, ReturnReference };
+use crate::runtime::utilities::variable::Variable;
 
 pub struct FunctionImplementationCode<'a> {
     scope: GcScope<'a>,
@@ -22,11 +23,11 @@ impl<'a> FunctionImplementationCode<'a> {
 }
 
 impl<'a> FunctionImplementation<'a> for FunctionImplementationCode<'a> {
-    fn call(&self, engine: &mut Engine<'a>, parameters: &[Parameter<'a>], rest: &Option<Parameter<'a>>, arguments: Arguments<'a>) -> ReturnReference<'a> {
+    fn call(&self, engine: &mut Engine<'a>, parameters: &[Variable<'a>], rest: &Option<Variable<'a>>, arguments: Arguments<'a>) -> ReturnReference<'a> {
         let reference = engine.frame(self.scope, &|engine| {
             for (parameter, argument) in parameters.into_iter().zip(arguments.iter().copied()) {
-                let reference = engine.new_variable(Some(argument), parameter.r#type);
-                engine.add_variable(&parameter.name, reference);
+                let mut reference = parameter.build(engine);
+                reference.set_value(argument);
             }
 
             if let Some(rest) = rest {
@@ -36,9 +37,8 @@ impl<'a> FunctionImplementation<'a> for FunctionImplementationCode<'a> {
                 }
 
                 let value = engine.new_array_any_value(elements);
-                value.cast(rest.r#type)?;
-                let reference = engine.new_variable(Some(value), rest.r#type);
-                engine.add_variable(&rest.name, reference)
+                let mut reference = rest.build(engine);
+                reference.write(value)?;
             }
 
             let executable = Ref::as_ref(&self.block);

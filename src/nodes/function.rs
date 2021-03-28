@@ -1,9 +1,9 @@
 use crate::memory::Ref;
 use crate::nodes::{ Executable, Node };
-use crate::runtime::data::Parameter;
 use crate::runtime::engine::Engine;
 use crate::runtime::error::Error;
 use crate::runtime::utilities::ReturnReference;
+use crate::runtime::utilities::variable::Variable;
 
 pub struct Function {
     name: Option<Ref<str>>,
@@ -29,16 +29,18 @@ impl Executable for Function {
     fn execute<'a>(&self, engine: &mut Engine<'a>) -> ReturnReference<'a> {
         let mut parameters = Vec::new();
         for (name, parameter) in self.parameters.iter() {
-            parameters.push(Parameter::new(Box::from(name.as_ref()), if let Some(parameter) = parameter.as_ref() {
-                engine.execute(parameter)?.read()?
+            let r#type = if let Some(parameter) = parameter.as_ref() {
+                Some(engine.execute(parameter)?.read()?)
             } else {
-                engine.primitives.any
-            }));
+                None
+            };
+
+            parameters.push(Variable::new(engine, Box::from(name.as_ref()), r#type)?);
         }
 
         let rest = if let Some(rest) = self.rest.as_ref() {
-            Some(Parameter::new(Box::from(rest.0.as_ref()), if let Some(r#type) = rest.1.as_ref() {
-                let r#type = engine.execute(r#type)?.read()?;
+            let r#type = if let Some(parameter) = rest.1.as_ref() {
+                let r#type = engine.execute(parameter)?.read()?;
                 r#type.cast(engine.primitives.class)?;
                 if let Some(constructor) = r#type.data_class().constructor.as_ref() {
                     if constructor.generic != engine.primitives.array {
@@ -48,10 +50,12 @@ impl Executable for Function {
                     return Err(Error::new_rest())
                 }
 
-                r#type
+                Some(r#type)
             } else {
-                engine.primitives.any
-            }))
+                None
+            };
+
+            Some(Variable::new(engine, Box::from(rest.0.as_ref()), r#type)?)
         } else {
             None
         };

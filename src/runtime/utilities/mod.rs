@@ -1,6 +1,7 @@
 pub mod builder;
 pub mod memoizes;
 pub mod parameters;
+pub mod variable;
 
 use crate::runtime::engine::Engine;
 use crate::runtime::error::Error;

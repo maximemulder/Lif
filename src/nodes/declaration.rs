@@ -2,6 +2,7 @@ use crate::memory::Ref;
 use crate::nodes::{ Executable, Node };
 use crate::runtime::engine::Engine;
 use crate::runtime::utilities::ReturnReference;
+use crate::runtime::utilities::variable::Variable;
 
 pub struct Declaration {
     identifier: Ref<str>,
@@ -20,15 +21,12 @@ impl Declaration {
 impl Executable for Declaration {
     fn execute<'a>(&self, engine: &mut Engine<'a>) -> ReturnReference<'a> {
         let r#type = if let Some(r#type) = self.r#type.as_ref() {
-            let value = execute!(engine, r#type).read()?;
-            value.cast(engine.primitives.class)?;
-            value
+            Some(execute!(engine, r#type).read()?)
         } else {
-            engine.primitives.any
+            None
         };
 
-        let reference = engine.new_variable(None, r#type);
-        engine.add_variable(&self.identifier, reference);
-        Ok(reference)
+        let variable = Variable::new(engine, Box::from(self.identifier.as_ref()), r#type)?;
+        Ok(variable.build(engine))
     }
 }
