@@ -5,8 +5,8 @@ use crate::runtime::value::GcValue;
 
 fn parameters<'a>(types: &[GcValue<'a>]) -> Box<[Parameter<'a>]> {
     let mut parameters = Vec::new();
-    for r#type in types {
-        parameters.push(Parameter::new(Box::from("__unused__"), *r#type));
+    for r#type in types.iter().copied() {
+        parameters.push(Parameter::new(Box::from("__unused__"), r#type));
     }
 
     parameters.into_boxed_slice()

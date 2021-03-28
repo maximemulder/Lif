@@ -25,11 +25,7 @@ impl<'a> Scope<'a> {
     }
 
     pub fn get_variable(&self, name: &str) -> Option<GcReference<'a>> {
-        if let Some(reference) = self.variables.get(name) {
-            return Some(*reference);
-        }
-
-        None
+        self.variables.get(name).copied()
     }
 
     pub fn add_variable(&mut self, name: &str, reference: GcReference<'a>) {
