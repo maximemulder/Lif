@@ -37,15 +37,15 @@ fn to_string<'a>(engine: &mut Engine<'a>, arguments: Arguments<'a>) -> ReturnRef
 
 fn new<'a>(engine: &mut Engine<'a>, arguments: Arguments<'a>) -> ReturnReference<'a> {
     let class = get_type(engine)?;
-    let mut generic = engine.primitives.nullable;
-    let nullable = generic.data_generic_primitive_mut().call(engine, Box::new([class]))?.read()?;
+    let generic = engine.primitives.nullable;
+    let nullable = generic.clone().data_generic_primitive_mut().call(engine, generic, Box::new([class]))?.read()?;
     Ok(engine.new_nullable(nullable, Some(arguments[0])))
 }
 
 fn null<'a>(engine: &mut Engine<'a>, _: Arguments<'a>) -> ReturnReference<'a> {
     let class = get_type(engine)?;
-    let mut generic = engine.primitives.nullable;
-    let nullable = generic.data_generic_primitive_mut().call(engine, Box::new([class]))?.read()?;
+    let generic = engine.primitives.nullable;
+    let nullable = generic.clone().data_generic_primitive_mut().call(engine, generic, Box::new([class]))?.read()?;
     Ok(engine.new_nullable(nullable, None))
 }
 

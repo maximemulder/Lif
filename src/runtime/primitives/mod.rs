@@ -120,8 +120,8 @@ impl<'a> Engine<'a> {
         self.primitives.nullable = self.new_generic_primitive_value("Option", Box::new([Box::from("__type__")]), &nullable::create);
 
         self.primitives.array_any = {
-            let mut array = self.primitives.array;
-            array.data_generic_primitive_mut().call(self, Box::new([self.primitives.any])).ok().unwrap().read().ok().unwrap()
+            let array = self.primitives.array;
+            array.clone().data_generic_primitive_mut().call(self, array, Box::new([self.primitives.any])).ok().unwrap().read().ok().unwrap()
         };
 
         any::populate(self);

@@ -3,13 +3,14 @@ mod primitive;
 
 use crate::memory::Ref;
 use crate::nodes::Executable;
-use crate::runtime::data::Tag;
+use crate::runtime::data::{ Constructor, Tag };
 use crate::runtime::engine::Engine;
 use crate::runtime::gc::GcTrace;
 use crate::runtime::scope::GcScope;
 use crate::runtime::utilities::{ Arguments, Callable, ReturnReference };
 use crate::runtime::utilities::memoizes::Memoizes;
 use crate::runtime::utilities::parameters;
+use crate::runtime::value::GcValue;
 
 use code::GenericImplementationCode;
 use primitive::GenericImplementationPrimitive;
@@ -54,7 +55,7 @@ impl<'a> GenericPrimitive<'a> {
 }
 
 impl<'a, T: GenericImplementation<'a>> Generic<'a, T> {
-    pub fn call(&mut self, engine: &mut Engine<'a>, arguments: Arguments<'a>) -> ReturnReference<'a> {
+    pub fn call(&mut self, engine: &mut Engine<'a>, generic: GcValue<'a>, arguments: Arguments<'a>) -> ReturnReference<'a> {
         parameters::length(arguments.len(), self.parameters.len())?;
         if let Some(reference) = self.memoizes.get(&arguments) {
             return Ok(reference);
@@ -68,6 +69,11 @@ impl<'a, T: GenericImplementation<'a>> Generic<'a, T> {
 
             self.implementation.call(engine, arguments.clone())
         })?;
+
+        let mut value = reference.read()?;
+        if value.class == engine.primitives.class {
+            value.data_class_mut().constructor = Some(Constructor::new(generic, arguments.clone()));
+        }
 
         self.memoizes.record(arguments, reference);
         Ok(reference)

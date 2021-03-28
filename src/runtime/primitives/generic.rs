@@ -16,12 +16,14 @@ fn to_string<'a>(engine: &mut Engine<'a>, _: Arguments<'a>) -> ReturnReference<'
     Ok(engine.new_string("GENERIC".to_string()))
 }
 
-fn gn_code<'a>(engine: &mut Engine<'a>, mut arguments: Arguments<'a>) -> ReturnReference<'a> {
+fn gn_code<'a>(engine: &mut Engine<'a>, arguments: Arguments<'a>) -> ReturnReference<'a> {
     let parameters = parameters::unpack(arguments[1])?;
-    arguments[0].data_generic_mut().call(engine, parameters)
+    let generic = arguments[0];
+    generic.clone().data_generic_mut().call(engine, generic, parameters)
 }
 
-fn gn_primitive<'a>(engine: &mut Engine<'a>, mut arguments: Arguments<'a>) -> ReturnReference<'a> {
+fn gn_primitive<'a>(engine: &mut Engine<'a>, arguments: Arguments<'a>) -> ReturnReference<'a> {
     let parameters = parameters::unpack(arguments[1])?;
-    arguments[0].data_generic_primitive_mut().call(engine, parameters)
+    let generic = arguments[0];
+    generic.clone().data_generic_primitive_mut().call(engine, generic, parameters)
 }

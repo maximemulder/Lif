@@ -8,7 +8,7 @@ mod object;
 mod tag;
 
 pub use array::Array;
-pub use class::Class;
+pub use class::{ Class, Constructor };
 pub use function::{ Function, FunctionCode, FunctionPrimitive, Parameter };
 pub use generic::{ Generic, GenericCode, GenericPrimitive };
 pub use method::Method;

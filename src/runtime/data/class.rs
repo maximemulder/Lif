@@ -4,8 +4,23 @@ use crate::runtime::reference::GcReference;
 use crate::runtime::value::GcValue;
 use std::collections::HashMap;
 
+pub struct Constructor<'a> {
+    pub generic: GcValue<'a>,
+    arguments: Box<[GcValue<'a>]>,
+}
+
+impl<'a> Constructor<'a> {
+    pub fn new(generic: GcValue<'a>, arguments: Box<[GcValue<'a>]>) -> Self {
+        Self {
+            generic,
+            arguments,
+        }
+    }
+}
+
 pub struct Class<'a> {
     pub tag: Tag,
+    pub constructor: Option<Constructor<'a>>,
     pub parent:  Option<GcValue<'a>>,
     pub statics: HashMap<Box<str>, GcReference<'a>>,
     pub methods: HashMap<Box<str>, GcValue<'a>>,
@@ -15,6 +30,7 @@ impl<'a> Class<'a> {
     pub fn new(tag: Tag, parent: Option<GcValue<'a>>) -> Self {
         Self {
             tag,
+            constructor: None,
             parent,
             statics: HashMap::new(),
             methods: HashMap::new(),

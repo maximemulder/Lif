@@ -2,6 +2,7 @@ use crate::memory::Ref;
 use crate::nodes::{ Executable, Node };
 use crate::runtime::data::Parameter;
 use crate::runtime::engine::Engine;
+use crate::runtime::error::Error;
 use crate::runtime::utilities::ReturnReference;
 
 pub struct Function {
@@ -37,7 +38,17 @@ impl Executable for Function {
 
         let rest = if let Some(rest) = self.rest.as_ref() {
             Some(Parameter::new(Box::from(rest.0.as_ref()), if let Some(r#type) = rest.1.as_ref() {
-                engine.execute(r#type)?.read()?
+                let r#type = engine.execute(r#type)?.read()?;
+                r#type.cast(engine.primitives.class)?;
+                if let Some(constructor) = r#type.data_class().constructor.as_ref() {
+                    if constructor.generic != engine.primitives.array {
+                        return Err(Error::new_rest())
+                    }
+                } else {
+                    return Err(Error::new_rest())
+                }
+
+                r#type
             } else {
                 engine.primitives.any
             }))

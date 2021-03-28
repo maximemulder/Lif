@@ -78,6 +78,10 @@ impl Error {
         Self::new_runtime("Cannot get the content of a null value.")
     }
 
+    pub fn new_rest() -> Self {
+        Self::new_runtime("Rest parameter type must be an array.")
+    }
+
     pub fn get_message(&self) -> String {
         let mut message = String::new();
         message += &self.message;
