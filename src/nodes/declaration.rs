@@ -26,7 +26,6 @@ impl Executable for Declaration {
             None
         };
 
-        let variable = Variable::new(engine, Box::from(self.identifier.as_ref()), r#type)?;
-        Ok(variable.build(engine))
+        Ok(Variable::new(engine, Box::from(self.identifier.as_ref()), r#type)?.build(engine))
     }
 }

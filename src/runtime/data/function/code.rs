@@ -26,8 +26,7 @@ impl<'a> FunctionImplementation<'a> for FunctionImplementationCode<'a> {
     fn call(&self, engine: &mut Engine<'a>, parameters: &[Variable<'a>], rest: &Option<Variable<'a>>, arguments: Arguments<'a>) -> ReturnReference<'a> {
         let reference = engine.frame(self.scope, &|engine| {
             for (parameter, argument) in parameters.into_iter().zip(arguments.iter().copied()) {
-                let mut reference = parameter.build(engine);
-                reference.set_value(argument);
+                parameter.build(engine).set_value(argument);
             }
 
             if let Some(rest) = rest {
@@ -37,8 +36,7 @@ impl<'a> FunctionImplementation<'a> for FunctionImplementationCode<'a> {
                 }
 
                 let value = engine.new_array_any_value(elements);
-                let mut reference = rest.build(engine);
-                reference.write(value)?;
+                rest.build(engine).set_value(value);
             }
 
             let executable = Ref::as_ref(&self.block);
