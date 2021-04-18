@@ -121,7 +121,7 @@ impl<'a> Engine<'a> {
 
         self.primitives.array_any = {
             let array = self.primitives.array;
-            array.clone().data_generic_primitive_mut().call(self, array, Box::new([self.primitives.any])).ok().unwrap().read().ok().unwrap()
+            array.clone().data_generic_primitive_mut().call(self, array, Box::new([self.primitives.any])).ok().unwrap().get_value()
         };
 
         any::populate(self);
