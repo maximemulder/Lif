@@ -1,64 +1,47 @@
 mod code;
 mod primitive;
 
-use crate::memory::Ref;
-use crate::nodes::Executable;
-use crate::runtime::data::{ Constructor, Tag };
+use crate::runtime::data::Tag;
 use crate::runtime::engine::Engine;
 use crate::runtime::gc::GcTrace;
 use crate::runtime::scope::GcScope;
-use crate::runtime::utilities::{ Arguments, Callable, ReturnReference };
-use crate::runtime::utilities::memoizes::Memoizes;
+use crate::runtime::utilities::{ Arguments, ReturnReference };
+use crate::runtime::utilities::constructors::Constructors;
 use crate::runtime::utilities::parameters;
 use crate::runtime::value::GcValue;
 
-use code::GenericImplementationCode;
-use primitive::GenericImplementationPrimitive;
-
-pub type GenericCode<'a>      = Generic<'a, GenericImplementationCode>;
-pub type GenericPrimitive<'a> = Generic<'a, GenericImplementationPrimitive<'a>>;
+pub use code::GenericCode;
+pub use primitive::GenericPrimitive;
 
 pub trait GenericImplementation<'a> {
     fn call(&self, engine: &mut Engine<'a>, arguments: Arguments<'a>) -> ReturnReference<'a>;
 }
 
-pub struct Generic<'a, T: GenericImplementation<'a>> {
+pub struct Generic<'a> {
     pub tag: Tag,
     scope: GcScope<'a>,
-    memoizes: Memoizes<'a>,
+    constructors: Constructors<'a>,
     parameters: Box<[Box<str>]>,
-    implementation: T,
+    implementation: Box<dyn GenericImplementation<'a> + 'a>,
 }
 
-impl<'a, T: GenericImplementation<'a>> Generic<'a, T> {
-    fn new(tag: Tag, scope: GcScope<'a>, parameters: Box<[Box<str>]>, implementation: T) -> Self {
+impl<'a> Generic<'a> {
+    pub fn new(tag: Tag, scope: GcScope<'a>, parameters: Box<[Box<str>]>, implementation: impl GenericImplementation<'a> + 'a) -> Self {
         Self {
             tag,
             scope,
-            memoizes: Memoizes::new(),
+            constructors: Constructors::new(),
             parameters,
-            implementation
+            implementation: Box::new(implementation),
         }
     }
 }
 
-impl<'a> GenericCode<'a> {
-    pub fn new_code(tag: Tag, scope: GcScope<'a>, parameters: Box<[Box<str>]>, node: Ref<dyn Executable>) -> Self {
-        Self::new(tag, scope, parameters, GenericImplementationCode::new(node))
-    }
-}
-
-impl<'a> GenericPrimitive<'a> {
-    pub fn new_primitive(tag: Tag, scope: GcScope<'a>, parameters: Box<[Box<str>]>, callback: &'a Callable<'a>) -> Self {
-        Self::new(tag, scope, parameters, GenericImplementationPrimitive::new(callback))
-    }
-}
-
-impl<'a, T: GenericImplementation<'a>> Generic<'a, T> {
+impl<'a> Generic<'a> {
     pub fn call(&mut self, engine: &mut Engine<'a>, generic: GcValue<'a>, arguments: Arguments<'a>) -> ReturnReference<'a> {
         parameters::length(arguments.len(), self.parameters.len())?;
-        if let Some(reference) = self.memoizes.get(&arguments) {
-            return Ok(reference);
+        if let Some(value) = self.constructors.get(&arguments) {
+            return Ok(engine.new_reference(value));
         }
 
         let reference = engine.frame(self.scope, &|engine| {
@@ -70,19 +53,20 @@ impl<'a, T: GenericImplementation<'a>> Generic<'a, T> {
             self.implementation.call(engine, arguments.clone())
         })?;
 
+
+        let constructor = self.constructors.record(engine, generic, arguments, reference.get_value());
         let mut value = reference.read()?;
         if value.class == engine.primitives.class {
-            value.data_class_mut().constructor = Some(Constructor::new(generic, arguments.clone()));
+            value.data_class_mut().constructor = Some(constructor);
         }
 
-        self.memoizes.record(arguments, reference);
         Ok(reference)
     }
 }
 
-impl<'a, T: GenericImplementation<'a>> GcTrace for Generic<'a, T> {
+impl GcTrace for Generic<'_> {
     fn trace(&mut self) {
         self.scope.trace();
-        self.memoizes.trace();
+        self.constructors.trace();
     }
 }

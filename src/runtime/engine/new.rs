@@ -36,22 +36,22 @@ impl<'a> Engine<'a> {
 
     pub fn new_function_value(&mut self, name: Option<&str>, parameters: Box<[Variable<'a>]>, rest: Option<Variable<'a>>, r#type: Option<GcValue<'a>>, block: Ref<Node>) -> GcValue<'a> {
         let tag = self.taggers.functions.generate(name.map(Box::from));
-        self.new_value(self.primitives.function_code, Data::new_function(tag, parameters, rest, r#type, self.scope, block))
+        self.new_value(self.primitives.function, Data::new_function(tag, self.scope, parameters, rest, r#type, block))
     }
 
     pub fn new_function_primitive_value(&mut self, name: &str, parameters: Box<[Variable<'a>]>, rest: Option<Variable<'a>>, callback: &'a Callable<'a>) -> GcValue<'a> {
         let tag = self.taggers.functions.generate(Some(Box::from(name)));
-        self.new_value(self.primitives.function_primitive, Data::new_function_primitive(tag, parameters, rest, None, callback))
+        self.new_value(self.primitives.function, Data::new_function_primitive(tag, self.scope, parameters, rest, None, callback))
     }
 
     pub fn new_generic_value(&mut self, name: Option<&str>, parameters: Box<[Box<str>]>, node: Ref<dyn Executable>) -> GcValue<'a> {
         let tag = self.taggers.generics.generate(name.map(Box::from));
-        self.new_value(self.primitives.generic_code, Data::new_generic(tag, self.scope, parameters, node))
+        self.new_value(self.primitives.generic, Data::new_generic(tag, self.scope, parameters, node))
     }
 
     pub fn new_generic_primitive_value(&mut self, name: &str, parameters: Box<[Box<str>]>, callback: &'a Callable<'a>) -> GcValue<'a> {
         let tag = self.taggers.generics.generate(Some(Box::from(name)));
-        self.new_value(self.primitives.generic_primitive, Data::new_generic_primitive(tag, self.scope, parameters, callback))
+        self.new_value(self.primitives.generic, Data::new_generic_primitive(tag, self.scope, parameters, callback))
     }
 
     pub fn new_integer_value(&mut self, integer: isize) -> GcValue<'a> {

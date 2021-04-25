@@ -4,11 +4,11 @@ use crate::runtime::data::generic::GenericImplementation;
 use crate::runtime::engine::Engine;
 use crate::runtime::utilities::{ Arguments, ReturnReference };
 
-pub struct GenericImplementationCode {
+pub struct GenericCode {
     node: Ref<dyn Executable>,
 }
 
-impl GenericImplementationCode {
+impl GenericCode {
     pub fn new(node: Ref<dyn Executable>) -> Self {
         Self {
             node,
@@ -16,7 +16,7 @@ impl GenericImplementationCode {
     }
 }
 
-impl<'a> GenericImplementation<'a> for GenericImplementationCode {
+impl<'a> GenericImplementation<'a> for GenericCode {
     fn call(&self, engine: &mut Engine<'a>, _: Arguments<'a>) -> ReturnReference<'a> {
         engine.execute(Ref::as_ref(&self.node))
     }

@@ -4,44 +4,39 @@ use crate::runtime::data::function::FunctionImplementation;
 use crate::runtime::engine::{ Control, Engine };
 use crate::runtime::error::Error;
 use crate::runtime::gc::GcTrace;
-use crate::runtime::scope::GcScope;
 use crate::runtime::utilities::{ Arguments, ReturnReference };
 use crate::runtime::utilities::variable::Variable;
 
-pub struct FunctionImplementationCode<'a> {
-    scope: GcScope<'a>,
+pub struct FunctionCode {
     block: Ref<Node>,
 }
 
-impl<'a> FunctionImplementationCode<'a> {
-    pub fn new(scope: GcScope<'a>, block: Ref<Node>) -> Self {
+impl FunctionCode {
+    pub fn new(block: Ref<Node>) -> Self {
         Self {
-            scope,
             block,
         }
     }
 }
 
-impl<'a> FunctionImplementation<'a> for FunctionImplementationCode<'a> {
+impl<'a> FunctionImplementation<'a> for FunctionCode {
     fn call(&self, engine: &mut Engine<'a>, parameters: &[Variable<'a>], rest: &Option<Variable<'a>>, arguments: Arguments<'a>) -> ReturnReference<'a> {
-        let reference = engine.frame(self.scope, &|engine| {
-            for (parameter, argument) in parameters.into_iter().zip(arguments.iter().copied()) {
-                parameter.build(engine).set_value(argument);
+        for (parameter, argument) in parameters.into_iter().zip(arguments.iter().copied()) {
+            parameter.build(engine).set_value(argument);
+        }
+
+        if let Some(rest) = rest {
+            let mut elements = Vec::new();
+            for i in parameters.len() .. arguments.len() {
+                elements.push(engine.new_reference(arguments[i]))
             }
 
-            if let Some(rest) = rest {
-                let mut elements = Vec::new();
-                for i in parameters.len() .. arguments.len() {
-                    elements.push(engine.new_reference(arguments[i]))
-                }
+            let value = engine.new_array_any_value(elements);
+            rest.build(engine).set_value(value);
+        }
 
-                let value = engine.new_array_any_value(elements);
-                rest.build(engine).set_value(value);
-            }
-
-            let executable = Ref::as_ref(&self.block);
-            engine.execute(executable)
-        })?;
+        let executable = Ref::as_ref(&self.block);
+        let reference = engine.execute(executable)?;
 
         if engine.control_is(Control::Break) || engine.control_is(Control::Continue) {
             return Err(Error::new_control());
@@ -55,8 +50,6 @@ impl<'a> FunctionImplementation<'a> for FunctionImplementationCode<'a> {
     }
 }
 
-impl GcTrace for FunctionImplementationCode<'_> {
-    fn trace(&mut self) {
-        self.scope.trace();
-    }
+impl GcTrace for FunctionCode {
+    fn trace(&mut self) {}
 }

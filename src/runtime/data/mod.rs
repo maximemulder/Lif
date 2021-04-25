@@ -8,7 +8,7 @@ mod object;
 mod tag;
 
 pub use array::Array;
-pub use class::{ Class, Constructor };
+pub use class::Class;
 pub use function::{ Function, FunctionCode, FunctionPrimitive };
 pub use generic::{ Generic, GenericCode, GenericPrimitive };
 pub use method::Method;
@@ -30,10 +30,8 @@ pub enum Data<'a> {
     Boolean(bool),
     Class(Class<'a>),
     Float(f64),
-    FunctionCode(FunctionCode<'a>),
-    FunctionPrimitive(FunctionPrimitive<'a>),
-    GenericCode(GenericCode<'a>),
-    GenericPrimitive(GenericPrimitive<'a>),
+    Function(Function<'a>),
+    Generic(Generic<'a>),
     Integer(isize),
     Method(Method<'a>),
     Nullable(Nullable<'a>),
@@ -58,20 +56,20 @@ impl<'a> Data<'a> {
         Data::Float(float)
     }
 
-    pub fn new_function(tag: Tag, parameters: Box<[Variable<'a>]>, rest: Option<Variable<'a>>, r#return: Option<GcValue<'a>>, scope: GcScope<'a>, block: Ref<Node>) -> Self {
-        Data::FunctionCode(Function::new_code(tag, parameters, rest, r#return, scope, block))
+    pub fn new_function(tag: Tag, scope: GcScope<'a>, parameters: Box<[Variable<'a>]>, rest: Option<Variable<'a>>, r#return: Option<GcValue<'a>>, block: Ref<Node>) -> Self {
+        Data::Function(Function::new(tag, scope, parameters, rest, r#return, FunctionCode::new(block)))
     }
 
-    pub fn new_function_primitive(tag: Tag, parameters: Box<[Variable<'a>]>, rest: Option<Variable<'a>>, r#return: Option<GcValue<'a>>, callback: &'a Callable<'a>) -> Self {
-        Data::FunctionPrimitive(Function::new_primitive(tag, parameters, rest, r#return, callback))
+    pub fn new_function_primitive(tag: Tag, scope: GcScope<'a>, parameters: Box<[Variable<'a>]>, rest: Option<Variable<'a>>, r#return: Option<GcValue<'a>>, callback: &'a Callable<'a>) -> Self {
+        Data::Function(Function::new(tag, scope, parameters, rest, r#return, FunctionPrimitive::new(callback)))
     }
 
     pub fn new_generic(tag: Tag, scope: GcScope<'a>, parameters: Box<[Box<str>]>, node: Ref<dyn Executable>) -> Self {
-        Data::GenericCode(Generic::new_code(tag, scope, parameters, node))
+        Data::Generic(Generic::new(tag, scope, parameters, GenericCode::new(node)))
     }
 
     pub fn new_generic_primitive(tag: Tag, scope: GcScope<'a>, parameters: Box<[Box<str>]>, callback: &'a Callable<'a>) -> Self {
-        Data::GenericPrimitive(Generic::new_primitive(tag, scope, parameters, callback))
+        Data::Generic(Generic::new(tag, scope, parameters, GenericPrimitive::new(callback)))
     }
 
     pub fn new_integer(integer: isize) -> Self {
@@ -98,15 +96,13 @@ impl<'a> Data<'a> {
 impl GcTrace for Data<'_> {
     fn trace(&mut self) {
         match self {
-            Data::Array(array)                => array.trace(),
-            Data::Class(class)                => class.trace(),
-            Data::FunctionCode(function)      => function.trace(),
-            Data::FunctionPrimitive(function) => function.trace(),
-            Data::GenericCode(generic)        => generic.trace(),
-            Data::GenericPrimitive(generic)   => generic.trace(),
-            Data::Method(method)              => method.trace(),
-            Data::Nullable(nullable)          => nullable.trace(),
-            Data::Object(object)              => object.trace(),
+            Data::Array(array)       => array.trace(),
+            Data::Class(class)       => class.trace(),
+            Data::Function(function) => function.trace(),
+            Data::Generic(generic)   => generic.trace(),
+            Data::Method(method)     => method.trace(),
+            Data::Nullable(nullable) => nullable.trace(),
+            Data::Object(object)     => object.trace(),
             _ => (),
         }
     }

@@ -2,25 +2,12 @@ use crate::runtime::data::Tag;
 use crate::runtime::gc::GcTrace;
 use crate::runtime::reference::GcReference;
 use crate::runtime::value::GcValue;
+use crate::runtime::utilities::constructors::GcConstructor;
 use std::collections::HashMap;
-
-pub struct Constructor<'a> {
-    pub generic: GcValue<'a>,
-    arguments: Box<[GcValue<'a>]>,
-}
-
-impl<'a> Constructor<'a> {
-    pub fn new(generic: GcValue<'a>, arguments: Box<[GcValue<'a>]>) -> Self {
-        Self {
-            generic,
-            arguments,
-        }
-    }
-}
 
 pub struct Class<'a> {
     pub tag: Tag,
-    pub constructor: Option<Constructor<'a>>,
+    pub constructor: Option<GcConstructor<'a>>,
     pub parent:  Option<GcValue<'a>>,
     pub statics: HashMap<Box<str>, GcReference<'a>>,
     pub methods: HashMap<Box<str>, GcValue<'a>>,

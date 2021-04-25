@@ -1,4 +1,4 @@
-use crate::runtime::data::{ Array, Class, Data, FunctionCode, FunctionPrimitive, GenericCode, GenericPrimitive, Method, Nullable, Object, Tag };
+use crate::runtime::data::{ Array, Class, Data, Function, Generic, Method, Nullable, Object, Tag };
 use crate::runtime::engine::Engine;
 use crate::runtime::error::Error;
 use crate::runtime::gc::{ GcRef, GcTrace };
@@ -63,7 +63,7 @@ impl<'a> GcValue<'a> {
     pub fn call_method_self(self, engine: &mut Engine<'a>, name: &str, arguments: Arguments<'a>) -> ReturnReference<'a> {
         let method = self.get_method(name)?;
         let array = parameters::pack(engine, arguments);
-        method.get_method("__cl__")?.data_function_primitive().call(engine, Box::new([method, array]))
+        method.get_method("__cl__")?.data_function().call(engine, Box::new([method, array]))
     }
 
     pub fn call_to_string(self, engine: &mut Engine<'a>) -> Return<String> {
@@ -113,11 +113,9 @@ macro_rules! data_mut {
 impl<'a> Value<'a> {
     pub fn data_tag(&self) -> Tag {
         match &self.data {
-            Data::Class(class)                => class.tag.clone(),
-            Data::FunctionCode(function)      => function.tag.clone(),
-            Data::FunctionPrimitive(function) => function.tag.clone(),
-            Data::GenericCode(generic)        => generic.tag.clone(),
-            Data::GenericPrimitive(generic)   => generic.tag.clone(),
+            Data::Class(class)       => class.tag.clone(),
+            Data::Function(function) => function.tag.clone(),
+            Data::Generic(generic)   => generic.tag.clone(),
             _ => panic!(),
         }
     }
@@ -154,36 +152,20 @@ impl<'a> Value<'a> {
         data_mut!(self, Float);
     }
 
-    pub fn data_function(&self) -> &FunctionCode<'a> {
-        data!(self, FunctionCode);
+    pub fn data_function(&self) -> &Function<'a> {
+        data!(self, Function);
     }
 
-    pub fn data_function_mut(&mut self) -> &mut FunctionCode<'a> {
-        data_mut!(self, FunctionCode);
+    pub fn data_function_mut(&mut self) -> &mut Function<'a> {
+        data_mut!(self, Function);
     }
 
-    pub fn data_function_primitive(&self) -> &FunctionPrimitive<'a> {
-        data!(self, FunctionPrimitive);
+    pub fn data_generic(&self) -> &Generic<'a> {
+        data!(self, Generic);
     }
 
-    pub fn data_function_primitive_mut(&mut self) -> &mut FunctionPrimitive<'a> {
-        data_mut!(self, FunctionPrimitive);
-    }
-
-    pub fn data_generic(&self) -> &GenericCode<'a> {
-        data!(self, GenericCode);
-    }
-
-    pub fn data_generic_mut(&mut self) -> &mut GenericCode<'a> {
-        data_mut!(self, GenericCode);
-    }
-
-    pub fn data_generic_primitive(&self) -> &GenericPrimitive<'a> {
-        data!(self, GenericPrimitive);
-    }
-
-    pub fn data_generic_primitive_mut(&mut self) -> &mut GenericPrimitive<'a> {
-        data_mut!(self, GenericPrimitive);
+    pub fn data_generic_mut(&mut self) -> &mut Generic<'a> {
+        data_mut!(self, Generic);
     }
 
     pub fn data_integer(&self) -> &isize {

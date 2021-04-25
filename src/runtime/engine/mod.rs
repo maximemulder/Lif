@@ -13,6 +13,7 @@ use crate::runtime::reference::{ GcReference, Reference };
 use crate::runtime::registries::Registries;
 use crate::runtime::scope::{ GcScope, Scope };
 use crate::runtime::utilities::ReturnReference;
+use crate::runtime::utilities::constructors::{ GcConstructor, Constructor };
 use crate::runtime::value::{ GcValue, Value };
 
 use std::io::{ Read, Write };
@@ -90,6 +91,10 @@ impl Engine<'_> {
 }
 
 impl<'a> Engine<'a> {
+    pub fn new_builder(&mut self, generic: GcValue<'a>, arguments: Box<[GcValue<'a>]>, value: GcValue<'a>) -> GcConstructor<'a> {
+        self.alloc(Constructor::new(generic, arguments, value))
+    }
+
     pub fn new_value(&mut self, class: GcValue<'a>, data: Data<'a>) -> GcValue<'a> {
         self.alloc(Value::new(class, data))
     }
