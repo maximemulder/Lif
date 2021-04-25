@@ -39,18 +39,6 @@ impl<'a> Function<'a> {
     }
 }
 
-/* impl<'a> FunctionCode<'a> {
-    pub fn new_code(tag: Tag, scope: GcScope<'a>, parameters: Box<[Variable<'a>]>, rest: Option<Variable<'a>>, r#return: Option<GcValue<'a>>, block: Ref<Node>) -> Self {
-        Self::new(tag, scope, parameters, rest, r#return, FunctionImplementationCode::new(block))
-    }
-}
-
-impl<'a> FunctionPrimitive<'a> {
-    pub fn new_primitive(tag: Tag, scope: GcScope<'a>, parameters: Box<[Variable<'a>]>, rest: Option<Variable<'a>>, r#return: Option<GcValue<'a>>, callback: &'a Callable<'a>) -> Self {
-        Self::new(tag, scope, parameters, rest, r#return, FunctionImplementationPrimitive::new(callback))
-    }
-} */
-
 impl<'a> Function<'a> {
     pub fn call(&self, engine: &mut Engine<'a>, arguments: Arguments<'a>) -> ReturnReference<'a> {
         match &self.rest {
@@ -67,7 +55,6 @@ impl<'a> Function<'a> {
         }
 
         let reference = engine.frame(self.scope, &|engine| self.implementation.call(engine, &self.parameters, &self.rest, arguments.clone()))?;
-
         if let Some(r#return) = self.r#return {
             reference.read()?.cast(r#return)?;
         }
