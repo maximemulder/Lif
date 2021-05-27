@@ -1,0 +1,56 @@
+print(0);
+print(1);
+print(227);
+
+print(2 == 2);
+print(2 != 2);
+print(2 <= 2);
+print(2 >= 2);
+
+print(2 < 3);
+print(2 > 3);
+print(2 <= 3);
+print(2 >= 3);
+print(2 == 3);
+print(2 != 3);
+
+print(3 < 2);
+print(3 > 2);
+print(3 <= 2);
+print(3 >= 2);
+print(3 == 2);
+print(3 != 2);
+
+print(+0);
+print(-0);
+print(-1);
+print(--1);
+
+print(0016);
+print(0b10000);
+print(0o20);
+print(0x10);
+
+print(1_000);
+print(0b1000_1000);
+
+print(12 + 2);
+print(12 - 2);
+print(12 * 2);
+print(12 / 2);
+print(12 % 2);
+
+print(~21);
+
+print(21 & 7);
+print(21 | 7);
+print(21 ^ 7);
+
+print(17 >> 1);
+print(17 << 1);
+
+print(5.6);
+print(-5.6);
+
+print(if true { 1 } else { 0 });
+print(if false { 1 } else { 0 });

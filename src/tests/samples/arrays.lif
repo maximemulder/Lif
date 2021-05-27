@@ -1,0 +1,20 @@
+print([0, 1, 2]);
+
+print([2, 3, 4][0]);
+print([2, 3, 4][2]);
+
+let array = [0, 1, 2];
+array.append(3);
+print(array);
+
+let array = [0, 1, 2];
+array.prepend(-1);
+print(array);
+
+let array = [0, 1, 2];
+array.insert(1, 10);
+print(array);
+
+let array = [0, 1, 2];
+array.remove(1);
+print(array);
