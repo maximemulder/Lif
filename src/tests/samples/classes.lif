@@ -1,0 +1,18 @@
+class Pet {
+    function speak(self) {
+        print("I cannot speak, I am a pet !");
+    }
+}
+
+class Dog : Pet {
+    function speak(self) {
+        print("Woof ! Woof ! I am " + self.name + " !");
+    }
+}
+
+let pet = new(Pet);
+let doggo = new(Dog);
+doggo.name = "Medor";
+
+pet.speak();
+doggo.speak();

@@ -18,3 +18,8 @@ print(array);
 let array = [0, 1, 2];
 array.remove(1);
 print(array);
+
+let array = [2, 4, 8];
+array.append(16, 32, 64);
+array.prepend(0, 1);
+print(array);

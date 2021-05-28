@@ -1,0 +1,17 @@
+function greet(greeting: String, ...persons: Array<String>) {
+	for person in persons {
+		print(greeting + " " + person + " !");
+	}
+}
+
+greet("Hello", "Alice", "Bob");
+
+function callback(variable) {
+    print("Variable " + variable + " from callback.");
+}
+
+function executor(callback) {
+    callback(42);
+}
+
+executor(callback);

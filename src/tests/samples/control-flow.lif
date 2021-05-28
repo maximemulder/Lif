@@ -1,0 +1,32 @@
+print(if true {
+    true
+} else {
+    false
+});
+
+print(if false {
+    true
+} else {
+    false
+});
+
+let i = 0;
+loop {
+    if i == 3 {
+        break;
+    } else {
+        print(i);
+    }
+
+    i = i + 1;
+}
+
+let i = 0;
+while i < 3 {
+    print(i);
+    i = i + 1;
+}
+
+for i in [0, 1, 2] {
+    print(i);
+}
