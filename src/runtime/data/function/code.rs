@@ -1,9 +1,10 @@
 use crate::memory::Ref;
 use crate::nodes::Node;
 use crate::runtime::data::function::FunctionImplementation;
-use crate::runtime::engine::{ Control, Engine };
+use crate::runtime::engine::Engine;
 use crate::runtime::error::Error;
 use crate::runtime::gc::GcTrace;
+use crate::runtime::jump::Jump;
 use crate::runtime::utilities::{ Arguments, ReturnReference };
 use crate::runtime::utilities::variable::Variable;
 
@@ -38,11 +39,11 @@ impl<'a> FunctionImplementation<'a> for FunctionCode {
         let executable = Ref::as_ref(&self.block);
         let reference = engine.execute(executable)?;
 
-        if engine.control_is(Control::Break) || engine.control_is(Control::Continue) {
-            return Err(Error::new_control());
+        if engine.jump == Jump::Break || engine.jump == Jump::Continue {
+            return Err(Error::new_jump());
         }
 
-        if engine.control_consume(Control::Return) && reference.is_defined() {
+        if engine.jump_swap(Jump::Return, Jump::None) && reference.is_defined() {
             return Ok(engine.new_constant(reference.get_value()));
         }
 

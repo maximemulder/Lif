@@ -1,0 +1,17 @@
+if true {
+    print(true);
+} else {
+    print(false);
+}
+
+print(if true {
+    true
+} else {
+    false
+});
+
+print(if false {
+    true
+} else {
+    false
+});

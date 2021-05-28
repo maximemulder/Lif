@@ -1,4 +1,3 @@
-mod control;
 mod new;
 
 use crate::code::Code;
@@ -9,6 +8,7 @@ use crate::runtime::data::{ Data, Tagger };
 use crate::runtime::primitives::Primitives;
 use crate::runtime::error::Error;
 use crate::runtime::gc::{ GC_THRESHOLD, Gc, GcRef, GcTrace };
+use crate::runtime::jump::Jump;
 use crate::runtime::reference::{ GcReference, Reference };
 use crate::runtime::registries::Registries;
 use crate::runtime::scope::{ GcScope, Scope };
@@ -17,13 +17,6 @@ use crate::runtime::utilities::constructors::{ GcConstructor, Constructor };
 use crate::runtime::value::{ GcValue, Value };
 
 use std::io::{ Read, Write };
-
-#[derive(PartialEq, Eq)]
-pub enum Control {
-    Return,
-    Break,
-    Continue,
-}
 
 pub struct Taggers {
     generics:  Tagger,
@@ -47,6 +40,7 @@ pub struct Engine<'a> {
     pub output:     &'a mut dyn Write,
     pub error:      &'a mut dyn Write,
     pub primitives: Primitives<'a>,
+    pub jump:       Jump,
     registries:     Registries,
     taggers:        Taggers,
     gc:             Gc,
@@ -54,7 +48,6 @@ pub struct Engine<'a> {
     frames:         Vec<GcScope<'a>>,
     scope:          GcScope<'a>,
     undefined:      GcReference<'a>,
-    control:        Option<Control>,
 }
 
 impl<'a> Engine<'a> {
@@ -65,6 +58,7 @@ impl<'a> Engine<'a> {
             output,
             error,
             primitives:  Primitives::new(),
+            jump:        Jump::None,
             registries:  Registries::new(),
             taggers:     Taggers::new(),
             gc:          Gc::new(),
@@ -72,7 +66,6 @@ impl<'a> Engine<'a> {
             frames:      Vec::new(),
             scope:       GcScope::null(),
             undefined:   GcReference::null(),
-            control:     None,
         };
 
         engine.undefined = engine.alloc(Reference::new_constant(None));

@@ -166,7 +166,7 @@ pub fn get() -> (Arena::<dyn Descent>, Arena::<dyn Ascent>) {
     let variable_string         = descent_token!(&elements::variables::STRING);
     let variable_identifier     = descent_token!(&elements::variables::IDENTIFIER);
 
-    macro_rules! macro_control {
+    macro_rules! macro_jump {
         ( $keyword:expr, $element:expr ) => {
             descent_element!(
                 descent_sequence![$keyword, expression_option],
@@ -292,13 +292,13 @@ pub fn get() -> (Arena::<dyn Descent>, Arena::<dyn Ascent>) {
         &elements::expressions::LET
     );
 
-    let control = descent_element!(
+    let jump = descent_element!(
         descent_choice![
-            macro_control!(keyword_return,   &elements::controls::RETURN),
-            macro_control!(keyword_break,    &elements::controls::BREAK),
-            macro_control!(keyword_continue, &elements::controls::CONTINUE),
+            macro_jump!(keyword_continue, &elements::jumps::CONTINUE),
+            macro_jump!(keyword_break,    &elements::jumps::BREAK),
+            macro_jump!(keyword_return,   &elements::jumps::RETURN),
         ],
-        &elements::controls::CONTROL
+        &elements::jumps::JUMP
     );
 
     let block = descent_element!(
@@ -430,7 +430,7 @@ pub fn get() -> (Arena::<dyn Descent>, Arena::<dyn Ascent>) {
     );
 
     let expression_core = descent_element!(
-        descent_choice![class, function, flow, control, r#let, array, group, literal, preop],
+        descent_choice![class, function, flow, jump, r#let, array, group, literal, preop],
         &elements::expressions::EXPRESSION
     );
 

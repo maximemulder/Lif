@@ -1,9 +1,11 @@
 #![allow(dead_code)]
+#![macro_use]
 
 macro_rules! execute {
     ( $engine:expr, $node:expr ) => {{
+        use crate::runtime::jump::Jump;
         let reference = $engine.execute($node)?;
-        if $engine.control_none() {
+        if $engine.jump == Jump::None {
             reference
         } else {
             return Ok(reference);

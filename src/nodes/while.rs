@@ -1,5 +1,6 @@
 use crate::nodes::{ Executable, Node };
-use crate::runtime::engine::{ Control, Engine };
+use crate::runtime::engine::Engine;
+use crate::runtime::jump::Jump;
 use crate::runtime::utilities::ReturnReference;
 
 pub struct While {
@@ -24,7 +25,7 @@ impl Executable for While {
             *reference.read()?.get_cast_boolean(engine)?
         } {
             let reference = engine.execute(&self.body)?;
-            if engine.control_is(Control::Return) {
+            if engine.jump == Jump::Return {
                 return Ok(reference);
             }
 
@@ -32,12 +33,12 @@ impl Executable for While {
                 array.push(engine.new_reference(reference.get_value()));
             }
 
-            if engine.control_consume(Control::Break) {
-                break;
+            if engine.jump_swap(Jump::Continue, Jump::None) {
+                continue;
             }
 
-            if engine.control_consume(Control::Continue) {
-                continue;
+            if engine.jump_swap(Jump::Break, Jump::None) {
+                break;
             }
         }
 

@@ -42,8 +42,8 @@ impl Error {
         Self::new_runtime(&message)
     }
 
-    pub fn new_control() -> Self {
-        Self::new_runtime("Cannot loop control out of a function.")
+    pub fn new_jump() -> Self {
+        Self::new_runtime("Cannot continue or break out of a function.")
     }
 
     pub fn new_undefined() -> Self {

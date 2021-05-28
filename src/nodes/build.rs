@@ -61,7 +61,7 @@ pub fn expression(node: Ref<SyntaxNode>) -> Node {
         elements::structures::CLASS        => class(child),
         elements::structures::FUNCTION     => function(child),
         elements::flows::FLOW              => flow(child),
-        elements::controls::CONTROL        => control(child),
+        elements::jumps::JUMP              => jump(child),
         elements::expressions::LET         => r#let(child),
         elements::expressions::ARRAY       => array(child),
         elements::expressions::GROUP       => group(child),
@@ -178,12 +178,12 @@ fn declaration(node: Ref<SyntaxNode>) -> Node {
     Node::new(node, Declaration::new(token(node.front(0)), r#type(node.front(1))))
 }
 
-fn control(node: Ref<SyntaxNode>) -> Node {
+fn jump(node: Ref<SyntaxNode>) -> Node {
     let child = node.front(0);
     match *child.element {
-        elements::controls::RETURN   => r#return(child),
-        elements::controls::BREAK    => r#break(child),
-        elements::controls::CONTINUE => r#continue(child),
+        elements::jumps::CONTINUE => r#continue(child),
+        elements::jumps::BREAK    => r#break(child),
+        elements::jumps::RETURN   => r#return(child),
         _ => panic!(),
     }
 }

@@ -1,5 +1,6 @@
 use crate::nodes::{ Executable, Node };
-use crate::runtime::engine::{ Control, Engine };
+use crate::runtime::engine::Engine;
+use crate::runtime::jump::Jump;
 use crate::runtime::utilities::ReturnReference;
 
 pub struct Return {
@@ -15,6 +16,6 @@ impl Return {
 
 impl Executable for Return {
     fn execute<'a>(&self, engine: &mut Engine<'a>) -> ReturnReference<'a> {
-        engine.control_new(Control::Return, self.expression.as_ref())
+        engine.jump_new(Jump::Return, self.expression.as_ref())
     }
 }

@@ -1,5 +1,6 @@
 use crate::nodes::{ Executable, Node };
-use crate::runtime::engine::{ Control, Engine };
+use crate::runtime::engine::Engine;
+use crate::runtime::jump::Jump;
 use crate::runtime::utilities::ReturnReference;
 
 pub struct Break {
@@ -16,6 +17,6 @@ impl Break {
 
 impl Executable for Break {
     fn execute<'a>(&self, engine: &mut Engine<'a>) -> ReturnReference<'a> {
-        engine.control_new(Control::Break, self.expression.as_ref())
+        engine.jump_new(Jump::Break, self.expression.as_ref())
     }
 }
