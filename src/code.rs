@@ -14,8 +14,8 @@ pub struct Code {
 impl Code {
     fn new(parser: &Parser, production: usize, program: &dyn Fn(Ref<ANode>) -> CNode, name: Option<&str>, text: Box<str>) -> Own<Self> {
         let mut code = Own::new(Self {
+            text,
             name: name.map(Box::from),
-            text: Box::from(text),
             ast: None,
             cst: None,
         });

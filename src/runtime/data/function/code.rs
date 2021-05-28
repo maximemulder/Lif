@@ -21,7 +21,7 @@ impl FunctionCode {
 
 impl<'a> FunctionImplementation<'a> for FunctionCode {
     fn call(&self, engine: &mut Engine<'a>, parameters: &[Variable<'a>], rest: &Option<Variable<'a>>, arguments: Arguments<'a>) -> ReturnReference<'a> {
-        for (parameter, argument) in parameters.into_iter().zip(arguments.iter().copied()) {
+        for (parameter, argument) in parameters.iter().zip(arguments.iter().copied()) {
             parameter.build(engine).set_value(argument);
         }
 

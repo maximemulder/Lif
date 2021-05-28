@@ -27,7 +27,7 @@ fn to_string<'a>(engine: &mut Engine<'a>, arguments: Arguments<'a>) -> ReturnRef
     if let Some(value) = arguments[0].data_nullable().option {
         string.push_str("OPTION(");
         string.push_str(&value.call_to_string(engine)?);
-        string.push_str(")");
+        string.push(')');
     } else {
         string.push_str("NULL");
     }
