@@ -53,7 +53,7 @@ fn prepend<'a>(engine: &mut Engine<'a>, mut arguments: Arguments<'a>) -> ReturnR
     for index in 1 .. arguments.len() {
         let r#type = get_type(engine)?;
         let reference = engine.new_variable(Some(arguments[index]), r#type);
-        arguments[0].data_array_mut().elements.insert(0, reference);
+        arguments[0].data_array_mut().elements.insert(index - 1, reference);
     }
 
     Ok(engine.undefined())
