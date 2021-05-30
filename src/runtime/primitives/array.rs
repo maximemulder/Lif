@@ -1,15 +1,16 @@
 use crate::runtime::engine::Engine;
-use crate::runtime::utilities::{ Arguments, ReturnReference, ReturnValue };
+use crate::runtime::utilities::{ Arguments, ReturnReference };
 use crate::runtime::utilities::builder;
+use crate::runtime::value::GcValue;
 
 pub fn populate(engine: &mut Engine) {
-    engine.add_constant_value("Array", engine.primitives.array);
+    engine.set_constant_value("Array", engine.primitives.array);
 }
 
 pub fn create<'a>(engine: &mut Engine<'a>, arguments: Arguments<'a>) -> ReturnReference<'a> {
     let class = arguments[0];
     class.cast(engine.primitives.class)?;
-    let array = engine.new_class_value(None, engine.primitives.any);
+    let array = engine.new_class_value(None, Some(engine.primitives.any));
     builder::method(engine, array, "to_string", [array],               &to_string);
     builder::method(engine, array, "insert",    [array, engine.primitives.integer, class], &insert);
     builder::method(engine, array, "remove",    [array, engine.primitives.integer],        &remove);
@@ -19,8 +20,8 @@ pub fn create<'a>(engine: &mut Engine<'a>, arguments: Arguments<'a>) -> ReturnRe
     Ok(engine.new_constant(array))
 }
 
-fn get_type<'a>(engine: &mut Engine<'a>) -> ReturnValue<'a> {
-    engine.get_variable("__type__")?.read()
+fn get_type<'a>(engine: &mut Engine<'a>) -> GcValue<'a> {
+    engine.scope().parent().unwrap().source().unwrap().data_class().constructor.unwrap().arguments[0]
 }
 
 fn to_string<'a>(engine: &mut Engine<'a>, arguments: Arguments<'a>) -> ReturnReference<'a> {
@@ -41,7 +42,7 @@ fn to_string<'a>(engine: &mut Engine<'a>, arguments: Arguments<'a>) -> ReturnRef
 
 fn append<'a>(engine: &mut Engine<'a>, mut arguments: Arguments<'a>) -> ReturnReference<'a> {
     for index in 1 .. arguments.len() {
-        let r#type = get_type(engine)?;
+        let r#type = get_type(engine);
         let reference = engine.new_variable(Some(arguments[index]), r#type);
         arguments[0].data_array_mut().elements.push(reference);
     }
@@ -51,7 +52,7 @@ fn append<'a>(engine: &mut Engine<'a>, mut arguments: Arguments<'a>) -> ReturnRe
 
 fn prepend<'a>(engine: &mut Engine<'a>, mut arguments: Arguments<'a>) -> ReturnReference<'a> {
     for index in 1 .. arguments.len() {
-        let r#type = get_type(engine)?;
+        let r#type = get_type(engine);
         let reference = engine.new_variable(Some(arguments[index]), r#type);
         arguments[0].data_array_mut().elements.insert(index - 1, reference);
     }
@@ -61,7 +62,7 @@ fn prepend<'a>(engine: &mut Engine<'a>, mut arguments: Arguments<'a>) -> ReturnR
 
 fn insert<'a>(engine: &mut Engine<'a>, mut arguments: Arguments<'a>) -> ReturnReference<'a> {
     let index = *arguments[1].data_integer() as usize;
-    let r#type = get_type(engine)?;
+    let r#type = get_type(engine);
     let reference = engine.new_variable(Some(arguments[2]), r#type);
     arguments[0].data_array_mut().elements.insert(index, reference);
     Ok(engine.undefined())

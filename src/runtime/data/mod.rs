@@ -48,8 +48,8 @@ impl<'a> Data<'a> {
         Data::Boolean(boolean)
     }
 
-    pub fn new_class(tag: Tag, parent: Option<GcValue<'a>>) -> Self {
-        Data::Class(Class::new(tag, parent))
+    pub fn new_class(tag: Tag, scope: GcScope<'a>, parent: Option<GcValue<'a>>) -> Self {
+        Data::Class(Class::new(tag, scope, parent))
     }
 
     pub fn new_float(float: f64) -> Self {

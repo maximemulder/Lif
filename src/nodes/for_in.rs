@@ -27,7 +27,7 @@ impl Executable for ForIn {
             let reference = execute!(engine, &self.expression);
             reference.read()?.get_cast_array(engine)?.elements.clone()
         } {
-            engine.add_variable(&self.identifier, element);
+            engine.set_variable(&self.identifier, element);
             let reference = engine.execute(&self.body)?;
             if engine.jump == Jump::Return {
                 return Ok(reference);

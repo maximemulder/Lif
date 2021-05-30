@@ -1,0 +1,21 @@
+let variable = 0;
+print(variable);
+
+{
+    print(variable);
+    let variable = 1;
+    print(variable);
+}
+
+print(variable);
+
+let test = {
+    let variable = 2;
+    function() {
+        print(variable);
+        let variable = 3;
+        print(variable);
+    }
+};
+
+test();

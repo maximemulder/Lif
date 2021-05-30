@@ -35,6 +35,10 @@ impl<'a> Generic<'a> {
             implementation: Box::new(implementation),
         }
     }
+
+    pub fn scope(&self) -> GcScope<'a> {
+        self.scope
+    }
 }
 
 impl<'a> Generic<'a> {
@@ -44,10 +48,10 @@ impl<'a> Generic<'a> {
             return Ok(engine.new_reference(value));
         }
 
-        let reference = engine.frame(self.scope, &|engine| {
+        let reference = engine.run_frame(self.scope, &|engine| {
             for (parameter, argument) in self.parameters.iter().zip(arguments.iter().copied()) {
                 let reference = engine.new_constant(argument);
-                engine.add_variable(parameter, reference);
+                engine.set_variable(parameter, reference);
             }
 
             self.implementation.call(engine, arguments.clone())

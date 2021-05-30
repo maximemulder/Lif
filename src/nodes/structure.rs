@@ -17,7 +17,7 @@ impl Structure {
 impl Executable for Structure {
     fn execute<'a>(&self, engine: &mut Engine<'a>) -> ReturnReference<'a> {
         let structure = execute!(engine, &self.structure);
-        engine.add_variable(structure.read()?.data_tag().get_name().unwrap(), structure);
+        engine.set_variable(structure.read()?.data_tag().get_name().unwrap(), structure);
         Ok(engine.undefined())
     }
 }

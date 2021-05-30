@@ -27,13 +27,18 @@ impl Executable for Class {
             engine.primitives.object
         };
 
-        let class = engine.new_class(Ref::as_option(&self.name), parent);
-        let mut value = class.read()?;
-        let data = value.data_class_mut();
-        for method in self.methods.iter() {
-            let function = engine.execute(method)?.read()?;
-            data.methods.insert(function.data_tag().get_name().unwrap().to_string().into_boxed_str(), function);
-        }
+        let class = engine.new_class(Ref::as_option(&self.name), Some(parent));
+        let value = class.read()?;
+        engine.run_frame(value.data_class().scope(), &|engine| {
+            let mut value = class.read()?;
+            let data = value.data_class_mut();
+            for method in self.methods.iter() {
+                let function = engine.execute(method)?.read()?;
+                data.methods.insert(function.data_tag().get_name().unwrap().to_string().into_boxed_str(), function);
+            }
+
+            Ok(())
+        })?;
 
         Ok(class)
     }

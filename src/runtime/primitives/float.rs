@@ -5,7 +5,7 @@ use crate::runtime::utilities::builder;
 
 pub fn populate(engine: &mut Engine) {
     let Primitives { any, float, .. } = engine.primitives;
-    engine.add_constant_value("Float", float);
+    engine.set_constant_value("Float", float);
     builder::method(engine, float, "to_string", [float],          &to_string);
     builder::method(engine, float, "__eq__",    [float, any],     &eq);
     builder::method(engine, float, "__lt__",    [float, float], &lt);

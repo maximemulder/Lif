@@ -6,7 +6,7 @@ use crate::runtime::utilities::parameters;
 
 pub fn populate(engine: &mut Engine) {
     let Primitives { array_any, function, .. } = engine.primitives;
-    engine.add_constant_value("Function", function);
+    engine.set_constant_value("Function", function);
     builder::method(engine, function, "to_string", [function],            &to_string);
     builder::method(engine, function, "__cl__",    [function, array_any], &cl);
 }

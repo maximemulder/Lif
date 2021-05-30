@@ -3,7 +3,6 @@ use crate::nodes::Node;
 use crate::runtime::data::function::FunctionImplementation;
 use crate::runtime::engine::Engine;
 use crate::runtime::error::Error;
-use crate::runtime::gc::GcTrace;
 use crate::runtime::jump::Jump;
 use crate::runtime::utilities::{ Arguments, ReturnReference };
 use crate::runtime::utilities::variable::Variable;
@@ -49,8 +48,4 @@ impl<'a> FunctionImplementation<'a> for FunctionCode {
 
         Ok(engine.undefined())
     }
-}
-
-impl GcTrace for FunctionCode {
-    fn trace(&mut self) {}
 }

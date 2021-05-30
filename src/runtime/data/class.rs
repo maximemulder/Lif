@@ -1,12 +1,14 @@
 use crate::runtime::data::Tag;
 use crate::runtime::gc::GcTrace;
 use crate::runtime::reference::GcReference;
-use crate::runtime::value::GcValue;
+use crate::runtime::scope::GcScope;
 use crate::runtime::utilities::constructors::GcConstructor;
+use crate::runtime::value::GcValue;
 use std::collections::HashMap;
 
 pub struct Class<'a> {
     pub tag: Tag,
+    scope: GcScope<'a>,
     pub constructor: Option<GcConstructor<'a>>,
     pub parent:  Option<GcValue<'a>>,
     pub statics: HashMap<Box<str>, GcReference<'a>>,
@@ -14,10 +16,11 @@ pub struct Class<'a> {
 }
 
 impl<'a> Class<'a> {
-    pub fn new(tag: Tag, parent: Option<GcValue<'a>>) -> Self {
+    pub fn new(tag: Tag, scope: GcScope<'a>, parent: Option<GcValue<'a>>) -> Self {
         Self {
             tag,
             constructor: None,
+            scope,
             parent,
             statics: HashMap::new(),
             methods: HashMap::new(),
@@ -35,10 +38,19 @@ impl<'a> Class<'a> {
 
         None
     }
+
+    pub fn scope(&self) -> GcScope<'a> {
+        self.scope
+    }
 }
 
 impl GcTrace for Class<'_> {
     fn trace(&mut self) {
+        self.scope.trace();
+        if let Some(constructor) = self.constructor.as_mut() {
+            constructor.trace();
+        }
+
         if let Some(parent) = &mut self.parent {
             parent.trace();
         }

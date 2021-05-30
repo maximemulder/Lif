@@ -27,7 +27,7 @@ impl<'a> Variable<'a> {
 
     pub fn build(&self, engine: &mut Engine<'a>) -> GcReference<'a> {
         let reference = engine.new_variable(None, self.r#type.unwrap_or(engine.primitives.any));
-        engine.add_variable(self.name.as_ref(), reference);
+        engine.set_variable(self.name.as_ref(), reference);
         reference
     }
 

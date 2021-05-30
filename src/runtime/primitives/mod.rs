@@ -85,25 +85,25 @@ impl GcTrace for Primitives<'_> {
 
 impl<'a> Engine<'a> {
     pub fn populate(&mut self) {
-        self.primitives.class = self.new_class_primitive_value(None, "Class");
-        self.primitives.any   = self.new_class_primitive_value(None, "Any");
+        self.primitives.class = self.new_class_value(Some("Class"), None);
+        self.primitives.any   = self.new_class_value(Some("Any"), None);
 
         self.primitives.class.class = self.primitives.class;
         self.primitives.class.data_class_mut().parent = Some(self.primitives.any);
         self.primitives.any.data_class_mut().parent = None;
 
-        self.primitives.boolean  = self.new_class_primitive_value(Some(self.primitives.any), "Boolean");
-        self.primitives.file     = self.new_class_primitive_value(Some(self.primitives.any), "File");
-        self.primitives.float    = self.new_class_primitive_value(Some(self.primitives.any), "Float");
-        self.primitives.function = self.new_class_primitive_value(Some(self.primitives.any), "Function");
-        self.primitives.generic  = self.new_class_primitive_value(Some(self.primitives.any), "Generic");
-        self.primitives.integer  = self.new_class_primitive_value(Some(self.primitives.any), "Integer");
-        self.primitives.method   = self.new_class_primitive_value(Some(self.primitives.any), "Method");
-        self.primitives.object   = self.new_class_primitive_value(Some(self.primitives.any), "Object");
-        self.primitives.string   = self.new_class_primitive_value(Some(self.primitives.any), "String");
+        self.primitives.boolean  = self.new_class_value(Some("Boolean"),  Some(self.primitives.any));
+        self.primitives.file     = self.new_class_value(Some("File"),     Some(self.primitives.any));
+        self.primitives.float    = self.new_class_value(Some("Float"),    Some(self.primitives.any));
+        self.primitives.function = self.new_class_value(Some("Function"), Some(self.primitives.any));
+        self.primitives.generic  = self.new_class_value(Some("Generic"),  Some(self.primitives.any));
+        self.primitives.integer  = self.new_class_value(Some("Integer"),  Some(self.primitives.any));
+        self.primitives.method   = self.new_class_value(Some("Method"),   Some(self.primitives.any));
+        self.primitives.object   = self.new_class_value(Some("Object"),   Some(self.primitives.any));
+        self.primitives.string   = self.new_class_value(Some("String"),   Some(self.primitives.any));
 
-        self.primitives.array    = self.new_generic_primitive_value("Array",  Box::new([Box::from("__type__")]), &array::create);
-        self.primitives.nullable = self.new_generic_primitive_value("Option", Box::new([Box::from("__type__")]), &nullable::create);
+        self.primitives.array    = self.new_generic_primitive_value("Array",  Box::new([Box::from("T")]), &array::create);
+        self.primitives.nullable = self.new_generic_primitive_value("Option", Box::new([Box::from("T")]), &nullable::create);
 
         self.primitives.array_any = {
             let array = self.primitives.array;

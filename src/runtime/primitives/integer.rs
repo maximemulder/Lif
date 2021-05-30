@@ -7,7 +7,7 @@ use std::mem::size_of;
 
 pub fn populate(engine: &mut Engine) {
     let Primitives { any, integer, .. } = engine.primitives;
-    engine.add_constant_value("Integer", integer);
+    engine.set_constant_value("Integer", integer);
     builder::method(engine, integer, "to_string", [integer],          &to_string);
     builder::method(engine, integer, "__eq__",    [integer, any],     &eq);
     builder::method(engine, integer, "__lt__",    [integer, integer], &lt);

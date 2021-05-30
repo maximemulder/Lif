@@ -5,7 +5,7 @@ use crate::runtime::utilities::builder;
 
 pub fn populate(engine: &mut Engine) {
     let Primitives { any, boolean, .. } = engine.primitives;
-    engine.add_constant_value("Boolean", boolean);
+    engine.set_constant_value("Boolean", boolean);
     builder::method(engine, boolean, "to_string", [boolean],      &to_string);
     builder::method(engine, boolean, "__eq__",    [boolean, any], &eq);
     builder::method(engine, boolean, "__not__",   [boolean],      &not);

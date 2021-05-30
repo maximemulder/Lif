@@ -13,7 +13,7 @@ use crate::runtime::value::GcValue;
 pub use code::FunctionCode;
 pub use primitive::FunctionPrimitive;
 
-pub trait FunctionImplementation<'a>: GcTrace {
+pub trait FunctionImplementation<'a> {
     fn call(&self, engine: &mut Engine<'a>, parameters: &[Variable<'a>], rest: &Option<Variable<'a>>, arguments: Arguments<'a>) -> ReturnReference<'a>;
 }
 
@@ -37,6 +37,10 @@ impl<'a> Function<'a> {
             implementation: Box::new(implementation),
         }
     }
+
+    pub fn scope(&self) -> GcScope<'a> {
+        self.scope
+    }
 }
 
 impl<'a> Function<'a> {
@@ -54,7 +58,7 @@ impl<'a> Function<'a> {
             parameter.cast(argument)?;
         }
 
-        let reference = engine.frame(self.scope, &|engine| self.implementation.call(engine, &self.parameters, &self.rest, arguments.clone()))?;
+        let reference = engine.run_frame(self.scope, &|engine| self.implementation.call(engine, &self.parameters, &self.rest, arguments.clone()))?;
         if let Some(r#return) = self.r#return {
             reference.read()?.cast(r#return)?;
         }
@@ -65,7 +69,7 @@ impl<'a> Function<'a> {
 
 impl GcTrace for Function<'_> {
     fn trace(&mut self) {
-        self.implementation.trace();
+        self.scope.trace();
         for parameter in self.parameters.iter_mut() {
             parameter.trace();
         }

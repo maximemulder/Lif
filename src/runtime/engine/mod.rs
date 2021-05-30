@@ -1,4 +1,5 @@
 mod new;
+mod scope;
 
 use crate::code::Code;
 use crate::memory::{ Own, Ref };
@@ -68,8 +69,8 @@ impl<'a> Engine<'a> {
             undefined:   GcReference::null(),
         };
 
+        engine.scope = engine.alloc(Scope::new(None));
         engine.undefined = engine.alloc(Reference::new_constant(None));
-        engine.scope = engine.alloc(Scope::new());
         engine.populate();
         engine
     }
@@ -110,46 +111,13 @@ impl<'a> Engine<'a> {
 }
 
 impl<'a> Engine<'a> {
-    pub fn frame(&mut self, scope: GcScope<'a>, callback: &dyn Fn(&mut Engine<'a>) -> ReturnReference<'a>) -> ReturnReference<'a> {
-        self.push_frame(scope);
-        let reference = callback(self);
-        self.pop_frame();
-        reference
-    }
-
-    pub fn scope(&mut self, callback: &dyn Fn(&mut Engine<'a>) -> ReturnReference<'a>) -> ReturnReference<'a> {
-        self.push_scope();
-        let reference = callback(self);
-        self.pop_scope();
-        reference
-    }
-
-    fn push_frame(&mut self, frame: GcScope<'a>) {
-        self.frames.push(self.scope);
-        self.scope = frame;
-    }
-
-    fn pop_frame(&mut self) {
-        self.scope = self.frames.pop().unwrap();
-    }
-
-    fn push_scope(&mut self) {
-        self.scope = self.alloc(Scope::new_child(self.scope));
-    }
-
-    fn pop_scope(&mut self) {
-        self.scope = self.scope.parent.unwrap();
-    }
-}
-
-impl<'a> Engine<'a> {
-    pub fn add_constant_value(&mut self, name: &str, value: GcValue<'a>) {
+    pub fn set_constant_value(&mut self, name: &str, value: GcValue<'a>) {
         let reference = self.new_constant(value);
-        self.add_variable(name, reference);
+        self.set_variable(name, reference);
     }
 
-    pub fn add_variable(&mut self, name: &str, reference: GcReference<'a>) {
-        self.scope.add_variable(name, reference);
+    pub fn set_variable(&mut self, name: &str, reference: GcReference<'a>) {
+        self.scope.set_variable(name, reference);
     }
 
     pub fn get_variable(&self, name: &str) -> ReturnReference<'a> {
@@ -159,7 +127,7 @@ impl<'a> Engine<'a> {
                 return Ok(object);
             }
 
-            if let Some(parent) = scope.parent {
+            if let Some(parent) = scope.parent() {
                 scope = parent;
             } else {
                 return Err(Error::new_undeclared_variable(name));

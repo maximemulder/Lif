@@ -7,7 +7,7 @@ use std::fs;
 
 pub fn populate(engine: &mut Engine) {
     let Primitives { any, file, string, .. } = engine.primitives;
-    engine.add_constant_value("File", file);
+    engine.set_constant_value("File", file);
     builder::r#static(engine, file, "read",  [string],      &read);
     builder::r#static(engine, file, "write", [string, any], &write);
 }

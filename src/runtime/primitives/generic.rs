@@ -6,7 +6,7 @@ use crate::runtime::utilities::parameters;
 
 pub fn populate(engine: &mut Engine) {
     let Primitives { array_any, generic, .. } = engine.primitives;
-    engine.add_constant_value("Generic", generic);
+    engine.set_constant_value("Generic", generic);
     builder::method(engine, generic, "to_string", [generic],            &to_string);
     builder::method(engine, generic, "__gn__",    [generic, array_any], &gn);
 }
