@@ -1,7 +1,7 @@
 use crate::runtime::engine::Engine;
 use crate::runtime::scope::{ GcScope, Scope };
 
-impl<'a,> Engine<'a> {
+impl<'a> Engine<'a> {
     pub fn run_scope<T>(&mut self, callback: &dyn Fn(&mut Engine<'a>) -> T) -> T {
         self.push_scope();
         let r#return = callback(self);
