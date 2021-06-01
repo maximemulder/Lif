@@ -18,7 +18,7 @@ pub trait GenericImplementation<'a> {
 }
 
 pub struct Generic<'a> {
-    pub tag: Tag,
+    tag: Tag,
     scope: GcScope<'a>,
     constructors: Constructors<'a>,
     parameters: Box<[Box<str>]>,
@@ -36,6 +36,10 @@ impl<'a> Generic<'a> {
         }
     }
 
+    pub fn tag(&self) -> &Tag {
+        &self.tag
+    }
+
     pub fn scope(&self) -> GcScope<'a> {
         self.scope
     }
@@ -48,7 +52,7 @@ impl<'a> Generic<'a> {
             return Ok(engine.new_reference(value));
         }
 
-        let reference = engine.run_frame(self.scope, &|engine| {
+        let reference = engine.run_frame(self.scope, |engine| {
             for (parameter, argument) in self.parameters.iter().zip(arguments.iter().copied()) {
                 let reference = engine.new_constant(argument);
                 engine.set_variable(parameter, reference);

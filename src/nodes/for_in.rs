@@ -25,7 +25,7 @@ impl Executable for ForIn {
         let mut array = Vec::new();
         for element in {
             let reference = execute!(engine, &self.expression);
-            reference.read()?.get_cast_array(engine)?.elements.clone()
+            reference.read()?.get_cast_array(engine)?.elements().iter().copied().clone()
         } {
             engine.set_variable(&self.identifier, element);
             let reference = engine.execute(&self.body)?;

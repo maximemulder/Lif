@@ -1,16 +1,28 @@
 use crate::runtime::engine::Engine;
 use crate::runtime::scope::{ GcScope, Scope };
+use crate::runtime::value::GcValue;
 
 impl<'a> Engine<'a> {
-    pub fn run_scope<T>(&mut self, callback: &dyn Fn(&mut Engine<'a>) -> T) -> T {
+    pub fn scope(&self) -> GcScope<'a> {
+        self.scope
+    }
+
+    pub fn run_source_scope(&mut self, name: &str, callback: impl FnOnce(&mut Engine<'a>, GcScope<'a>) -> GcValue<'a>) -> GcValue<'a> {
+        let mut scope = self.new_scope();
+        let value = callback(self, scope);
+        scope.set_source(self, name, value);
+        value
+    }
+
+    pub fn run_scope<T>(&mut self, callback: impl FnOnce(&mut Engine<'a>) -> T) -> T {
         self.push_scope();
         let r#return = callback(self);
         self.pop_scope();
         r#return
     }
 
-    pub fn run_frame<T>(&mut self, scope: GcScope<'a>, callback: &dyn Fn(&mut Engine<'a>) -> T) -> T {
-        self.push_frame(scope);
+    pub fn run_frame<T>(&mut self, frame: GcScope<'a>, callback: impl FnOnce(&mut Engine<'a>) -> T) -> T {
+        self.push_frame(frame);
         let r#return = callback(self);
         self.pop_frame();
         r#return
@@ -18,16 +30,10 @@ impl<'a> Engine<'a> {
 }
 
 impl<'a> Engine<'a> {
-    pub fn new_scope(&mut self) -> GcScope<'a> {
+    fn new_scope(&mut self) -> GcScope<'a> {
         self.alloc(Scope::new(Some(self.scope)))
     }
 
-    pub fn scope(&self) -> GcScope<'a> {
-        self.scope
-    }
-}
-
-impl<'a> Engine<'a> {
     fn push_scope(&mut self) {
         self.scope = self.new_scope();
     }

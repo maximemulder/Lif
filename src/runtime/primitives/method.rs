@@ -24,7 +24,7 @@ fn gn<'a>(engine: &mut Engine<'a>, arguments: Arguments<'a>) -> ReturnReference<
 fn cl<'a>(engine: &mut Engine<'a>, mut arguments: Arguments<'a>) -> ReturnReference<'a> {
     let this = arguments[0].data_method().this;
     let reference = engine.new_reference(this);
-    arguments[1].data_array_mut().elements.insert(0, reference);
+    arguments[1].data_array_mut().insert(0, reference);
     let method = arguments[0].data_method();
     method.function.call_method(engine, "__cl__", Box::new([arguments[1]]))
 }

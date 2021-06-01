@@ -1,9 +1,10 @@
-use crate::runtime::data::{ Array, Class, Data, Function, Generic, Method, Nullable, Object, Tag };
+use crate::runtime::data::{ Array, Class, Data, Function, Generic, Method, Nullable, Object };
 use crate::runtime::engine::Engine;
 use crate::runtime::error::Error;
 use crate::runtime::gc::{ GcRef, GcTrace };
 use crate::runtime::utilities::{ Arguments, Return, ReturnReference, ReturnValue };
 use crate::runtime::utilities::parameters;
+use crate::runtime::utilities::tag::Tag;
 
 pub type GcValue<'a> = GcRef<Value<'a>>;
 
@@ -25,7 +26,7 @@ impl<'a> GcValue<'a> {
     pub fn is(self, other: GcValue<'a>) -> bool {
         if self == other {
             true
-        } else if let Some(parent) = self.data_class().parent {
+        } else if let Some(parent) = self.data_class().parent() {
             parent.is(other)
         } else {
             false
@@ -113,9 +114,9 @@ macro_rules! data_mut {
 impl<'a> Value<'a> {
     pub fn data_tag(&self) -> Tag {
         match &self.data {
-            Data::Class(class)       => class.tag.clone(),
-            Data::Function(function) => function.tag.clone(),
-            Data::Generic(generic)   => generic.tag.clone(),
+            Data::Class(class)       => class.tag().clone(),
+            Data::Function(function) => function.tag().clone(),
+            Data::Generic(generic)   => generic.tag().clone(),
             _ => panic!(),
         }
     }

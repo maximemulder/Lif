@@ -11,8 +11,8 @@ impl Tagger {
         }
     }
 
-    pub fn generate(&mut self, name: Option<Box<str>>) -> Tag {
-        let tag = Tag::new(self.index, name);
+    pub fn generate(&mut self, name: Option<&str>) -> Tag {
+        let tag = Tag::new(self.index, name.map(Box::from));
         self.index += 1;
         tag
     }

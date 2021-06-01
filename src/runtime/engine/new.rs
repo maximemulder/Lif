@@ -1,15 +1,12 @@
-use crate::memory::Ref;
-use crate::nodes::{ Executable, Node };
-use crate::runtime::data::Data;
+use crate::runtime::data::{ Data, FunctionImplementation, GenericImplementation };
 use crate::runtime::engine::Engine;
 use crate::runtime::reference::GcReference;
-use crate::runtime::utilities::Callable;
 use crate::runtime::utilities::variable::Variable;
 use crate::runtime::value::GcValue;
 
 impl<'a> Engine<'a> {
     pub fn new_array_value(&mut self, class: GcValue<'a>, elements: Vec<GcReference<'a>>) -> GcValue<'a> {
-        self.new_value(class, Data::new_array(elements))
+        self.new_value(class, Data::array(elements))
     }
 
     pub fn new_array_any_value(&mut self, elements: Vec<GcReference<'a>>) -> GcValue<'a> {
@@ -17,71 +14,54 @@ impl<'a> Engine<'a> {
     }
 
     pub fn new_boolean_value(&mut self, boolean: bool) -> GcValue<'a> {
-        self.new_value(self.primitives.boolean, Data::new_boolean(boolean))
+        self.new_value(self.primitives.boolean, Data::boolean(boolean))
     }
 
     pub fn new_class_value(&mut self, name: Option<&str>, parent: Option<GcValue<'a>>) -> GcValue<'a> {
-        let tag = self.taggers.classes.generate(name.map(Box::from));
-        let mut scope = self.new_scope();
-        let class = self.new_value(self.primitives.class, Data::new_class(tag, scope, parent));
-        scope.set_source(self, "__class__", class);
-        class
+        let tag = self.taggers.classes.generate(name);
+        self.run_source_scope("__class__", |engine, scope| {
+            engine.new_value(engine.primitives.class, Data::class(tag, scope, parent))
+        })
     }
 
     pub fn new_float_value(&mut self, float: f64) -> GcValue<'a> {
-        self.new_value(self.primitives.float, Data::new_float(float))
+        self.new_value(self.primitives.float, Data::float(float))
     }
 
-    pub fn new_function_value(&mut self, name: Option<&str>, parameters: Box<[Variable<'a>]>, rest: Option<Variable<'a>>, r#type: Option<GcValue<'a>>, block: Ref<Node>) -> GcValue<'a> {
-        let tag = self.taggers.functions.generate(name.map(Box::from));
-        let mut scope = self.new_scope();
-        let function = self.new_value(self.primitives.function, Data::new_function(tag, scope, parameters, rest, r#type, block));
-        scope.set_source(self, "__function__", function);
-        function
+    pub fn new_function_value(&mut self,
+        name: Option<&str>, parameters: Box<[Variable<'a>]>, rest: Option<Variable<'a>>, r#return: Option<GcValue<'a>>, implementation: impl FunctionImplementation<'a> + 'a
+    ) -> GcValue<'a> {
+        let tag = self.taggers.functions.generate(name);
+        self.run_source_scope("__function__", |engine, scope| {
+            engine.new_value(engine.primitives.function, Data::function(tag, scope, parameters, rest, r#return, implementation))
+        })
     }
 
-    pub fn new_function_primitive_value(&mut self, name: &str, parameters: Box<[Variable<'a>]>, rest: Option<Variable<'a>>, callback: &'a Callable<'a>) -> GcValue<'a> {
-        let tag = self.taggers.functions.generate(Some(Box::from(name)));
-        let mut scope = self.new_scope();
-        let function = self.new_value(self.primitives.function, Data::new_function_primitive(tag, scope, parameters, rest, None, callback));
-        scope.set_source(self, "__function__", function);
-        function
-    }
-
-    pub fn new_generic_value(&mut self, name: Option<&str>, parameters: Box<[Box<str>]>, node: Ref<dyn Executable>) -> GcValue<'a> {
-        let tag = self.taggers.generics.generate(name.map(Box::from));
-        let mut scope = self.new_scope();
-        let generic = self.new_value(self.primitives.generic, Data::new_generic(tag, scope, parameters, node));
-        scope.set_source(self, "__generic__", generic);
-        generic
-    }
-
-    pub fn new_generic_primitive_value(&mut self, name: &str, parameters: Box<[Box<str>]>, callback: &'a Callable<'a>) -> GcValue<'a> {
-        let tag = self.taggers.generics.generate(Some(Box::from(name)));
-        let mut scope = self.new_scope();
-        let generic = self.new_value(self.primitives.generic, Data::new_generic_primitive(tag, scope, parameters, callback));
-        scope.set_source(self, "__generic__", generic.clone());
-        generic
+    pub fn new_generic_value(&mut self, name: Option<&str>, parameters: Box<[Box<str>]>, implementation: impl GenericImplementation<'a> + 'a) -> GcValue<'a> {
+        let tag = self.taggers.generics.generate(name);
+        self.run_source_scope("__generic__", |engine, scope| {
+            engine.new_value(engine.primitives.generic, Data::generic(tag, scope, parameters, implementation))
+        })
     }
 
     pub fn new_integer_value(&mut self, integer: isize) -> GcValue<'a> {
-        self.new_value(self.primitives.integer, Data::new_integer(integer))
+        self.new_value(self.primitives.integer, Data::integer(integer))
     }
 
     pub fn new_method_value(&mut self, function: GcValue<'a>, this: GcValue<'a>) -> GcValue<'a> {
-        self.new_value(self.primitives.method, Data::new_method(function, this))
+        self.new_value(self.primitives.method, Data::method(function, this))
     }
 
     pub fn new_object_value(&mut self, parent: GcValue<'a>) -> GcValue<'a> {
-        self.new_value(parent, Data::new_object())
+        self.new_value(parent, Data::object())
     }
 
     pub fn new_nullable_value(&mut self, class: GcValue<'a>, option: Option<GcValue<'a>>) -> GcValue<'a> {
-        self.new_value(class, Data::new_nullable(option))
+        self.new_value(class, Data::nullable(option))
     }
 
     pub fn new_string_value(&mut self, string: String) -> GcValue<'a> {
-        self.new_value(self.primitives.string, Data::new_string(string))
+        self.new_value(self.primitives.string, Data::string(string))
     }
 }
 
@@ -110,23 +90,15 @@ impl<'a> Engine<'a> {
         self.new_constant(value)
     }
 
-    pub fn new_function(&mut self, name: Option<&str>, parameters: Box<[Variable<'a>]>, rest: Option<Variable<'a>>, r#type: Option<GcValue<'a>>, block: Ref<Node>) -> GcReference<'a> {
-       let value = self.new_function_value(name, parameters, rest, r#type, block);
+    pub fn new_function(&mut self,
+        name: Option<&str>, parameters: Box<[Variable<'a>]>, rest: Option<Variable<'a>>, r#type: Option<GcValue<'a>>, implementation: impl FunctionImplementation<'a> + 'a
+    ) -> GcReference<'a> {
+       let value = self.new_function_value(name, parameters, rest, r#type, implementation);
         self.new_constant(value)
     }
 
-    pub fn new_function_primitive(&mut self, name: &str, parameters: Box<[Variable<'a>]>, rest: Option<Variable<'a>>, callback: &'a Callable<'a>) -> GcReference<'a> {
-        let value = self.new_function_primitive_value(name, parameters, rest, callback);
-        self.new_constant(value)
-    }
-
-    pub fn new_generic(&mut self, name: Option<&str>, parameters: Box<[Box<str>]>, node: Ref<dyn Executable>) -> GcReference<'a> {
-        let value = self.new_generic_value(name, parameters, node);
-        self.new_constant(value)
-    }
-
-    pub fn new_generic_primitive(&mut self, name: &str, parameters: Box<[Box<str>]>, callback: &'a Callable<'a>) -> GcReference<'a> {
-        let value = self.new_generic_primitive_value(name, parameters, callback);
+    pub fn new_generic(&mut self, name: Option<&str>, parameters: Box<[Box<str>]>, implementation: impl GenericImplementation<'a> + 'a) -> GcReference<'a> {
+        let value = self.new_generic_value(name, parameters, implementation);
         self.new_constant(value)
     }
 

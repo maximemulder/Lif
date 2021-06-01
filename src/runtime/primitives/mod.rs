@@ -14,6 +14,7 @@ mod string;
 
 use crate::code::Code;
 use crate::nodes::build;
+use crate::runtime::data::GenericPrimitive;
 use crate::runtime::engine::Engine;
 use crate::runtime::gc::GcTrace;
 use crate::runtime::utilities::{ Arguments, ReturnReference };
@@ -89,8 +90,7 @@ impl<'a> Engine<'a> {
         self.primitives.any   = self.new_class_value(Some("Any"), None);
 
         self.primitives.class.class = self.primitives.class;
-        self.primitives.class.data_class_mut().parent = Some(self.primitives.any);
-        self.primitives.any.data_class_mut().parent = None;
+        self.primitives.class.data_class_mut().set_parent(self.primitives.any);
 
         self.primitives.boolean  = self.new_class_value(Some("Boolean"),  Some(self.primitives.any));
         self.primitives.file     = self.new_class_value(Some("File"),     Some(self.primitives.any));
@@ -102,8 +102,8 @@ impl<'a> Engine<'a> {
         self.primitives.object   = self.new_class_value(Some("Object"),   Some(self.primitives.any));
         self.primitives.string   = self.new_class_value(Some("String"),   Some(self.primitives.any));
 
-        self.primitives.array    = self.new_generic_primitive_value("Array",  Box::new([Box::from("T")]), &array::create);
-        self.primitives.nullable = self.new_generic_primitive_value("Option", Box::new([Box::from("T")]), &nullable::create);
+        self.primitives.array    = self.new_generic_value(Some("Array"),  Box::new([Box::from("T")]), GenericPrimitive::new(&array::create));
+        self.primitives.nullable = self.new_generic_value(Some("Option"), Box::new([Box::from("T")]), GenericPrimitive::new(&nullable::create));
 
         self.primitives.array_any = {
             let array = self.primitives.array;

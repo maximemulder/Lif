@@ -18,7 +18,7 @@ pub trait FunctionImplementation<'a> {
 }
 
 pub struct Function<'a> {
-    pub tag: Tag,
+    tag: Tag,
     scope: GcScope<'a>,
     parameters: Box<[Variable<'a>]>,
     rest: Option<Variable<'a>>,
@@ -36,6 +36,10 @@ impl<'a> Function<'a> {
             r#return,
             implementation: Box::new(implementation),
         }
+    }
+
+    pub fn tag(&self) -> &Tag {
+        &self.tag
     }
 
     pub fn scope(&self) -> GcScope<'a> {
@@ -58,7 +62,7 @@ impl<'a> Function<'a> {
             parameter.cast(argument)?;
         }
 
-        let reference = engine.run_frame(self.scope, &|engine| self.implementation.call(engine, &self.parameters, &self.rest, arguments.clone()))?;
+        let reference = engine.run_frame(self.scope, |engine| self.implementation.call(engine, &self.parameters, &self.rest, arguments.clone()))?;
         if let Some(r#return) = self.r#return {
             reference.read()?.cast(r#return)?;
         }

@@ -29,7 +29,7 @@ impl Error {
         message += "Method \"";
         message += method;
         message += "\" is undefined in the type ";
-        message += &class.data_class().tag.to_string();
+        message += &class.data_class().tag().to_string();
         message += ".";
         Self::new_runtime(&message)
     }
@@ -67,9 +67,9 @@ impl Error {
     pub fn new_cast(value: GcValue, r#type: GcValue) -> Self {
         let mut message = String::new();
         message += "Cannot cast a value of the type ";
-        message += &value.class.data_class().tag.to_string();
+        message += &value.class.data_class().tag().to_string();
         message += " to the type ";
-        message += &r#type.data_class().tag.to_string();
+        message += &r#type.data_class().tag().to_string();
         message += ".";
         Self::new_runtime(&message)
     }

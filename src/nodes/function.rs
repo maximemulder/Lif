@@ -1,5 +1,6 @@
 use crate::memory::Ref;
 use crate::nodes::{ Executable, Node };
+use crate::runtime::data::FunctionCode;
 use crate::runtime::engine::Engine;
 use crate::runtime::error::Error;
 use crate::runtime::utilities::ReturnReference;
@@ -66,6 +67,6 @@ impl Executable for Function {
             None
         };
 
-        Ok(engine.new_function(Ref::as_option(&self.name), parameters.into_boxed_slice(), rest, r#type, Ref::new(&self.block)))
+        Ok(engine.new_function(Ref::as_option(&self.name), parameters.into_boxed_slice(), rest, r#type, FunctionCode::new(Ref::new(&self.block))))
     }
 }

@@ -7,12 +7,12 @@ use crate::runtime::value::GcValue;
 use std::collections::HashMap;
 
 pub struct Class<'a> {
-    pub tag: Tag,
+    tag: Tag,
     scope: GcScope<'a>,
     pub constructor: Option<GcConstructor<'a>>,
-    pub parent:  Option<GcValue<'a>>,
-    pub statics: HashMap<Box<str>, GcReference<'a>>,
-    pub methods: HashMap<Box<str>, GcValue<'a>>,
+    parent: Option<GcValue<'a>>,
+    statics: HashMap<Box<str>, GcReference<'a>>,
+    methods: HashMap<Box<str>, GcValue<'a>>,
 }
 
 impl<'a> Class<'a> {
@@ -27,9 +27,26 @@ impl<'a> Class<'a> {
         }
     }
 
+    pub fn tag(&self) -> &Tag {
+        &self.tag
+    }
+
+    pub fn scope(&self) -> GcScope<'a> {
+        self.scope
+    }
+
+    pub fn parent(&self) -> Option<GcValue<'a>> {
+        self.parent
+    }
+
+    pub fn set_parent(&mut self, parent: GcValue<'a>) {
+        debug_assert!(self.parent.is_none());
+        self.parent = Some(parent);
+    }
+
     pub fn get_method(&self, name: &str) -> Option<GcValue<'a>> {
-        if let Some(&method) = self.methods.get(name) {
-            return Some(method);
+        if let Some(method) = self.methods.get(name) {
+            return Some(method).copied();
         }
 
         if let Some(parent) = self.parent {
@@ -39,8 +56,16 @@ impl<'a> Class<'a> {
         None
     }
 
-    pub fn scope(&self) -> GcScope<'a> {
-        self.scope
+    pub fn set_method(&mut self, name: &str, reference: GcValue<'a>) {
+        self.methods.insert(Box::from(name), reference);
+    }
+
+    pub fn get_static(&self, name: &str) -> Option<GcReference<'a>> {
+        self.statics.get(name).copied()
+    }
+
+    pub fn set_static(&mut self, name: &str, reference: GcReference<'a>) {
+        self.statics.insert(Box::from(name), reference);
     }
 }
 

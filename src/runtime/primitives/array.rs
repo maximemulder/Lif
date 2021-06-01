@@ -26,7 +26,7 @@ fn get_type<'a>(engine: &mut Engine<'a>) -> GcValue<'a> {
 
 fn to_string<'a>(engine: &mut Engine<'a>, arguments: Arguments<'a>) -> ReturnReference<'a> {
     let mut string = String::from("[");
-    let elements = arguments[0].data_array().elements.clone();
+    let elements = arguments[0].data_array().elements();
     for element in elements.iter() {
         string.push_str(&element.read()?.call_to_string(engine)?);
         string.push_str(", ");
@@ -44,7 +44,7 @@ fn append<'a>(engine: &mut Engine<'a>, mut arguments: Arguments<'a>) -> ReturnRe
     for index in 1 .. arguments.len() {
         let r#type = get_type(engine);
         let reference = engine.new_variable(Some(arguments[index]), r#type);
-        arguments[0].data_array_mut().elements.push(reference);
+        arguments[0].data_array_mut().append(reference);
     }
 
     Ok(engine.undefined())
@@ -54,7 +54,7 @@ fn prepend<'a>(engine: &mut Engine<'a>, mut arguments: Arguments<'a>) -> ReturnR
     for index in 1 .. arguments.len() {
         let r#type = get_type(engine);
         let reference = engine.new_variable(Some(arguments[index]), r#type);
-        arguments[0].data_array_mut().elements.insert(index - 1, reference);
+        arguments[0].data_array_mut().insert(index - 1, reference);
     }
 
     Ok(engine.undefined())
@@ -64,16 +64,16 @@ fn insert<'a>(engine: &mut Engine<'a>, mut arguments: Arguments<'a>) -> ReturnRe
     let index = *arguments[1].data_integer() as usize;
     let r#type = get_type(engine);
     let reference = engine.new_variable(Some(arguments[2]), r#type);
-    arguments[0].data_array_mut().elements.insert(index, reference);
+    arguments[0].data_array_mut().insert(index, reference);
     Ok(engine.undefined())
 }
 
 fn remove<'a>(engine: &mut Engine<'a>, mut arguments: Arguments<'a>) -> ReturnReference<'a> {
     let index = *arguments[1].data_integer() as usize;
-    arguments[0].data_array_mut().elements.remove(index);
+    arguments[0].data_array_mut().remove(index);
     Ok(engine.undefined())
 }
 
 fn id<'a>(_: &mut Engine<'a>, arguments: Arguments<'a>) -> ReturnReference<'a> {
-    Ok(arguments[0].data_array().elements[*arguments[1].data_array().elements[0].read()?.data_integer() as usize])
+    Ok(arguments[0].data_array().get(*arguments[1].data_array().get(0).read()?.data_integer() as usize))
 }

@@ -38,6 +38,7 @@ impl<'a> Scope<'a> {
     }
 
     pub fn set_source(&mut self, engine: &mut Engine<'a>, name: &str, source: GcValue<'a>) {
+        debug_assert!(self.source.is_none());
         self.source = Some(source);
         let reference = engine.new_constant(source);
         self.set_variable(name, reference);

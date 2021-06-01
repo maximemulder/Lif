@@ -2,7 +2,7 @@ use crate::runtime::gc::GcTrace;
 use crate::runtime::reference::GcReference;
 
 pub struct Array<'a> {
-    pub elements: Vec<GcReference<'a>>,
+    elements: Vec<GcReference<'a>>,
 }
 
 impl<'a> Array<'a> {
@@ -12,25 +12,29 @@ impl<'a> Array<'a> {
         }
     }
 
-    /*pub fn get(&self, index: usize) -> GcReference<'a> {
+    pub fn elements(&self) -> &[GcReference<'a>] {
+        &self.elements
+    }
+
+    pub fn get(&self, index: usize) -> GcReference<'a> {
         self.elements[index]
     }
 
-    pub fn push(&mut self, engine: &mut Engine<'a>, value: GcValue<'a>) {
-        self.elements.push(engine.new_variable(Some(value), engine.primitives.any));
+    pub fn append(&mut self, reference: GcReference<'a>) {
+        self.elements.push(reference);
     }
 
-    pub fn insert(&mut self, engine: &mut Engine<'a>, index: usize, value: GcValue<'a>) {
-        self.elements.insert(index, engine.new_variable(Some(value), engine.primitives.any));
+    pub fn prepend(&mut self, reference: GcReference<'a>) {
+        self.elements.insert(0, reference);
+    }
+
+    pub fn insert(&mut self, index: usize, reference: GcReference<'a>) {
+        self.elements.insert(index, reference);
     }
 
     pub fn remove(&mut self, index: usize) {
         self.elements.remove(index);
     }
-
-    pub fn slice(&self) -> &[GcReference<'a>] {
-        &self.elements
-    } */
 }
 
 impl GcTrace for Array<'_> {

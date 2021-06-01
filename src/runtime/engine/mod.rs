@@ -5,7 +5,7 @@ use crate::code::Code;
 use crate::memory::{ Own, Ref };
 use crate::nodes::Executable;
 use crate::parser::Parser;
-use crate::runtime::data::{ Data, Tagger };
+use crate::runtime::data::Data;
 use crate::runtime::primitives::Primitives;
 use crate::runtime::error::Error;
 use crate::runtime::gc::{ GC_THRESHOLD, Gc, GcRef, GcTrace };
@@ -14,7 +14,7 @@ use crate::runtime::reference::{ GcReference, Reference };
 use crate::runtime::registries::Registries;
 use crate::runtime::scope::{ GcScope, Scope };
 use crate::runtime::utilities::ReturnReference;
-use crate::runtime::utilities::constructors::{ GcConstructor, Constructor };
+use crate::runtime::utilities::tag::Tagger;
 use crate::runtime::value::{ GcValue, Value };
 
 use std::io::{ Read, Write };
@@ -85,10 +85,6 @@ impl Engine<'_> {
 }
 
 impl<'a> Engine<'a> {
-    pub fn new_builder(&mut self, generic: GcValue<'a>, arguments: Box<[GcValue<'a>]>, value: GcValue<'a>) -> GcConstructor<'a> {
-        self.alloc(Constructor::new(generic, arguments, value))
-    }
-
     pub fn new_value(&mut self, class: GcValue<'a>, data: Data<'a>) -> GcValue<'a> {
         self.alloc(Value::new(class, data))
     }

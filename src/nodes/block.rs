@@ -18,7 +18,7 @@ impl Block {
 
 impl Executable for Block {
     fn execute<'a>(&self, engine: &mut Engine<'a>) -> ReturnReference<'a> {
-        engine.run_scope(&|engine| {
+        engine.run_scope(|engine| {
             execute!(engine, &self.statements);
             Ok(if let Some(expression) = &self.expression {
                 execute!(engine, expression)

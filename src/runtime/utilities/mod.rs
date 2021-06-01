@@ -1,6 +1,7 @@
 pub mod builder;
 pub mod constructors;
 pub mod parameters;
+pub mod tag;
 pub mod variable;
 
 use crate::runtime::engine::Engine;
