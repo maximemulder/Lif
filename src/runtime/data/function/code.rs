@@ -26,10 +26,10 @@ impl<'a> FunctionImplementation<'a> for FunctionCode {
         }
 
         if let Some(rest) = rest {
-            let mut elements = Vec::new();
-            for i in parameters.len() .. arguments.len() {
-                elements.push(engine.new_reference(arguments[i]))
-            }
+            let elements = arguments[parameters.len()..].iter()
+                .copied()
+                .map(|argument| engine.new_reference(argument))
+                .collect();
 
             let value = engine.new_array_any_value(elements);
             rest.build(engine).set_value(value);

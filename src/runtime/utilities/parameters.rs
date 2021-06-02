@@ -12,19 +12,17 @@ pub fn length(arguments: usize, parameters: usize) -> Return<()> {
 }
 
 pub fn pack<'a>(engine: &mut Engine<'a>, values: Arguments<'a>) -> GcValue<'a> {
-    let mut references = Vec::new();
-    for value in values.iter().copied() {
-        references.push(engine.new_constant(value));
-    }
+    let elements = values.iter()
+        .copied()
+        .map(|value| engine.new_constant(value))
+        .collect();
 
-    engine.new_array_any_value(references)
+    engine.new_array_any_value(elements)
 }
 
 pub fn unpack(value: GcValue<'_>) -> Return<Arguments<'_>> {
-    let mut elements = Vec::new();
-    for reference in value.data_array().elements() {
-        elements.push(reference.read()?);
-    }
-
-    Ok(elements.into_boxed_slice())
+    value.data_array().elements().iter()
+        .copied()
+        .map(|element| element.read())
+        .collect()
 }

@@ -4,6 +4,9 @@ use crate::parser::Parse;
 use crate::parser::arena::ArenaRef;
 use crate::parser::ascent::Ascent;
 
+use std::iter;
+use std::ops::Not;
+
 pub trait Descent {
     fn descent(&self, parse: &mut Parse) -> Option<Vec<Node>>;
 }
@@ -58,13 +61,9 @@ impl DescentChoice {
 
 impl Descent for DescentChoice {
     fn descent(&self, parse: &mut Parse) -> Option<Vec<Node>> {
-        for descent in self.descents.iter().copied() {
-            if let Some(nodes) = parse.descent(descent) {
-                return Some(nodes);
-            }
-        }
-
-        None
+        self.descents.iter()
+            .copied()
+            .find_map(|descent| parse.descent(descent))
     }
 }
 
@@ -82,12 +81,13 @@ impl DescentSequence {
 
 impl Descent for DescentSequence {
     fn descent(&self, parse: &mut Parse) -> Option<Vec<Node>> {
-        let mut nodes = Vec::new();
-        for descent in self.descents.iter().copied() {
-            nodes.extend(parse.descent(descent)?);
-        }
-
-        Some(nodes)
+        self.descents.iter()
+            .copied()
+            .map(|descent| parse.descent(descent))
+            .flat_map(|option|
+                option.map_or_else(|| vec![None], |nodes| nodes.into_iter().map(Some).collect())
+            )
+            .collect::<Option<Vec<Node>>>()
     }
 }
 
@@ -105,12 +105,7 @@ impl DescentZeroOrMore {
 
 impl Descent for DescentZeroOrMore {
     fn descent(&self, parse: &mut Parse) -> Option<Vec<Node>> {
-        let mut nodes = Vec::new();
-        while let Some(children) = parse.descent(self.descent) {
-            nodes.extend(children);
-        }
-
-        Some(nodes)
+        Some(iter::from_fn(|| parse.descent(self.descent)).flatten().collect())
     }
 }
 
@@ -128,16 +123,8 @@ impl DescentOneOrMore {
 
 impl Descent for DescentOneOrMore {
     fn descent(&self, parse: &mut Parse) -> Option<Vec<Node>> {
-        let mut nodes = Vec::new();
-        while let Some(children) = parse.descent(self.descent) {
-            nodes.extend(children);
-        }
-
-        if !nodes.is_empty() {
-            Some(nodes)
-        } else {
-            None
-        }
+        let nodes = iter::from_fn(|| parse.descent(self.descent)).flatten().collect::<Vec<Node>>();
+        nodes.is_empty().not().then_some(nodes)
     }
 }
 
@@ -173,11 +160,7 @@ impl DescentPredicateAnd {
 
 impl Descent for DescentPredicateAnd {
     fn descent(&self, parse: &mut Parse) -> Option<Vec<Node>> {
-        if parse.descent_predicate(self.descent) {
-            Some(Vec::new())
-        } else {
-            None
-        }
+        parse.descent_predicate(self.descent).then(Vec::new)
     }
 }
 
@@ -195,11 +178,7 @@ impl DescentPredicateNot {
 
 impl Descent for DescentPredicateNot {
     fn descent(&self, parse: &mut Parse) -> Option<Vec<Node>> {
-        if parse.descent_predicate(self.descent) {
-            None
-        } else {
-            Some(Vec::new())
-        }
+        parse.descent_predicate(self.descent).not().then(Vec::new)
     }
 }
 
@@ -237,12 +216,7 @@ impl DescentToken {
 
 impl Descent for DescentToken {
     fn descent(&self, parse: &mut Parse) -> Option<Vec<Node>> {
-        if let Some(token) = parse.next() {
-            if token.element == self.element {
-                return Some(vec![token]);
-            }
-        }
-
-        None
+        let token = parse.next()?;
+        (token.element == self.element).then(|| vec![token])
     }
 }

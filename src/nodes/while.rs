@@ -19,7 +19,7 @@ impl While {
 
 impl Executable for While {
     fn execute<'a>(&self, engine: &mut Engine<'a>) -> ReturnReference<'a> {
-        let mut array = Vec::new();
+        let mut elements = Vec::new();
         while {
             let reference = execute!(engine, &self.condition);
             *reference.read()?.get_cast_boolean(engine)?
@@ -30,7 +30,7 @@ impl Executable for While {
             }
 
             if reference.is_defined() {
-                array.push(engine.new_reference(reference.get_value()));
+                elements.push(engine.new_reference(reference.get_value()));
             }
 
             if engine.jump_swap(Jump::Continue, Jump::None) {
@@ -42,6 +42,6 @@ impl Executable for While {
             }
         }
 
-        Ok(engine.new_array_any(array))
+        Ok(engine.new_array_any(elements))
     }
 }

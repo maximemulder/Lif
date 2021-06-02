@@ -16,12 +16,13 @@ impl Array {
 
 impl Executable for Array {
     fn execute<'a>(&self, engine: &mut Engine<'a>) -> ReturnReference<'a> {
-        let mut references = Vec::new();
-        for expression in self.expressions.iter() {
-            let value = execute!(engine, expression).read()?;
-            references.push(engine.new_reference(value));
-        }
+        let elements = self.expressions.iter()
+            .map(|expression| {
+                let value = execute!(engine, expression).read()?;
+                Ok(engine.new_reference(value))
+            })
+            .collect::<Result<_, _>>()?;
 
-        Ok(engine.new_array_any(references))
+        Ok(engine.new_array_any(elements))
     }
 }

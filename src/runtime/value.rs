@@ -38,11 +38,7 @@ impl<'a> GcValue<'a> {
     }
 
     pub fn cast(self, other: GcValue<'a>) -> Return<()> {
-        if self.isa(other) {
-            Ok(())
-        } else {
-            Err(Error::new_cast(self, other))
-        }
+        self.isa(other).then_some(()).ok_or_else(|| Error::new_cast(self, other))
     }
 }
 

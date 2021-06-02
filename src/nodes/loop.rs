@@ -17,7 +17,7 @@ impl Loop {
 
 impl Executable for Loop {
     fn execute<'a>(&self, engine: &mut Engine<'a>) -> ReturnReference<'a> {
-        let mut array = Vec::new();
+        let mut elements = Vec::new();
         loop {
             let reference = engine.execute(&self.body)?;
             if engine.jump == Jump::Return {
@@ -25,7 +25,7 @@ impl Executable for Loop {
             }
 
             if reference.is_defined() {
-                array.push(engine.new_reference(reference.get_value()));
+                elements.push(engine.new_reference(reference.get_value()));
             }
 
             if engine.jump_swap(Jump::Continue, Jump::None) {
@@ -37,6 +37,6 @@ impl Executable for Loop {
             }
         }
 
-        Ok(engine.new_array_any(array))
+        Ok(engine.new_array_any(elements))
     }
 }

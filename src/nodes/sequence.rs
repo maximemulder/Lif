@@ -29,12 +29,11 @@ impl Sequence {
 impl Executable for Sequence {
     fn execute<'a>(&self, engine: &mut Engine<'a>) -> ReturnReference<'a> {
         let value = execute!(engine, &self.expression).read()?;
-        let mut arguments = Vec::new();
-        for argument in self.expressions.iter() {
-            arguments.push(execute!(engine, argument));
-        }
+        let elements = self.expressions.iter()
+            .map(|expression| Ok(execute!(engine, expression)))
+            .collect::<Result<_, _>>()?;
 
-        let array = engine.new_array_any_value(arguments);
+        let array = engine.new_array_any_value(elements);
         value.call_method(engine, &self.operator, Box::new([array]))
     }
 }

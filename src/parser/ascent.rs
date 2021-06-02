@@ -21,11 +21,8 @@ impl AscentDescent {
 }
 
 impl Ascent for AscentDescent {
-    fn ascent(&self, parse: &mut Parse, mut nodes: Vec<Node>) -> Option<Vec<Node>> {
-        parse.descent(self.descent).map(|others| {
-            nodes.extend(others);
-            nodes
-        })
+    fn ascent(&self, parse: &mut Parse, nodes: Vec<Node>) -> Option<Vec<Node>> {
+        parse.descent(self.descent).map(|others| nodes.into_iter().chain(others).collect())
     }
 }
 
@@ -43,13 +40,9 @@ impl AscentChoice {
 
 impl Ascent for AscentChoice {
     fn ascent(&self, parse: &mut Parse, nodes: Vec<Node>) -> Option<Vec<Node>> {
-        for ascent in self.ascents.iter().copied() {
-            if let Some(others) = parse.ascent(ascent, nodes.clone()) {
-                return Some(others);
-            }
-        }
-
-        None
+        self.ascents.iter()
+            .copied()
+            .find_map(|ascent| parse.ascent(ascent, nodes.clone()))
     }
 }
 
@@ -66,12 +59,10 @@ impl AscentSequence {
 }
 
 impl Ascent for AscentSequence {
-    fn ascent(&self, parse: &mut Parse, mut nodes: Vec<Node>) -> Option<Vec<Node>> {
-        for ascent in self.ascents.iter().copied() {
-            nodes = parse.ascent(ascent, nodes)?;
-        }
-
-        Some(nodes)
+    fn ascent(&self, parse: &mut Parse, nodes: Vec<Node>) -> Option<Vec<Node>> {
+        self.ascents.iter()
+            .copied()
+            .fold(Some(nodes), |nodes, ascent| parse.ascent(ascent, nodes?))
     }
 }
 
@@ -89,7 +80,7 @@ impl AscentOption {
 
 impl Ascent for AscentOption {
     fn ascent(&self, parse: &mut Parse, nodes: Vec<Node>) -> Option<Vec<Node>> {
-        parse.ascent(self.ascent, nodes.clone()).or_else(|| Some(nodes))
+        parse.ascent(self.ascent, nodes.clone()).or(Some(nodes))
     }
 }
 

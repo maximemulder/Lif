@@ -45,8 +45,8 @@ impl<'a> Class<'a> {
     }
 
     pub fn get_method(&self, name: &str) -> Option<GcValue<'a>> {
-        if let Some(method) = self.methods.get(name) {
-            return Some(method).copied();
+        if let Some(method) = self.methods.get(name).copied() {
+            return Some(method);
         }
 
         if let Some(parent) = self.parent {

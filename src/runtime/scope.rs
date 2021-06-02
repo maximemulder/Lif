@@ -1,6 +1,8 @@
 use crate::runtime::engine::Engine;
+use crate::runtime::error::Error;
 use crate::runtime::gc::{ GcRef, GcTrace };
 use crate::runtime::reference::GcReference;
+use crate::runtime::utilities::ReturnReference;
 use crate::runtime::value::GcValue;
 use std::collections::HashMap;
 
@@ -29,8 +31,14 @@ impl<'a> Scope<'a> {
         self.source
     }
 
-    pub fn get_variable(&self, name: &str) -> Option<GcReference<'a>> {
-        self.variables.get(name).copied()
+    pub fn get_variable(&self, name: &str) -> ReturnReference<'a> {
+        if let Some(value) = self.variables.get(name).copied() {
+            Ok(value)
+        } else if let Some(parent) = self.parent {
+            parent.get_variable(name)
+        } else {
+            Err(Error::new_undeclared_variable(name))
+        }
     }
 
     pub fn set_variable(&mut self, name: &str, reference: GcReference<'a>) {

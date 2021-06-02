@@ -5,12 +5,7 @@ use crate::runtime::utilities::variable::Variable;
 use crate::runtime::value::GcValue;
 
 fn parameters<'a>(types: &[GcValue<'a>]) -> Box<[Variable<'a>]> {
-    let mut parameters = Vec::new();
-    for r#type in types.iter().copied() {
-        parameters.push(Variable::new_unchecked(Box::from("__unused__"), Some(r#type)));
-    }
-
-    parameters.into_boxed_slice()
+    types.iter().copied().map(|r#type| Variable::new_unchecked(Box::from("__unused__"), Some(r#type))).collect()
 }
 
 pub fn function<'a, const N: usize>(engine: &mut Engine<'a>, name: &str, types: [GcValue<'a>; N], callback: &'a Callable<'a>) {

@@ -28,16 +28,17 @@ impl Function {
 
 impl Executable for Function {
     fn execute<'a>(&self, engine: &mut Engine<'a>) -> ReturnReference<'a> {
-        let mut parameters = Vec::new();
-        for (name, parameter) in self.parameters.iter() {
-            let r#type = if let Some(parameter) = parameter.as_ref() {
-                Some(engine.execute(parameter)?.read()?)
-            } else {
-                None
-            };
+        let parameters = self.parameters.iter()
+            .map(|(name, parameter)| {
+                let r#type = if let Some(parameter) = parameter.as_ref() {
+                    Some(engine.execute(parameter)?.read()?)
+                } else {
+                    None
+                };
 
-            parameters.push(Variable::new(engine, Box::from(name.as_ref()), r#type)?);
-        }
+                Variable::new(engine, Box::from(name.as_ref()), r#type)
+            })
+            .collect::<Result<_, _>>()?;
 
         let rest = if let Some(rest) = self.rest.as_ref() {
             let r#type = if let Some(parameter) = rest.1.as_ref() {
@@ -67,6 +68,6 @@ impl Executable for Function {
             None
         };
 
-        Ok(engine.new_function(Ref::as_option(&self.name), parameters.into_boxed_slice(), rest, r#type, FunctionCode::new(Ref::new(&self.block))))
+        Ok(engine.new_function(Ref::as_option(&self.name), parameters, rest, r#type, FunctionCode::new(Ref::new(&self.block))))
     }
 }

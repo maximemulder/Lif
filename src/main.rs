@@ -1,14 +1,15 @@
 #![allow(incomplete_features)]
 #![allow(dead_code)]
-#![feature(const_fn)]
-#![feature(new_uninit)]
-#![feature(maybe_uninit_ref)]
-#![feature(maybe_uninit_extra)]
-#![feature(unsize)]
+#![feature(bool_to_option)]
 #![feature(drain_filter)]
 #![feature(const_generics)]
 #![feature(const_fn_fn_ptr_basics)]
+#![feature(const_fn_trait_bound)]
+#![feature(maybe_uninit_ref)]
+#![feature(maybe_uninit_extra)]
+#![feature(new_uninit)]
 #![feature(raw)]
+#![feature(unsize)]
 #![warn(clippy::all)]
 
 mod element;
@@ -43,7 +44,12 @@ fn main() {
     let mut input  = stdin();
     let mut output = stdout();
     let mut error  = stderr();
+    let a = std::time::Instant::now();
     let mut engine = Engine::new(&parser, &mut input, &mut output, &mut error);
+    let b = std::time::Instant::now();
     let code = Code::from_file(engine.parser, 0, &build::program, &args[1]).unwrap();
+    let c = std::time::Instant::now();
     engine.run(code);
+    let d = std::time::Instant::now();
+    print!("INIT TIME: {}ns\nPARSING TIME: {}ns\nRUN TIME: {}ns\nTOTAL TIME: {}ns\n", (b - a).as_nanos(), (c - b).as_nanos(), (d - c).as_nanos(),(d - a).as_nanos());
 }

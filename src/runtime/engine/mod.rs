@@ -7,7 +7,6 @@ use crate::nodes::Executable;
 use crate::parser::Parser;
 use crate::runtime::data::Data;
 use crate::runtime::primitives::Primitives;
-use crate::runtime::error::Error;
 use crate::runtime::gc::{ GC_THRESHOLD, Gc, GcRef, GcTrace };
 use crate::runtime::jump::Jump;
 use crate::runtime::reference::{ GcReference, Reference };
@@ -117,27 +116,12 @@ impl<'a> Engine<'a> {
     }
 
     pub fn get_variable(&self, name: &str) -> ReturnReference<'a> {
-        let mut scope = self.scope;
-        loop {
-            if let Some(object) = scope.get_variable(name) {
-                return Ok(object);
-            }
-
-            if let Some(parent) = scope.parent() {
-                scope = parent;
-            } else {
-                return Err(Error::new_undeclared_variable(name));
-            }
-        }
+        self.scope.get_variable(name)
     }
 
     pub fn execute(&mut self, node: &dyn Executable) -> ReturnReference<'a> {
         self.registries.push();
-        let reference = match node.execute(self) {
-            Ok(reference) => reference,
-            Err(error) => return Err(error),
-        };
-
+        let reference = node.execute(self)?;
         self.registries.cache(reference);
         self.registries.pop();
         if self.gc.get_allocations() > GC_THRESHOLD {
