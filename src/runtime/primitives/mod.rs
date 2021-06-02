@@ -169,8 +169,11 @@ fn exit<'a>(_: &mut Engine<'a>, arguments: Arguments<'a>) -> ReturnReference<'a>
 }
 
 fn include<'a>(engine: &mut Engine<'a>, arguments: Arguments<'a>) -> ReturnReference<'a> {
-    let code = Code::from_file(&engine.parser, 0, &build::program, &arguments[0].data_string()).unwrap();
-    engine.run(code);
+    engine.run_frame(engine.scope().parent().unwrap(), |engine| {
+        let code = Code::from_file(&engine.parser, 0, &build::program, &arguments[0].data_string()).unwrap();
+        engine.run(code);
+    });
+
     Ok(engine.undefined())
 }
 
