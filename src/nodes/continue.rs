@@ -1,7 +1,7 @@
 use crate::nodes::{ Executable, Node };
 use crate::runtime::engine::Engine;
 use crate::runtime::jump::Jump;
-use crate::runtime::utilities::ReturnReference;
+use crate::runtime::utilities::ReturnFlow;
 
 pub struct Continue {
     expression: Option<Node>,
@@ -16,7 +16,7 @@ impl Continue {
 }
 
 impl Executable for Continue {
-    fn execute<'a>(&self, engine: &mut Engine<'a>) -> ReturnReference<'a> {
+    fn execute<'a>(&self, engine: &mut Engine<'a>) -> ReturnFlow<'a> {
         engine.jump_new(Jump::Continue, self.expression.as_ref())
     }
 }

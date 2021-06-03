@@ -1,7 +1,7 @@
 use crate::memory::Ref;
 use crate::nodes::Executable;
 use crate::runtime::engine::Engine;
-use crate::runtime::utilities::ReturnReference;
+use crate::runtime::utilities::ReturnFlow;
 pub struct Float {
     float: f64,
 }
@@ -16,7 +16,7 @@ impl Float {
 }
 
 impl Executable for Float {
-    fn execute<'a>(&self, engine: &mut Engine<'a>) -> ReturnReference<'a> {
+    fn execute<'a>(&self, engine: &mut Engine<'a>) -> ReturnFlow<'a> {
         Ok(engine.new_float(self.float))
     }
 }

@@ -1,6 +1,6 @@
 use crate::nodes::{ Executable, Node };
 use crate::runtime::engine::Engine;
-use crate::runtime::utilities::ReturnReference;
+use crate::runtime::utilities::ReturnFlow;
 
 pub struct Block {
     statements: Node,
@@ -17,11 +17,11 @@ impl Block {
 }
 
 impl Executable for Block {
-    fn execute<'a>(&self, engine: &mut Engine<'a>) -> ReturnReference<'a> {
+    fn execute<'a>(&self, engine: &mut Engine<'a>) -> ReturnFlow<'a> {
         engine.run_scope(|engine| {
-            execute!(engine, &self.statements);
+            engine.execute(&self.statements)?;
             Ok(if let Some(expression) = &self.expression {
-                execute!(engine, expression)
+                engine.execute(expression)?
             } else {
                 engine.undefined()
             })

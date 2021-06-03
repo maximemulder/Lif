@@ -1,6 +1,6 @@
 use crate::nodes::Executable;
 use crate::runtime::engine::Engine;
-use crate::runtime::utilities::ReturnReference;
+use crate::runtime::utilities::ReturnFlow;
 
 pub struct True;
 
@@ -11,7 +11,7 @@ impl True {
 }
 
 impl Executable for True {
-    fn execute<'a>(&self, engine: &mut Engine<'a>) -> ReturnReference<'a> {
+    fn execute<'a>(&self, engine: &mut Engine<'a>) -> ReturnFlow<'a> {
         Ok(engine.new_boolean(true))
     }
 }

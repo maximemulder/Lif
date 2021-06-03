@@ -1,7 +1,7 @@
 use crate::nodes::{ Executable, Node };
 use crate::runtime::engine::Engine;
 use crate::runtime::jump::Jump;
-use crate::runtime::utilities::ReturnReference;
+use crate::runtime::utilities::ReturnFlow;
 
 pub struct Loop {
     body: Node,
@@ -16,7 +16,7 @@ impl Loop {
 }
 
 impl Executable for Loop {
-    fn execute<'a>(&self, engine: &mut Engine<'a>) -> ReturnReference<'a> {
+    fn execute<'a>(&self, engine: &mut Engine<'a>) -> ReturnFlow<'a> {
         let mut elements = Vec::new();
         loop {
             let reference = engine.execute(&self.body)?;

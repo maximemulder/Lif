@@ -18,3 +18,7 @@ pub type Return<T> = Result<T, Error>;
 pub type ReturnReference<'a> = Return<GcReference<'a>>;
 
 pub type ReturnValue<'a> = Return<GcValue<'a>>;
+
+mod flow;
+
+pub use flow::{ Control, Jump, Flow, ReturnFlow };

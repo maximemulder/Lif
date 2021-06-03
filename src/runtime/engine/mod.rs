@@ -12,7 +12,7 @@ use crate::runtime::jump::Jump;
 use crate::runtime::reference::{ GcReference, Reference };
 use crate::runtime::registries::Registries;
 use crate::runtime::scope::{ GcScope, Scope };
-use crate::runtime::utilities::ReturnReference;
+use crate::runtime::utilities::{ Flow, ReturnFlow, ReturnReference };
 use crate::runtime::utilities::tag::Tagger;
 use crate::runtime::value::{ GcValue, Value };
 
@@ -119,7 +119,7 @@ impl<'a> Engine<'a> {
         self.scope.get_variable(name)
     }
 
-    pub fn execute(&mut self, node: &dyn Executable) -> ReturnReference<'a> {
+    pub fn execute(&mut self, node: &dyn Executable) -> ReturnFlow<'a> {
         self.registries.push();
         let reference = node.execute(self)?;
         self.registries.cache(reference);
@@ -138,8 +138,10 @@ impl<'a> Engine<'a> {
         let executable = Ref::as_ref(&node);
         match self.execute(executable) {
             Ok(reference) => Some(reference),
-            Err(error) => {
-                writeln!(self.error, "{}", error.get_message()).unwrap();
+            Err(flow) => {
+                if let Flow::Error(error) = flow {
+                    writeln!(self.error, "{}", error.get_message()).unwrap();
+                }
                 None
             },
         }

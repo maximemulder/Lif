@@ -3,8 +3,7 @@ use crate::nodes::Node;
 use crate::runtime::data::function::FunctionImplementation;
 use crate::runtime::engine::Engine;
 use crate::runtime::error::Error;
-use crate::runtime::jump::Jump;
-use crate::runtime::utilities::{ Arguments, ReturnReference };
+use crate::runtime::utilities::{ Arguments, Control, Flow, ReturnReference };
 use crate::runtime::utilities::variable::Variable;
 
 pub struct FunctionCode {
@@ -36,8 +35,20 @@ impl<'a> FunctionImplementation<'a> for FunctionCode {
         }
 
         let executable = Ref::as_ref(&self.block);
-        let reference = engine.execute(executable)?;
-
+        match engine.execute(executable) {
+            Ok(_) => Ok(engine.undefined()),
+            Err(flow) => match flow {
+                Flow::Jump(jump) => {
+                    if jump.control == Control::Return && jump.reference.is_defined() {
+                        Ok(engine.new_constant(jump.reference.get_value()))
+                    } else {
+                        Err(Error::new_jump())
+                    }
+                }
+                Flow::Error(error) => Err(error),
+            }
+        }
+/*
         if engine.jump == Jump::Break || engine.jump == Jump::Continue {
             return Err(Error::new_jump());
         }
@@ -46,6 +57,6 @@ impl<'a> FunctionImplementation<'a> for FunctionCode {
             return Ok(engine.new_constant(reference.get_value()));
         }
 
-        Ok(engine.undefined())
+        Ok(engine.undefined()) */
     }
 }

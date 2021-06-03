@@ -1,6 +1,6 @@
 use crate::nodes::Node;
 use crate::runtime::engine::Engine;
-use crate::runtime::utilities::ReturnReference;
+use crate::runtime::utilities::{ Flow, ReturnFlow };
 
 #[derive(PartialEq, Eq)]
 pub enum Jump {
@@ -11,9 +11,9 @@ pub enum Jump {
 }
 
 impl<'a> Engine<'a> {
-    pub fn jump_new(&mut self, jump: Jump, node: Option<&Node>) -> ReturnReference<'a> {
+    pub fn jump_new(&mut self, jump: Jump, node: Option<&Node>) -> ReturnFlow<'a> {
         let reference = if let Some(node) = node {
-            let value = execute!(self, node).read()?;
+            let value = self.execute(node)?.read().map_err(Flow::Error)?;
             self.new_constant(value)
         } else {
             self.undefined()

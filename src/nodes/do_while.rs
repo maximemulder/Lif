@@ -1,7 +1,7 @@
 use crate::nodes::{ Executable, Node };
 use crate::runtime::engine::Engine;
 use crate::runtime::jump::Jump;
-use crate::runtime::utilities::ReturnReference;
+use crate::runtime::utilities::{ Flow, ReturnFlow };
 
 pub struct DoWhile {
     body:      Node,
@@ -18,7 +18,7 @@ impl DoWhile {
 }
 
 impl Executable for DoWhile {
-    fn execute<'a>(&self, engine: &mut Engine<'a>) -> ReturnReference<'a> {
+    fn execute<'a>(&self, engine: &mut Engine<'a>) -> ReturnFlow<'a> {
         let mut elements = Vec::new();
         loop {
             let reference = engine.execute(&self.body)?;
@@ -38,8 +38,8 @@ impl Executable for DoWhile {
                 break;
             }
 
-            let reference = execute!(engine, &self.condition);
-            let condition = !*reference.read()?.get_cast_boolean(engine)?;
+            let reference = engine.execute(&self.condition)?;
+            let condition = !*reference.read().map_err(Flow::Error)?.get_cast_boolean(engine).map_err(Flow::Error)?;
             if condition {
                 break;
             }

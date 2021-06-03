@@ -1,7 +1,7 @@
 use crate::memory::Ref;
 use crate::nodes::Executable;
 use crate::runtime::engine::Engine;
-use crate::runtime::utilities::ReturnReference;
+use crate::runtime::utilities::{ Flow, ReturnFlow };
 
 pub struct Identifier {
     identifier: Ref<str>,
@@ -16,7 +16,7 @@ impl Identifier {
 }
 
 impl Executable for Identifier {
-    fn execute<'a>(&self, engine: &mut Engine<'a>) -> ReturnReference<'a> {
-        engine.get_variable(&self.identifier)
+    fn execute<'a>(&self, engine: &mut Engine<'a>) -> ReturnFlow<'a> {
+        engine.get_variable(&self.identifier).map_err(Flow::Error)
     }
 }

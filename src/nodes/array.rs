@@ -1,6 +1,6 @@
 use crate::nodes::{ Executable, Node };
 use crate::runtime::engine::Engine;
-use crate::runtime::utilities::ReturnReference;
+use crate::runtime::utilities::{ Flow, ReturnFlow };
 
 pub struct Array {
     expressions: Box<[Node]>,
@@ -15,10 +15,10 @@ impl Array {
 }
 
 impl Executable for Array {
-    fn execute<'a>(&self, engine: &mut Engine<'a>) -> ReturnReference<'a> {
+    fn execute<'a>(&self, engine: &mut Engine<'a>) -> ReturnFlow<'a> {
         let elements = self.expressions.iter()
             .map(|expression| {
-                let value = execute!(engine, expression).read()?;
+                let value = engine.execute(expression)?.read().map_err(Flow::Error)?;
                 Ok(engine.new_reference(value))
             })
             .collect::<Result<_, _>>()?;

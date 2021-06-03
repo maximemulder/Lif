@@ -3,7 +3,7 @@ use crate::nodes::{ Executable, Node };
 use crate::runtime::data::FunctionCode;
 use crate::runtime::engine::Engine;
 use crate::runtime::error::Error;
-use crate::runtime::utilities::ReturnReference;
+use crate::runtime::utilities::{ Flow, ReturnFlow };
 use crate::runtime::utilities::variable::Variable;
 
 pub struct Function {
@@ -27,29 +27,29 @@ impl Function {
 }
 
 impl Executable for Function {
-    fn execute<'a>(&self, engine: &mut Engine<'a>) -> ReturnReference<'a> {
+    fn execute<'a>(&self, engine: &mut Engine<'a>) -> ReturnFlow<'a> {
         let parameters = self.parameters.iter()
             .map(|(name, parameter)| {
                 let r#type = if let Some(parameter) = parameter.as_ref() {
-                    Some(engine.execute(parameter)?.read()?)
+                    Some(engine.execute(parameter)?.read().map_err(Flow::Error)?)
                 } else {
                     None
                 };
 
-                Variable::new(engine, Box::from(name.as_ref()), r#type)
+                Variable::new(engine, Box::from(name.as_ref()), r#type).map_err(Flow::Error)
             })
             .collect::<Result<_, _>>()?;
 
         let rest = if let Some(rest) = self.rest.as_ref() {
             let r#type = if let Some(parameter) = rest.1.as_ref() {
-                let r#type = engine.execute(parameter)?.read()?;
-                r#type.cast(engine.primitives.class)?;
+                let r#type = engine.execute(parameter)?.read().map_err(Flow::Error)?;
+                r#type.cast(engine.primitives.class).map_err(Flow::Error)?;
                 if let Some(constructor) = r#type.data_class().constructor.as_ref() {
                     if constructor.generic != engine.primitives.array {
-                        return Err(Error::new_rest())
+                        return Err(Error::new_rest()).map_err(Flow::Error)
                     }
                 } else {
-                    return Err(Error::new_rest())
+                    return Err(Error::new_rest()).map_err(Flow::Error)
                 }
 
                 Some(r#type)
@@ -57,13 +57,13 @@ impl Executable for Function {
                 None
             };
 
-            Some(Variable::new(engine, Box::from(rest.0.as_ref()), r#type)?)
+            Some(Variable::new(engine, Box::from(rest.0.as_ref()), r#type).map_err(Flow::Error)?)
         } else {
             None
         };
 
         let r#type = if let Some(r#type) = self.r#type.as_ref() {
-            Some(engine.execute(r#type)?.read()?)
+            Some(engine.execute(r#type)?.read().map_err(Flow::Error)?)
         } else {
             None
         };
