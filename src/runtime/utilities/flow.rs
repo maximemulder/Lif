@@ -13,6 +13,15 @@ pub struct Jump<'a> {
     pub reference: GcReference<'a>,
 }
 
+impl<'a> Jump<'a> {
+    pub fn new(control: Control, reference: GcReference<'a>) -> Self {
+        Self {
+            control,
+            reference,
+        }
+    }
+}
+
 pub enum Flow<'a> {
     Jump(Jump<'a>),
     Error(Error),

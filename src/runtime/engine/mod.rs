@@ -8,7 +8,6 @@ use crate::parser::Parser;
 use crate::runtime::data::Data;
 use crate::runtime::primitives::Primitives;
 use crate::runtime::gc::{ GC_THRESHOLD, Gc, GcRef, GcTrace };
-use crate::runtime::jump::Jump;
 use crate::runtime::reference::{ GcReference, Reference };
 use crate::runtime::registries::Registries;
 use crate::runtime::scope::{ GcScope, Scope };
@@ -40,7 +39,6 @@ pub struct Engine<'a> {
     pub output:     &'a mut dyn Write,
     pub error:      &'a mut dyn Write,
     pub primitives: Primitives<'a>,
-    pub jump:       Jump,
     registries:     Registries,
     taggers:        Taggers,
     gc:             Gc,
@@ -58,7 +56,6 @@ impl<'a> Engine<'a> {
             output,
             error,
             primitives:  Primitives::new(),
-            jump:        Jump::None,
             registries:  Registries::new(),
             taggers:     Taggers::new(),
             gc:          Gc::new(),
