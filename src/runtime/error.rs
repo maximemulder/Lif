@@ -87,7 +87,7 @@ impl Error {
         message += &self.message;
         if let Some(node) = self.node {
             let code = node.code;
-            if let Some(name) = &code.name {
+            if let Some(name) = code.name.as_ref() {
                 message += " ";
                 message += name;
             }

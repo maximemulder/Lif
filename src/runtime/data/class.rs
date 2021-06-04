@@ -76,7 +76,7 @@ impl GcTrace for Class<'_> {
             constructor.trace();
         }
 
-        if let Some(parent) = &mut self.parent {
+        if let Some(parent) = self.parent.as_mut() {
             parent.trace();
         }
 

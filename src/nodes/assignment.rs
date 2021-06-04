@@ -27,7 +27,7 @@ impl Executable for Assignment {
     fn execute<'a>(&self, engine: &mut Engine<'a>) -> ReturnFlow<'a> {
         let mut reference  = engine.execute(&self.reference)?;
         let mut expression = flow(engine.execute(&self.expression)?.read())?;
-        if let Some(operator) = &self.operator {
+        if let Some(operator) = self.operator.as_ref() {
             let left = flow(reference.read())?;
             expression = flow(flow(left.call_method(engine, operator, Box::new([expression])))?.read())?;
         }
