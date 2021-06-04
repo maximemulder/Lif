@@ -10,8 +10,8 @@ use crate::runtime::primitives::Primitives;
 use crate::runtime::gc::{ GC_THRESHOLD, Gc, GcRef, GcTrace };
 use crate::runtime::reference::{ GcReference, Reference };
 use crate::runtime::registries::Registries;
+use crate::runtime::r#return::{ Flow, ReturnFlow, ReturnReference };
 use crate::runtime::scope::{ GcScope, Scope };
-use crate::runtime::utilities::{ Flow, ReturnFlow, ReturnReference };
 use crate::runtime::utilities::tag::Tagger;
 use crate::runtime::value::{ GcValue, Value };
 

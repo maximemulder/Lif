@@ -1,6 +1,7 @@
 use crate::runtime::engine::Engine;
 use crate::runtime::error::Error;
-use crate::runtime::utilities::{ Arguments, Return };
+use crate::runtime::r#return::Return;
+use crate::runtime::utilities::Arguments;
 use crate::runtime::value::GcValue;
 
 pub fn length(arguments: usize, parameters: usize) -> Return<()> {

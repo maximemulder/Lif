@@ -1,7 +1,7 @@
 use crate::memory::Ref;
 use crate::nodes::{ Executable, Node };
 use crate::runtime::engine::Engine;
-use crate::runtime::utilities::{ Flow, ReturnFlow };
+use crate::runtime::r#return::{ flow, ReturnFlow };
 
 pub struct Class {
     name: Option<Ref<str>>,
@@ -22,17 +22,17 @@ impl Class {
 impl Executable for Class {
     fn execute<'a>(&self, engine: &mut Engine<'a>) -> ReturnFlow<'a> {
         let parent = if let Some(parent) = self.parent.as_ref() {
-            engine.execute(parent)?.read().map_err(Flow::Error)?
+            flow(engine.execute(parent)?.read())?
         } else {
             engine.primitives.object
         };
 
         let class = engine.new_class(Ref::as_option(&self.name), Some(parent));
-        let mut value = class.read().map_err(Flow::Error)?;
+        let mut value = flow(class.read())?;
         engine.run_frame(value.data_class().scope(), |engine| {
             let data = value.data_class_mut();
             for method in self.methods.iter() {
-                let function = engine.execute(method)?.read().map_err(Flow::Error)?;
+                let function = flow(engine.execute(method)?.read())?;
                 data.set_method(function.data_tag().get_name().unwrap(), function);
             }
 

@@ -2,7 +2,7 @@ use crate::memory::Ref;
 use crate::nodes::{ Executable, Node };
 use crate::runtime::data::GenericCode;
 use crate::runtime::engine::Engine;
-use crate::runtime::utilities::ReturnFlow;
+use crate::runtime::r#return::ReturnFlow;
 
 pub struct Generic {
     name: Option<Ref<str>>,

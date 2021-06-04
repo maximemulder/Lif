@@ -2,7 +2,8 @@ use crate::runtime::data::{ Array, Class, Data, Function, Generic, Method, Nulla
 use crate::runtime::engine::Engine;
 use crate::runtime::error::Error;
 use crate::runtime::gc::{ GcRef, GcTrace };
-use crate::runtime::utilities::{ Arguments, Return, ReturnReference, ReturnValue };
+use crate::runtime::r#return::{ Return, ReturnReference, ReturnValue };
+use crate::runtime::utilities::Arguments;
 use crate::runtime::utilities::parameters;
 use crate::runtime::utilities::tag::Tag;
 

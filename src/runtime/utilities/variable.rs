@@ -1,7 +1,7 @@
 use crate::runtime::engine::Engine;
 use crate::runtime::gc::GcTrace;
 use crate::runtime::reference::GcReference;
-use crate::runtime::utilities::Return;
+use crate::runtime::r#return::Return;
 use crate::runtime::value::GcValue;
 
 pub struct Variable<'a> {

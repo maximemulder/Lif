@@ -1,5 +1,6 @@
 use crate::runtime::engine::Engine;
-use crate::runtime::utilities::{ Arguments, ReturnReference };
+use crate::runtime::r#return::ReturnReference;
+use crate::runtime::utilities::Arguments;
 use crate::runtime::utilities::builder;
 use crate::runtime::value::GcValue;
 

@@ -35,7 +35,7 @@ pub mod build;
 
 use crate::memory::Ref;
 use crate::runtime::engine::Engine;
-use crate::runtime::utilities::{ Flow, ReturnFlow };
+use crate::runtime::r#return::{ Flow, ReturnFlow };
 
 pub use crate::node::Node as SyntaxNode;
 

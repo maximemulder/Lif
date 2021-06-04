@@ -1,7 +1,7 @@
 use crate::memory::Ref;
 use crate::nodes::{ Executable, Node };
 use crate::runtime::engine::Engine;
-use crate::runtime::utilities::{ Flow, ReturnFlow };
+use crate::runtime::r#return::{ flow, ReturnFlow };
 
 use std::ops::Deref;
 
@@ -45,13 +45,13 @@ impl Binop {
 
 impl Executable for Binop {
     fn execute<'a>(&self, engine: &mut Engine<'a>) -> ReturnFlow<'a> {
-        let left = engine.execute(&self.left)?.read().map_err(Flow::Error)?;
+        let left = flow(engine.execute(&self.left)?.read())?;
         match self.operator.deref() {
             "__and__" => {
-                left.cast(engine.primitives.boolean).map_err(Flow::Error)?;
+                flow(left.cast(engine.primitives.boolean))?;
                 let boolean = if *left.data_boolean() {
-                    let right = engine.execute(&self.right)?.read().map_err(Flow::Error)?;
-                    right.cast(engine.primitives.boolean).map_err(Flow::Error)?;
+                    let right = flow(engine.execute(&self.right)?.read())?;
+                    flow(right.cast(engine.primitives.boolean))?;
                     *right.data_boolean()
                 } else {
                     false
@@ -60,20 +60,20 @@ impl Executable for Binop {
                 Ok(engine.new_boolean(boolean))
             },
             "__or__" => {
-                left.cast(engine.primitives.boolean).map_err(Flow::Error)?;
+                flow(left.cast(engine.primitives.boolean))?;
                 let boolean = if *left.data_boolean() {
                     true
                 } else {
-                    let right = engine.execute(&self.right)?.read().map_err(Flow::Error)?;
-                    right.cast(engine.primitives.boolean).map_err(Flow::Error)?;
+                    let right = flow(engine.execute(&self.right)?.read())?;
+                    flow(right.cast(engine.primitives.boolean))?;
                     *right.data_boolean()
                 };
 
                 Ok(engine.new_boolean(boolean))
             },
             _ => {
-                let right = engine.execute(&self.right)?.read().map_err(Flow::Error)?;
-                left.call_method(engine, &self.operator, Box::new([right])).map_err(Flow::Error)
+                let right = flow(engine.execute(&self.right)?.read())?;
+                flow(left.call_method(engine, &self.operator, Box::new([right])))
             },
         }
     }

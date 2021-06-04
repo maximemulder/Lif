@@ -5,8 +5,9 @@ use crate::runtime::data::Tag;
 use crate::runtime::engine::Engine;
 use crate::runtime::error::Error;
 use crate::runtime::gc::GcTrace;
+use crate::runtime::r#return::ReturnReference;
 use crate::runtime::scope::GcScope;
-use crate::runtime::utilities::{ Arguments, ReturnReference };
+use crate::runtime::utilities::Arguments;
 use crate::runtime::utilities::variable::Variable;
 use crate::runtime::value::GcValue;
 

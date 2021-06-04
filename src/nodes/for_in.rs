@@ -1,7 +1,7 @@
 use crate::memory::Ref;
 use crate::nodes::{ Executable, Node };
 use crate::runtime::engine::Engine;
-use crate::runtime::utilities::{ Control, Flow, Jump, ReturnFlow };
+use crate::runtime::r#return::{ Control, Flow, flow, Jump, ReturnFlow };
 
 pub struct ForIn {
     identifier: Ref<str>,
@@ -24,7 +24,7 @@ impl Executable for ForIn {
         let mut elements = Vec::new();
         for element in {
             let reference = engine.execute(&self.expression)?;
-            reference.read().map_err(Flow::Error)?.get_cast_array(engine).map_err(Flow::Error)?.elements().iter().copied().clone()
+            flow(flow(reference.read())?.get_cast_array(engine))?.elements().iter().copied().clone()
         } {
             engine.set_variable(&self.identifier, element);
             let r#return = engine.execute(&self.body);

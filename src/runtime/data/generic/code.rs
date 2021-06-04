@@ -3,7 +3,8 @@ use crate::nodes::Executable;
 use crate::runtime::data::generic::GenericImplementation;
 use crate::runtime::engine::Engine;
 use crate::runtime::error::Error;
-use crate::runtime::utilities::{ Arguments, Flow, ReturnReference };
+use crate::runtime::r#return::{ Flow, ReturnReference };
+use crate::runtime::utilities::Arguments;
 
 pub struct GenericCode {
     node: Ref<dyn Executable>,

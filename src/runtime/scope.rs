@@ -2,7 +2,7 @@ use crate::runtime::engine::Engine;
 use crate::runtime::error::Error;
 use crate::runtime::gc::{ GcRef, GcTrace };
 use crate::runtime::reference::GcReference;
-use crate::runtime::utilities::ReturnReference;
+use crate::runtime::r#return::ReturnReference;
 use crate::runtime::value::GcValue;
 use std::collections::HashMap;
 

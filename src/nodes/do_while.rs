@@ -1,6 +1,6 @@
 use crate::nodes::{ Executable, Node };
 use crate::runtime::engine::Engine;
-use crate::runtime::utilities::{ Control, Flow, Jump, ReturnFlow };
+use crate::runtime::r#return::{ Control, Flow, flow, Jump, ReturnFlow };
 
 pub struct DoWhile {
     body:      Node,
@@ -48,7 +48,7 @@ impl Executable for DoWhile {
             };
 
             let reference = engine.execute(&self.condition)?;
-            let condition = !*reference.read().map_err(Flow::Error)?.get_cast_boolean(engine).map_err(Flow::Error)?;
+            let condition = !*flow(flow(reference.read())?.get_cast_boolean(engine))?;
             if condition {
                 break;
             }

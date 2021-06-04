@@ -1,7 +1,7 @@
 use crate::memory::Ref;
 use crate::nodes::{ Executable, Node };
 use crate::runtime::engine::Engine;
-use crate::runtime::utilities::{ Flow, ReturnFlow };
+use crate::runtime::r#return::{ flow, ReturnFlow };
 
 pub struct Assignment {
     reference:  Node,
@@ -26,13 +26,13 @@ impl Assignment {
 impl Executable for Assignment {
     fn execute<'a>(&self, engine: &mut Engine<'a>) -> ReturnFlow<'a> {
         let mut reference  = engine.execute(&self.reference)?;
-        let mut expression = engine.execute(&self.expression)?.read().map_err(Flow::Error)?;
+        let mut expression = flow(engine.execute(&self.expression)?.read())?;
         if let Some(operator) = &self.operator {
-            let left = reference.read().map_err(Flow::Error)?;
-            expression = left.call_method(engine, operator, Box::new([expression])).map_err(Flow::Error)?.read().map_err(Flow::Error)?;
+            let left = flow(reference.read())?;
+            expression = flow(flow(left.call_method(engine, operator, Box::new([expression])))?.read())?;
         }
 
-        reference.write(expression).map_err(Flow::Error)?;
+        flow(reference.write(expression))?;
         Ok(engine.undefined())
     }
 }

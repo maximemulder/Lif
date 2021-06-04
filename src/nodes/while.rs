@@ -1,6 +1,6 @@
 use crate::nodes::{ Executable, Node };
 use crate::runtime::engine::Engine;
-use crate::runtime::utilities::{ Control, Flow, Jump, ReturnFlow };
+use crate::runtime::r#return::{ Control, Flow, flow, Jump, ReturnFlow };
 
 pub struct While {
     condition: Node,
@@ -21,7 +21,7 @@ impl Executable for While {
         let mut elements = Vec::new();
         while {
             let reference = engine.execute(&self.condition)?;
-            *reference.read().map_err(Flow::Error)?.get_cast_boolean(engine).map_err(Flow::Error)?
+            *flow(flow(reference.read())?.get_cast_boolean(engine))?
         } {
             let r#return = engine.execute(&self.body);
             match r#return {
