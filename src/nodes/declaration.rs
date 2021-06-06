@@ -20,12 +20,7 @@ impl Declaration {
 
 impl Executable for Declaration {
     fn execute<'a>(&self, engine: &mut Engine<'a>) -> ReturnFlow<'a> {
-        let r#type = if let Some(r#type) = self.r#type.as_ref() {
-            Some(get_none!(engine.execute(r#type)?).read()?)
-        } else {
-            None
-        };
-
+        let r#type = self.r#type.as_ref().map(|r#type| get_none!(engine.execute(r#type)?).read()).transpose()?;
         Ok(flow!(Variable::new(engine, Box::from(self.identifier.as_ref()), r#type)?.build(engine)))
     }
 }

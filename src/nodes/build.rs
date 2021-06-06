@@ -141,11 +141,7 @@ fn flow(node: Ref<SyntaxNode>) -> Node {
 }
 
 fn block(node: Ref<SyntaxNode>) -> Node {
-    Node::new(node, Block::new(statements(node.front(1)), if node.children().len() == 4 {
-        Some(expression(node.front(2)))
-    } else {
-        None
-    }))
+    Node::new(node, Block::new(statements(node.front(1)), (node.children().len() == 4).then(|| expression(node.front(2)))))
 }
 
 fn r#if(node: Ref<SyntaxNode>) -> Node {
