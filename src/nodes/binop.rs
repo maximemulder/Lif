@@ -1,7 +1,7 @@
 use crate::memory::Ref;
 use crate::nodes::{ Executable, Node };
 use crate::runtime::engine::Engine;
-use crate::runtime::r#return::{ flow, ReturnFlow };
+use crate::runtime::r#return::ReturnFlow;
 
 use std::ops::Deref;
 
@@ -45,35 +45,35 @@ impl Binop {
 
 impl Executable for Binop {
     fn execute<'a>(&self, engine: &mut Engine<'a>) -> ReturnFlow<'a> {
-        let left = flow(engine.execute(&self.left)?.read())?;
+        let left = get!(engine.execute(&self.left)?).read()?;
         match self.operator.deref() {
             "__and__" => {
-                flow(left.cast(engine.primitives.boolean))?;
+                left.cast(engine.primitives.boolean)?;
                 let boolean = if *left.data_boolean() {
-                    let right = flow(engine.execute(&self.right)?.read())?;
-                    flow(right.cast(engine.primitives.boolean))?;
+                    let right = get!(engine.execute(&self.right)?).read()?;
+                    right.cast(engine.primitives.boolean)?;
                     *right.data_boolean()
                 } else {
                     false
                 };
 
-                Ok(engine.new_boolean(boolean))
+                Ok(flow!(engine.new_boolean(boolean)))
             },
             "__or__" => {
-                flow(left.cast(engine.primitives.boolean))?;
+                left.cast(engine.primitives.boolean)?;
                 let boolean = if *left.data_boolean() {
                     true
                 } else {
-                    let right = flow(engine.execute(&self.right)?.read())?;
-                    flow(right.cast(engine.primitives.boolean))?;
+                    let right = get!(engine.execute(&self.right)?).read()?;
+                    right.cast(engine.primitives.boolean)?;
                     *right.data_boolean()
                 };
 
-                Ok(engine.new_boolean(boolean))
+                Ok(flow!(engine.new_boolean(boolean)))
             },
             _ => {
-                let right = flow(engine.execute(&self.right)?.read())?;
-                flow(left.call_method(engine, &self.operator, Box::new([right])))
+                let right = get!(engine.execute(&self.right)?).read()?;
+                Ok(flow!(left.call_method(engine, &self.operator, Box::new([right]))?))
             },
         }
     }

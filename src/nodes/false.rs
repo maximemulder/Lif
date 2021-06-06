@@ -12,6 +12,6 @@ impl False {
 
 impl Executable for False {
     fn execute<'a>(&self, engine: &mut Engine<'a>) -> ReturnFlow<'a> {
-        Ok(engine.new_boolean(false))
+        Ok(flow!(engine.new_boolean(false)))
     }
 }

@@ -10,7 +10,7 @@ use crate::runtime::primitives::Primitives;
 use crate::runtime::gc::{ GC_THRESHOLD, Gc, GcRef, GcTrace };
 use crate::runtime::reference::{ GcReference, Reference };
 use crate::runtime::registries::Registries;
-use crate::runtime::r#return::{ Flow, ReturnFlow, ReturnReference };
+use crate::runtime::r#return::{ ReturnFlow, ReturnReference };
 use crate::runtime::scope::{ GcScope, Scope };
 use crate::runtime::utilities::tag::Tagger;
 use crate::runtime::value::{ GcValue, Value };
@@ -118,15 +118,18 @@ impl<'a> Engine<'a> {
 
     pub fn execute(&mut self, node: &dyn Executable) -> ReturnFlow<'a> {
         self.registries.push();
-        let reference = node.execute(self)?;
-        self.registries.cache(reference);
+        let r#return = node.execute(self);
+        if let Ok(flow) = r#return.as_ref() {
+            self.registries.cache(flow.reference);
+        }
+
         self.registries.pop();
         if self.gc.get_allocations() > GC_THRESHOLD {
             self.trace();
             self.gc.collect();
         }
 
-        Ok(reference)
+        r#return
     }
 
     pub fn run(&mut self, code: Own<Code>) -> Option<GcReference<'a>> {
@@ -134,11 +137,9 @@ impl<'a> Engine<'a> {
         let node = Ref::new(self.codes.last().unwrap().cst.as_ref().unwrap());
         let executable = Ref::as_ref(&node);
         match self.execute(executable) {
-            Ok(reference) => Some(reference),
-            Err(flow) => {
-                if let Flow::Error(error) = flow {
-                    writeln!(self.error, "{}", error.get_message()).unwrap();
-                }
+            Ok(flow) => Some(flow.reference),
+            Err(error) => {
+                writeln!(self.error, "{}", error.get_message()).unwrap();
                 None
             },
         }

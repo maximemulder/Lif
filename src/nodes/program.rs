@@ -16,7 +16,7 @@ impl Program {
 
 impl Executable for Program {
     fn execute<'a>(&self, engine: &mut Engine<'a>) -> ReturnFlow<'a> {
-        engine.execute(&self.statements)?;
-        Ok(engine.undefined())
+        get_none!(engine.execute(&self.statements)?);
+        Ok(flow!(engine.undefined()))
     }
 }

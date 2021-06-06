@@ -1,16 +1,18 @@
-use crate::runtime::reference::GcReference;
-use crate::runtime::r#return::control::Control;
-
-pub struct Jump<'a> {
-    pub control: Control,
-    pub reference: GcReference<'a>,
+#[derive(PartialEq, Eq)]
+pub enum Jump {
+    None,
+    Continue,
+    Break,
+    Return
 }
 
-impl<'a> Jump<'a> {
-    pub fn new(control: Control, reference: GcReference<'a>) -> Self {
-        Self {
-            control,
-            reference,
+impl Jump {
+    fn is_loop(&self) -> bool {
+        match self {
+            Self::None     => true,
+            Self::Continue => true,
+            Self::Break    => true,
+            Self::Return   => false,
         }
     }
 }

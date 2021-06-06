@@ -16,7 +16,7 @@ impl Statement {
 
 impl Executable for Statement {
     fn execute<'a>(&self, engine: &mut Engine<'a>) -> ReturnFlow<'a> {
-        engine.execute(&self.node)?;
-        Ok(engine.undefined())
+        get!(engine.execute(&self.node)?);
+        Ok(flow!(engine.undefined()))
     }
 }

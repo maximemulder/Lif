@@ -19,12 +19,12 @@ impl Block {
 impl Executable for Block {
     fn execute<'a>(&self, engine: &mut Engine<'a>) -> ReturnFlow<'a> {
         engine.run_scope(|engine| {
-            engine.execute(&self.statements)?;
-            Ok(if let Some(expression) = self.expression.as_ref() {
-                engine.execute(expression)?
+            get!(engine.execute(&self.statements)?);
+            Ok(flow!(if let Some(expression) = self.expression.as_ref() {
+                get!(engine.execute(expression)?)
             } else {
                 engine.undefined()
-            })
+            }))
         })
     }
 }

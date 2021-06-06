@@ -1,7 +1,16 @@
-use crate::runtime::error::Error;
-use crate::runtime::r#return::Jump;
+use crate::runtime::reference::GcReference;
+use crate::runtime::r#return::jump::Jump;
 
-pub enum Flow<'a> {
-    Jump(Jump<'a>),
-    Error(Error),
+pub struct Flow<'a> {
+    pub reference: GcReference<'a>,
+    pub jump: Jump,
+}
+
+impl<'a> Flow<'a> {
+    pub fn new(reference: GcReference<'a>, jump: Jump) -> Self {
+        Self {
+            reference,
+            jump,
+        }
+    }
 }

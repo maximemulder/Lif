@@ -26,6 +26,6 @@ impl Executable for Generic {
             .map(|parameter| Box::from(parameter.as_ref()))
             .collect();
 
-        Ok(engine.new_generic(Ref::as_option(&self.name), parameters, GenericCode::new(Ref::new(&self.node))))
+        Ok(flow!(engine.new_generic(Ref::as_option(&self.name), parameters, GenericCode::new(Ref::new(&self.node)))))
     }
 }

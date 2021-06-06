@@ -17,9 +17,9 @@ impl Statements {
 impl Executable for Statements {
     fn execute<'a>(&self, engine: &mut Engine<'a>) -> ReturnFlow<'a> {
         for statement in self.statements.iter() {
-            engine.execute(statement)?;
+            get!(engine.execute(statement)?);
         }
 
-        Ok(engine.undefined())
+        Ok(flow!(engine.undefined()))
     }
 }

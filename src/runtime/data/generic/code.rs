@@ -2,8 +2,7 @@ use crate::memory::Ref;
 use crate::nodes::Executable;
 use crate::runtime::data::generic::GenericImplementation;
 use crate::runtime::engine::Engine;
-use crate::runtime::error::Error;
-use crate::runtime::r#return::{ Flow, ReturnReference };
+use crate::runtime::r#return::ReturnReference;
 use crate::runtime::utilities::Arguments;
 
 pub struct GenericCode {
@@ -20,12 +19,6 @@ impl GenericCode {
 
 impl<'a> GenericImplementation<'a> for GenericCode {
     fn call(&self, engine: &mut Engine<'a>, _: Arguments<'a>) -> ReturnReference<'a> {
-        match engine.execute(Ref::as_ref(&self.node)) {
-            Ok(reference)  => Ok(reference),
-            Err(flow) => Err(match flow {
-                Flow::Jump(_) => Error::new_jump(),
-                Flow::Error(error) => error,
-            }),
-        }
+        Ok(get_none!(engine.execute(Ref::as_ref(&self.node))?))
     }
 }

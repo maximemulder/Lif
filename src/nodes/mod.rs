@@ -1,5 +1,54 @@
 #![allow(dead_code)]
 
+#![macro_use]
+
+macro_rules! get {
+    ( $flow:expr ) => {{
+        use crate::runtime::r#return::Jump;
+
+        let flow = $flow;
+        if flow.jump == Jump::None {
+            flow.reference
+        } else {
+            return Ok(flow);
+        }
+    }
+}}
+
+macro_rules! get_none {
+    ( $flow:expr ) => {{
+        use crate::runtime::error::Error;
+        use crate::runtime::r#return::Jump;
+
+        let flow = $flow;
+        if flow.jump == Jump::None {
+            flow.reference
+        } else {
+            return Err(Error::new_jump());
+        }
+    }
+}}
+
+macro_rules! get_loop {
+    ( $flow:expr ) => {{
+        use crate::runtime::r#return::Jump;
+
+        if $flow.jump != Jump::Return {
+            $flow.reference
+        } else {
+            return Ok($flow);
+        }
+    }
+}}
+
+macro_rules! flow {
+    ( $reference:expr ) => {{
+        use crate::runtime::r#return::{ Flow, Jump };
+
+        Flow::new($reference, Jump::None)
+    }
+}}
+
 pub mod program;
 pub mod statements;
 pub mod statement;
@@ -35,7 +84,7 @@ pub mod build;
 
 use crate::memory::Ref;
 use crate::runtime::engine::Engine;
-use crate::runtime::r#return::{ Flow, ReturnFlow };
+use crate::runtime::r#return::ReturnFlow;
 
 pub use crate::node::Node as SyntaxNode;
 
@@ -59,15 +108,13 @@ impl Node {
 
 impl Executable for Node {
     fn execute<'a>(&self, engine: &mut Engine<'a>) -> ReturnFlow<'a> {
-        let mut r#return = self.sem.execute(engine);
-        if let Err(mut flow) = r#return.as_mut() {
-            if let Flow::Error(error) = &mut flow {
-                if error.node.is_none(){
-                    error.node = Some(self.syn)
-                }
+        let mut flow = self.sem.execute(engine);
+        if let Err(mut error) = flow.as_mut() {
+            if error.node.is_none(){
+                error.node = Some(self.syn)
             }
         }
 
-        r#return
+        flow
     }
 }

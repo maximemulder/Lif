@@ -23,6 +23,6 @@ impl Integer {
 
 impl Executable for Integer {
     fn execute<'a>(&self, engine: &mut Engine<'a>) -> ReturnFlow<'a> {
-        Ok(engine.new_integer(self.integer))
+        Ok(flow!(engine.new_integer(self.integer)))
     }
 }

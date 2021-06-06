@@ -17,6 +17,6 @@ impl Float {
 
 impl Executable for Float {
     fn execute<'a>(&self, engine: &mut Engine<'a>) -> ReturnFlow<'a> {
-        Ok(engine.new_float(self.float))
+        Ok(flow!(engine.new_float(self.float)))
     }
 }

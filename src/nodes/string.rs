@@ -17,6 +17,6 @@ impl String {
 
 impl Executable for String {
     fn execute<'a>(&self, engine: &mut Engine<'a>) -> ReturnFlow<'a> {
-        Ok(engine.new_string(self.string.to_string()))
+        Ok(flow!(engine.new_string(self.string.to_string())))
     }
 }

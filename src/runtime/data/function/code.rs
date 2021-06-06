@@ -3,7 +3,7 @@ use crate::nodes::Node;
 use crate::runtime::data::function::FunctionImplementation;
 use crate::runtime::engine::Engine;
 use crate::runtime::error::Error;
-use crate::runtime::r#return::{ Control, Flow, ReturnReference };
+use crate::runtime::r#return::{ Jump, ReturnReference };
 use crate::runtime::utilities::Arguments;
 use crate::runtime::utilities::variable::Variable;
 
@@ -36,18 +36,13 @@ impl<'a> FunctionImplementation<'a> for FunctionCode {
         }
 
         let executable = Ref::as_ref(&self.block);
-        match engine.execute(executable) {
-            Ok(_) => Ok(engine.undefined()),
-            Err(flow) => match flow {
-                Flow::Jump(jump) => {
-                    if jump.control == Control::Return && jump.reference.is_defined() {
-                        Ok(engine.new_constant(jump.reference.get_value()))
-                    } else {
-                        Err(Error::new_jump())
-                    }
-                }
-                Flow::Error(error) => Err(error),
-            }
+        let flow = engine.execute(executable)?;
+        if flow.jump == Jump::Return && flow.reference.is_defined() {
+            Ok(engine.new_constant(flow.reference.get_value()))
+        } else if flow.jump == Jump::None {
+            Ok(engine.undefined())
+        } else {
+            Err(Error::new_jump())
         }
     }
 }

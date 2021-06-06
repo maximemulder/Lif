@@ -24,6 +24,7 @@ impl Code {
         code.ast = Some(ast);
         code.cst = Some(program(Ref::new(code.ast.as_ref().unwrap())));
         code
+
     }
 
     pub fn from_file(parser: &Parser, production: usize, program: &dyn Fn(Ref<ANode>) -> CNode, name: &str) -> Option<Own<Self>> {
