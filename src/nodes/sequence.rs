@@ -29,10 +29,6 @@ impl Sequence {
 impl Executable for Sequence {
     fn execute<'a>(&self, engine: &mut Engine<'a>) -> ReturnFlow<'a> {
         let value = get!(engine.execute(&self.expression)?).read()?;
-        /* let elements = self.expressions.iter()
-            .map(|expression| Ok(get_none!(engine.execute(expression)?)))
-            .collect::<Return<_>>()?; */
-
         let mut elements = Vec::new();
         for expression in self.expressions.iter() {
             elements.push(get_none!(engine.execute(expression)?))

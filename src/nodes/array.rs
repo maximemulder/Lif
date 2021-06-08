@@ -16,13 +16,6 @@ impl Array {
 
 impl Executable for Array {
     fn execute<'a>(&self, engine: &mut Engine<'a>) -> ReturnFlow<'a> {
-        /* let elements = self.expressions.iter()
-            .map(|expression| {
-                let value = get_none!(engine.execute(expression)?).read()?;
-                Ok(engine.new_reference(value))
-            })
-            .collect::<Return<_>>()?; */
-
         let mut elements = Vec::new();
         for expression in self.expressions.iter() {
             let value = get!(engine.execute(expression)?).read()?;
