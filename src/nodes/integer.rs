@@ -1,7 +1,7 @@
 use crate::memory::Ref;
 use crate::nodes::Executable;
 use crate::runtime::engine::Engine;
-use crate::runtime::r#return::ReturnFlow;
+use crate::runtime::r#return::{ Flow, ReturnFlow };
 
 pub struct Integer {
     integer: isize,
@@ -23,6 +23,6 @@ impl Integer {
 
 impl Executable for Integer {
     fn execute<'a>(&self, engine: &mut Engine<'a>) -> ReturnFlow<'a> {
-        Ok(flow!(engine.new_integer(self.integer)))
+        Flow::new(engine.new_integer(self.integer))
     }
 }

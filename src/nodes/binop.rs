@@ -1,7 +1,7 @@
 use crate::memory::Ref;
 use crate::nodes::{ Executable, Node };
 use crate::runtime::engine::Engine;
-use crate::runtime::r#return::ReturnFlow;
+use crate::runtime::r#return::{ Flow, ReturnFlow };
 
 use std::ops::Deref;
 
@@ -57,7 +57,7 @@ impl Executable for Binop {
                     false
                 };
 
-                Ok(flow!(engine.new_boolean(boolean)))
+                Flow::new(engine.new_boolean(boolean))
             },
             "__or__" => {
                 left.cast(engine.primitives.boolean)?;
@@ -69,11 +69,11 @@ impl Executable for Binop {
                     *right.data_boolean()
                 };
 
-                Ok(flow!(engine.new_boolean(boolean)))
+                Flow::new(engine.new_boolean(boolean))
             },
             _ => {
                 let right = get!(engine.execute(&self.right)?).read()?;
-                Ok(flow!(left.call_method(engine, &self.operator, Box::new([right]))?))
+                Flow::new(left.call_method(engine, &self.operator, Box::new([right]))?)
             },
         }
     }

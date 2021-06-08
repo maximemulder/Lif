@@ -1,7 +1,7 @@
 use crate::memory::Ref;
 use crate::nodes::Executable;
 use crate::runtime::engine::Engine;
-use crate::runtime::r#return::ReturnFlow;
+use crate::runtime::r#return::{ Flow, ReturnFlow };
 
 pub struct String {
     string: Ref<str>,
@@ -17,6 +17,6 @@ impl String {
 
 impl Executable for String {
     fn execute<'a>(&self, engine: &mut Engine<'a>) -> ReturnFlow<'a> {
-        Ok(flow!(engine.new_string(self.string.to_string())))
+        Flow::new(engine.new_string(self.string.to_string()))
     }
 }

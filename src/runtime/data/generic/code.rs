@@ -19,6 +19,6 @@ impl GenericCode {
 
 impl<'a> GenericImplementation<'a> for GenericCode {
     fn call(&self, engine: &mut Engine<'a>, _: Arguments<'a>) -> ReturnReference<'a> {
-        Ok(get_none!(engine.execute(Ref::as_ref(&self.node))?))
+        Ok(engine.execute(Ref::as_ref(&self.node))?.none()?)
     }
 }

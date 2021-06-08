@@ -1,6 +1,6 @@
 use crate::nodes::{ Executable, Node };
 use crate::runtime::engine::Engine;
-use crate::runtime::r#return::{ Jump, ReturnFlow };
+use crate::runtime::r#return::{ Flow, Jump, ReturnFlow };
 
 pub struct DoWhile {
     body:      Node,
@@ -41,6 +41,6 @@ impl Executable for DoWhile {
             }
         }
 
-        Ok(flow!(engine.new_array_any(elements)))
+        Flow::new(engine.new_array_any(elements))
     }
 }

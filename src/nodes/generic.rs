@@ -2,7 +2,7 @@ use crate::memory::Ref;
 use crate::nodes::{ Executable, Node };
 use crate::runtime::data::GenericCode;
 use crate::runtime::engine::Engine;
-use crate::runtime::r#return::ReturnFlow;
+use crate::runtime::r#return::{ Flow, ReturnFlow };
 
 pub struct Generic {
     name: Option<Ref<str>>,
@@ -26,6 +26,6 @@ impl Executable for Generic {
             .map(|parameter| Box::from(parameter.as_ref()))
             .collect();
 
-        Ok(flow!(engine.new_generic(Ref::as_option(&self.name), parameters, GenericCode::new(Ref::new(&self.node)))))
+        Flow::new(engine.new_generic(Ref::as_option(&self.name), parameters, GenericCode::new(Ref::new(&self.node))))
     }
 }

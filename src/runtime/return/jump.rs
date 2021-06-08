@@ -1,4 +1,6 @@
-#[derive(PartialEq, Eq)]
+use std::fmt;
+
+#[derive(PartialEq, Eq, Clone, Copy)]
 pub enum Jump {
     None,
     Continue,
@@ -6,13 +8,13 @@ pub enum Jump {
     Return
 }
 
-impl Jump {
-    fn is_loop(&self) -> bool {
-        match self {
-            Self::None     => true,
-            Self::Continue => true,
-            Self::Break    => true,
-            Self::Return   => false,
-        }
+impl fmt::Display for Jump {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", match self {
+            Self::None     => "None",
+            Self::Continue => "Continue",
+            Self::Break    => "Break",
+            Self::Return   => "Return",
+        })
     }
 }

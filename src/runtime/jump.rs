@@ -11,6 +11,6 @@ impl<'a> Engine<'a> {
             self.undefined()
         };
 
-        Ok(Flow::new(reference, jump))
+        Flow::new_jump(reference, jump)
     }
 }

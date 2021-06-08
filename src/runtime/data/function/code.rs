@@ -42,7 +42,12 @@ impl<'a> FunctionImplementation<'a> for FunctionCode {
         } else if flow.jump == Jump::None {
             Ok(engine.undefined())
         } else {
-            Err(Error::new_jump())
+            Err(error_jump())
         }
     }
+}
+
+
+fn error_jump() -> Error {
+    Error::new_runtime("Incorrect jump use.")
 }

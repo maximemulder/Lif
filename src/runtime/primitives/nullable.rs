@@ -55,6 +55,10 @@ fn get<'a>(engine: &mut Engine<'a>, arguments: Arguments<'a>) -> ReturnReference
     return if let Some(value) = arguments[0].data_nullable().option {
         Ok(engine.new_constant(value))
     } else {
-        Err(Error::new_nullable())
+        Err(error_nullable())
     }
+}
+
+fn error_nullable() -> Error {
+    Error::new_runtime("Cannot get the content of a null value.")
 }

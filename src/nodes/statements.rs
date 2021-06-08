@@ -1,6 +1,6 @@
 use crate::nodes::{ Executable, Node };
 use crate::runtime::engine::Engine;
-use crate::runtime::r#return::ReturnFlow;
+use crate::runtime::r#return::{ Flow, ReturnFlow };
 
 pub struct Statements {
     statements: Box<[Node]>,
@@ -20,6 +20,6 @@ impl Executable for Statements {
             get!(engine.execute(statement)?);
         }
 
-        Ok(flow!(engine.undefined()))
+        Flow::new(engine.undefined())
     }
 }

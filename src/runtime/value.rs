@@ -39,7 +39,7 @@ impl<'a> GcValue<'a> {
     }
 
     pub fn cast(self, other: GcValue<'a>) -> Return<()> {
-        self.isa(other).then_some(()).ok_or_else(|| Error::new_cast(self, other))
+        self.isa(other).then_some(()).ok_or_else(|| error_cast(self, other))
     }
 }
 
@@ -48,7 +48,7 @@ impl<'a> GcValue<'a> {
         if let Some(method) = self.class.data_class().get_method(name) {
             Ok(method)
         } else {
-            Err(Error::new_undefined_method(name, self.class))
+            Err(error_undefined_method(name, self.class))
         }
     }
 
@@ -205,4 +205,12 @@ impl<'a> Value<'a> {
     pub fn data_string_mut(&mut self) -> &mut String {
         data_mut!(self, String);
     }
+}
+
+fn error_undefined_method(method: &str, class: GcValue) -> Error {
+    Error::new_runtime(&format!("Method `{}` is undefined for type `{}`.", method, class.data_class().tag()))
+}
+
+fn error_cast(value: GcValue, r#type: GcValue) -> Error {
+    Error::new_runtime(&format!("Cannot cast a value of the type `{}` to the type `{}`.", value.class.data_class().tag(), r#type.data_class().tag()))
 }

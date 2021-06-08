@@ -1,4 +1,4 @@
-use std::fmt::{ Display, Formatter, Result };
+use std::fmt;
 
 pub struct Tagger {
     index: usize,
@@ -41,8 +41,8 @@ impl Tag {
     }
 }
 
-impl Display for Tag {
-    fn fmt(&self, f: &mut Formatter) -> Result {
+impl fmt::Display for Tag {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "(")?;
         if let Some(name) = self.name.as_ref() {
             write!(f, "{}", name)?;

@@ -37,7 +37,7 @@ impl<'a> Scope<'a> {
         } else if let Some(parent) = self.parent {
             parent.get_variable(name)
         } else {
-            Err(Error::new_undeclared_variable(name))
+            Err(error_undeclared_variable(name))
         }
     }
 
@@ -67,4 +67,8 @@ impl GcTrace for Scope<'_> {
             variable.trace();
         }
     }
+}
+
+pub fn error_undeclared_variable(variable: &str) -> Error {
+    Error::new_runtime(&format!("Variable `{}` is not declared in this scope.", variable))
 }

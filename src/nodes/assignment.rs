@@ -1,7 +1,7 @@
 use crate::memory::Ref;
 use crate::nodes::{ Executable, Node };
 use crate::runtime::engine::Engine;
-use crate::runtime::r#return::ReturnFlow;
+use crate::runtime::r#return::{ Flow, ReturnFlow };
 
 pub struct Assignment {
     reference:  Node,
@@ -29,6 +29,6 @@ impl Executable for Assignment {
         }
 
         reference.write(expression)?;
-        Ok(flow!(engine.undefined()))
+        Flow::new(engine.undefined())
     }
 }

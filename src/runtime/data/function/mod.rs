@@ -52,10 +52,10 @@ impl<'a> Function<'a> {
     pub fn call(&self, engine: &mut Engine<'a>, arguments: Arguments<'a>) -> ReturnReference<'a> {
         match &self.rest {
             Some(_) => if arguments.len() < self.parameters.len() {
-                return Err(Error::new_arguments(self.parameters.len(), arguments.len()));
+                return Err(error_arguments(self.parameters.len(), arguments.len()));
             },
             None => if arguments.len() != self.parameters.len() {
-                return Err(Error::new_arguments(self.parameters.len(), arguments.len()));
+                return Err(error_arguments(self.parameters.len(), arguments.len()));
             },
         }
 
@@ -87,4 +87,8 @@ impl GcTrace for Function<'_> {
             r#return.trace();
         }
     }
+}
+
+fn error_arguments(parameters: usize, arguments: usize) -> Error {
+    Error::new_runtime(&format!("Provided {} arguments while the function expects at least {} parameters.", arguments, parameters))
 }

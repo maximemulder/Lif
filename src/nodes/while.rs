@@ -1,6 +1,6 @@
 use crate::nodes::{ Executable, Node };
 use crate::runtime::engine::Engine;
-use crate::runtime::r#return::{ Jump, ReturnFlow };
+use crate::runtime::r#return::{ Flow, Jump, ReturnFlow };
 
 pub struct While {
     condition: Node,
@@ -38,6 +38,6 @@ impl Executable for While {
             }
         }
 
-        Ok(flow!(engine.new_array_any(elements)))
+        Flow::new(engine.new_array_any(elements))
     }
 }

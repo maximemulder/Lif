@@ -31,7 +31,7 @@ impl<'a> Reference<'a> {
     }
 
     pub fn read(&self) -> ReturnValue<'a> {
-        self.value.ok_or_else(Error::new_undefined)
+        self.value.ok_or_else(error_undefined)
     }
 
     pub fn write(&mut self, value: GcValue<'a>) -> Return<()> {
@@ -43,7 +43,7 @@ impl<'a> Reference<'a> {
             Type::Constant => if self.value.is_none() {
                 self.set_value(value);
             } else {
-                return Err(Error::new_constant_write());
+                return Err(error_write_constant());
             },
         }
 
@@ -73,4 +73,12 @@ impl GcTrace for Reference<'_> {
             value.trace();
         }
     }
+}
+
+fn error_undefined() -> Error {
+    Error::new_runtime("Cannot read an undefined reference.")
+}
+
+fn error_write_constant() -> Error {
+    Error::new_runtime("Cannot write data into a constant.")
 }

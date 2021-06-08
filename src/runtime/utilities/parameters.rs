@@ -6,7 +6,7 @@ use crate::runtime::value::GcValue;
 
 pub fn length(arguments: usize, parameters: usize) -> Return<()> {
     if arguments != parameters {
-        return Err(Error::new_arguments(parameters, arguments));
+        return Err(error_arguments(parameters, arguments));
     }
 
     Ok(())
@@ -26,4 +26,8 @@ pub fn unpack(value: GcValue<'_>) -> Return<Arguments<'_>> {
         .copied()
         .map(|element| element.read())
         .collect()
+}
+
+fn error_arguments(parameters: usize, arguments: usize) -> Error {
+    Error::new_runtime(&format!("Provided {} arguments while the function expects {} parameters.", arguments, parameters))
 }

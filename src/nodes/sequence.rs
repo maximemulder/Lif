@@ -1,7 +1,7 @@
 use crate::memory::Ref;
 use crate::nodes::{ Executable, Node };
 use crate::runtime::engine::Engine;
-use crate::runtime::r#return::ReturnFlow;
+use crate::runtime::r#return::{ Flow, ReturnFlow };
 
 use std::ops::Deref;
 
@@ -31,10 +31,10 @@ impl Executable for Sequence {
         let value = get!(engine.execute(&self.expression)?).read()?;
         let mut elements = Vec::new();
         for expression in self.expressions.iter() {
-            elements.push(get_none!(engine.execute(expression)?))
+            elements.push(get!(engine.execute(expression)?))
         }
 
         let array = engine.new_array_any_value(elements);
-        Ok(flow!(value.call_method(engine, &self.operator, Box::new([array]))?))
+        Flow::new(value.call_method(engine, &self.operator, Box::new([array]))?)
     }
 }

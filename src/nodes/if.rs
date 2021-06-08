@@ -1,6 +1,6 @@
 use crate::nodes::{ Executable, Node };
 use crate::runtime::engine::Engine;
-use crate::runtime::r#return::ReturnFlow;
+use crate::runtime::r#return::{ Flow, ReturnFlow };
 
 pub struct If {
     condition: Node,
@@ -27,7 +27,7 @@ impl Executable for If {
         } else if let Some(r#else) = self.r#else.as_ref() {
             engine.execute(r#else)
         } else {
-            Ok(flow!(engine.undefined()))
+            Flow::new(engine.undefined())
         }
     }
 }

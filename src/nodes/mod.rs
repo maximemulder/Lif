@@ -15,20 +15,6 @@ macro_rules! get {
     }
 }}
 
-macro_rules! get_none {
-    ( $flow:expr ) => {{
-        use crate::runtime::error::Error;
-        use crate::runtime::r#return::Jump;
-
-        let flow = $flow;
-        if flow.jump == Jump::None {
-            flow.reference
-        } else {
-            return Err(Error::new_jump());
-        }
-    }
-}}
-
 macro_rules! get_loop {
     ( $flow:expr ) => {{
         use crate::runtime::r#return::Jump;
@@ -38,14 +24,6 @@ macro_rules! get_loop {
         } else {
             return Ok($flow);
         }
-    }
-}}
-
-macro_rules! flow {
-    ( $reference:expr ) => {{
-        use crate::runtime::r#return::{ Flow, Jump };
-
-        Flow::new($reference, Jump::None)
     }
 }}
 

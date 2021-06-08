@@ -1,6 +1,6 @@
 use crate::nodes::{ Executable, Node };
 use crate::runtime::engine::Engine;
-use crate::runtime::r#return::ReturnFlow;
+use crate::runtime::r#return::{ Flow, ReturnFlow };
 
 pub struct Array {
     expressions: Box<[Node]>,
@@ -22,6 +22,6 @@ impl Executable for Array {
             elements.push(engine.new_reference(value))
         }
 
-        Ok(flow!(engine.new_array_any(elements)))
+        Flow::new(engine.new_array_any(elements))
     }
 }
