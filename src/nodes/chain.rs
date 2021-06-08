@@ -1,7 +1,7 @@
 use crate::memory::Ref;
 use crate::nodes::{ Executable, Node };
 use crate::runtime::engine::Engine;
-use crate::runtime::utilities::ReturnReference;
+use crate::runtime::r#return::ReturnFlow;
 
 pub struct Chain {
     expression: Node,
@@ -18,9 +18,9 @@ impl Chain {
 }
 
 impl Executable for Chain {
-    fn execute<'a>(&self, engine: &mut Engine<'a>) -> ReturnReference<'a> {
-        let value = execute!(engine, &self.expression).read()?;
+    fn execute<'a>(&self, engine: &mut Engine<'a>) -> ReturnFlow<'a> {
+        let value = get!(engine.execute(&self.expression)?).read()?;
         let name = engine.new_string(self.member.to_string());
-        value.call_method(engine, "__cn__", Box::new([name.read()?]))
+        Ok(flow!(value.call_method(engine, "__cn__", Box::new([name.read()?]))?))
     }
 }

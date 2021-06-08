@@ -1,6 +1,7 @@
 use crate::runtime::data::generic::GenericImplementation;
 use crate::runtime::engine::Engine;
-use crate::runtime::utilities::{ Arguments, Callable, ReturnReference };
+use crate::runtime::r#return::ReturnReference;
+use crate::runtime::utilities::{ Arguments, Callable };
 
 pub struct GenericPrimitive<'a> {
     callback: &'a Callable<'a>,

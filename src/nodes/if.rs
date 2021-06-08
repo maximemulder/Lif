@@ -1,6 +1,6 @@
 use crate::nodes::{ Executable, Node };
 use crate::runtime::engine::Engine;
-use crate::runtime::utilities::ReturnReference;
+use crate::runtime::r#return::ReturnFlow;
 
 pub struct If {
     condition: Node,
@@ -19,15 +19,15 @@ impl If {
 }
 
 impl Executable for If {
-    fn execute<'a>(&self, engine: &mut Engine<'a>) -> ReturnReference<'a> {
-        let reference = execute!(engine, &self.condition);
+    fn execute<'a>(&self, engine: &mut Engine<'a>) -> ReturnFlow<'a> {
+        let reference = get!(engine.execute(&self.condition)?);
         let condition = *reference.read()?.get_cast_boolean(engine)?;
         if condition {
             engine.execute(&self.then)
         } else if let Some(r#else) = self.r#else.as_ref() {
             engine.execute(r#else)
         } else {
-            Ok(engine.undefined())
+            Ok(flow!(engine.undefined()))
         }
     }
 }

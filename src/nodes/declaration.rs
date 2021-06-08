@@ -1,7 +1,7 @@
 use crate::memory::Ref;
 use crate::nodes::{ Executable, Node };
 use crate::runtime::engine::Engine;
-use crate::runtime::utilities::ReturnReference;
+use crate::runtime::r#return::ReturnFlow;
 use crate::runtime::utilities::variable::Variable;
 
 pub struct Declaration {
@@ -19,13 +19,8 @@ impl Declaration {
 }
 
 impl Executable for Declaration {
-    fn execute<'a>(&self, engine: &mut Engine<'a>) -> ReturnReference<'a> {
-        let r#type = if let Some(r#type) = self.r#type.as_ref() {
-            Some(execute!(engine, r#type).read()?)
-        } else {
-            None
-        };
-
-        Ok(Variable::new(engine, Box::from(self.identifier.as_ref()), r#type)?.build(engine))
+    fn execute<'a>(&self, engine: &mut Engine<'a>) -> ReturnFlow<'a> {
+        let r#type = self.r#type.as_ref().map(|r#type| get_none!(engine.execute(r#type)?).read()).transpose()?;
+        Ok(flow!(Variable::new(engine, Box::from(self.identifier.as_ref()), r#type)?.build(engine)))
     }
 }

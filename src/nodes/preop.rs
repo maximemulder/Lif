@@ -1,7 +1,7 @@
 use crate::memory::Ref;
 use crate::nodes::{ Executable, Node };
 use crate::runtime::engine::Engine;
-use crate::runtime::utilities::ReturnReference;
+use crate::runtime::r#return::ReturnFlow;
 
 use std::ops::Deref;
 
@@ -26,8 +26,8 @@ impl Preop {
 }
 
 impl Executable for Preop {
-    fn execute<'a>(&self, engine: &mut Engine<'a>) -> ReturnReference<'a> {
-        let expression = execute!(engine, &self.expression).read()?;
-        expression.call_method(engine, &self.operator, Box::new([]))
+    fn execute<'a>(&self, engine: &mut Engine<'a>) -> ReturnFlow<'a> {
+        let expression = get!(engine.execute(&self.expression)?).read()?;
+        Ok(flow!(expression.call_method(engine, &self.operator, Box::new([]))?))
     }
 }

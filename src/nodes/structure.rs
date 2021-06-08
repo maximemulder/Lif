@@ -1,6 +1,6 @@
 use crate::nodes::{ Executable, Node };
 use crate::runtime::engine::Engine;
-use crate::runtime::utilities::ReturnReference;
+use crate::runtime::r#return::ReturnFlow;
 
 pub struct Structure {
     structure: Node,
@@ -15,9 +15,9 @@ impl Structure {
 }
 
 impl Executable for Structure {
-    fn execute<'a>(&self, engine: &mut Engine<'a>) -> ReturnReference<'a> {
-        let structure = execute!(engine, &self.structure);
+    fn execute<'a>(&self, engine: &mut Engine<'a>) -> ReturnFlow<'a> {
+        let structure = get!(engine.execute(&self.structure)?);
         engine.set_variable(structure.read()?.data_tag().get_name().unwrap(), structure);
-        Ok(engine.undefined())
+        Ok(flow!(engine.undefined()))
     }
 }

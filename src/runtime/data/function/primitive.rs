@@ -1,6 +1,7 @@
 use crate::runtime::data::function::FunctionImplementation;
 use crate::runtime::engine::Engine;
-use crate::runtime::utilities::{ Arguments, Callable, ReturnReference };
+use crate::runtime::r#return::ReturnReference;
+use crate::runtime::utilities::{ Arguments, Callable };
 use crate::runtime::utilities::variable::Variable;
 
 pub struct FunctionPrimitive<'a> {
