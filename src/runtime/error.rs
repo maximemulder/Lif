@@ -43,7 +43,7 @@ impl Error {
     }
 
     pub fn new_jump() -> Self {
-        Self::new_runtime("Cannot continue or break out of a function.")
+        Self::new_runtime("Incorrect jump use.")
     }
 
     pub fn new_undefined() -> Self {
