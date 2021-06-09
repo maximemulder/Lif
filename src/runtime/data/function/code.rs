@@ -1,11 +1,11 @@
 use crate::memory::Ref;
-use crate::nodes::Node;
 use crate::runtime::data::function::FunctionImplementation;
 use crate::runtime::engine::Engine;
 use crate::runtime::error::Error;
 use crate::runtime::r#return::{ Jump, ReturnReference };
 use crate::runtime::utilities::Arguments;
 use crate::runtime::utilities::variable::Variable;
+use crate::walker::Node;
 
 pub struct FunctionCode {
     block: Ref<Node>,

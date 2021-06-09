@@ -2,7 +2,6 @@ pub mod data;
 pub mod engine;
 pub mod error;
 pub mod gc;
-pub mod jump;
 pub mod primitives;
 pub mod reference;
 pub mod registries;

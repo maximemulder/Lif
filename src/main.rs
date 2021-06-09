@@ -17,7 +17,7 @@ mod elements;
 mod lexer;
 mod memory;
 mod node;
-mod nodes;
+mod walker;
 mod parser;
 mod printer;
 mod runtime;
@@ -28,8 +28,9 @@ mod tests;
 
 use code::Code;
 use parser::Parser;
-use nodes::build;
 use runtime::engine::Engine;
+use walker::build;
+
 use std::env::args;
 use std::io::{ stderr, stdin, stdout };
 

@@ -1,5 +1,5 @@
-pub mod flow;
-pub mod jump;
+mod flow;
+mod jump;
 
 use crate::runtime::error::Error;
 use crate::runtime::reference::GcReference;

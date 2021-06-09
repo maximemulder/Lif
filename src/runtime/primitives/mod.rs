@@ -13,7 +13,6 @@ mod object;
 mod string;
 
 use crate::code::Code;
-use crate::nodes::build;
 use crate::runtime::data::GenericPrimitive;
 use crate::runtime::engine::Engine;
 use crate::runtime::gc::GcTrace;
@@ -21,6 +20,7 @@ use crate::runtime::r#return::ReturnReference;
 use crate::runtime::utilities::Arguments;
 use crate::runtime::utilities::builder;
 use crate::runtime::value::GcValue;
+use crate::walker::build;
 
 use std::process;
 

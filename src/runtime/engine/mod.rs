@@ -3,7 +3,6 @@ mod scope;
 
 use crate::code::Code;
 use crate::memory::{ Own, Ref };
-use crate::nodes::Executable;
 use crate::parser::Parser;
 use crate::runtime::data::Data;
 use crate::runtime::primitives::Primitives;
@@ -14,6 +13,7 @@ use crate::runtime::r#return::{ ReturnFlow, ReturnReference };
 use crate::runtime::scope::{ GcScope, Scope };
 use crate::runtime::utilities::tag::Tagger;
 use crate::runtime::value::{ GcValue, Value };
+use crate::walker::Executable;
 
 use std::io::{ Read, Write };
 

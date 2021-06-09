@@ -1,6 +1,6 @@
 use crate::memory::{ Own, Ref };
 use crate::node::Node as ANode;
-use crate::nodes::Node as CNode;
+use crate::walker::Node as CNode;
 use crate::parser::Parser;
 use std::fs::read_to_string;
 
