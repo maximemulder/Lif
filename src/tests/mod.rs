@@ -1,5 +1,4 @@
-use crate::code::Code;
-use crate::parser::Parser;
+use crate::parser::{ Code, Grammar };
 use crate::runtime::engine::Engine;
 use crate::walker::build;
 
@@ -19,14 +18,14 @@ fn test() {
 
     for file in files {
         let strings = read_content(&file);
-        let parser = Parser::new();
+        let grammar = Grammar::new();
         let mut input  = empty();
         let mut output = Vec::new();
         let mut error  = Vec::new();
 
         {
-            let mut engine = Engine::new(&parser, &mut input, &mut output, &mut error);
-            let code = Code::from_string(engine.parser, 0, &build::program, &strings.0);
+            let mut engine = Engine::new(&grammar, &mut input, &mut output, &mut error);
+            let code = Code::from_string(engine.grammar, 0, &build::program, &strings.0);
             engine.run(code);
         }
 

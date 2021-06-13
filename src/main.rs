@@ -12,22 +12,15 @@
 #![feature(unsize)]
 #![warn(clippy::all)]
 
-mod element;
-mod elements;
-mod lexer;
 mod memory;
-mod node;
 mod walker;
 mod parser;
-mod printer;
 mod runtime;
-mod code;
 
 #[cfg(test)]
 mod tests;
 
-use code::Code;
-use parser::Parser;
+use parser::{ Code, Grammar };
 use runtime::engine::Engine;
 use walker::build;
 
@@ -41,11 +34,11 @@ fn main() {
         return;
     }
 
-    let parser = Parser::new();
+    let parser = Grammar::new();
     let mut input  = stdin();
     let mut output = stdout();
     let mut error  = stderr();
     let mut engine = Engine::new(&parser, &mut input, &mut output, &mut error);
-    let code = Code::from_file(engine.parser, 0, &build::program, &args[1]).unwrap();
+    let code = Code::from_file(engine.grammar, 0, &build::program, &args[1]).unwrap();
     engine.run(code);
 }

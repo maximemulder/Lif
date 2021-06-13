@@ -1,9 +1,35 @@
-use crate::elements;
-use crate::parser::arena::Arena;
+#![allow(unused_variables)]
+
+use crate::memory::Ref;
+use crate::parser::{ Code, Parse, SNode };
+use crate::parser::arena::{ Arena, ArenaRef };
+use crate::parser::elements;
 use crate::parser::ascent::*;
 use crate::parser::descent::*;
+use crate::parser::lexer::lex;
 
-pub fn get() -> (Arena::<dyn Descent>, Arena::<dyn Ascent>) {
+pub struct Grammar {
+    pub descents: Arena<dyn Descent>,
+    pub ascents: Arena<dyn Ascent>,
+}
+
+impl Grammar {
+    pub fn new() -> Self {
+        let tuple = get();
+        Self {
+            descents: tuple.0,
+            ascents: tuple.1,
+        }
+    }
+
+    pub fn parse(&self, production: usize, code: Ref<Code>) -> Option<SNode> {
+        let tokens = lex(code);
+        let mut parse = Parse::new(self, code, &tokens);
+        parse.parse(ArenaRef::new(production))
+    }
+}
+
+fn get() -> (Arena::<dyn Descent>, Arena::<dyn Ascent>) {
     let descents = Arena::<dyn Descent>::new();
     let ascents = Arena::<dyn Ascent>::new();
 

@@ -1,23 +1,23 @@
 use crate::runtime::engine::Engine;
 use crate::runtime::r#return::{ Flow, ReturnFlow };
-use crate::walker::{ Executable, Node };
+use crate::walker::{ Walkable, WNode };
 
 pub struct Statements {
-    statements: Box<[Node]>,
+    statements: Box<[WNode]>,
 }
 
 impl Statements {
-    pub fn new(statements: Box<[Node]>) -> Self {
+    pub fn new(statements: Box<[WNode]>) -> Self {
         Self {
             statements,
         }
     }
 }
 
-impl Executable for Statements {
-    fn execute<'a>(&self, engine: &mut Engine<'a>) -> ReturnFlow<'a> {
+impl Walkable for Statements {
+    fn walk<'a>(&self, engine: &mut Engine<'a>) -> ReturnFlow<'a> {
         for statement in self.statements.iter() {
-            get!(engine.execute(statement)?);
+            get!(engine.walk(statement)?);
         }
 
         Flow::new(engine.undefined())

@@ -1,4 +1,4 @@
-use crate::element::Element;
+use crate::parser::Element;
 
 declare_node!(PROGRAM);
 declare_node!(STATEMENTS);

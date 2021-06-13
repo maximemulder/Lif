@@ -1,4 +1,4 @@
-use crate::element::Element;
+use crate::parser::Element;
 
 pub struct Node {
     pub element: Option<&'static Element>,

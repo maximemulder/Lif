@@ -4,19 +4,19 @@ use crate::runtime::engine::Engine;
 use crate::runtime::error::Error;
 use crate::runtime::r#return::{ Flow, Return, ReturnFlow };
 use crate::runtime::utilities::variable::Variable;
-use crate::walker::{ Executable, Node };
+use crate::walker::{ Walkable, WNode };
 use crate::walker::utilities;
 
 pub struct Function {
     name: Option<Ref<str>>,
-    parameters: Box<[(Ref<str>, Option<Node>)]>,
-    rest: Option<(Ref<str>, Option<Node>)>,
-    r#type: Option<Node>,
-    block: Node,
+    parameters: Box<[(Ref<str>, Option<WNode>)]>,
+    rest: Option<(Ref<str>, Option<WNode>)>,
+    r#type: Option<WNode>,
+    block: WNode,
 }
 
 impl Function {
-    pub fn new(name: Option<Ref<str>>, parameters: (Box<[(Ref<str>, Option<Node>)]>, Option<(Ref<str>, Option<Node>)>), r#type: Option<Node>, block: Node) -> Self {
+    pub fn new(name: Option<Ref<str>>, parameters: (Box<[(Ref<str>, Option<WNode>)]>, Option<(Ref<str>, Option<WNode>)>), r#type: Option<WNode>, block: WNode) -> Self {
         Self {
             name,
             parameters: parameters.0,
@@ -27,8 +27,8 @@ impl Function {
     }
 }
 
-impl Executable for Function {
-    fn execute<'a>(&self, engine: &mut Engine<'a>) -> ReturnFlow<'a> {
+impl Walkable for Function {
+    fn walk<'a>(&self, engine: &mut Engine<'a>) -> ReturnFlow<'a> {
         let parameters = self.parameters.iter()
             .map(|(name, parameter)| {
                 let r#type = utilities::new_type(engine, parameter.as_ref())?;
@@ -38,7 +38,7 @@ impl Executable for Function {
 
         let rest = self.rest.as_ref().map(|(name, parameter)| {
             let r#type = parameter.as_ref().map(|parameter| {
-                let r#type = engine.execute(parameter)?.none()?.read()?;
+                let r#type = engine.walk(parameter)?.none()?.read()?;
                 r#type.cast(engine.primitives.class)?;
                 if let Some(constructor) = r#type.data_class().constructor.as_ref() {
                     if constructor.generic != engine.primitives.array {

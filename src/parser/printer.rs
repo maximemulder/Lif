@@ -1,23 +1,21 @@
-use crate::code::Code;
-use crate::element::Element;
-use crate::node::{ Content, Node };
+use crate::parser::{ Code, Element, SNode, SNodeContent };
 
-pub fn tokens(code: &Code, nodes: &[Node]) {
+pub fn tokens(code: &Code, nodes: &[SNode]) {
     for node in nodes {
         match &node.content {
-            Content::Token(_, _) => println!("{} {:?}", node.element.name, code.node_str(node)),
-            Content::Production(children) => tokens(code, children),
+            SNodeContent::Token(_, _) => println!("{} {:?}", node.element.name, code.node_str(node)),
+            SNodeContent::Production(children) => tokens(code, children),
         }
     }
 }
 
-pub fn tree(tree: &Node) {
+pub fn tree(tree: &SNode) {
     node(tree, "", "");
 }
 
-fn node(tree: &Node, prefix: &str, infix: &str) {
+fn node(tree: &SNode, prefix: &str, infix: &str) {
     element(&prefix, tree.element);
-    if let Content::Production(children) = &tree.content {
+    if let SNodeContent::Production(children) = &tree.content {
         for i in 0 .. children.len() {
             let (next_prefix, next_suffix) = if i == children.len() - 1 {
                 (format!("{}{}", infix, "└─"), format!("{}{}", infix, "  "))

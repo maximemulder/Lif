@@ -1,14 +1,14 @@
 use crate::runtime::engine::Engine;
 use crate::runtime::r#return::{ Flow, Jump, ReturnFlow };
-use crate::walker::{ Executable, Node };
+use crate::walker::{ Walkable, WNode };
 
 pub struct While {
-    condition: Node,
-    body:      Node,
+    condition: WNode,
+    body:      WNode,
 }
 
 impl While {
-    pub fn new(condition: Node, body: Node) -> Self {
+    pub fn new(condition: WNode, body: WNode) -> Self {
         Self {
             condition,
             body,
@@ -16,14 +16,14 @@ impl While {
     }
 }
 
-impl Executable for While {
-    fn execute<'a>(&self, engine: &mut Engine<'a>) -> ReturnFlow<'a> {
+impl Walkable for While {
+    fn walk<'a>(&self, engine: &mut Engine<'a>) -> ReturnFlow<'a> {
         let mut elements = Vec::new();
         while {
-            let reference = get!(engine.execute(&self.condition)?);
+            let reference = get!(engine.walk(&self.condition)?);
             *reference.read()?.get_cast_boolean(engine)?
         } {
-            let flow = engine.execute(&self.body)?;
+            let flow = engine.walk(&self.body)?;
             let reference = get_loop!(flow);
             if reference.is_defined() {
                 elements.push(engine.new_reference(reference.get_value()))

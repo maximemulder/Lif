@@ -1,5 +1,5 @@
-use crate::lexer::node::Node;
-use crate::elements;
+use crate::parser::elements;
+use crate::parser::lexer::node::Node;
 
 pub const ROOT: Node = Node::new_null(&|character| {
     Some(match character {

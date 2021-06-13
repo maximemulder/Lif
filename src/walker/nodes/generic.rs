@@ -2,16 +2,16 @@ use crate::memory::Ref;
 use crate::runtime::data::GenericCode;
 use crate::runtime::engine::Engine;
 use crate::runtime::r#return::{ Flow, ReturnFlow };
-use crate::walker::{ Executable, Node };
+use crate::walker::{ Walkable, WNode };
 
 pub struct Generic {
     name: Option<Ref<str>>,
     parameters: Box<[Ref<str>]>,
-    node: Node,
+    node: WNode,
 }
 
 impl Generic {
-    pub fn new(name: Option<Ref<str>>, parameters: Box<[Ref<str>]>, node: Node) -> Self {
+    pub fn new(name: Option<Ref<str>>, parameters: Box<[Ref<str>]>, node: WNode) -> Self {
         Self {
             name,
             parameters,
@@ -20,8 +20,8 @@ impl Generic {
     }
 }
 
-impl Executable for Generic {
-    fn execute<'a>(&self, engine: &mut Engine<'a>) -> ReturnFlow<'a> {
+impl Walkable for Generic {
+    fn walk<'a>(&self, engine: &mut Engine<'a>) -> ReturnFlow<'a> {
         let parameters = self.parameters.iter()
             .map(|parameter| Box::from(parameter.as_ref()))
             .collect();

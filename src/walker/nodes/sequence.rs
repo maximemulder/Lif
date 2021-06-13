@@ -1,18 +1,18 @@
 use crate::memory::Ref;
 use crate::runtime::engine::Engine;
 use crate::runtime::r#return::{ Flow, ReturnFlow };
-use crate::walker::{ Executable, Node };
+use crate::walker::{ Walkable, WNode };
 
 use std::ops::Deref;
 
 pub struct Sequence {
-    expression:  Node,
-    expressions: Box<[Node]>,
+    expression:  WNode,
+    expressions: Box<[WNode]>,
     operator:    Ref<str>,
 }
 
 impl Sequence {
-    pub fn new(expression: Node, open: Ref<str>, expressions: Box<[Node]>, close: Ref<str>) -> Self {
+    pub fn new(expression: WNode, open: Ref<str>, expressions: Box<[WNode]>, close: Ref<str>) -> Self {
         Self {
             expression,
             expressions,
@@ -26,12 +26,12 @@ impl Sequence {
     }
 }
 
-impl Executable for Sequence {
-    fn execute<'a>(&self, engine: &mut Engine<'a>) -> ReturnFlow<'a> {
-        let value = get!(engine.execute(&self.expression)?).read()?;
+impl Walkable for Sequence {
+    fn walk<'a>(&self, engine: &mut Engine<'a>) -> ReturnFlow<'a> {
+        let value = get!(engine.walk(&self.expression)?).read()?;
         let mut elements = Vec::new();
         for expression in self.expressions.iter() {
-            elements.push(get!(engine.execute(expression)?))
+            elements.push(get!(engine.walk(expression)?))
         }
 
         let array = engine.new_array_any_value(elements);
