@@ -1,6 +1,8 @@
 use crate::memory::{ Own, Ref };
 use crate::parser::Grammar;
 use crate::parser::SNode;
+use crate::parser::arena::ArenaRef;
+use crate::parser::descent::Descent;
 use crate::walker::WNode;
 use std::fs::read_to_string;
 
@@ -12,7 +14,7 @@ pub struct Code {
 }
 
 impl Code {
-    fn new(grammar: &Grammar, production: usize, program: &dyn Fn(Ref<SNode>) -> WNode, name: Option<&str>, text: Box<str>) -> Own<Self> {
+    fn new(grammar: &Grammar, production: ArenaRef<dyn Descent>, program: &dyn Fn(Ref<SNode>) -> WNode, name: Option<&str>, text: Box<str>) -> Own<Self> {
         let mut code = Own::new(Self {
             text,
             name: name.map(Box::from),
@@ -27,11 +29,11 @@ impl Code {
 
     }
 
-    pub fn from_file(grammar: &Grammar, production: usize, program: &dyn Fn(Ref<SNode>) -> WNode, name: &str) -> Option<Own<Self>> {
+    pub fn from_file(grammar: &Grammar, production: ArenaRef<dyn Descent>, program: &dyn Fn(Ref<SNode>) -> WNode, name: &str) -> Option<Own<Self>> {
         Some(Code::new(grammar, production, program, Some(name), read_to_string(name).ok()?.into_boxed_str()))
     }
 
-    pub fn from_string(grammar: &Grammar, production: usize, program: &dyn Fn(Ref<SNode>) -> WNode, text: &str) -> Own<Self> {
+    pub fn from_string(grammar: &Grammar, production: ArenaRef<dyn Descent>, program: &dyn Fn(Ref<SNode>) -> WNode, text: &str) -> Own<Self> {
         Code::new(grammar, production, program, None, Box::from(text))
     }
 

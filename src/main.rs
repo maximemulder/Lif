@@ -20,7 +20,7 @@ mod runtime;
 #[cfg(test)]
 mod tests;
 
-use parser::{ Code, Grammar };
+use parser::Code;
 use runtime::engine::Engine;
 use walker::build;
 
@@ -34,11 +34,11 @@ fn main() {
         return;
     }
 
-    let parser = Grammar::new();
+    let parser = parser::grammar();
     let mut input  = stdin();
     let mut output = stdout();
     let mut error  = stderr();
     let mut engine = Engine::new(&parser, &mut input, &mut output, &mut error);
-    let code = Code::from_file(engine.grammar, 0, &build::program, &args[1]).unwrap();
+    let code = Code::from_file(engine.grammar, engine.grammar.program, &build::program, &args[1]).unwrap();
     engine.run(code);
 }
