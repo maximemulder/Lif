@@ -13,9 +13,10 @@ mod printer;
 mod parse;
 mod node;
 
+pub use grammar::get as grammar;
+
 pub use code::Code;
 pub use element::Element;
 pub use grammar::Grammar;
-pub use grammar::get as grammar;
 pub use parse::Parse;
-pub use node::{ SNode, SNodeContent };
+pub use node::SNode;

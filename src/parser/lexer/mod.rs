@@ -12,7 +12,7 @@ pub fn lex(code: Ref<Code>) -> Vec<SNode> {
     let mut shift = 0;
     while let Some((element, length)) = automaton(&code.text[shift ..]) {
         if element != &WHITESPACE && element != &ENDLINE && element != &COMMENT_LINE && element != &COMMENT_BLOCK {
-            tokens.push(SNode::new_token(code, element, (shift, shift + length)));
+            tokens.push(SNode::new_token(code, element, shift, shift + length));
         }
 
         shift += length;

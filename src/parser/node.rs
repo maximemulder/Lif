@@ -1,3 +1,5 @@
+use std::usize;
+
 use crate::parser::Code;
 use crate::parser::Element;
 use crate::memory::Ref;
@@ -6,42 +8,53 @@ use crate::memory::Ref;
 pub struct SNode {
     pub code: Ref<Code>,
     pub element: &'static Element,
-    pub content: SNodeContent,
-}
-
-#[derive(Clone)]
-pub enum SNodeContent {
-    Production(Box<[SNode]>),
-    Token(usize, usize),
+    children: Box<[SNode]>,
+    left: usize,
+    right: usize,
 }
 
 impl SNode {
-    pub fn new_token(code: Ref<Code>, element: &'static Element, delimiters: (usize, usize)) -> Self {
+    pub fn new(code: Ref<Code>,  element: &'static Element, children: Box<[SNode]>, left: usize, right: usize) -> Self {
+        debug_assert!(right > left);
         Self {
             code,
             element,
-            content: SNodeContent::Token(delimiters.0, delimiters.1),
+            children,
+            left,
+            right,
         }
     }
 
+    pub fn new_token(code: Ref<Code>, element: &'static Element, left: usize, right: usize) -> Self {
+        Self::new(code, element,  Box::new([]), left, right)
+    }
+
     pub fn new_production(code: Ref<Code>, element: &'static Element, children: Box<[SNode]>) -> Self {
+        let (left, right) = if !children.is_empty() {
+            (children.first().unwrap().left(), children.first().unwrap().right())
+        } else {
+            (0, 0)
+        };
+
         Self {
             code,
             element,
-            content: SNodeContent::Production(children),
+            children,
+            left,
+            right,
         }
     }
 
     pub fn children(&self) -> &[SNode] {
-        if let SNodeContent::Production(children) = &self.content {
-            return children;
-        }
-
-        panic!();
+        &self.children
     }
 
-    pub fn length(&self) -> usize {
-        self.children().len()
+    pub fn left(&self) -> usize {
+        self.left
+    }
+
+    pub fn right(&self) -> usize {
+        self.right
     }
 
     pub fn front(&self, index: usize) -> Ref<SNode>{
@@ -55,19 +68,5 @@ impl SNode {
 
     pub fn text(&self) -> Ref<str> {
         Ref::new(self.code.node_str(self))
-    }
-
-    pub fn left(&self) -> usize {
-        match &self.content {
-            SNodeContent::Production(children) => children.first().unwrap().left(),
-            SNodeContent::Token(left, _) => *left,
-        }
-    }
-
-    pub fn right(&self) -> usize {
-        match &self.content {
-            SNodeContent::Production(children) => children.last().unwrap().right(),
-            SNodeContent::Token(_, right) => *right,
-        }
     }
 }

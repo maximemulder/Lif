@@ -176,7 +176,7 @@ fn generics(node: Ref<SNode>) -> Box<[Ref<str>]> {
 fn class(node: Ref<SNode>) -> WNode {
     let name = name(node.front(1));
     let class = WNode::new(node, Class::new(name, r#type(node.back(4)), methods(node.back(2))));
-    if node.length() >= 7 {
+    if node.children().len() >= 7 {
         WNode::new(node, Generic::new(name, generics(node.front(2)), class))
     } else {
         class
@@ -186,7 +186,7 @@ fn class(node: Ref<SNode>) -> WNode {
 fn class_named(node: Ref<SNode>) -> WNode {
     let name = Some(token(node.front(1)));
     let class = WNode::new(node, Class::new(name, r#type(node.back(4)), methods(node.back(2))));
-    if node.length() >= 7 {
+    if node.children().len() >= 7 {
         WNode::new(node, Generic::new(name, generics(node.front(2)), class))
     } else {
         class
@@ -202,7 +202,7 @@ fn methods(node: Ref<SNode>) -> Box<[WNode]> {
 fn function(node: Ref<SNode>) -> WNode {
     let name = name(node.front(1));
     let function = WNode::new(node, Function::new(name, parameters(node.back(3)), r#type(node.back(2)), block(node.back(1))));
-    if node.length() >= 6 {
+    if node.children().len() >= 6 {
         WNode::new(node, Generic::new(name, generics(node.front(2)), function))
     } else {
         function
@@ -212,7 +212,7 @@ fn function(node: Ref<SNode>) -> WNode {
 fn function_named(node: Ref<SNode>) -> WNode {
     let name = Some(token(node.front(1)));
     let function = WNode::new(node, Function::new(name, parameters(node.back(3)), r#type(node.back(2)), block(node.back(1))));
-    if node.length() >= 6 {
+    if node.children().len() >= 6 {
         WNode::new(node, Generic::new(name, generics(node.front(2)), function))
     } else {
         function

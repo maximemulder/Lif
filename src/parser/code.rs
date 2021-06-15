@@ -23,6 +23,7 @@ impl Code {
         });
 
         let syntax_tree = grammar.parse(production, code.get_ref()).unwrap();
+        crate::parser::printer::tree(&syntax_tree);
         code.syntax_tree = Some(syntax_tree);
         code.walk_tree = Some(program(Ref::new(code.syntax_tree.as_ref().unwrap())));
         code
