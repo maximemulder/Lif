@@ -15,7 +15,7 @@ pub struct SNode {
 
 impl SNode {
     pub fn new(code: Ref<Code>,  element: &'static Element, children: Box<[SNode]>, left: usize, right: usize) -> Self {
-        debug_assert!(right > left);
+        debug_assert!(right >= left);
         Self {
             code,
             element,
@@ -36,13 +36,7 @@ impl SNode {
             (0, 0)
         };
 
-        Self {
-            code,
-            element,
-            children,
-            left,
-            right,
-        }
+        Self::new(code, element, children, left, right)
     }
 
     pub fn children(&self) -> &[SNode] {
