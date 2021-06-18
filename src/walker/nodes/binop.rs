@@ -1,18 +1,18 @@
 use crate::memory::Ref;
 use crate::runtime::engine::Engine;
 use crate::runtime::r#return::{ Flow, ReturnFlow };
-use crate::walker::{ Executable, Node };
+use crate::walker::{ Walkable, WNode };
 
 use std::ops::Deref;
 
 pub struct Binop {
-    left:     Node,
-    right:    Node,
+    left:     WNode,
+    right:    WNode,
     operator: Ref<str>,
 }
 
 impl Binop {
-    pub fn new(left: Node, operator: Ref<str>, right: Node) -> Self {
+    pub fn new(left: WNode, operator: Ref<str>, right: WNode) -> Self {
         Self {
             left,
             right,
@@ -43,14 +43,14 @@ impl Binop {
     }
 }
 
-impl Executable for Binop {
-    fn execute<'a>(&self, engine: &mut Engine<'a>) -> ReturnFlow<'a> {
-        let left = get!(engine.execute(&self.left)?).read()?;
+impl Walkable for Binop {
+    fn walk<'a>(&self, engine: &mut Engine<'a>) -> ReturnFlow<'a> {
+        let left = get!(engine.walk(&self.left)?).read()?;
         match self.operator.deref() {
             "__and__" => {
                 left.cast(engine.primitives.boolean)?;
                 let boolean = if *left.data_boolean() {
-                    let right = get!(engine.execute(&self.right)?).read()?;
+                    let right = get!(engine.walk(&self.right)?).read()?;
                     right.cast(engine.primitives.boolean)?;
                     *right.data_boolean()
                 } else {
@@ -64,7 +64,7 @@ impl Executable for Binop {
                 let boolean = if *left.data_boolean() {
                     true
                 } else {
-                    let right = get!(engine.execute(&self.right)?).read()?;
+                    let right = get!(engine.walk(&self.right)?).read()?;
                     right.cast(engine.primitives.boolean)?;
                     *right.data_boolean()
                 };
@@ -72,7 +72,7 @@ impl Executable for Binop {
                 Flow::new(engine.new_boolean(boolean))
             },
             _ => {
-                let right = get!(engine.execute(&self.right)?).read()?;
+                let right = get!(engine.walk(&self.right)?).read()?;
                 Flow::new(left.call_method(engine, &self.operator, Box::new([right]))?)
             },
         }

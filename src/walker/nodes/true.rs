@@ -1,6 +1,6 @@
 use crate::runtime::engine::Engine;
 use crate::runtime::r#return::{ Flow, ReturnFlow };
-use crate::walker::Executable;
+use crate::walker::Walkable;
 
 pub struct True;
 
@@ -10,8 +10,8 @@ impl True {
     }
 }
 
-impl Executable for True {
-    fn execute<'a>(&self, engine: &mut Engine<'a>) -> ReturnFlow<'a> {
+impl Walkable for True {
+    fn walk<'a>(&self, engine: &mut Engine<'a>) -> ReturnFlow<'a> {
         Flow::new(engine.new_boolean(true))
     }
 }

@@ -1,15 +1,44 @@
-use crate::elements;
-use crate::parser::arena::Arena;
+#![allow(unused_variables)]
+
+use crate::memory::Ref;
+use crate::parser::{ Code, Parse, SNode };
+use crate::parser::arena::{ Arena, ArenaRef };
+use crate::parser::elements;
 use crate::parser::ascent::*;
 use crate::parser::descent::*;
+use crate::parser::lexer::lex;
 
-pub fn get() -> (Arena::<dyn Descent>, Arena::<dyn Ascent>) {
+pub struct Grammar {
+    pub descents: Arena<dyn Descent>,
+    pub ascents: Arena<dyn Ascent>,
+    pub program: ArenaRef<dyn Descent>,
+    pub expression: ArenaRef<dyn Descent>,
+}
+
+impl Grammar {
+    pub fn new(descents: Arena::<dyn Descent>, ascents: Arena::<dyn Ascent>, program: ArenaRef<dyn Descent>, expression: ArenaRef<dyn Descent>) -> Self {
+        Self {
+            descents,
+            ascents,
+            program,
+            expression,
+        }
+    }
+
+    pub fn parse(&self, production: ArenaRef<dyn Descent>, code: Ref<Code>) -> Option<SNode> {
+        let tokens = lex(code);
+        let mut parse = Parse::new(self, code, &tokens);
+        parse.parse(production)
+    }
+}
+
+pub fn get() -> Grammar {
     let descents = Arena::<dyn Descent>::new();
     let ascents = Arena::<dyn Ascent>::new();
 
-    let program = descents.declare(); // 0
+    let program = descents.declare();
 
-    let expression = descents.declare(); // 1
+    let expression = descents.declare();
 
     let statements = descents.declare();
 
@@ -562,5 +591,5 @@ pub fn get() -> (Arena::<dyn Descent>, Arena::<dyn Ascent>) {
         &elements::productions::PROGRAM
     ));
 
-    (descents, ascents)
+    Grammar::new(descents, ascents, program, expression)
 }

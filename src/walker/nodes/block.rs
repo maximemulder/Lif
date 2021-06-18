@@ -1,14 +1,14 @@
 use crate::runtime::engine::Engine;
 use crate::runtime::r#return::{ Flow, ReturnFlow };
-use crate::walker::{ Executable, Node };
+use crate::walker::{ Walkable, WNode };
 
 pub struct Block {
-    statements: Node,
-    expression: Option<Node>,
+    statements: WNode,
+    expression: Option<WNode>,
 }
 
 impl Block {
-    pub fn new(statements: Node, expression: Option<Node>) -> Self {
+    pub fn new(statements: WNode, expression: Option<WNode>) -> Self {
         Self {
             statements,
             expression,
@@ -16,12 +16,12 @@ impl Block {
     }
 }
 
-impl Executable for Block {
-    fn execute<'a>(&self, engine: &mut Engine<'a>) -> ReturnFlow<'a> {
+impl Walkable for Block {
+    fn walk<'a>(&self, engine: &mut Engine<'a>) -> ReturnFlow<'a> {
         engine.run_scope(|engine| {
-            get!(engine.execute(&self.statements)?);
+            get!(engine.walk(&self.statements)?);
             Flow::new(if let Some(expression) = self.expression.as_ref() {
-                get!(engine.execute(expression)?)
+                get!(engine.walk(expression)?)
             } else {
                 engine.undefined()
             })

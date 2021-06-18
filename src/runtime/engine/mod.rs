@@ -1,9 +1,8 @@
 mod new;
 mod scope;
 
-use crate::code::Code;
 use crate::memory::{ Own, Ref };
-use crate::parser::Parser;
+use crate::parser::{ Code, Grammar };
 use crate::runtime::data::Data;
 use crate::runtime::primitives::Primitives;
 use crate::runtime::gc::{ GC_THRESHOLD, Gc, GcRef, GcTrace };
@@ -13,7 +12,7 @@ use crate::runtime::r#return::{ ReturnFlow, ReturnReference };
 use crate::runtime::scope::{ GcScope, Scope };
 use crate::runtime::utilities::tag::Tagger;
 use crate::runtime::value::{ GcValue, Value };
-use crate::walker::Executable;
+use crate::walker::WNode;
 
 use std::io::{ Read, Write };
 
@@ -34,7 +33,7 @@ impl Taggers {
 }
 
 pub struct Engine<'a> {
-    pub parser:     &'a Parser,
+    pub grammar:    &'a Grammar,
     pub input:      &'a mut dyn Read,
     pub output:     &'a mut dyn Write,
     pub error:      &'a mut dyn Write,
@@ -49,9 +48,9 @@ pub struct Engine<'a> {
 }
 
 impl<'a> Engine<'a> {
-    pub fn new(parser: &'a Parser, input: &'a mut dyn Read, output: &'a mut dyn Write, error: &'a mut dyn Write) -> Self {
+    pub fn new(grammar: &'a Grammar, input: &'a mut dyn Read, output: &'a mut dyn Write, error: &'a mut dyn Write) -> Self {
         let mut engine = Self {
-            parser,
+            grammar,
             input,
             output,
             error,
@@ -116,9 +115,9 @@ impl<'a> Engine<'a> {
         self.scope.get_variable(name)
     }
 
-    pub fn execute(&mut self, node: &dyn Executable) -> ReturnFlow<'a> {
+    pub fn walk(&mut self, node: &WNode) -> ReturnFlow<'a> {
         self.registries.push();
-        let r#return = node.execute(self);
+        let r#return = node.walk(self);
         if let Ok(flow) = r#return.as_ref() {
             self.registries.cache(flow.reference);
         }
@@ -134,9 +133,9 @@ impl<'a> Engine<'a> {
 
     pub fn run(&mut self, code: Own<Code>) -> Option<GcReference<'a>> {
         self.codes.push(code);
-        let node = Ref::new(self.codes.last().unwrap().cst.as_ref().unwrap());
+        let node = Ref::new(self.codes.last().unwrap().walk_tree.as_ref().unwrap());
         let executable = Ref::as_ref(&node);
-        match self.execute(executable) {
+        match self.walk(executable) {
             Ok(flow) => Some(flow.reference),
             Err(error) => {
                 writeln!(self.error, "{}", error.get_message()).unwrap();

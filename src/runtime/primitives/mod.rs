@@ -12,7 +12,7 @@ mod nullable;
 mod object;
 mod string;
 
-use crate::code::Code;
+use crate::parser::Code;
 use crate::runtime::data::GenericPrimitive;
 use crate::runtime::engine::Engine;
 use crate::runtime::gc::GcTrace;
@@ -152,7 +152,7 @@ fn error<'a>(engine: &mut Engine<'a>, arguments: Arguments<'a>) -> ReturnReferen
 }
 
 fn eval<'a>(engine: &mut Engine<'a>, arguments: Arguments<'a>) -> ReturnReference<'a> {
-    let code = Code::from_string(&engine.parser, 1, &build::expression, &arguments[0].data_string());
+    let code = Code::from_string(&engine.grammar, engine.grammar.expression, &build::expression, &arguments[0].data_string());
     Ok(match engine.run(code) {
         Some(reference) => reference,
         None => engine.undefined(),
@@ -160,7 +160,7 @@ fn eval<'a>(engine: &mut Engine<'a>, arguments: Arguments<'a>) -> ReturnReferenc
 }
 
 fn exec<'a>(engine: &mut Engine<'a>, arguments: Arguments<'a>) -> ReturnReference<'a> {
-    let code = Code::from_string(&engine.parser, 0, &build::program, &arguments[0].data_string());
+    let code = Code::from_string(&engine.grammar, engine.grammar.program, &build::program, &arguments[0].data_string());
     engine.run(code);
     Ok(engine.undefined())
 }
@@ -171,7 +171,7 @@ fn exit<'a>(_: &mut Engine<'a>, arguments: Arguments<'a>) -> ReturnReference<'a>
 
 fn include<'a>(engine: &mut Engine<'a>, arguments: Arguments<'a>) -> ReturnReference<'a> {
     engine.run_frame(engine.scope().parent().unwrap(), |engine| {
-        let code = Code::from_file(&engine.parser, 0, &build::program, &arguments[0].data_string()).unwrap();
+        let code = Code::from_file(&engine.grammar, engine.grammar.program, &build::program, &arguments[0].data_string()).unwrap();
         engine.run(code);
     });
 

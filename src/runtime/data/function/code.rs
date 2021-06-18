@@ -5,14 +5,14 @@ use crate::runtime::error::Error;
 use crate::runtime::r#return::{ Jump, ReturnReference };
 use crate::runtime::utilities::Arguments;
 use crate::runtime::utilities::variable::Variable;
-use crate::walker::Node;
+use crate::walker::WNode;
 
 pub struct FunctionCode {
-    block: Ref<Node>,
+    block: Ref<WNode>,
 }
 
 impl FunctionCode {
-    pub fn new(block: Ref<Node>) -> Self {
+    pub fn new(block: Ref<WNode>) -> Self {
         Self {
             block,
         }
@@ -36,7 +36,7 @@ impl<'a> FunctionImplementation<'a> for FunctionCode {
         }
 
         let executable = Ref::as_ref(&self.block);
-        let flow = engine.execute(executable)?;
+        let flow = engine.walk(executable)?;
         if flow.jump == Jump::Return && flow.reference.is_defined() {
             Ok(engine.new_constant(flow.reference.get_value()))
         } else if flow.jump == Jump::None {

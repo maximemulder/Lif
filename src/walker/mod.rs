@@ -3,35 +3,32 @@ pub mod nodes;
 pub mod utilities;
 
 use crate::memory::Ref;
+use crate::parser::SNode;
 use crate::runtime::engine::Engine;
 use crate::runtime::r#return::ReturnFlow;
 
-pub use crate::node::Node as SyntaxNode;
-
-pub trait Executable {
-    fn execute<'a>(&self, engine: &mut Engine<'a>) -> ReturnFlow<'a>;
+pub trait Walkable {
+    fn walk<'a>(&self, engine: &mut Engine<'a>) -> ReturnFlow<'a>;
 }
 
-pub struct Node {
-    pub syn: Ref<SyntaxNode>,
-    pub sem: Box<dyn Executable>,
+pub struct WNode {
+    pub syntax: Ref<SNode>,
+    pub walkable: Box<dyn Walkable>,
 }
 
-impl Node {
-    pub fn new(syn: Ref<SyntaxNode>, sem: impl Executable + 'static) -> Self {
+impl WNode {
+    pub fn new(syntax: Ref<SNode>, walkable: impl Walkable + 'static) -> Self {
         Self {
-            syn,
-            sem: Box::new(sem),
+            syntax,
+            walkable: Box::new(walkable),
         }
     }
-}
 
-impl Executable for Node {
-    fn execute<'a>(&self, engine: &mut Engine<'a>) -> ReturnFlow<'a> {
-        let mut flow = self.sem.execute(engine);
+    pub fn walk<'a>(&self, engine: &mut Engine<'a>) -> ReturnFlow<'a> {
+        let mut flow = self.walkable.walk(engine);
         if let Err(mut error) = flow.as_mut() {
             if error.node.is_none(){
-                error.node = Some(self.syn)
+                error.node = Some(self.syntax)
             }
         }
 

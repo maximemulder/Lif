@@ -1,4 +1,4 @@
-use crate::element::Element;
+use crate::parser::Element;
 
 declare_node!(PLUS);
 declare_node!(PLUS_EQ);

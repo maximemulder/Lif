@@ -3,14 +3,14 @@ use crate::runtime::data::generic::GenericImplementation;
 use crate::runtime::engine::Engine;
 use crate::runtime::r#return::ReturnReference;
 use crate::runtime::utilities::Arguments;
-use crate::walker::Executable;
+use crate::walker::WNode;
 
 pub struct GenericCode {
-    node: Ref<dyn Executable>,
+    node: Ref<WNode>,
 }
 
 impl GenericCode {
-    pub fn new(node: Ref<dyn Executable>) -> Self {
+    pub fn new(node: Ref<WNode>) -> Self {
         Self {
             node,
         }
@@ -19,6 +19,6 @@ impl GenericCode {
 
 impl<'a> GenericImplementation<'a> for GenericCode {
     fn call(&self, engine: &mut Engine<'a>, _: Arguments<'a>) -> ReturnReference<'a> {
-        engine.execute(Ref::as_ref(&self.node))?.none()
+        engine.walk(Ref::as_ref(&self.node))?.none()
     }
 }

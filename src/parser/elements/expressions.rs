@@ -1,4 +1,4 @@
-use crate::element::Element;
+use crate::parser::Element;
 
 declare_node!(EXPRESSION);
 declare_node!(SEQUENCE);

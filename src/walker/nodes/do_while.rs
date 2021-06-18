@@ -1,14 +1,14 @@
 use crate::runtime::engine::Engine;
 use crate::runtime::r#return::{ Flow, Jump, ReturnFlow };
-use crate::walker::{ Executable, Node };
+use crate::walker::{ Walkable, WNode };
 
 pub struct DoWhile {
-    body:      Node,
-    condition: Node,
+    body:      WNode,
+    condition: WNode,
 }
 
 impl DoWhile {
-    pub fn new(body: Node, condition: Node) -> Self {
+    pub fn new(body: WNode, condition: WNode) -> Self {
         Self {
             body,
             condition,
@@ -16,11 +16,11 @@ impl DoWhile {
     }
 }
 
-impl Executable for DoWhile {
-    fn execute<'a>(&self, engine: &mut Engine<'a>) -> ReturnFlow<'a> {
+impl Walkable for DoWhile {
+    fn walk<'a>(&self, engine: &mut Engine<'a>) -> ReturnFlow<'a> {
         let mut elements = Vec::new();
         loop {
-            let flow = engine.execute(&self.body)?;
+            let flow = engine.walk(&self.body)?;
             let reference = get_loop!(flow);
             if reference.is_defined() {
                 elements.push(engine.new_reference(reference.get_value()))
@@ -34,7 +34,7 @@ impl Executable for DoWhile {
                 break;
             }
 
-            let reference = get!(engine.execute(&self.condition)?);
+            let reference = get!(engine.walk(&self.condition)?);
             let condition = !*reference.read()?.get_cast_boolean(engine)?;
             if condition {
                 break;

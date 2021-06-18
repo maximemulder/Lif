@@ -1,22 +1,22 @@
 use crate::runtime::engine::Engine;
 use crate::runtime::r#return::{ Jump, ReturnFlow };
-use crate::walker::{ Executable, Node };
+use crate::walker::{ Walkable, WNode };
 use crate::walker::utilities;
 
 pub struct Continue {
-    expression: Option<Node>,
+    expression: Option<WNode>,
 }
 
 impl Continue {
-    pub fn new(expression: Option<Node>) -> Self {
+    pub fn new(expression: Option<WNode>) -> Self {
         Self {
             expression,
         }
     }
 }
 
-impl Executable for Continue {
-    fn execute<'a>(&self, engine: &mut Engine<'a>) -> ReturnFlow<'a> {
+impl Walkable for Continue {
+    fn walk<'a>(&self, engine: &mut Engine<'a>) -> ReturnFlow<'a> {
         utilities::new_jump(engine, Jump::Continue, self.expression.as_ref())
     }
 }
