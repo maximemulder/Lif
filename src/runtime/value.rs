@@ -3,7 +3,6 @@ use crate::runtime::engine::Engine;
 use crate::runtime::error::Error;
 use crate::runtime::gc::{ GcRef, GcTrace };
 use crate::runtime::r#return::{ Return, ReturnReference, ReturnValue };
-use crate::runtime::utilities::Arguments;
 use crate::runtime::utilities::parameters;
 use crate::runtime::utilities::tag::Tag;
 
@@ -52,20 +51,21 @@ impl<'a> GcValue<'a> {
         }
     }
 
-    pub fn call_method(self, engine: &mut Engine<'a>, name: &str, arguments: Arguments<'a>) -> ReturnReference<'a> {
-        let mut arguments = arguments.into_vec();
-        arguments.insert(0, self);
-        self.call_method_self(engine, name, arguments.into_boxed_slice())
+    pub fn call_method(self, engine: &mut Engine<'a>, name: &str, arguments: &mut [GcValue<'a>]) -> ReturnReference<'a> {
+        let mut values = Vec::new();
+        values.push(self);
+        values.extend_from_slice(arguments);
+        self.call_method_self(engine, name, &mut values)
     }
 
-    pub fn call_method_self(self, engine: &mut Engine<'a>, name: &str, arguments: Arguments<'a>) -> ReturnReference<'a> {
+    pub fn call_method_self(self, engine: &mut Engine<'a>, name: &str, arguments: &mut [GcValue<'a>]) -> ReturnReference<'a> {
         let method = self.get_method(name)?;
         let array = parameters::pack(engine, arguments);
-        method.get_method("__cl__")?.data_function().call(engine, Box::new([method, array]))
+        method.get_method("__cl__")?.data_function().call(engine, &mut [method, array])
     }
 
     pub fn call_to_string(self, engine: &mut Engine<'a>) -> Return<String> {
-        Ok(self.call_method(engine, "to_string", Box::new([]))?.read()?.data_string().clone())
+        Ok(self.call_method(engine, "to_string", &mut [])?.read()?.data_string().clone())
     }
 }
 

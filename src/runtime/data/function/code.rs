@@ -3,8 +3,8 @@ use crate::runtime::data::function::FunctionImplementation;
 use crate::runtime::engine::Engine;
 use crate::runtime::error::Error;
 use crate::runtime::r#return::{ Jump, ReturnReference };
-use crate::runtime::utilities::Arguments;
 use crate::runtime::utilities::variable::Variable;
+use crate::runtime::value::GcValue;
 use crate::walker::WNode;
 
 pub struct FunctionCode {
@@ -20,7 +20,7 @@ impl FunctionCode {
 }
 
 impl<'a> FunctionImplementation<'a> for FunctionCode {
-    fn call(&self, engine: &mut Engine<'a>, parameters: &[Variable<'a>], rest: &Option<Variable<'a>>, arguments: Arguments<'a>) -> ReturnReference<'a> {
+    fn call(&self, engine: &mut Engine<'a>, parameters: &[Variable<'a>], rest: &Option<Variable<'a>>, arguments: &mut [GcValue<'a>]) -> ReturnReference<'a> {
         for (parameter, argument) in parameters.iter().zip(arguments.iter().copied()) {
             parameter.build(engine).set_value(argument);
         }

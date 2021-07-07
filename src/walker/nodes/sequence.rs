@@ -34,6 +34,6 @@ impl Walkable for Sequence {
         }
 
         let array = engine.new_array_any_value(elements);
-        Flow::new(value.call_method(engine, &self.operator, Box::new([array]))?)
+        Flow::new(value.call_method(engine, &self.operator, &mut [array])?)
     }
 }

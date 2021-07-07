@@ -1,7 +1,6 @@
 use crate::runtime::engine::Engine;
 use crate::runtime::error::Error;
 use crate::runtime::r#return::Return;
-use crate::runtime::utilities::Arguments;
 use crate::runtime::value::GcValue;
 
 pub fn length(arguments: usize, parameters: usize) -> Return<()> {
@@ -12,7 +11,7 @@ pub fn length(arguments: usize, parameters: usize) -> Return<()> {
     Ok(())
 }
 
-pub fn pack<'a>(engine: &mut Engine<'a>, values: Arguments<'a>) -> GcValue<'a> {
+pub fn pack<'a>(engine: &mut Engine<'a>, values: &mut [GcValue<'a>]) -> GcValue<'a> {
     let elements = values.iter()
         .copied()
         .map(|value| engine.new_constant(value))
@@ -21,7 +20,7 @@ pub fn pack<'a>(engine: &mut Engine<'a>, values: Arguments<'a>) -> GcValue<'a> {
     engine.new_array_any_value(elements)
 }
 
-pub fn unpack(value: GcValue<'_>) -> Return<Arguments<'_>> {
+pub fn unpack(value: GcValue<'_>) -> Return<Box<[GcValue<'_>]>> {
     value.data_array().elements().iter()
         .copied()
         .map(|element| element.read())

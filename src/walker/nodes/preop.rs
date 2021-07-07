@@ -28,6 +28,6 @@ impl Preop {
 impl Walkable for Preop {
     fn walk<'a>(&self, engine: &mut Engine<'a>) -> ReturnFlow<'a> {
         let expression = get!(engine.walk(&self.expression)?).read()?;
-        Flow::new(expression.call_method(engine, &self.operator, Box::new([]))?)
+        Flow::new(expression.call_method(engine, &self.operator, &mut [])?)
     }
 }

@@ -1,8 +1,8 @@
 use crate::runtime::engine::Engine;
 use crate::runtime::primitives::Primitives;
 use crate::runtime::r#return::ReturnReference;
-use crate::runtime::utilities::Arguments;
 use crate::runtime::utilities::builder;
+use crate::runtime::value::GcValue;
 
 pub fn populate(engine: &mut Engine) {
     let Primitives { object, string, .. } = engine.primitives;
@@ -11,7 +11,7 @@ pub fn populate(engine: &mut Engine) {
     builder::method(engine, object, "__cn__",    [object, string], &cn);
 }
 
-fn to_string<'a>(engine: &mut Engine<'a>, arguments: Arguments<'a>) -> ReturnReference<'a> {
+fn to_string<'a>(engine: &mut Engine<'a>, arguments: &mut [GcValue<'a>]) -> ReturnReference<'a> {
     let mut string = String::from("{");
     let attributes = arguments[0].data_object().attributes();
     for (name, attribute) in attributes {
@@ -29,7 +29,7 @@ fn to_string<'a>(engine: &mut Engine<'a>, arguments: Arguments<'a>) -> ReturnRef
     Ok(engine.new_string(string))
 }
 
-fn cn<'a>(engine: &mut Engine<'a>, arguments: Arguments<'a>) -> ReturnReference<'a> {
+fn cn<'a>(engine: &mut Engine<'a>, arguments: &mut [GcValue<'a>]) -> ReturnReference<'a> {
     let mut this = arguments[0];
     let name = arguments[1].data_string();
     if let Some(method) = this.class.data_class().get_method(name) {

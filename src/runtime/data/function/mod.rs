@@ -7,7 +7,6 @@ use crate::runtime::error::Error;
 use crate::runtime::gc::GcTrace;
 use crate::runtime::r#return::ReturnReference;
 use crate::runtime::scope::GcScope;
-use crate::runtime::utilities::Arguments;
 use crate::runtime::utilities::variable::Variable;
 use crate::runtime::value::GcValue;
 
@@ -15,7 +14,7 @@ pub use code::FunctionCode;
 pub use primitive::FunctionPrimitive;
 
 pub trait FunctionImplementation<'a> {
-    fn call(&self, engine: &mut Engine<'a>, parameters: &[Variable<'a>], rest: &Option<Variable<'a>>, arguments: Arguments<'a>) -> ReturnReference<'a>;
+    fn call(&self, engine: &mut Engine<'a>, parameters: &[Variable<'a>], rest: &Option<Variable<'a>>, arguments: &mut [GcValue<'a>]) -> ReturnReference<'a>;
 }
 
 pub struct Function<'a> {
@@ -49,7 +48,7 @@ impl<'a> Function<'a> {
 }
 
 impl<'a> Function<'a> {
-    pub fn call(&self, engine: &mut Engine<'a>, arguments: Arguments<'a>) -> ReturnReference<'a> {
+    pub fn call(&self, engine: &mut Engine<'a>, arguments: &mut [GcValue<'a>]) -> ReturnReference<'a> {
         match &self.rest {
             Some(_) => if arguments.len() < self.parameters.len() {
                 return Err(error_arguments(self.parameters.len(), arguments.len()));
@@ -63,7 +62,7 @@ impl<'a> Function<'a> {
             parameter.cast(argument)?;
         }
 
-        let reference = engine.run_frame(self.scope, |engine| self.implementation.call(engine, &self.parameters, &self.rest, arguments.clone()))?;
+        let reference = engine.run_frame(self.scope, |engine| self.implementation.call(engine, &self.parameters, &self.rest, arguments))?;
         if let Some(r#return) = self.r#return {
             reference.read()?.cast(r#return)?;
         }

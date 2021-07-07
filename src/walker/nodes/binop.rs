@@ -73,7 +73,7 @@ impl Walkable for Binop {
             },
             _ => {
                 let right = get!(engine.walk(&self.right)?).read()?;
-                Flow::new(left.call_method(engine, &self.operator, Box::new([right]))?)
+                Flow::new(left.call_method(engine, &self.operator, &mut [right])?)
             },
         }
     }
