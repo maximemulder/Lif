@@ -1,4 +1,5 @@
 use crate::runtime::engine::Engine;
+use crate::runtime::primitives::Primitives;
 use crate::runtime::r#return::ReturnReference;
 use crate::runtime::utilities::Arguments;
 use crate::runtime::utilities::builder;
@@ -9,20 +10,40 @@ pub fn populate(engine: &mut Engine) {
 }
 
 pub fn create<'a>(engine: &mut Engine<'a>, arguments: Arguments<'a>) -> ReturnReference<'a> {
+    let Primitives { any, integer, .. } = engine.primitives;
     let class = arguments[0];
     class.cast(engine.primitives.class)?;
-    let array = engine.new_class_value(None, Some(engine.primitives.any));
-    builder::method(engine, array, "to_string", [array],               &to_string);
-    builder::method(engine, array, "insert",    [array, engine.primitives.integer, class], &insert);
-    builder::method(engine, array, "remove",    [array, engine.primitives.integer],        &remove);
-    builder::method(engine, array, "__id__",    [array, array],        &id);
+    let array = engine.new_class_value(None, Some(any));
+    let array_any = if class == any {
+        array
+    } else {
+        engine.primitives.array_any
+    };
+
+    builder::static_rest(engine, array, "__init__", [], &new);
+
+    builder::method(engine, array, "to_string", [array],                 &to_string);
+    builder::method(engine, array, "insert",    [array, integer, class], &insert);
+    builder::method(engine, array, "remove",    [array, integer],        &remove);
+    builder::method(engine, array, "__cl__",    [array, array_any],      &id);
+
     builder::method_rest(engine, array, "prepend", [array, class], &prepend);
     builder::method_rest(engine, array, "append",  [array, class], &append);
+
     Ok(engine.new_constant(array))
 }
 
 fn get_type<'a>(engine: &mut Engine<'a>) -> GcValue<'a> {
     engine.scope().parent().unwrap().source().unwrap().data_class().constructor.unwrap().arguments[0]
+}
+
+fn new<'a>(engine: &mut Engine<'a>, arguments: Arguments<'a>) -> ReturnReference<'a> {
+    let r#type = get_type(engine);
+    let elements = arguments.into_iter()
+    .copied()
+    .map(|argument| engine.new_variable(Some(argument), r#type))
+    .collect();
+    Ok(engine.new_array(engine.scope().parent().unwrap().source().unwrap(), elements))
 }
 
 fn to_string<'a>(engine: &mut Engine<'a>, arguments: Arguments<'a>) -> ReturnReference<'a> {

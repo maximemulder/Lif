@@ -1,15 +1,19 @@
 use crate::runtime::engine::Engine;
+use crate::runtime::error::Error;
 use crate::runtime::primitives::Primitives;
 use crate::runtime::r#return::ReturnReference;
 use crate::runtime::utilities::Arguments;
 use crate::runtime::utilities::builder;
+use crate::runtime::utilities::parameters;
+use crate::runtime::value::GcValue;
 
 pub fn populate(engine: &mut Engine) {
-    let Primitives { class, string, .. } = engine.primitives;
+    let Primitives { array_any, class, string, .. } = engine.primitives;
     engine.set_constant_value("Class", class);
-    builder::method(engine, class, "to_string", [class],         &to_string);
-    builder::method(engine, class, "__cn__",    [class, string], &cn);
-    builder::method(engine, class, "__id__",    [class],         &id);
+
+    builder::method(engine, class, "to_string", [class],            &to_string);
+    builder::method(engine, class, "__cn__",    [class, string],    &cn);
+    builder::method(engine, class, "__cl__",    [class, array_any], &cl);
 }
 
 fn to_string<'a>(engine: &mut Engine<'a>, arguments: Arguments<'a>) -> ReturnReference<'a> {
@@ -41,6 +45,15 @@ fn cn<'a>(engine: &mut Engine<'a>, arguments: Arguments<'a>) -> ReturnReference<
     })
 }
 
-fn id<'a>(engine: &mut Engine<'a>, _: Arguments<'a>) -> ReturnReference<'a> {
-    Ok(engine.new_constant(engine.primitives.array))
+fn cl<'a>(engine: &mut Engine<'a>, arguments: Arguments<'a>) -> ReturnReference<'a> {
+    let class = arguments[0];
+    Ok(if let Some(member) = class.data_class().get_static("__init__") {
+        member.read()?.data_function().call(engine, parameters::unpack(arguments[1])?)?
+    } else {
+        return Err(error_constructor(class))
+    })
+}
+
+fn error_constructor(class: GcValue) -> Error {
+    Error::new_runtime(&format!("Class {} has no default constructor.", class.data_class().tag()))
 }

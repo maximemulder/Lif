@@ -21,6 +21,14 @@ pub fn r#static<'a, const N: usize>(engine: &mut Engine<'a>, mut value: GcValue<
     value.data_class_mut().set_static(name, engine.new_constant(primitive));
 }
 
+pub fn r#static_rest<'a, const N: usize>(engine: &mut Engine<'a>, mut value: GcValue<'a>, name: &str, types: [GcValue<'a>; N], callback: &'a Callable<'a>) {
+    let primitive = engine.run_frame(value.data_class().scope(), |engine| {
+        engine.new_function_value(Some(&name), parameters(&types), Some(Variable::new_unchecked(Box::from("__unused__"), None)), None, FunctionPrimitive::new(callback))
+    });
+
+    value.data_class_mut().set_static(name, engine.new_constant(primitive));
+}
+
 pub fn method<'a, const N: usize>(engine: &mut Engine<'a>, mut value: GcValue<'a>, name: &str, types: [GcValue<'a>; N], callback: &'a Callable<'a>) {
     let primitive = engine.run_frame(value.data_class().scope(), |engine| {
         engine.new_function_value(Some(&name), parameters(&types), None, None, FunctionPrimitive::new(callback))

@@ -71,8 +71,13 @@ impl<'a> GcValue<'a> {
 
 impl<'a> GcValue<'a> {
     pub fn get_cast_array(&self, engine: &Engine<'a>) -> Return<&Array<'a>> {
-        self.cast(engine.primitives.array_any)?;
-        Ok(&self.data_array())
+        if let Some(constructor) = self.class.data_class().constructor {
+            if constructor.generic == engine.primitives.array {
+                return Ok(&self.data_array())
+            }
+        }
+
+        Err(error_cast(*self, engine.primitives.array_any))
     }
 
     pub fn get_cast_boolean(&self, engine: &Engine<'a>) -> Return<&bool> {

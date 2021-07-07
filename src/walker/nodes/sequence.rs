@@ -18,8 +18,7 @@ impl Sequence {
             expressions,
             operator: Ref::new(match format!("{}{}", open.deref(), close.deref()).as_str() {
                 "()" => "__cl__",
-                "[]" => "__id__",
-                "<>" => "__gn__",
+                "[]" => "__gn__",
                 _ => panic!(),
             })
         }

@@ -1,25 +1,28 @@
-print([0, 1, 2]);
+print(Array[Integer](0, 1, 2));
 
-print([2, 3, 4][0]);
-print([2, 3, 4][2]);
+let a = Array[Integer](0);
+a(0);
 
-let array = [0, 1, 2];
+print(Array[Integer](2, 3, 4)(0));
+print(Array[Integer](2, 3, 4)(2));
+
+let array = Array[Integer](0, 1, 2);
 array.append(3);
 print(array);
 
-let array = [0, 1, 2];
+let array = Array[Integer](0, 1, 2);
 array.prepend(-1);
 print(array);
 
-let array = [0, 1, 2];
+let array = Array[Integer](0, 1, 2);
 array.insert(1, 10);
 print(array);
 
-let array = [0, 1, 2];
+let array = Array[Integer](0, 1, 2);
 array.remove(1);
 print(array);
 
-let array = [2, 4, 8];
+let array = Array[Integer](2, 4, 8);
 array.append(16, 32, 64);
 array.prepend(0, 1);
 print(array);

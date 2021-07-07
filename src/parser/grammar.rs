@@ -204,7 +204,7 @@ pub fn get() -> Grammar {
         }
     }
 
-    macro_rules! macro_binop_1 {
+    macro_rules! macro_binop {
         ( $child:expr, $tokens:expr ) => {{
             let ascent = ascents.declare();
             ascents.swap(ascent, ascent_option!(
@@ -223,16 +223,10 @@ pub fn get() -> Grammar {
                 ]
             ));
 
-            ascent
-        }}
-    }
-
-    macro_rules! macro_binop_2 {
-        ( $child:expr, $tokens:expr ) => {{
             descent_ascent!(
                 ascent_sequence![
                     ascent_descent!($child),
-                    macro_binop_1!($child, $tokens),
+                    ascent,
                 ]
             )
         }}
@@ -301,11 +295,6 @@ pub fn get() -> Grammar {
         &elements::expressions::LITERAL
     );
 
-    let array = descent_element!(
-        descent_sequence![symbol_crotchet_l, expressions, symbol_crotchet_r],
-        &elements::expressions::ARRAY
-    );
-
     let group = descent_element!(
         descent_sequence![symbol_parenthesis_l, expression, symbol_parenthesis_r],
         &elements::expressions::GROUP
@@ -370,12 +359,12 @@ pub fn get() -> Grammar {
     let generics = descent_option!(
         descent_element!(
             descent_sequence![
-                symbol_guillemet_l,
+                symbol_crotchet_l,
                 descent_element!(
                     macro_list!(variable_identifier, symbol_comma),
                     &elements::productions::GENERICS_LIST
                 ),
-                symbol_guillemet_r,
+                symbol_crotchet_r,
             ],
             &elements::productions::GENERICS
         )
@@ -459,7 +448,7 @@ pub fn get() -> Grammar {
     );
 
     let expression_core = descent_element!(
-        descent_choice![class, function, flow, jump, r#let, array, group, literal, preop],
+        descent_choice![class, function, flow, jump, r#let, group, literal, preop],
         &elements::expressions::EXPRESSION
     );
 
@@ -482,14 +471,6 @@ pub fn get() -> Grammar {
             descent_choice![
                 descent_sequence![symbol_parenthesis_l, expressions, symbol_parenthesis_r],
                 descent_sequence![symbol_crotchet_l, expressions, symbol_crotchet_r],
-                descent_sequence![
-                    symbol_guillemet_l,
-                    descent_element!(
-                        macro_list!(expression_base, symbol_comma),
-                        &elements::productions::EXPRESSIONS
-                    ),
-                    symbol_guillemet_r,
-                ],
             ]
         ),
         ascent_sequence![
@@ -510,56 +491,29 @@ pub fn get() -> Grammar {
         ]
     ));
 
-    let binop_1 = macro_binop_2!(expression_base, descent_choice![symbol_asterisk, symbol_slash, symbol_percent, symbol_asterisk_d]);
+    let binop_1 = macro_binop!(expression_base, descent_choice![symbol_asterisk, symbol_slash, symbol_percent, symbol_asterisk_d]);
 
     descents.swap(binop_base, descent_alias!(binop_1));
 
-    let binop_2  = macro_binop_2!(binop_1, descent_choice![symbol_plus, symbol_minus]);
+    let binop_2  = macro_binop!(binop_1, descent_choice![symbol_plus, symbol_minus]);
 
-    let binop_3  = macro_binop_2!(binop_2, descent_choice![symbol_guillemet_l_d, symbol_guillemet_r_d, symbol_guillemet_l_t, symbol_guillemet_l_t]);
+    let binop_3  = macro_binop!(binop_2, descent_choice![symbol_guillemet_l_d, symbol_guillemet_r_d, symbol_guillemet_l_t, symbol_guillemet_l_t]);
 
-    let binop_4  = macro_binop_2!(binop_3, descent_choice![symbol_ampersand]);
+    let binop_4  = macro_binop!(binop_3, descent_choice![symbol_ampersand]);
 
-    let binop_5  = macro_binop_2!(binop_4, descent_choice![symbol_caret]);
+    let binop_5  = macro_binop!(binop_4, descent_choice![symbol_caret]);
 
-    let binop_6  = macro_binop_2!(binop_5, descent_choice![symbol_pipe]);
+    let binop_6  = macro_binop!(binop_5, descent_choice![symbol_pipe]);
 
-    let binop_7_l = macro_binop_1!(binop_6, descent_choice![symbol_guillemet_l, symbol_guillemet_l_eq]);
+    let binop_7  = macro_binop!(binop_6,  descent_choice![symbol_guillemet_l, symbol_guillemet_l_eq, symbol_guillemet_r, symbol_guillemet_r_eq]);
 
-    let binop_7_r = macro_binop_1!(binop_6, descent_choice![symbol_guillemet_r, symbol_guillemet_r_eq]);
+    let binop_8  = macro_binop!(binop_7,  descent_choice![symbol_equal_d, symbol_exclamation_eq]);
 
-    let binop_7 = descent_choice![
-        descent_sequence![
-            descent_ascent!(
-                ascent_sequence![
-                    ascent_descent!(binop_6),
-                    binop_7_l,
-                ]
-            ),
-            descent_predicate_not!(
-                descent_choice![symbol_guillemet_r, symbol_guillemet_r_eq]
-            ),
-        ],
-        descent_sequence![
-            descent_ascent!(
-                ascent_sequence![
-                    ascent_descent!(binop_6),
-                    binop_7_r,
-                ]
-            ),
-            descent_predicate_not!(
-                descent_choice![symbol_guillemet_l, symbol_guillemet_l_eq]
-            ),
-        ],
-    ];
+    let binop_9  = macro_binop!(binop_8,  descent_choice![symbol_ampersand_d]);
 
-    let binop_8  = macro_binop_2!(binop_7,  descent_choice![symbol_equal_d, symbol_exclamation_eq]);
+    let binop_10 = macro_binop!(binop_9,  descent_choice![symbol_pipe_d]);
 
-    let binop_9  = macro_binop_2!(binop_8,  descent_choice![symbol_ampersand_d]);
-
-    let binop_10 = macro_binop_2!(binop_9,  descent_choice![symbol_pipe_d]);
-
-    let binop_11 = macro_binop_2!(binop_10, descent_choice![symbol_dot_d, symbol_dot_d_eq]);
+    let binop_11 = macro_binop!(binop_10, descent_choice![symbol_dot_d, symbol_dot_d_eq]);
 
     let binop_12 = macro_assignment!(binop_11, descent_choice![symbol_equal, symbol_plus_eq, symbol_minus_eq, symbol_asterisk_eq, symbol_slash_eq,
         symbol_percent_eq, symbol_asterisk_d_eq, symbol_guillemet_l_d_eq, symbol_guillemet_r_d_eq, symbol_guillemet_l_t_eq, symbol_guillemet_r_t_eq,
