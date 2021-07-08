@@ -3,6 +3,7 @@ use crate::runtime::data::FunctionCode;
 use crate::runtime::engine::Engine;
 use crate::runtime::error::Error;
 use crate::runtime::r#return::{ Flow, Return, ReturnFlow };
+use crate::runtime::utilities::parameters::Parameters;
 use crate::runtime::utilities::variable::Variable;
 use crate::walker::{ Walkable, WNode };
 use crate::walker::utilities;
@@ -51,7 +52,7 @@ impl Walkable for Function {
         }).transpose()?;
 
         let r#type = utilities::new_type(engine, self.r#type.as_ref())?;
-        Flow::new(engine.new_function(Ref::as_option(&self.name), parameters, rest, r#type, FunctionCode::new(Ref::new(&self.block))))
+        Flow::new(engine.new_function(Ref::as_option(&self.name), Parameters::new(parameters, rest), r#type, FunctionCode::new(Ref::new(&self.block))))
     }
 }
 
