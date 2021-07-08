@@ -23,22 +23,42 @@ impl<'a> Value<'a> {
 }
 
 impl<'a> GcValue<'a> {
-    pub fn is(self, other: GcValue<'a>) -> bool {
-        if self == other {
+    pub fn is(self, class: GcValue<'a>) -> bool {
+        if self == class {
             true
         } else if let Some(parent) = self.data_class().parent() {
-            parent.is(other)
+            parent.is(class)
         } else {
             false
         }
     }
 
-    pub fn isa(self, other: GcValue<'a>) -> bool {
-        self.class.is(other)
+    pub fn is_generic(self, generic: GcValue<'a>) -> bool {
+        if let Some(constructor) = self.data_class().constructor {
+            if constructor.generic == generic {
+                return true;
+            }
+        }
+
+        false
+    }
+}
+
+impl<'a> GcValue<'a> {
+    pub fn isa(self, class: GcValue<'a>) -> bool {
+        self.class.is(class)
     }
 
-    pub fn cast(self, other: GcValue<'a>) -> Return<()> {
-        self.isa(other).then_some(()).ok_or_else(|| error_cast(self, other))
+    pub fn isa_generic(self, generic: GcValue<'a>) -> bool {
+        self.class.is_generic(generic)
+    }
+
+    pub fn cast(self, class: GcValue<'a>) -> Return<()> {
+        if self.isa(class) {
+            Ok(())
+        } else {
+            Err(error_cast(self, class))
+        }
     }
 }
 
@@ -71,13 +91,11 @@ impl<'a> GcValue<'a> {
 
 impl<'a> GcValue<'a> {
     pub fn get_cast_array(&self, engine: &Engine<'a>) -> Return<&Array<'a>> {
-        if let Some(constructor) = self.class.data_class().constructor {
-            if constructor.generic == engine.primitives.array {
-                return Ok(&self.data_array())
-            }
+        if self.isa_generic(engine.primitives.array) {
+            Ok(&self.data_array())
+        } else {
+            Err(error_cast(*self, engine.primitives.array_any))
         }
-
-        Err(error_cast(*self, engine.primitives.array_any))
     }
 
     pub fn get_cast_boolean(&self, engine: &Engine<'a>) -> Return<&bool> {

@@ -1,4 +1,4 @@
-print(Array[Integer](0, 1, 2));
+print(Array[Any](0, true, "String"));
 
 let a = Array[Integer](0);
 a(0);

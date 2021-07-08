@@ -40,15 +40,11 @@ impl Walkable for Function {
             let r#type = parameter.as_ref().map(|parameter| {
                 let r#type = engine.walk(parameter)?.none()?.read()?;
                 r#type.cast(engine.primitives.class)?;
-                if let Some(constructor) = r#type.data_class().constructor.as_ref() {
-                    if constructor.generic != engine.primitives.array {
-                        return Err(error_rest())
-                    }
-                } else if r#type != engine.primitives.any {
-                    return Err(error_rest())
+                if !r#type.is_generic(engine.primitives.array) && r#type != engine.primitives.any {
+                    Err(error_rest())
+                } else {
+                    Ok(r#type)
                 }
-
-                Ok(r#type)
             }).transpose()?;
 
             Variable::new(engine, Box::from(name.as_ref()), r#type)
