@@ -18,6 +18,16 @@ impl<'a> Parameters<'a> {
         }
     }
 
+    pub fn get_rest_array(&self, engine: &Engine<'a>) -> Option<GcValue<'a>> {
+        self.rest.as_ref()
+            .and_then(|parameter| parameter.r#type)
+            .and_then(|class| class.is_generic(engine.primitives.array).then_some(class))
+    }
+
+    pub fn get_rest_array_type(&self, engine: &Engine<'a>) -> Option<GcValue<'a>> {
+        self.get_rest_array(engine).map(|class| class.data_class().constructor.unwrap().arguments[0])
+    }
+
     pub fn validate(&self, engine: &Engine<'a>, arguments: &[GcValue<'a>]) -> Return<()> {
         let condition = if self.rest.is_some() {
             arguments.len() < self.elements.len()
@@ -33,14 +43,9 @@ impl<'a> Parameters<'a> {
             parameter.cast(argument)?;
         }
 
-        if let Some(parameter) = self.rest.as_ref() {
-            if let Some(r#type) = parameter.r#type.as_ref() {
-                if r#type.is_generic(engine.primitives.array) {
-                    let class = r#type.data_class().constructor.unwrap().arguments[0];
-                    for argument in arguments[self.elements.len()..].iter().copied() {
-                        argument.cast(class)?;
-                    }
-                }
+        if let Some(r#type) = self.get_rest_array_type(engine) {
+            for argument in arguments[self.elements.len()..].iter().copied() {
+                argument.cast(r#type)?;
             }
         }
 
@@ -58,17 +63,13 @@ impl<'a> Parameters<'a> {
                 .map(|argument| engine.new_reference(argument))
                 .collect();
 
-            let value = if let Some(r#type) = parameter.r#type {
-                if r#type.is_generic(engine.primitives.array) {
-                    engine.new_array_value(r#type, elements)
-                } else {
-                    engine.new_array_any_value(elements)
-                }
+            let array = if let Some(class) = self.get_rest_array(engine) {
+                engine.new_array_value(class, elements)
             } else {
                 engine.new_array_any_value(elements)
             };
 
-            parameter.build(engine).set_value(value);
+            parameter.build(engine).set_value(array);
         }
     }
 }
