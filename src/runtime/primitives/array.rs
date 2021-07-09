@@ -1,7 +1,6 @@
 use crate::runtime::engine::Engine;
 use crate::runtime::primitives::Primitives;
 use crate::runtime::r#return::ReturnReference;
-use crate::runtime::utilities::builder;
 use crate::runtime::value::GcValue;
 
 pub fn populate(engine: &mut Engine) {
@@ -9,26 +8,23 @@ pub fn populate(engine: &mut Engine) {
 }
 
 pub fn create<'a>(engine: &mut Engine<'a>, arguments: &mut [GcValue<'a>]) -> ReturnReference<'a> {
-    let Primitives { any, integer, .. } = engine.primitives;
-    let class = arguments[0];
-    class.cast(engine.primitives.class)?;
+    let Primitives { any, class, integer, string, .. } = engine.primitives;
+    let r#type = arguments[0];
+    r#type.cast(class)?;
     let array = engine.new_class_value(None, Some(any));
-    let array_any = if class == any {
+    let array_any = if r#type == any {
         array
     } else {
         engine.primitives.array_any
     };
 
-    builder::static_rest(engine, array, "__init__", [], &new);
-
-    builder::method(engine, array, "to_string", [array],                 &to_string);
-    builder::method(engine, array, "insert",    [array, integer, class], &insert);
-    builder::method(engine, array, "remove",    [array, integer],        &remove);
-    builder::method(engine, array, "__cl__",    [array, array_any],      &id);
-
-    builder::method_rest(engine, array, "prepend", [array, class], &prepend);
-    builder::method_rest(engine, array, "append",  [array, class], &append);
-
+    engine.primitive_static(array, "__init__", [], Some(("elements", array)), None, &init);
+    engine.primitive_method(array, "to_string", [], None, Some(string), &to_string);
+    engine.primitive_method(array, "append", [], Some(("elements", array)), None, &append);
+    engine.primitive_method(array, "prepend", [], Some(("elements", array)), None, &prepend);
+    engine.primitive_method(array, "insert", [("index", integer), ("element", r#type)], None, None, &insert);
+    engine.primitive_method(array, "remove", [("index", integer)], None, None, &remove);
+    engine.primitive_method(array, "__cl__", [("arguments", array_any)], None, Some(r#type), &access);
     Ok(engine.new_constant(array))
 }
 
@@ -36,7 +32,7 @@ fn get_type<'a>(engine: &mut Engine<'a>) -> GcValue<'a> {
     engine.scope().parent().unwrap().source().unwrap().data_class().constructor.unwrap().arguments[0]
 }
 
-fn new<'a>(engine: &mut Engine<'a>, arguments: &mut [GcValue<'a>]) -> ReturnReference<'a> {
+fn init<'a>(engine: &mut Engine<'a>, arguments: &mut [GcValue<'a>]) -> ReturnReference<'a> {
     let r#type = get_type(engine);
     let elements = arguments.iter()
         .copied()
@@ -96,6 +92,6 @@ fn remove<'a>(engine: &mut Engine<'a>, arguments: &mut [GcValue<'a>]) -> ReturnR
     Ok(engine.undefined())
 }
 
-fn id<'a>(_: &mut Engine<'a>, arguments: &mut [GcValue<'a>]) -> ReturnReference<'a> {
+fn access<'a>(_: &mut Engine<'a>, arguments: &mut [GcValue<'a>]) -> ReturnReference<'a> {
     Ok(arguments[0].data_array().get(*arguments[1].data_array().get(0).read()?.data_integer() as usize))
 }

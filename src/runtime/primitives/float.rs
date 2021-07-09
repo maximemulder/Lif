@@ -1,22 +1,21 @@
 use crate::runtime::engine::Engine;
 use crate::runtime::primitives::Primitives;
 use crate::runtime::r#return::ReturnReference;
-use crate::runtime::utilities::builder;
 use crate::runtime::value::GcValue;
 
 pub fn populate(engine: &mut Engine) {
-    let Primitives { any, float, .. } = engine.primitives;
+    let Primitives { any, boolean, float, string, .. } = engine.primitives;
     engine.set_constant_value("Float", float);
-    builder::method(engine, float, "to_string", [float],          &to_string);
-    builder::method(engine, float, "__eq__",    [float, any],     &eq);
-    builder::method(engine, float, "__lt__",    [float, float], &lt);
-    builder::method(engine, float, "__pos__",   [float],        &pos);
-    builder::method(engine, float, "__neg__",   [float],        &neg);
-    builder::method(engine, float, "__add__",   [float, float], &add);
-    builder::method(engine, float, "__sub__",   [float, float], &sub);
-    builder::method(engine, float, "__mul__",   [float, float], &mul);
-    builder::method(engine, float, "__div__",   [float, float], &div);
-    builder::method(engine, float, "__rem__",   [float, float], &rem);
+    engine.primitive_method(float, "to_string", [], None, Some(string), &to_string);
+    engine.primitive_method(float, "__eq__", [("other", any)], None, Some(boolean), &eq);
+    engine.primitive_method(float, "__lt__", [("other", float)], None, Some(boolean), &lt);
+    engine.primitive_method(float, "__pos__", [], None, Some(float), &pos);
+    engine.primitive_method(float, "__neg__", [], None, Some(float), &neg);
+    engine.primitive_method(float, "__add__", [("other", float)], None, Some(float), &add);
+    engine.primitive_method(float, "__sub__", [("other", float)], None, Some(float), &sub);
+    engine.primitive_method(float, "__mul__", [("other", float)], None, Some(float), &mul);
+    engine.primitive_method(float, "__div__", [("other", float)], None, Some(float), &div);
+    engine.primitive_method(float, "__rem__", [("other", float)], None, Some(float), &rem);
 }
 
 fn to_string<'a>(engine: &mut Engine<'a>, arguments: &mut [GcValue<'a>]) -> ReturnReference<'a> {

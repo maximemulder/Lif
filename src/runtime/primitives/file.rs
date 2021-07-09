@@ -1,7 +1,6 @@
 use crate::runtime::engine::Engine;
 use crate::runtime::primitives::Primitives;
 use crate::runtime::r#return::ReturnReference;
-use crate::runtime::utilities::builder;
 use crate::runtime::value::GcValue;
 
 use std::fs;
@@ -9,8 +8,8 @@ use std::fs;
 pub fn populate(engine: &mut Engine) {
     let Primitives { any, file, string, .. } = engine.primitives;
     engine.set_constant_value("File", file);
-    builder::r#static(engine, file, "read",  [string],      &read);
-    builder::r#static(engine, file, "write", [string, any], &write);
+    engine.primitive_static(file, "read", [("file", string)], None, Some(string), &read);
+    engine.primitive_static(file, "write", [("file", string), ("content", any)], None, None, &write);
 }
 
 fn read<'a>(engine: &mut Engine<'a>, arguments: &mut [GcValue<'a>]) -> ReturnReference<'a> {

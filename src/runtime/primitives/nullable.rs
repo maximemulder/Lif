@@ -1,7 +1,7 @@
 use crate::runtime::engine::Engine;
 use crate::runtime::error::Error;
+use crate::runtime::primitives::Primitives;
 use crate::runtime::r#return::ReturnReference;
-use crate::runtime::utilities::builder;
 use crate::runtime::value::GcValue;
 
 pub fn populate(engine: &mut Engine) {
@@ -9,13 +9,14 @@ pub fn populate(engine: &mut Engine) {
 }
 
 pub fn create<'a>(engine: &mut Engine<'a>, arguments: &mut [GcValue<'a>]) -> ReturnReference<'a> {
-    let class = arguments[0];
-    class.cast(engine.primitives.class)?;
-    let nullable = engine.new_class_value(None, Some(engine.primitives.any));
-    builder::r#static(engine, nullable, "new",     [class],    &new);
-    builder::r#static(engine, nullable, "null",    [],         &null);
-    builder::method(engine, nullable, "to_string", [nullable], &to_string);
-    builder::method(engine, nullable, "get",       [nullable], &get);
+    let Primitives { any, class, string, .. } = engine.primitives;
+    let r#type = arguments[0];
+    r#type.cast(class)?;
+    let nullable = engine.new_class_value(None, Some(any));
+    engine.primitive_static(nullable, "some", [("value", r#type)], None, Some(nullable), &some);
+    engine.primitive_static(nullable, "none", [], None, Some(nullable), &none);
+    engine.primitive_method(nullable, "to_string", [], None, Some(string), &to_string);
+    engine.primitive_method(nullable, "get", [], None, Some(r#type), &get);
     Ok(engine.new_constant(nullable))
 }
 
@@ -36,14 +37,14 @@ fn to_string<'a>(engine: &mut Engine<'a>, arguments: &mut [GcValue<'a>]) -> Retu
     Ok(engine.new_string(string))
 }
 
-fn new<'a>(engine: &mut Engine<'a>, arguments: &mut [GcValue<'a>]) -> ReturnReference<'a> {
+fn some<'a>(engine: &mut Engine<'a>, arguments: &mut [GcValue<'a>]) -> ReturnReference<'a> {
     let class = get_type(engine);
     let generic = engine.primitives.nullable;
     let nullable = generic.clone().data_generic_mut().call(engine, generic, &mut [class])?.read()?;
     Ok(engine.new_nullable(nullable, Some(arguments[0])))
 }
 
-fn null<'a>(engine: &mut Engine<'a>, _: &mut [GcValue<'a>]) -> ReturnReference<'a> {
+fn none<'a>(engine: &mut Engine<'a>, _: &mut [GcValue<'a>]) -> ReturnReference<'a> {
     let class = get_type(engine);
     let generic = engine.primitives.nullable;
     let nullable = generic.clone().data_generic_mut().call(engine, generic, &mut [class])?.read()?;

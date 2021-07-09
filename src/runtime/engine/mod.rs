@@ -1,4 +1,5 @@
 mod new;
+mod primitive;
 mod scope;
 
 use crate::memory::{ Own, Ref };

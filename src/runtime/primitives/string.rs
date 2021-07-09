@@ -1,15 +1,14 @@
 use crate::runtime::engine::Engine;
 use crate::runtime::primitives::Primitives;
 use crate::runtime::r#return::ReturnReference;
-use crate::runtime::utilities::builder;
 use crate::runtime::value::GcValue;
 
 pub fn populate(engine: &mut Engine) {
     let Primitives { any, string, .. } = engine.primitives;
     engine.set_constant_value("String", string);
-    builder::method(engine, string, "to_string", [string],    &to_string);
-    builder::method(engine, string, "__eq__",    [string, any], &eq);
-    builder::method(engine, string, "__add__",   [string, any], &add);
+    engine.primitive_method(string, "to_string", [], None, Some(string), &to_string);
+    engine.primitive_method(string, "__eq__", [("other", any)], None, Some(string), &eq);
+    engine.primitive_method(string, "__add__", [("other", any)], None, Some(string), &add);
 }
 
 fn to_string<'a>(engine: &mut Engine<'a>, arguments: &mut [GcValue<'a>]) -> ReturnReference<'a> {

@@ -17,7 +17,6 @@ use crate::runtime::data::GenericPrimitive;
 use crate::runtime::engine::Engine;
 use crate::runtime::gc::GcTrace;
 use crate::runtime::r#return::ReturnReference;
-use crate::runtime::utilities::builder;
 use crate::runtime::value::GcValue;
 use crate::walker::build;
 
@@ -125,14 +124,14 @@ impl<'a> Engine<'a> {
         string::populate(self);
 
         let Primitives { any, class, integer, string, .. } = self.primitives;
-        builder::function(self, "assert",  [any],     &assert);
-        builder::function(self, "error",   [any],     &error);
-        builder::function(self, "eval",    [string],  &eval);
-        builder::function(self, "exec",    [string],  &exec);
-        builder::function(self, "exit",    [integer], &exit);
-        builder::function(self, "include", [string],  &include);
-        builder::function(self, "new",     [class],   &new);
-        builder::function(self, "print",   [any],     &print);
+        self.primitive_function("assert", [("value", any)], None, None, &assert);
+        self.primitive_function("error", [("value", any)], None, None, &error);
+        self.primitive_function("eval", [("code", string)], None, None, &eval);
+        self.primitive_function("exec", [("code", string)], None, None, &exec);
+        self.primitive_function("exit", [("code", integer)], None, None, &exit);
+        self.primitive_function("include", [("file", string)], None, None, &include);
+        self.primitive_function("new", [("class", class)], None, Some(any), &new);
+        self.primitive_function("print", [("value", any)], None, None, &print);
     }
 }
 

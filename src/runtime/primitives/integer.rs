@@ -1,32 +1,31 @@
 use crate::runtime::engine::Engine;
 use crate::runtime::primitives::Primitives;
 use crate::runtime::r#return::ReturnReference;
-use crate::runtime::utilities::builder;
 use crate::runtime::value::GcValue;
 
 use std::mem::size_of;
 
 pub fn populate(engine: &mut Engine) {
-    let Primitives { any, integer, .. } = engine.primitives;
+    let Primitives { any, boolean, integer, string, .. } = engine.primitives;
     engine.set_constant_value("Integer", integer);
-    builder::method(engine, integer, "to_string", [integer],          &to_string);
-    builder::method(engine, integer, "__eq__",    [integer, any],     &eq);
-    builder::method(engine, integer, "__lt__",    [integer, integer], &lt);
-    builder::method(engine, integer, "__pos__",   [integer],          &pos);
-    builder::method(engine, integer, "__neg__",   [integer],          &neg);
-    builder::method(engine, integer, "__add__",   [integer, integer], &add);
-    builder::method(engine, integer, "__sub__",   [integer, integer], &sub);
-    builder::method(engine, integer, "__mul__",   [integer, integer], &mul);
-    builder::method(engine, integer, "__div__",   [integer, integer], &div);
-    builder::method(engine, integer, "__rem__",   [integer, integer], &rem);
-    builder::method(engine, integer, "__bnot__",  [integer],          &bnot);
-    builder::method(engine, integer, "__band__",  [integer, integer], &band);
-    builder::method(engine, integer, "__bor__",   [integer, integer], &bor);
-    builder::method(engine, integer, "__bxor__",  [integer, integer], &bxor);
-    builder::method(engine, integer, "__bls__",   [integer, integer], &bls);
-    builder::method(engine, integer, "__brs__",   [integer, integer], &brs);
-    builder::method(engine, integer, "__bcls__",  [integer, integer], &bcls);
-    builder::method(engine, integer, "__bcrs__",  [integer, integer], &bcrs);
+    engine.primitive_method(integer, "to_string", [], None, Some(string), &to_string);
+    engine.primitive_method(integer, "__eq__", [("other", any)], None, Some(boolean), &eq);
+    engine.primitive_method(integer, "__lt__", [("other", integer)], None, Some(boolean), &lt);
+    engine.primitive_method(integer, "__pos__", [], None, Some(integer), &pos);
+    engine.primitive_method(integer, "__neg__", [], None, Some(integer), &neg);
+    engine.primitive_method(integer, "__add__", [("other", integer)], None, Some(integer), &add);
+    engine.primitive_method(integer, "__sub__", [("other", integer)], None, Some(integer), &sub);
+    engine.primitive_method(integer, "__mul__", [("other", integer)], None, Some(integer), &mul);
+    engine.primitive_method(integer, "__div__", [("other", integer)], None, Some(integer), &div);
+    engine.primitive_method(integer, "__rem__", [("other", integer)], None, Some(integer), &rem);
+    engine.primitive_method(integer, "__bnot__", [], None, Some(integer), &bnot);
+    engine.primitive_method(integer, "__band__", [("other", integer)], None, Some(integer), &band);
+    engine.primitive_method(integer, "__bor__", [("other", integer)], None, Some(integer), &bor);
+    engine.primitive_method(integer, "__bxor__", [("other", integer)], None, Some(integer), &bxor);
+    engine.primitive_method(integer, "__bls__", [("other", integer)], None, Some(integer), &bls);
+    engine.primitive_method(integer, "__brs__", [("other", integer)], None, Some(integer), &brs);
+    engine.primitive_method(integer, "__bcls__", [("other", integer)], None, Some(integer), &bcls);
+    engine.primitive_method(integer, "__bcrs__", [("other", integer)], None, Some(integer), &bcrs);
 }
 
 fn to_string<'a>(engine: &mut Engine<'a>, arguments: &mut [GcValue<'a>]) -> ReturnReference<'a> {
