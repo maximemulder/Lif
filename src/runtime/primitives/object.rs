@@ -35,7 +35,7 @@ fn chain<'a>(engine: &mut Engine<'a>, arguments: &mut [GcValue<'a>]) -> ReturnRe
         return Ok(engine.new_method(method, this));
     }
 
-    let member = engine.undefined();
+    let member = engine.new_variable(None, engine.primitives.any);
     let object = this.data_object_mut();
     Ok(if let Some(member) = object.get_attribute(name) {
         member
