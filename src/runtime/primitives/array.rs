@@ -1,6 +1,6 @@
 use crate::runtime::engine::Engine;
 use crate::runtime::primitives::Primitives;
-use crate::runtime::r#return::ReturnReference;
+use crate::runtime::r#return::{ Return, ReturnReference };
 use crate::runtime::value::GcValue;
 
 pub fn populate(engine: &mut Engine) {
@@ -44,15 +44,11 @@ fn init<'a>(engine: &mut Engine<'a>, arguments: &mut [GcValue<'a>]) -> ReturnRef
 
 fn to_string<'a>(engine: &mut Engine<'a>, arguments: &mut [GcValue<'a>]) -> ReturnReference<'a> {
     let mut string = String::from("[");
-    let elements = arguments[0].data_array().elements();
-    for element in elements.iter() {
-        string.push_str(&element.read()?.call_to_string(engine)?);
-        string.push_str(", ");
-    }
-
-    if string.len() != 1 {
-        string.truncate(string.len() - 2);
-    }
+    string.push_str(&arguments[0].data_array().elements().iter()
+        .map(|element| element.read()?.call_to_string(engine))
+        .collect::<Return<Box<[String]>>>()?
+        .join(", ")
+    );
 
     string.push(']');
     Ok(engine.new_string(string))
