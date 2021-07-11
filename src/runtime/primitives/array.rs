@@ -11,7 +11,7 @@ pub fn create<'a>(engine: &mut Engine<'a>, arguments: &mut [GcValue<'a>]) -> Ret
     let Primitives { any, class, integer, string, .. } = engine.primitives;
     let r#type = arguments[0];
     r#type.cast(class)?;
-    let array = engine.new_class_value(None, Some(any));
+    let array = engine.new_class_value(Some("Array"), Some(any));
     let array_any = if r#type == any {
         array
     } else {
@@ -19,7 +19,7 @@ pub fn create<'a>(engine: &mut Engine<'a>, arguments: &mut [GcValue<'a>]) -> Ret
     };
 
     engine.primitive_static(array, "__init__", [], Some(("elements", array)), None, &init);
-    engine.primitive_method(array, "to_string", [], None, Some(string), &to_string);
+    engine.primitive_method(array, "__fstr__", [], None, Some(string), &fstr);
     engine.primitive_method(array, "append", [], Some(("elements", array)), None, &append);
     engine.primitive_method(array, "prepend", [], Some(("elements", array)), None, &prepend);
     engine.primitive_method(array, "insert", [("index", integer), ("element", r#type)], None, None, &insert);
@@ -42,15 +42,17 @@ fn init<'a>(engine: &mut Engine<'a>, arguments: &mut [GcValue<'a>]) -> ReturnRef
     Ok(engine.new_array(engine.scope().parent().unwrap().source().unwrap(), elements))
 }
 
-fn to_string<'a>(engine: &mut Engine<'a>, arguments: &mut [GcValue<'a>]) -> ReturnReference<'a> {
-    let mut string = String::from("[");
-    string.push_str(&arguments[0].data_array().elements().iter()
-        .map(|element| element.read()?.call_to_string(engine))
-        .collect::<Return<Box<[String]>>>()?
+fn fstr<'a>(engine: &mut Engine<'a>, arguments: &mut [GcValue<'a>]) -> ReturnReference<'a> {
+    let this = arguments[0];
+    let mut string = this.class.call_sstr(engine)?;
+    string.push_str("(");
+    string.push_str(&this.data_array().elements().iter()
+        .map(|element| element.read()?.call_sstr(engine))
+        .collect::<Return<Box<[_]>>>()?
         .join(", ")
     );
 
-    string.push(']');
+    string.push_str(")");
     Ok(engine.new_string(string))
 }
 

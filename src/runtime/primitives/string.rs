@@ -6,12 +6,12 @@ use crate::runtime::value::GcValue;
 pub fn populate(engine: &mut Engine) {
     let Primitives { any, string, .. } = engine.primitives;
     engine.set_constant_value("String", string);
-    engine.primitive_method(string, "to_string", [], None, Some(string), &to_string);
+    engine.primitive_method(string, "__sstr__", [], None, Some(string), &sstr);
     engine.primitive_method(string, "__eq__", [("other", any)], None, Some(string), &eq);
     engine.primitive_method(string, "__add__", [("other", any)], None, Some(string), &add);
 }
 
-fn to_string<'a>(engine: &mut Engine<'a>, arguments: &mut [GcValue<'a>]) -> ReturnReference<'a> {
+fn sstr<'a>(engine: &mut Engine<'a>, arguments: &mut [GcValue<'a>]) -> ReturnReference<'a> {
     Ok(engine.new_constant(arguments[0]))
 }
 
@@ -24,6 +24,6 @@ fn eq<'a>(engine: &mut Engine<'a>, arguments: &mut [GcValue<'a>]) -> ReturnRefer
 }
 
 fn add<'a>(engine: &mut Engine<'a>, arguments: &mut [GcValue<'a>]) -> ReturnReference<'a> {
-    let right = arguments[1].call_to_string(engine)?;
+    let right = arguments[1].call_fstr(engine)?;
     Ok(engine.new_string(format!("{}{}", arguments[0].data_string(), right)))
 }

@@ -18,6 +18,6 @@ fn read<'a>(engine: &mut Engine<'a>, arguments: &mut [GcValue<'a>]) -> ReturnRef
 }
 
 fn write<'a>(engine: &mut Engine<'a>, arguments: &mut [GcValue<'a>]) -> ReturnReference<'a> {
-    fs::write(arguments[0].data_string(), arguments[1].call_to_string(engine)?).unwrap();
+    fs::write(arguments[0].data_string(), arguments[1].call_fstr(engine)?).unwrap();
     Ok(engine.undefined())
 }

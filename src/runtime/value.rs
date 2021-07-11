@@ -84,8 +84,12 @@ impl<'a> GcValue<'a> {
         method.get_method("__cl__")?.data_function().call(engine, &mut [method, array])
     }
 
-    pub fn call_to_string(self, engine: &mut Engine<'a>) -> Return<String> {
-        Ok(self.call_method(engine, "to_string", &mut [])?.read()?.data_string().clone())
+    pub fn call_fstr(self, engine: &mut Engine<'a>) -> Return<String> {
+        Ok(self.call_method(engine, "__fstr__", &mut [])?.read()?.data_string().clone())
+    }
+
+    pub fn call_sstr(self, engine: &mut Engine<'a>) -> Return<String> {
+        Ok(self.call_method(engine, "__sstr__", &mut [])?.read()?.data_string().clone())
     }
 }
 

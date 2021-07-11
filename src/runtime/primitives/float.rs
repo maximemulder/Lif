@@ -6,7 +6,7 @@ use crate::runtime::value::GcValue;
 pub fn populate(engine: &mut Engine) {
     let Primitives { any, boolean, float, string, .. } = engine.primitives;
     engine.set_constant_value("Float", float);
-    engine.primitive_method(float, "to_string", [], None, Some(string), &to_string);
+    engine.primitive_method(float, "__sstr__", [], None, Some(string), &sstr);
     engine.primitive_method(float, "__eq__", [("other", any)], None, Some(boolean), &eq);
     engine.primitive_method(float, "__lt__", [("other", float)], None, Some(boolean), &lt);
     engine.primitive_method(float, "__pos__", [], None, Some(float), &pos);
@@ -18,7 +18,7 @@ pub fn populate(engine: &mut Engine) {
     engine.primitive_method(float, "__rem__", [("other", float)], None, Some(float), &rem);
 }
 
-fn to_string<'a>(engine: &mut Engine<'a>, arguments: &mut [GcValue<'a>]) -> ReturnReference<'a> {
+fn sstr<'a>(engine: &mut Engine<'a>, arguments: &mut [GcValue<'a>]) -> ReturnReference<'a> {
     Ok(engine.new_string(arguments[0].data_float().to_string()))
 }
 

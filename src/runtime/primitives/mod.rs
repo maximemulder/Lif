@@ -144,8 +144,8 @@ fn assert<'a>(engine: &mut Engine<'a>, arguments: &mut [GcValue<'a>]) -> ReturnR
 }
 
 fn error<'a>(engine: &mut Engine<'a>, arguments: &mut [GcValue<'a>]) -> ReturnReference<'a> {
-    let message = arguments[0].call_to_string(engine)?;
-    writeln!(engine.error, "{}", message).unwrap();
+    let string = arguments[0].call_fstr(engine)?;
+    writeln!(engine.error, "{}", string).unwrap();
     Ok(engine.undefined())
 }
 
@@ -181,7 +181,7 @@ fn new<'a>(engine: &mut Engine<'a>, arguments: &mut [GcValue<'a>]) -> ReturnRefe
 }
 
 fn print<'a>(engine: &mut Engine<'a>, arguments: &mut [GcValue<'a>]) -> ReturnReference<'a> {
-    let message = arguments[0].call_to_string(engine)?;
-    writeln!(engine.output, "{}", message).unwrap();
+    let string = arguments[0].call_fstr(engine)?;
+    writeln!(engine.output, "{}", string).unwrap();
     Ok(engine.undefined())
 }

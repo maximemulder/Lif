@@ -6,12 +6,12 @@ use crate::runtime::value::GcValue;
 pub fn populate(engine: &mut Engine) {
     let Primitives { any, boolean, string, .. } = engine.primitives;
     engine.set_constant_value("Boolean", boolean);
-    engine.primitive_method(boolean, "to_string", [], None, Some(string), &to_string);
+    engine.primitive_method(boolean, "__sstr__", [], None, Some(string), &sstr);
     engine.primitive_method(boolean, "__eq__", [("other", any)], None, Some(boolean), &eq);
     engine.primitive_method(boolean, "__not__", [], None, Some(boolean), &not);
 }
 
-fn to_string<'a>(engine: &mut Engine<'a>, arguments: &mut [GcValue<'a>]) -> ReturnReference<'a> {
+fn sstr<'a>(engine: &mut Engine<'a>, arguments: &mut [GcValue<'a>]) -> ReturnReference<'a> {
     Ok(engine.new_string(arguments[0].data_boolean().to_string()))
 }
 

@@ -15,4 +15,5 @@ let queue: Queue[Integer] = new(Queue[Integer]);
 queue.elements = Array[Integer]();
 queue.push(0);
 queue.push(1);
-print(queue.elements);
+print(queue.elements(0));
+print(queue.elements(1));

@@ -13,7 +13,7 @@ pub fn populate(engine: &mut Engine) {
 fn to_string<'a>(engine: &mut Engine<'a>, arguments: &mut [GcValue<'a>]) -> ReturnReference<'a> {
     let mut string = String::from("{");
     string.push_str(&arguments[0].data_object().attributes().iter()
-        .map(|(name, attribute)| Ok(format!("{}: {}", &name, &attribute.read()?.call_to_string(engine)?)))
+        .map(|(name, attribute)| Ok(format!("{}: {}", &name, &attribute.read()?.call_sstr(engine)?)))
         .collect::<Return<Box<[String]>>>()?
         .join(", ")
     );

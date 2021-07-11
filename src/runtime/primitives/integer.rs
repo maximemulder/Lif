@@ -8,7 +8,7 @@ use std::mem::size_of;
 pub fn populate(engine: &mut Engine) {
     let Primitives { any, boolean, integer, string, .. } = engine.primitives;
     engine.set_constant_value("Integer", integer);
-    engine.primitive_method(integer, "to_string", [], None, Some(string), &to_string);
+    engine.primitive_method(integer, "__sstr__", [], None, Some(string), &sstr);
     engine.primitive_method(integer, "__eq__", [("other", any)], None, Some(boolean), &eq);
     engine.primitive_method(integer, "__lt__", [("other", integer)], None, Some(boolean), &lt);
     engine.primitive_method(integer, "__pos__", [], None, Some(integer), &pos);
@@ -28,7 +28,7 @@ pub fn populate(engine: &mut Engine) {
     engine.primitive_method(integer, "__bcrs__", [("other", integer)], None, Some(integer), &bcrs);
 }
 
-fn to_string<'a>(engine: &mut Engine<'a>, arguments: &mut [GcValue<'a>]) -> ReturnReference<'a> {
+fn sstr<'a>(engine: &mut Engine<'a>, arguments: &mut [GcValue<'a>]) -> ReturnReference<'a> {
     Ok(engine.new_string(arguments[0].data_integer().to_string()))
 }
 

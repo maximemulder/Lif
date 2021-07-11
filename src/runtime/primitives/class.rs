@@ -1,25 +1,30 @@
 use crate::runtime::engine::Engine;
 use crate::runtime::error::Error;
 use crate::runtime::primitives::Primitives;
-use crate::runtime::r#return::ReturnReference;
+use crate::runtime::r#return::{ Return, ReturnReference };
 use crate::runtime::utilities::parameters;
 use crate::runtime::value::GcValue;
 
 pub fn populate(engine: &mut Engine) {
     let Primitives { any, array_any, class, string, .. } = engine.primitives;
     engine.set_constant_value("Class", class);
-    engine.primitive_method(class, "to_string", [], None, Some(string), &to_string);
+    engine.primitive_method(class, "__sstr__", [], None, Some(string), &sstr);
     engine.primitive_method(class, "__cn__", [("property", string)], None, Some(any), &chain);
     engine.primitive_method(class, "__cl__", [("arguments", array_any)], None, Some(any), &call);
 }
 
-fn to_string<'a>(engine: &mut Engine<'a>, arguments: &mut [GcValue<'a>]) -> ReturnReference<'a> {
-    let mut string = String::new();
-    string += "Class";
-    if let Some(name) = arguments[0].data_class().tag().get_name() {
-        string += "(";
-        string += name;
-        string += ")";
+fn sstr<'a>(engine: &mut Engine<'a>, arguments: &mut [GcValue<'a>]) -> ReturnReference<'a> {
+    let this = arguments[0].data_class();
+    let mut string = this.tag().to_string();
+    if let Some(constructor) = this.constructor {
+        string.push_str("[");
+        string.push_str(&constructor.arguments.iter()
+            .map(|argument| argument.call_sstr(engine))
+            .collect::<Return<Box<[_]>>>()?
+            .join(", ")
+        );
+
+        string.push_str("]");
     }
 
     Ok(engine.new_string(string))

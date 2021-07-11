@@ -1,28 +1,26 @@
-print(Array[Any](0, true, "String"));
-
-let a = Array[Integer](0);
-a(0);
-
-print(Array[Integer](2, 3, 4)(0));
-print(Array[Integer](2, 3, 4)(2));
+let array = Array[Any](0, true, "String");
+print(array(0));
+print(array(1));
+print(array(2));
 
 let array = Array[Integer](0, 1, 2);
 array.append(3);
-print(array);
+print(array(3));
 
 let array = Array[Integer](0, 1, 2);
 array.prepend(-1);
-print(array);
+print(array(0));
 
 let array = Array[Integer](0, 1, 2);
 array.insert(1, 10);
-print(array);
+print(array(1));
 
 let array = Array[Integer](0, 1, 2);
 array.remove(1);
-print(array);
+print(array(1));
 
 let array = Array[Integer](2, 4, 8);
 array.append(16, 32, 64);
 array.prepend(0, 1);
-print(array);
+print(array(2));
+print(array(6));
