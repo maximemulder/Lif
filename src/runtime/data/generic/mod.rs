@@ -65,7 +65,7 @@ impl<'a> Generic<'a> {
         let constructor = self.constructors.record(engine, generic, values.into_boxed_slice(), reference.get_value());
         let mut value = reference.read()?;
         if value.class == engine.primitives.class {
-            value.data_class_mut().constructor = Some(constructor);
+            value.data_class_mut().set_constructor(constructor);
         }
 
         Ok(reference)

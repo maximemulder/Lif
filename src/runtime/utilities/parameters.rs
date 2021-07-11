@@ -25,7 +25,7 @@ impl<'a> Parameters<'a> {
     }
 
     pub fn get_rest_array_type(&self, engine: &Engine<'a>) -> Option<GcValue<'a>> {
-        self.get_rest_array(engine).map(|class| class.data_class().constructor.unwrap().arguments[0])
+        self.get_rest_array(engine).map(|class| class.data_class().constructor().unwrap().arguments[0])
     }
 
     pub fn validate(&self, engine: &Engine<'a>, arguments: &[GcValue<'a>]) -> Return<()> {

@@ -34,7 +34,7 @@ impl<'a> GcValue<'a> {
     }
 
     pub fn is_generic(self, generic: GcValue<'a>) -> bool {
-        if let Some(constructor) = self.data_class().constructor {
+        if let Some(constructor) = self.data_class().constructor() {
             if constructor.generic == generic {
                 return true;
             }

@@ -16,7 +16,7 @@ pub fn populate(engine: &mut Engine) {
 fn sstr<'a>(engine: &mut Engine<'a>, arguments: &mut [GcValue<'a>]) -> ReturnReference<'a> {
     let this = arguments[0].data_class();
     let mut string = this.tag().to_string();
-    if let Some(constructor) = this.constructor {
+    if let Some(constructor) = this.constructor() {
         string.push_str("[");
         string.push_str(&constructor.arguments.iter()
             .map(|argument| argument.call_sstr(engine))

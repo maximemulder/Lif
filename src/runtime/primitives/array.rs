@@ -29,7 +29,7 @@ pub fn create<'a>(engine: &mut Engine<'a>, arguments: &mut [GcValue<'a>]) -> Ret
 }
 
 fn get_type<'a>(engine: &mut Engine<'a>) -> GcValue<'a> {
-    engine.scope().parent().unwrap().source().unwrap().data_class().constructor.unwrap().arguments[0]
+    engine.scope().parent().unwrap().source().unwrap().data_class().constructor().unwrap().arguments[0]
 }
 
 fn init<'a>(engine: &mut Engine<'a>, arguments: &mut [GcValue<'a>]) -> ReturnReference<'a> {
