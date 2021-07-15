@@ -3,7 +3,6 @@ use crate::runtime::engine::Engine;
 use crate::runtime::error::Error;
 use crate::runtime::gc::{ GcRef, GcTrace };
 use crate::runtime::r#return::{ Return, ReturnReference, ReturnValue };
-use crate::runtime::utilities::Arguments;
 use crate::runtime::utilities::parameters;
 use crate::runtime::utilities::tag::Tag;
 
@@ -24,22 +23,42 @@ impl<'a> Value<'a> {
 }
 
 impl<'a> GcValue<'a> {
-    pub fn is(self, other: GcValue<'a>) -> bool {
-        if self == other {
+    pub fn is(self, class: GcValue<'a>) -> bool {
+        if self == class {
             true
         } else if let Some(parent) = self.data_class().parent() {
-            parent.is(other)
+            parent.is(class)
         } else {
             false
         }
     }
 
-    pub fn isa(self, other: GcValue<'a>) -> bool {
-        self.class.is(other)
+    pub fn is_generic(self, generic: GcValue<'a>) -> bool {
+        if let Some(constructor) = self.data_class().constructor() {
+            if constructor.generic == generic {
+                return true;
+            }
+        }
+
+        false
+    }
+}
+
+impl<'a> GcValue<'a> {
+    pub fn isa(self, class: GcValue<'a>) -> bool {
+        self.class.is(class)
     }
 
-    pub fn cast(self, other: GcValue<'a>) -> Return<()> {
-        self.isa(other).then_some(()).ok_or_else(|| error_cast(self, other))
+    pub fn isa_generic(self, generic: GcValue<'a>) -> bool {
+        self.class.is_generic(generic)
+    }
+
+    pub fn cast(self, class: GcValue<'a>) -> Return<()> {
+        if self.isa(class) {
+            Ok(())
+        } else {
+            Err(error_cast(self, class))
+        }
     }
 }
 
@@ -52,27 +71,35 @@ impl<'a> GcValue<'a> {
         }
     }
 
-    pub fn call_method(self, engine: &mut Engine<'a>, name: &str, arguments: Arguments<'a>) -> ReturnReference<'a> {
-        let mut arguments = arguments.into_vec();
-        arguments.insert(0, self);
-        self.call_method_self(engine, name, arguments.into_boxed_slice())
+    pub fn call_method(self, engine: &mut Engine<'a>, name: &str, arguments: &mut [GcValue<'a>]) -> ReturnReference<'a> {
+        let mut values = Vec::new();
+        values.push(self);
+        values.extend_from_slice(arguments);
+        self.call_method_self(engine, name, &mut values)
     }
 
-    pub fn call_method_self(self, engine: &mut Engine<'a>, name: &str, arguments: Arguments<'a>) -> ReturnReference<'a> {
+    pub fn call_method_self(self, engine: &mut Engine<'a>, name: &str, arguments: &mut [GcValue<'a>]) -> ReturnReference<'a> {
         let method = self.get_method(name)?;
         let array = parameters::pack(engine, arguments);
-        method.get_method("__cl__")?.data_function().call(engine, Box::new([method, array]))
+        method.get_method("__cl__")?.data_function().call(engine, &mut [method, array])
     }
 
-    pub fn call_to_string(self, engine: &mut Engine<'a>) -> Return<String> {
-        Ok(self.call_method(engine, "to_string", Box::new([]))?.read()?.data_string().clone())
+    pub fn call_fstr(self, engine: &mut Engine<'a>) -> Return<String> {
+        Ok(self.call_method(engine, "__fstr__", &mut [])?.read()?.data_string().clone())
+    }
+
+    pub fn call_sstr(self, engine: &mut Engine<'a>) -> Return<String> {
+        Ok(self.call_method(engine, "__sstr__", &mut [])?.read()?.data_string().clone())
     }
 }
 
 impl<'a> GcValue<'a> {
     pub fn get_cast_array(&self, engine: &Engine<'a>) -> Return<&Array<'a>> {
-        self.cast(engine.primitives.array_any)?;
-        Ok(&self.data_array())
+        if self.isa_generic(engine.primitives.array) {
+            Ok(&self.data_array())
+        } else {
+            Err(error_cast(*self, engine.primitives.array_any))
+        }
     }
 
     pub fn get_cast_boolean(&self, engine: &Engine<'a>) -> Return<&bool> {

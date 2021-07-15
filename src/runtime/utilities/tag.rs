@@ -43,11 +43,10 @@ impl Tag {
 
 impl fmt::Display for Tag {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "(")?;
         if let Some(name) = self.name.as_ref() {
             write!(f, "{}", name)?;
         }
 
-        write!(f, "#{})", self.index)
+        write!(f, "#{}", self.index)
     }
 }

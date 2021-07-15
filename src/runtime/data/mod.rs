@@ -17,8 +17,8 @@ pub use object::Object;
 use crate::runtime::gc::GcTrace;
 use crate::runtime::scope::GcScope;
 use crate::runtime::reference::GcReference;
+use crate::runtime::utilities::parameters::Parameters;
 use crate::runtime::utilities::tag::Tag;
-use crate::runtime::utilities::variable::Variable;
 use crate::runtime::value::GcValue;
 
 pub enum Data<'a> {
@@ -53,9 +53,9 @@ impl<'a> Data<'a> {
     }
 
     pub fn function(
-        tag: Tag, scope: GcScope<'a>, parameters: Box<[Variable<'a>]>, rest: Option<Variable<'a>>, r#return: Option<GcValue<'a>>, implementation: impl FunctionImplementation<'a> + 'a
+        tag: Tag, scope: GcScope<'a>, parameters: Parameters<'a>, r#return: Option<GcValue<'a>>, implementation: impl FunctionImplementation<'a> + 'a
     ) -> Self {
-        Data::Function(Function::new(tag, scope, parameters, rest, r#return, implementation))
+        Data::Function(Function::new(tag, scope, parameters, r#return, implementation))
     }
 
     pub fn generic(tag: Tag, scope: GcScope<'a>, parameters: Box<[Box<str>]>, implementation: impl GenericImplementation<'a> + 'a) -> Self {

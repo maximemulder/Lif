@@ -18,8 +18,7 @@ impl Sequence {
             expressions,
             operator: Ref::new(match format!("{}{}", open.deref(), close.deref()).as_str() {
                 "()" => "__cl__",
-                "[]" => "__id__",
-                "<>" => "__gn__",
+                "[]" => "__gn__",
                 _ => panic!(),
             })
         }
@@ -35,6 +34,6 @@ impl Walkable for Sequence {
         }
 
         let array = engine.new_array_any_value(elements);
-        Flow::new(value.call_method(engine, &self.operator, Box::new([array]))?)
+        Flow::new(value.call_method(engine, &self.operator, &mut [array])?)
     }
 }

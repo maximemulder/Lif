@@ -1,7 +1,7 @@
 use crate::runtime::data::{ Data, FunctionImplementation, GenericImplementation };
 use crate::runtime::engine::Engine;
 use crate::runtime::reference::GcReference;
-use crate::runtime::utilities::variable::Variable;
+use crate::runtime::utilities::parameters::Parameters;
 use crate::runtime::value::GcValue;
 
 impl<'a> Engine<'a> {
@@ -29,11 +29,11 @@ impl<'a> Engine<'a> {
     }
 
     pub fn new_function_value(&mut self,
-        name: Option<&str>, parameters: Box<[Variable<'a>]>, rest: Option<Variable<'a>>, r#return: Option<GcValue<'a>>, implementation: impl FunctionImplementation<'a> + 'a
+        name: Option<&str>, parameters: Parameters<'a>, r#return: Option<GcValue<'a>>, implementation: impl FunctionImplementation<'a> + 'a
     ) -> GcValue<'a> {
         let tag = self.taggers.functions.generate(name);
         self.run_source_scope("__function__", |engine, scope| {
-            engine.new_value(engine.primitives.function, Data::function(tag, scope, parameters, rest, r#return, implementation))
+            engine.new_value(engine.primitives.function, Data::function(tag, scope, parameters, r#return, implementation))
         })
     }
 
@@ -91,9 +91,9 @@ impl<'a> Engine<'a> {
     }
 
     pub fn new_function(&mut self,
-        name: Option<&str>, parameters: Box<[Variable<'a>]>, rest: Option<Variable<'a>>, r#type: Option<GcValue<'a>>, implementation: impl FunctionImplementation<'a> + 'a
+        name: Option<&str>, parameters: Parameters<'a>, r#type: Option<GcValue<'a>>, implementation: impl FunctionImplementation<'a> + 'a
     ) -> GcReference<'a> {
-       let value = self.new_function_value(name, parameters, rest, r#type, implementation);
+       let value = self.new_function_value(name, parameters, r#type, implementation);
         self.new_constant(value)
     }
 

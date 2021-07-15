@@ -3,6 +3,7 @@ use crate::runtime::data::FunctionCode;
 use crate::runtime::engine::Engine;
 use crate::runtime::error::Error;
 use crate::runtime::r#return::{ Flow, Return, ReturnFlow };
+use crate::runtime::utilities::parameters::Parameters;
 use crate::runtime::utilities::variable::Variable;
 use crate::walker::{ Walkable, WNode };
 use crate::walker::utilities;
@@ -40,22 +41,18 @@ impl Walkable for Function {
             let r#type = parameter.as_ref().map(|parameter| {
                 let r#type = engine.walk(parameter)?.none()?.read()?;
                 r#type.cast(engine.primitives.class)?;
-                if let Some(constructor) = r#type.data_class().constructor.as_ref() {
-                    if constructor.generic != engine.primitives.array {
-                        return Err(error_rest())
-                    }
-                } else if r#type != engine.primitives.any {
-                    return Err(error_rest())
+                if !r#type.is_generic(engine.primitives.array) && r#type != engine.primitives.any {
+                    Err(error_rest())
+                } else {
+                    Ok(r#type)
                 }
-
-                Ok(r#type)
             }).transpose()?;
 
             Variable::new(engine, Box::from(name.as_ref()), r#type)
         }).transpose()?;
 
         let r#type = utilities::new_type(engine, self.r#type.as_ref())?;
-        Flow::new(engine.new_function(Ref::as_option(&self.name), parameters, rest, r#type, FunctionCode::new(Ref::new(&self.block))))
+        Flow::new(engine.new_function(Ref::as_option(&self.name), Parameters::new(parameters, rest), r#type, FunctionCode::new(Ref::new(&self.block))))
     }
 }
 

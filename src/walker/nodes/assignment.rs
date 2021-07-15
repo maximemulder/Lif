@@ -25,7 +25,7 @@ impl Walkable for Assignment {
         let mut expression = get!(engine.walk(&self.expression)?).read()?;
         if let Some(operator) = self.operator.as_ref() {
             let left = reference.read()?;
-            expression = left.call_method(engine, operator, Box::new([expression]))?.read()?;
+            expression = left.call_method(engine, operator, &mut [expression])?.read()?;
         }
 
         reference.write(expression)?;

@@ -21,6 +21,6 @@ impl Walkable for Chain {
     fn walk<'a>(&self, engine: &mut Engine<'a>) -> ReturnFlow<'a> {
         let value = get!(engine.walk(&self.expression)?).read()?;
         let name = engine.new_string(self.member.to_string());
-        Flow::new(value.call_method(engine, "__cn__", Box::new([name.read()?]))?)
+        Flow::new(value.call_method(engine, "__cn__", &mut [name.read()?])?)
     }
 }

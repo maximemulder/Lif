@@ -13,6 +13,6 @@ while i < 3 {
     i = i + 1;
 }
 
-for i in [0, 1, 2] {
+for i in Array[Integer](0, 1, 2) {
     print(i);
 }

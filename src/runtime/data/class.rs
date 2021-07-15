@@ -9,7 +9,7 @@ use std::collections::HashMap;
 pub struct Class<'a> {
     tag: Tag,
     scope: GcScope<'a>,
-    pub constructor: Option<GcConstructor<'a>>,
+    constructor: Option<GcConstructor<'a>>,
     parent: Option<GcValue<'a>>,
     statics: HashMap<Box<str>, GcReference<'a>>,
     methods: HashMap<Box<str>, GcValue<'a>>,
@@ -33,6 +33,15 @@ impl<'a> Class<'a> {
 
     pub fn scope(&self) -> GcScope<'a> {
         self.scope
+    }
+
+    pub fn constructor(&self) -> Option<GcConstructor<'a>> {
+        self.constructor
+    }
+
+    pub fn set_constructor(&mut self, constructor: GcConstructor<'a>) {
+        debug_assert!(self.constructor.is_none());
+        self.constructor = Some(constructor);
     }
 
     pub fn parent(&self) -> Option<GcValue<'a>> {

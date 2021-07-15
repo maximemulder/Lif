@@ -1,9 +1,9 @@
-// Arrays can be instantiated using square brackets.
-let array = [0, "String", true];
+// Arrays can be instantiated using the Array class.
+let array = Array[Any](0, "String", true);
 
-// Array indexing is also done using square brackets.
-print(array[1]);
-array[2] = 1;
+// Array indexing is done using parentheses.
+print(array(1));
+array(2) = 1;
 
 // Arrays can be iterated with for loop.
 for element in array {

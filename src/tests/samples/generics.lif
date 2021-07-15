@@ -1,18 +1,19 @@
-function super_print<T>(value: T) {
+function super_print[T](value: T) {
     print(value);
 }
 
-super_print<Integer>(42);
-super_print<String>("Forty-two");
+super_print[Integer](42);
+super_print[String]("Forty-two");
 
-class Queue<T> {
+class Queue[T] {
     function push(self, element: T) {
         self.elements.append(element);
     }
 }
 
-let queue: Queue<Integer> = new(Queue<Integer>);
-queue.elements = [];
+let queue: Queue[Integer] = new(Queue[Integer]);
+queue.elements = Array[Integer]();
 queue.push(0);
 queue.push(1);
-print(queue.elements);
+print(queue.elements(0));
+print(queue.elements(1));

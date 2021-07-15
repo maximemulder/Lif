@@ -17,8 +17,6 @@ use crate::runtime::data::GenericPrimitive;
 use crate::runtime::engine::Engine;
 use crate::runtime::gc::GcTrace;
 use crate::runtime::r#return::ReturnReference;
-use crate::runtime::utilities::Arguments;
-use crate::runtime::utilities::builder;
 use crate::runtime::value::GcValue;
 use crate::walker::build;
 
@@ -108,7 +106,7 @@ impl<'a> Engine<'a> {
 
         self.primitives.array_any = {
             let array = self.primitives.array;
-            array.clone().data_generic_mut().call(self, array, Box::new([self.primitives.any])).ok().unwrap().get_value()
+            array.clone().data_generic_mut().call(self, array, &mut [self.primitives.any]).ok().unwrap().get_value()
         };
 
         any::populate(self);
@@ -126,18 +124,18 @@ impl<'a> Engine<'a> {
         string::populate(self);
 
         let Primitives { any, class, integer, string, .. } = self.primitives;
-        builder::function(self, "assert",  [any],     &assert);
-        builder::function(self, "error",   [any],     &error);
-        builder::function(self, "eval",    [string],  &eval);
-        builder::function(self, "exec",    [string],  &exec);
-        builder::function(self, "exit",    [integer], &exit);
-        builder::function(self, "include", [string],  &include);
-        builder::function(self, "new",     [class],   &new);
-        builder::function(self, "print",   [any],     &print);
+        self.primitive_function("assert", [("value", any)], None, None, &assert);
+        self.primitive_function("error", [("value", any)], None, None, &error);
+        self.primitive_function("eval", [("code", string)], None, None, &eval);
+        self.primitive_function("exec", [("code", string)], None, None, &exec);
+        self.primitive_function("exit", [("code", integer)], None, None, &exit);
+        self.primitive_function("include", [("file", string)], None, None, &include);
+        self.primitive_function("new", [("class", class)], None, Some(any), &new);
+        self.primitive_function("print", [("value", any)], None, None, &print);
     }
 }
 
-fn assert<'a>(engine: &mut Engine<'a>, arguments: Arguments<'a>) -> ReturnReference<'a> {
+fn assert<'a>(engine: &mut Engine<'a>, arguments: &mut [GcValue<'a>]) -> ReturnReference<'a> {
     if !arguments[0].data_boolean() {
         panic!();
     }
@@ -145,13 +143,13 @@ fn assert<'a>(engine: &mut Engine<'a>, arguments: Arguments<'a>) -> ReturnRefere
     Ok(engine.undefined())
 }
 
-fn error<'a>(engine: &mut Engine<'a>, arguments: Arguments<'a>) -> ReturnReference<'a> {
-    let message = arguments[0].call_to_string(engine)?;
-    writeln!(engine.error, "{}", message).unwrap();
+fn error<'a>(engine: &mut Engine<'a>, arguments: &mut [GcValue<'a>]) -> ReturnReference<'a> {
+    let string = arguments[0].call_fstr(engine)?;
+    writeln!(engine.error, "{}", string).unwrap();
     Ok(engine.undefined())
 }
 
-fn eval<'a>(engine: &mut Engine<'a>, arguments: Arguments<'a>) -> ReturnReference<'a> {
+fn eval<'a>(engine: &mut Engine<'a>, arguments: &mut [GcValue<'a>]) -> ReturnReference<'a> {
     let code = Code::from_string(&engine.grammar, engine.grammar.expression, &build::expression, &arguments[0].data_string());
     Ok(match engine.run(code) {
         Some(reference) => reference,
@@ -159,17 +157,17 @@ fn eval<'a>(engine: &mut Engine<'a>, arguments: Arguments<'a>) -> ReturnReferenc
     })
 }
 
-fn exec<'a>(engine: &mut Engine<'a>, arguments: Arguments<'a>) -> ReturnReference<'a> {
+fn exec<'a>(engine: &mut Engine<'a>, arguments: &mut [GcValue<'a>]) -> ReturnReference<'a> {
     let code = Code::from_string(&engine.grammar, engine.grammar.program, &build::program, &arguments[0].data_string());
     engine.run(code);
     Ok(engine.undefined())
 }
 
-fn exit<'a>(_: &mut Engine<'a>, arguments: Arguments<'a>) -> ReturnReference<'a> {
+fn exit<'a>(_: &mut Engine<'a>, arguments: &mut [GcValue<'a>]) -> ReturnReference<'a> {
     process::exit(*arguments[0].data_integer() as i32);
 }
 
-fn include<'a>(engine: &mut Engine<'a>, arguments: Arguments<'a>) -> ReturnReference<'a> {
+fn include<'a>(engine: &mut Engine<'a>, arguments: &mut [GcValue<'a>]) -> ReturnReference<'a> {
     engine.run_frame(engine.scope().parent().unwrap(), |engine| {
         let code = Code::from_file(&engine.grammar, engine.grammar.program, &build::program, &arguments[0].data_string()).unwrap();
         engine.run(code);
@@ -178,12 +176,12 @@ fn include<'a>(engine: &mut Engine<'a>, arguments: Arguments<'a>) -> ReturnRefer
     Ok(engine.undefined())
 }
 
-fn new<'a>(engine: &mut Engine<'a>, arguments: Arguments<'a>) -> ReturnReference<'a> {
+fn new<'a>(engine: &mut Engine<'a>, arguments: &mut [GcValue<'a>]) -> ReturnReference<'a> {
     Ok(engine.new_object(arguments[0]))
 }
 
-fn print<'a>(engine: &mut Engine<'a>, arguments: Arguments<'a>) -> ReturnReference<'a> {
-    let message = arguments[0].call_to_string(engine)?;
-    writeln!(engine.output, "{}", message).unwrap();
+fn print<'a>(engine: &mut Engine<'a>, arguments: &mut [GcValue<'a>]) -> ReturnReference<'a> {
+    let string = arguments[0].call_fstr(engine)?;
+    writeln!(engine.output, "{}", string).unwrap();
     Ok(engine.undefined())
 }

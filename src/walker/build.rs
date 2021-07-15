@@ -33,7 +33,6 @@ pub fn expression(node: Ref<SNode>) -> WNode {
         elements::flows::FLOW              => flow(child),
         elements::jumps::JUMP              => jump(child),
         elements::expressions::LET         => r#let(child),
-        elements::expressions::ARRAY       => array(child),
         elements::expressions::GROUP       => group(child),
         elements::expressions::LITERAL     => literal(child),
         elements::expressions::CHAIN       => chain(child),
@@ -234,10 +233,6 @@ fn parameters(node: Ref<SNode>) -> (Box<[(Ref<str>, Option<WNode>)]>, Option<(Re
 
 fn parameter(node: Ref<SNode>) -> (Ref<str>, Option<WNode>) {
     (token(node.front(0)), r#type(node.front(1)))
-}
-
-fn array(node: Ref<SNode>) -> WNode {
-    WNode::new(node, Array::new(expressions(node.front(1))))
 }
 
 fn group(node: Ref<SNode>) -> WNode {
