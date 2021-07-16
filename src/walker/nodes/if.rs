@@ -21,7 +21,7 @@ impl If {
 impl Walkable for If {
     fn walk<'a>(&self, engine: &mut Engine<'a>) -> ReturnFlow<'a> {
         let reference = get!(engine.walk(&self.condition)?);
-        let condition = *reference.read()?.get_cast_boolean(engine)?;
+        let condition = reference.read()?.get_cast_boolean(engine)?;
         if condition {
             engine.walk(&self.then)
         } else if let Some(r#else) = self.r#else.as_ref() {

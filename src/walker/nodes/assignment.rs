@@ -28,7 +28,7 @@ impl Walkable for Assignment {
             expression = left.call_method(engine, operator, &mut [expression])?.read()?;
         }
 
-        reference.write(expression)?;
+        reference.write(engine, expression)?;
         Flow::new(engine.undefined())
     }
 }

@@ -1,6 +1,7 @@
 use crate::memory::Ref;
 use crate::runtime::engine::Engine;
 use crate::runtime::r#return::{ Flow, ReturnFlow };
+use crate::runtime::value::Primitive;
 use crate::walker::{ Walkable, WNode };
 
 use std::ops::Deref;
@@ -48,11 +49,11 @@ impl Walkable for Binop {
         let left = get!(engine.walk(&self.left)?).read()?;
         match self.operator.deref() {
             "__and__" => {
-                left.cast(engine.primitives.boolean)?;
-                let boolean = if *left.data_boolean() {
+                left.cast(engine, engine.primitives.boolean)?;
+                let boolean = if bool::get(engine, left) {
                     let right = get!(engine.walk(&self.right)?).read()?;
-                    right.cast(engine.primitives.boolean)?;
-                    *right.data_boolean()
+                    right.cast(engine, engine.primitives.boolean)?;
+                    bool::get(engine, right)
                 } else {
                     false
                 };
@@ -60,13 +61,13 @@ impl Walkable for Binop {
                 Flow::new(engine.new_boolean(boolean))
             },
             "__or__" => {
-                left.cast(engine.primitives.boolean)?;
-                let boolean = if *left.data_boolean() {
+                left.cast(engine, engine.primitives.boolean)?;
+                let boolean = if bool::get(engine, left) {
                     true
                 } else {
                     let right = get!(engine.walk(&self.right)?).read()?;
-                    right.cast(engine.primitives.boolean)?;
-                    *right.data_boolean()
+                    right.cast(engine, engine.primitives.boolean)?;
+                    bool::get(engine, right)
                 };
 
                 Flow::new(engine.new_boolean(boolean))

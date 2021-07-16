@@ -40,8 +40,8 @@ impl Walkable for Function {
         let rest = self.rest.as_ref().map(|(name, parameter)| {
             let r#type = parameter.as_ref().map(|parameter| {
                 let r#type = engine.walk(parameter)?.none()?.read()?;
-                r#type.cast(engine.primitives.class)?;
-                if !r#type.is_generic(engine.primitives.array) && r#type != engine.primitives.any {
+                r#type.cast(engine, engine.primitives.class)?;
+                if !r#type.is_generic(engine, engine.primitives.array) && r#type != engine.primitives.any {
                     Err(error_rest())
                 } else {
                     Ok(r#type)

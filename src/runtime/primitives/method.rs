@@ -1,3 +1,4 @@
+use crate::runtime::data::{ Array, Method };
 use crate::runtime::engine::Engine;
 use crate::runtime::primitives::Primitives;
 use crate::runtime::r#return::ReturnReference;
@@ -11,15 +12,15 @@ pub fn populate(engine: &mut Engine) {
 }
 
 fn apply<'a>(engine: &mut Engine<'a>, arguments: &mut [GcValue<'a>]) -> ReturnReference<'a> {
-    let method = arguments[0].data_method();
+    let method = arguments[0].get_ref::<Method>(engine);
     let function = method.function.call_method(engine, "__gn__", &mut [arguments[1]])?.read()?;
     Ok(engine.new_method(function, method.this))
 }
 
 fn call<'a>(engine: &mut Engine<'a>, arguments: &mut [GcValue<'a>]) -> ReturnReference<'a> {
-    let this = arguments[0].data_method().this;
+    let this = arguments[0].get_ref::<Method>(engine).this;
     let reference = engine.new_reference(this);
-    arguments[1].data_array_mut().insert(0, reference);
-    let method = arguments[0].data_method();
+    arguments[1].get_mut::<Array>(engine).insert(0, reference);
+    let method = arguments[0].get_ref::<Method>(engine);
     method.function.call_method(engine, "__cl__", &mut [arguments[1]])
 }

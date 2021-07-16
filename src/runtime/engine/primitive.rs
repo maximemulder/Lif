@@ -1,4 +1,4 @@
-use crate::runtime::data::FunctionPrimitive;
+use crate::runtime::data::{ Class, FunctionPrimitive };
 use crate::runtime::engine::Engine;
 use crate::runtime::utilities::Callable;
 use crate::runtime::utilities::parameters::Parameters;
@@ -27,20 +27,20 @@ impl<'a> Engine<'a> {
         let mut elements = Vec::<(&str, GcValue<'a>)>::new();
         elements.push(("self", class));
         elements.extend_from_slice(&parameters);
-        let primitive = self.run_frame(class.data_class().scope(), |engine| {
+        let primitive = self.run_frame(class.get_ref::<Class>(self).scope(), |engine| {
             engine.new_function_value(Some(&name), create_parameters(&elements, rest), r#return, FunctionPrimitive::new(callback))
         });
 
-        class.data_class_mut().set_method(name, primitive);
+        class.get_mut::<Class>(self).set_method(name, primitive);
     }
 
     pub fn primitive_static<const N: usize>(
         &mut self, mut class: GcValue<'a>, name: &str, parameters: [(&str, GcValue<'a>); N], rest: Option<(&str, GcValue<'a>)>, r#return: Option<GcValue<'a>>, callback: &'a Callable<'a>
     ) {
-        let primitive = self.run_frame(class.data_class().scope(), |engine| {
+        let primitive = self.run_frame(class.get_ref::<Class>(self).scope(), |engine| {
             engine.new_function_value(Some(&name), create_parameters(&parameters, rest), r#return, FunctionPrimitive::new(callback))
         });
 
-        class.data_class_mut().set_static(name, self.new_constant(primitive));
+        class.get_mut::<Class>(self).set_static(name, self.new_constant(primitive));
     }
 }

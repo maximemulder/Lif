@@ -49,7 +49,7 @@ impl<'a> Function<'a> {
         self.parameters.validate(engine, arguments)?;
         let reference = engine.run_frame(self.scope, |engine| self.implementation.call(engine, &self.parameters, arguments))?;
         if let Some(r#return) = self.r#return {
-            reference.read()?.cast(r#return)?;
+            reference.read()?.cast(engine, r#return)?;
         }
 
         Ok(reference)

@@ -1,3 +1,4 @@
+use crate::runtime::data::{ Class, Object };
 use crate::runtime::engine::Engine;
 use crate::runtime::primitives::Primitives;
 use crate::runtime::r#return::{ Return, ReturnReference };
@@ -12,7 +13,7 @@ pub fn populate(engine: &mut Engine) {
 
 fn to_string<'a>(engine: &mut Engine<'a>, arguments: &mut [GcValue<'a>]) -> ReturnReference<'a> {
     let mut string = String::from("{");
-    string.push_str(&arguments[0].data_object().attributes().iter()
+    string.push_str(&arguments[0].get_ref::<Object>(engine).attributes().iter()
         .map(|(name, attribute)| Ok(format!("{}: {}", &name, &attribute.read()?.call_sstr(engine)?)))
         .collect::<Return<Box<[String]>>>()?
         .join(", ")
@@ -24,13 +25,13 @@ fn to_string<'a>(engine: &mut Engine<'a>, arguments: &mut [GcValue<'a>]) -> Retu
 
 fn chain<'a>(engine: &mut Engine<'a>, arguments: &mut [GcValue<'a>]) -> ReturnReference<'a> {
     let mut this = arguments[0];
-    let name = arguments[1].data_string();
-    if let Some(method) = this.class.data_class().get_method(name) {
+    let name = arguments[1].get_ref::<String>(engine);
+    if let Some(method) = this.class.get_ref::<Class>(engine).get_method(engine, name) {
         return Ok(engine.new_method(method, this));
     }
 
     let member = engine.new_variable(None, engine.primitives.any);
-    let object = this.data_object_mut();
+    let object = this.get_mut::<Object>(engine);
     Ok(if let Some(member) = object.get_attribute(name) {
         member
     } else {

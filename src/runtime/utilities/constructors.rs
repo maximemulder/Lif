@@ -19,12 +19,12 @@ impl<'a> Constructor<'a> {
         }
     }
 
-    fn test(&self, values: &mut [GcValue<'a>]) -> bool {
+    fn check(&self, engine: &Engine<'a>, values: &mut [GcValue<'a>]) -> bool {
         if self.arguments.len() != values.len() {
             return false;
         }
 
-        self.arguments.iter().copied().zip(values.iter().copied()).all(|(argument, value)| argument.is(value))
+        self.arguments.iter().copied().zip(values.iter().copied()).all(|(argument, value)| argument.is(engine, value))
     }
 }
 
@@ -55,14 +55,8 @@ impl<'a> Constructors<'a> {
         constructor
     }
 
-    pub fn get(&self, values: &mut [GcValue<'a>]) -> Option<GcValue<'a>> {
-        for constructor in self.constructors.iter() {
-            if constructor.test(values) {
-                return Some(constructor.value);
-            }
-        }
-
-        None
+    pub fn get(&self, engine: &Engine<'a>, values: &mut [GcValue<'a>]) -> Option<GcValue<'a>> {
+        Some(self.constructors.iter().find(|constructor| constructor.check(engine, values))?.value)
     }
 }
 

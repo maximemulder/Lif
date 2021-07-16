@@ -19,45 +19,45 @@ pub fn populate(engine: &mut Engine) {
 }
 
 fn sstr<'a>(engine: &mut Engine<'a>, arguments: &mut [GcValue<'a>]) -> ReturnReference<'a> {
-    Ok(engine.new_string(arguments[0].data_float().to_string()))
+    Ok(engine.new_string(arguments[0].get::<f64>(engine).to_string()))
 }
 
 fn eq<'a>(engine: &mut Engine<'a>, arguments: &mut [GcValue<'a>]) -> ReturnReference<'a> {
-    Ok(engine.new_boolean(if arguments[1].isa(engine.primitives.integer) {
-        *arguments[0].data_float() == *arguments[1].data_float()
+    Ok(engine.new_boolean(if arguments[1].isa(engine, engine.primitives.float) {
+        arguments[0].get::<f64>(engine) == arguments[1].get(engine)
     } else {
         false
     }))
 }
 
 fn lt<'a>(engine: &mut Engine<'a>, arguments: &mut [GcValue<'a>]) -> ReturnReference<'a> {
-    Ok(engine.new_boolean(*arguments[0].data_float() < *arguments[1].data_float()))
+    Ok(engine.new_boolean(arguments[0].get::<f64>(engine) < arguments[1].get::<f64>(engine)))
 }
 
 fn pos<'a>(engine: &mut Engine<'a>, arguments: &mut [GcValue<'a>]) -> ReturnReference<'a> {
-    Ok(engine.new_float(*arguments[0].data_float()))
+    Ok(engine.new_float(arguments[0].get::<f64>(engine)))
 }
 
 fn neg<'a>(engine: &mut Engine<'a>, arguments: &mut [GcValue<'a>]) -> ReturnReference<'a> {
-    Ok(engine.new_float(-arguments[0].data_float()))
+    Ok(engine.new_float(-arguments[0].get::<f64>(engine)))
 }
 
 fn add<'a>(engine: &mut Engine<'a>, arguments: &mut [GcValue<'a>]) -> ReturnReference<'a> {
-    Ok(engine.new_float(*arguments[0].data_float() + *arguments[1].data_float()))
+    Ok(engine.new_float(arguments[0].get::<f64>(engine) + arguments[1].get::<f64>(engine)))
 }
 
 fn sub<'a>(engine: &mut Engine<'a>, arguments: &mut [GcValue<'a>]) -> ReturnReference<'a> {
-    Ok(engine.new_float(*arguments[0].data_float() - *arguments[1].data_float()))
+    Ok(engine.new_float(arguments[0].get::<f64>(engine) - arguments[1].get::<f64>(engine)))
 }
 
 fn mul<'a>(engine: &mut Engine<'a>, arguments: &mut [GcValue<'a>]) -> ReturnReference<'a> {
-    Ok(engine.new_float(*arguments[0].data_float() * *arguments[1].data_float()))
+    Ok(engine.new_float(arguments[0].get::<f64>(engine) * arguments[1].get::<f64>(engine)))
 }
 
 fn div<'a>(engine: &mut Engine<'a>, arguments: &mut [GcValue<'a>]) -> ReturnReference<'a> {
-    Ok(engine.new_float(*arguments[0].data_float() / *arguments[1].data_float()))
+    Ok(engine.new_float(arguments[0].get::<f64>(engine) / arguments[1].get::<f64>(engine)))
 }
 
 fn rem<'a>(engine: &mut Engine<'a>, arguments: &mut [GcValue<'a>]) -> ReturnReference<'a> {
-    Ok(engine.new_float(*arguments[0].data_float() % *arguments[1].data_float()))
+    Ok(engine.new_float(arguments[0].get::<f64>(engine) % arguments[1].get::<f64>(engine)))
 }

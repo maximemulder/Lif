@@ -1,4 +1,5 @@
 use crate::runtime::data::Tag;
+use crate::runtime::engine::Engine;
 use crate::runtime::gc::GcTrace;
 use crate::runtime::reference::GcReference;
 use crate::runtime::scope::GcScope;
@@ -53,13 +54,13 @@ impl<'a> Class<'a> {
         self.parent = Some(parent);
     }
 
-    pub fn get_method(&self, name: &str) -> Option<GcValue<'a>> {
+    pub fn get_method(&self, engine: &Engine<'a>, name: &str) -> Option<GcValue<'a>> {
         if let Some(method) = self.methods.get(name).copied() {
             return Some(method);
         }
 
         if let Some(parent) = self.parent {
-            return parent.data_class().get_method(name);
+            return parent.get_ref::<Class>(engine).get_method(engine, name);
         }
 
         None

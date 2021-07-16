@@ -1,3 +1,4 @@
+use crate::runtime::data::{ Class, Function };
 use crate::runtime::engine::Engine;
 use crate::runtime::error::Error;
 use crate::runtime::primitives::Primitives;
@@ -14,7 +15,7 @@ pub fn populate(engine: &mut Engine) {
 }
 
 fn sstr<'a>(engine: &mut Engine<'a>, arguments: &mut [GcValue<'a>]) -> ReturnReference<'a> {
-    let this = arguments[0].data_class();
+    let this = arguments[0].get_ref::<Class>(engine);
     let mut string = this.tag().to_string();
     if let Some(constructor) = this.constructor() {
         string.push_str("[");
@@ -32,13 +33,13 @@ fn sstr<'a>(engine: &mut Engine<'a>, arguments: &mut [GcValue<'a>]) -> ReturnRef
 
 fn chain<'a>(engine: &mut Engine<'a>, arguments: &mut [GcValue<'a>]) -> ReturnReference<'a> {
     let mut this = arguments[0];
-    let name = arguments[1].data_string();
-    if let Some(method) = this.class.data_class().get_method(name) {
+    let name = arguments[1].get_ref::<String>(engine);
+    if let Some(method) = this.class.get_ref::<Class>(engine).get_method(engine, name) {
         return Ok(engine.new_method(method, this));
     }
 
     let member = engine.new_variable(None, engine.primitives.any);
-    let class = this.data_class_mut();
+    let class = this.get_mut::<Class>(engine);
     Ok(if let Some(member) = class.get_static(name) {
         member
     } else {
@@ -49,13 +50,13 @@ fn chain<'a>(engine: &mut Engine<'a>, arguments: &mut [GcValue<'a>]) -> ReturnRe
 
 fn call<'a>(engine: &mut Engine<'a>, arguments: &mut [GcValue<'a>]) -> ReturnReference<'a> {
     let class = arguments[0];
-    Ok(if let Some(member) = class.data_class().get_static("__init__") {
-        member.read()?.data_function().call(engine, &mut parameters::unpack(arguments[1])?)?
+    Ok(if let Some(member) = class.get_ref::<Class>(engine).get_static("__init__") {
+        member.read()?.get_ref::<Function>(engine).call(engine, &mut parameters::unpack(engine, arguments[1])?)?
     } else {
-        return Err(error_constructor(class))
+        return Err(error_constructor(engine, class))
     })
 }
 
-fn error_constructor(class: GcValue) -> Error {
-    Error::new_runtime(&format!("Class {} has no default constructor.", class.data_class().tag()))
+fn error_constructor<'a>(engine: &Engine<'a>, class: GcValue<'a>) -> Error {
+    Error::new_runtime(&format!("Class {} has no default constructor.", class.get_ref::<Class>(engine).tag()))
 }

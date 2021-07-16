@@ -13,11 +13,11 @@ pub fn populate(engine: &mut Engine) {
 }
 
 fn read<'a>(engine: &mut Engine<'a>, arguments: &mut [GcValue<'a>]) -> ReturnReference<'a> {
-    let string = fs::read_to_string(arguments[0].data_string()).unwrap();
+    let string = fs::read_to_string(arguments[0].get_ref::<String>(engine)).unwrap();
     Ok(engine.new_string(string))
 }
 
 fn write<'a>(engine: &mut Engine<'a>, arguments: &mut [GcValue<'a>]) -> ReturnReference<'a> {
-    fs::write(arguments[0].data_string(), arguments[1].call_fstr(engine)?).unwrap();
+    fs::write(arguments[0].get_ref::<String>(engine), arguments[1].call_fstr(engine)?).unwrap();
     Ok(engine.undefined())
 }

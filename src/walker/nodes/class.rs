@@ -1,4 +1,5 @@
 use crate::memory::Ref;
+use crate::runtime::data::Class as Class2;
 use crate::runtime::engine::Engine;
 use crate::runtime::r#return::{ Flow, ReturnFlow };
 use crate::walker::{ Walkable, WNode };
@@ -29,8 +30,8 @@ impl Walkable for Class {
 
         let class = engine.new_class(Ref::as_option(&self.name), Some(parent));
         let mut value = class.read()?;
-        engine.run_frame(value.data_class().scope(), |engine| {
-            let data = value.data_class_mut();
+        engine.run_frame(value.get_ref::<Class2>(engine).scope(), |engine| {
+            let data = value.get_mut::<Class2>(engine);
             for method in self.methods.iter() {
                 let function = engine.walk(method)?.none()?.read()?;
                 data.set_method(function.data_tag().get_name().unwrap(), function);

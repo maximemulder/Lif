@@ -1,4 +1,5 @@
 use crate::runtime::error::Error;
+use crate::runtime::engine::Engine;
 use crate::runtime::gc::{ GcRef, GcTrace };
 use crate::runtime::r#return::{ Return, ReturnValue };
 use crate::runtime::value::GcValue;
@@ -34,10 +35,10 @@ impl<'a> Reference<'a> {
         self.value.ok_or_else(error_undefined)
     }
 
-    pub fn write(&mut self, value: GcValue<'a>) -> Return<()> {
+    pub fn write(&mut self, engine: &Engine<'a>, value: GcValue<'a>) -> Return<()> {
         match self.r#type {
             Type::Variable(r#type) => {
-                value.cast(r#type)?;
+                value.cast(engine, r#type)?;
                 self.set_value(value);
             },
             Type::Constant => if self.value.is_none() {

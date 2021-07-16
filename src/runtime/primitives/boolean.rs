@@ -12,17 +12,17 @@ pub fn populate(engine: &mut Engine) {
 }
 
 fn sstr<'a>(engine: &mut Engine<'a>, arguments: &mut [GcValue<'a>]) -> ReturnReference<'a> {
-    Ok(engine.new_string(arguments[0].data_boolean().to_string()))
+    Ok(engine.new_string(arguments[0].get::<bool>(engine).to_string()))
 }
 
 fn eq<'a>(engine: &mut Engine<'a>, arguments: &mut [GcValue<'a>]) -> ReturnReference<'a> {
-    Ok(engine.new_boolean(if arguments[1].isa(engine.primitives.boolean) {
-        arguments[0].data_boolean() == arguments[1].data_boolean()
+    Ok(engine.new_boolean(if arguments[1].isa(engine, engine.primitives.boolean) {
+        arguments[0].get::<bool>(engine) == arguments[1].get(engine)
     } else {
         false
     }))
 }
 
 fn not<'a>(engine: &mut Engine<'a>, arguments: &mut [GcValue<'a>]) -> ReturnReference<'a> {
-    Ok(engine.new_boolean(!arguments[0].data_boolean()))
+    Ok(engine.new_boolean(!arguments[0].get::<bool>(engine)))
 }

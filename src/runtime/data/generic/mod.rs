@@ -1,7 +1,7 @@
 mod code;
 mod primitive;
 
-use crate::runtime::data::Tag;
+use crate::runtime::data::{ Class, Tag };
 use crate::runtime::engine::Engine;
 use crate::runtime::gc::GcTrace;
 use crate::runtime::r#return::ReturnReference;
@@ -48,7 +48,7 @@ impl<'a> Generic<'a> {
 impl<'a> Generic<'a> {
     pub fn call(&mut self, engine: &mut Engine<'a>, generic: GcValue<'a>, arguments: &mut [GcValue<'a>]) -> ReturnReference<'a> {
         parameters::length(arguments.len(), self.parameters.len())?;
-        if let Some(value) = self.constructors.get(arguments) {
+        if let Some(value) = self.constructors.get(engine, arguments) {
             return Ok(engine.new_reference(value));
         }
 
@@ -65,7 +65,7 @@ impl<'a> Generic<'a> {
         let constructor = self.constructors.record(engine, generic, values.into_boxed_slice(), reference.get_value());
         let mut value = reference.read()?;
         if value.class == engine.primitives.class {
-            value.data_class_mut().set_constructor(constructor);
+            value.get_mut::<Class>(engine).set_constructor(constructor);
         }
 
         Ok(reference)

@@ -28,8 +28,8 @@ fn sstr<'a>(engine: &mut Engine<'a>, arguments: &mut [GcValue<'a>]) -> ReturnRef
 
 fn chain<'a>(engine: &mut Engine<'a>, arguments: &mut [GcValue<'a>]) -> ReturnReference<'a> {
     let this = arguments[0];
-    let name = arguments[1].data_string();
-    Ok(engine.new_method(this.get_method(&name)?, this))
+    let name = arguments[1].get_ref::<String>(engine);
+    Ok(engine.new_method(this.get_method(engine, &name)?, this))
 }
 
 fn eq<'a>(engine: &mut Engine<'a>, arguments: &mut [GcValue<'a>]) -> ReturnReference<'a> {
@@ -38,22 +38,22 @@ fn eq<'a>(engine: &mut Engine<'a>, arguments: &mut [GcValue<'a>]) -> ReturnRefer
 
 fn ne<'a>(engine: &mut Engine<'a>, arguments: &mut [GcValue<'a>]) -> ReturnReference<'a> {
     let reference = arguments[0].call_method_self(engine, "__eq__", arguments)?;
-    Ok(engine.new_boolean(!reference.read()?.data_boolean()))
+    Ok(engine.new_boolean(!reference.read()?.get::<bool>(engine)))
 }
 
 fn le<'a>(engine: &mut Engine<'a>, arguments: &mut [GcValue<'a>]) -> ReturnReference<'a> {
     let left  = arguments[0].call_method_self(engine, "__lt__", arguments)?;
     let right = arguments[0].call_method_self(engine, "__eq__", arguments)?;
-    Ok(engine.new_boolean(*left.read()?.data_boolean() || *right.read()?.data_boolean()))
+    Ok(engine.new_boolean(left.read()?.get(engine) || right.read()?.get(engine)))
 }
 
 fn gt<'a>(engine: &mut Engine<'a>, arguments: &mut [GcValue<'a>]) -> ReturnReference<'a> {
     let left  = arguments[0].call_method_self(engine, "__lt__", arguments)?;
     let right = arguments[0].call_method_self(engine, "__eq__", arguments)?;
-    Ok(engine.new_boolean(!left.read()?.data_boolean() && !right.read()?.data_boolean()))
+    Ok(engine.new_boolean(!left.read()?.get::<bool>(engine) && !right.read()?.get::<bool>(engine)))
 }
 
 fn ge<'a>(engine: &mut Engine<'a>, arguments: &mut [GcValue<'a>]) -> ReturnReference<'a> {
     let reference = arguments[0].call_method_self(engine, "__lt__", arguments)?;
-    Ok(engine.new_boolean(!reference.read()?.data_boolean()))
+    Ok(engine.new_boolean(!reference.read()?.get::<bool>(engine)))
 }

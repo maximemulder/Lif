@@ -19,7 +19,7 @@ impl<'a> Variable<'a> {
 
     pub fn new(engine: &Engine<'a>, name: Box<str>, r#type: Option<GcValue<'a>>) -> Return<Self> {
         if let Some(r#type) = r#type {
-            r#type.cast(engine.primitives.class)?;
+            r#type.cast(engine, engine.primitives.class)?;
         }
 
         Ok(Self::new_unchecked(name, r#type))
@@ -31,9 +31,9 @@ impl<'a> Variable<'a> {
         reference
     }
 
-    pub fn cast(&self, value: GcValue<'a>) -> Return<()> {
+    pub fn cast(&self, engine: &Engine<'a>, value: GcValue<'a>) -> Return<()> {
         if let Some(r#type) = self.r#type {
-            value.cast(r#type)?;
+            value.cast(engine, r#type)?;
         }
 
         Ok(())

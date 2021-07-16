@@ -1,3 +1,4 @@
+use crate::runtime::data::{ Array, Class };
 use crate::runtime::engine::Engine;
 use crate::runtime::error::Error;
 use crate::runtime::gc::GcTrace;
@@ -21,11 +22,11 @@ impl<'a> Parameters<'a> {
     pub fn get_rest_array(&self, engine: &Engine<'a>) -> Option<GcValue<'a>> {
         self.rest.as_ref()
             .and_then(|parameter| parameter.r#type)
-            .and_then(|class| class.is_generic(engine.primitives.array).then_some(class))
+            .and_then(|class| class.is_generic(engine, engine.primitives.array).then_some(class))
     }
 
     pub fn get_rest_array_type(&self, engine: &Engine<'a>) -> Option<GcValue<'a>> {
-        self.get_rest_array(engine).map(|class| class.data_class().constructor().unwrap().arguments[0])
+        self.get_rest_array(engine).map(|class| class.get_ref::<Class>(engine).constructor().unwrap().arguments[0])
     }
 
     pub fn validate(&self, engine: &Engine<'a>, arguments: &[GcValue<'a>]) -> Return<()> {
@@ -40,12 +41,12 @@ impl<'a> Parameters<'a> {
         }
 
         for (parameter, argument) in self.elements.iter().zip(arguments.iter().copied()) {
-            parameter.cast(argument)?;
+            parameter.cast(engine, argument)?;
         }
 
         if let Some(r#type) = self.get_rest_array_type(engine) {
             for argument in arguments[self.elements.len()..].iter().copied() {
-                argument.cast(r#type)?;
+                argument.cast(engine, r#type)?;
             }
         }
 
@@ -103,8 +104,8 @@ pub fn pack<'a>(engine: &mut Engine<'a>, values: &mut [GcValue<'a>]) -> GcValue<
     engine.new_array_any_value(elements)
 }
 
-pub fn unpack(value: GcValue<'_>) -> Return<Box<[GcValue<'_>]>> {
-    value.data_array().elements().iter()
+pub fn unpack<'a>(engine: &Engine<'a>, value: GcValue<'a>) -> Return<Box<[GcValue<'a>]>> {
+    value.get_ref::<Array>(engine).elements().iter()
         .copied()
         .map(|element| element.read())
         .collect()

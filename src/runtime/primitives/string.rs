@@ -16,8 +16,8 @@ fn sstr<'a>(engine: &mut Engine<'a>, arguments: &mut [GcValue<'a>]) -> ReturnRef
 }
 
 fn eq<'a>(engine: &mut Engine<'a>, arguments: &mut [GcValue<'a>]) -> ReturnReference<'a> {
-    Ok(engine.new_boolean(if arguments[1].isa(engine.primitives.string) {
-        arguments[0].data_string() == arguments[1].data_string()
+    Ok(engine.new_boolean(if arguments[1].isa(engine, engine.primitives.string) {
+        arguments[0].get_ref::<String>(engine) == arguments[1].get_ref::<String>(engine)
     } else {
         false
     }))
@@ -25,5 +25,5 @@ fn eq<'a>(engine: &mut Engine<'a>, arguments: &mut [GcValue<'a>]) -> ReturnRefer
 
 fn add<'a>(engine: &mut Engine<'a>, arguments: &mut [GcValue<'a>]) -> ReturnReference<'a> {
     let right = arguments[1].call_fstr(engine)?;
-    Ok(engine.new_string(format!("{}{}", arguments[0].data_string(), right)))
+    Ok(engine.new_string(format!("{}{}", arguments[0].get_ref::<String>(engine), right)))
 }
