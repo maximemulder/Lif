@@ -215,7 +215,7 @@ impl<'a> PrimitivePtr<'a> for String {
     }
 }
 
-impl <'a> GcValue<'a> {
+impl<'a> GcValue<'a> {
     pub fn get<T: Primitive<'a>>(self, engine: &Engine<'a>) -> T {
         T::get(engine, self)
     }
