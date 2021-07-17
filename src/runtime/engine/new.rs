@@ -2,7 +2,7 @@ use crate::runtime::data::{ Data, FunctionImplementation, GenericImplementation 
 use crate::runtime::engine::Engine;
 use crate::runtime::reference::GcReference;
 use crate::runtime::utilities::parameters::Parameters;
-use crate::runtime::value::GcValue;
+use crate::runtime::value::{ GcValue, Primitive };
 
 impl<'a> Engine<'a> {
     pub fn new_array_value(&mut self, class: GcValue<'a>, elements: Vec<GcReference<'a>>) -> GcValue<'a> {
@@ -14,7 +14,7 @@ impl<'a> Engine<'a> {
     }
 
     pub fn new_boolean_value(&mut self, boolean: bool) -> GcValue<'a> {
-        self.new_value(self.primitives.boolean, Data::boolean(boolean))
+        self.alloc(bool::set(self.primitives.boolean, boolean))
     }
 
     pub fn new_class_value(&mut self, name: Option<&str>, parent: Option<GcValue<'a>>) -> GcValue<'a> {
@@ -25,7 +25,7 @@ impl<'a> Engine<'a> {
     }
 
     pub fn new_float_value(&mut self, float: f64) -> GcValue<'a> {
-        self.new_value(self.primitives.float, Data::float(float))
+        self.alloc(f64::set(self.primitives.float, float))
     }
 
     pub fn new_function_value(&mut self,
@@ -45,7 +45,7 @@ impl<'a> Engine<'a> {
     }
 
     pub fn new_integer_value(&mut self, integer: isize) -> GcValue<'a> {
-        self.new_value(self.primitives.integer, Data::integer(integer))
+        self.alloc(isize::set(self.primitives.integer, integer))
     }
 
     pub fn new_method_value(&mut self, function: GcValue<'a>, this: GcValue<'a>) -> GcValue<'a> {

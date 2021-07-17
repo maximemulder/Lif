@@ -23,12 +23,9 @@ use crate::runtime::value::GcValue;
 
 pub enum Data<'a> {
     Array(Array<'a>),
-    Boolean(bool),
     Class(Class<'a>),
-    Float(f64),
     Function(Function<'a>),
     Generic(Generic<'a>),
-    Integer(isize),
     Method(Method<'a>),
     Nullable(Nullable<'a>),
     Object(Object<'a>),
@@ -40,16 +37,8 @@ impl<'a> Data<'a> {
         Data::Array(Array::new(elements))
     }
 
-    pub fn boolean(boolean: bool) -> Self {
-        Data::Boolean(boolean)
-    }
-
     pub fn class(tag: Tag, scope: GcScope<'a>, parent: Option<GcValue<'a>>) -> Self {
         Data::Class(Class::new(tag, scope, parent))
-    }
-
-    pub fn float(float: f64) -> Self {
-        Data::Float(float)
     }
 
     pub fn function(
@@ -60,10 +49,6 @@ impl<'a> Data<'a> {
 
     pub fn generic(tag: Tag, scope: GcScope<'a>, parameters: Box<[Box<str>]>, implementation: impl GenericImplementation<'a> + 'a) -> Self {
         Data::Generic(Generic::new(tag, scope, parameters, implementation))
-    }
-
-    pub fn integer(integer: isize) -> Self {
-        Data::Integer(integer)
     }
 
     pub fn method(function: GcValue<'a>, this: GcValue<'a>) -> Self {

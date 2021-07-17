@@ -11,9 +11,11 @@ pub type GcValue<'a> = GcRef<Value<'a>>;
 pub struct Value<'a> {
     pub class: GcValue<'a>,
     data: Data<'a>,
+    data_new: usize,
 }
 
 pub trait Primitive<'a> {
+    fn set(class: GcValue<'a>, primitive: Self) -> Value<'a>;
     fn get(engine: &Engine<'a>, value: GcValue<'a>) -> Self;
 }
 
@@ -23,35 +25,59 @@ pub trait PrimitivePtr<'a> {
 }
 
 impl<'a> Primitive<'a> for bool {
+    fn set(class: GcValue<'a>, primitive: Self) -> Value<'a> {
+        Value {
+            class,
+            data: Data::Nullable(Nullable::new(None)),
+            data_new: unsafe {
+                std::mem::transmute::<bool, u8>(primitive) as usize
+            },
+        }
+    }
+
     fn get(engine: &Engine<'a>, value: GcValue<'a>) -> Self {
         debug_assert!(value.class == engine.primitives.boolean);
-        if let Data::Boolean(boolean) = value.data {
-            return boolean;
+        unsafe {
+            std::mem::transmute::<u8, bool>(value.data_new as u8)
         }
-
-        panic!();
     }
 }
 
 impl<'a> Primitive<'a> for isize {
+    fn set(class: GcValue<'a>, primitive: Self) -> Value<'a> {
+        Value {
+            class,
+            data: Data::Nullable(Nullable::new(None)),
+            data_new: unsafe {
+                std::mem::transmute::<isize, usize>(primitive)
+            },
+        }
+    }
+
     fn get(engine: &Engine<'a>, value: GcValue<'a>) -> Self {
         debug_assert!(value.class == engine.primitives.integer);
-        if let Data::Integer(integer) = value.data {
-            return integer;
+        unsafe {
+            std::mem::transmute::<usize, isize>(value.data_new)
         }
-
-        panic!();
     }
 }
 
 impl<'a> Primitive<'a> for f64 {
+    fn set(class: GcValue<'a>, primitive: Self) -> Value<'a> {
+        Value {
+            class,
+            data: Data::Nullable(Nullable::new(None)),
+            data_new: unsafe {
+                std::mem::transmute::<f64, usize>(primitive)
+            },
+        }
+    }
+
     fn get(engine: &Engine<'a>, value: GcValue<'a>) -> Self {
         debug_assert!(value.class == engine.primitives.float);
-        if let Data::Float(float) = value.data {
-            return float;
+        unsafe {
+            std::mem::transmute::<usize, f64>(value.data_new)
         }
-
-        panic!();
     }
 }
 
@@ -234,6 +260,7 @@ impl<'a> Value<'a> {
         Self {
             class,
             data,
+            data_new: 0,
         }
     }
 
