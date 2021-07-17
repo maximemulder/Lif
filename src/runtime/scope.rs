@@ -3,14 +3,14 @@ use crate::runtime::error::Error;
 use crate::runtime::gc::{ GcRef, GcTrace };
 use crate::runtime::reference::GcReference;
 use crate::runtime::r#return::ReturnReference;
-use crate::runtime::value::GcValue;
+use crate::runtime::value::Value;
 use std::collections::HashMap;
 
 pub type GcScope<'a> = GcRef<Scope<'a>>;
 
 pub struct Scope<'a> {
     parent: Option<GcScope<'a>>,
-    source: Option<GcValue<'a>>,
+    source: Option<Value<'a>>,
     variables: HashMap<Box<str>, GcReference<'a>>,
 }
 
@@ -27,8 +27,15 @@ impl<'a> Scope<'a> {
         self.parent
     }
 
-    pub fn source(&self) -> Option<GcValue<'a>> {
+    pub fn source(&self) -> Option<Value<'a>> {
         self.source
+    }
+
+    pub fn set_source(&mut self, engine: &mut Engine<'a>, name: &str, source: Value<'a>) {
+        debug_assert!(self.source.is_none());
+        self.source = Some(source);
+        let reference = engine.new_constant(source);
+        self.set_variable(name, reference);
     }
 
     pub fn get_variable(&self, name: &str) -> ReturnReference<'a> {
@@ -43,13 +50,6 @@ impl<'a> Scope<'a> {
 
     pub fn set_variable(&mut self, name: &str, reference: GcReference<'a>) {
         self.variables.insert(Box::from(name), reference);
-    }
-
-    pub fn set_source(&mut self, engine: &mut Engine<'a>, name: &str, source: GcValue<'a>) {
-        debug_assert!(self.source.is_none());
-        self.source = Some(source);
-        let reference = engine.new_constant(source);
-        self.set_variable(name, reference);
     }
 }
 

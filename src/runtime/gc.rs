@@ -96,7 +96,7 @@ impl GcTrace for GcGuard {
 
 pub struct GcRef<T: GcTrace> {
     pointer: Mut<GcGuard>,
-    phantom: PhantomData<T>,
+    phantom: PhantomData<*const T>,
 }
 
 impl<T: GcTrace> GcRef<T> {

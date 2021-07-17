@@ -4,7 +4,7 @@ use crate::runtime::engine::Engine;
 use crate::runtime::error::Error;
 use crate::runtime::r#return::{ Jump, ReturnReference };
 use crate::runtime::utilities::parameters::Parameters;
-use crate::runtime::value::GcValue;
+use crate::runtime::value::Value;
 use crate::walker::WNode;
 
 pub struct FunctionCode {
@@ -20,7 +20,7 @@ impl FunctionCode {
 }
 
 impl<'a> FunctionImplementation<'a> for FunctionCode {
-    fn call(&self, engine: &mut Engine<'a>, parameters: &Parameters<'a>, arguments: &mut [GcValue<'a>]) -> ReturnReference<'a> {
+    fn call(&self, engine: &mut Engine<'a>, parameters: &Parameters<'a>, arguments: &mut [Value<'a>]) -> ReturnReference<'a> {
         parameters.build(engine, arguments);
         let executable = Ref::as_ref(&self.block);
         let flow = engine.walk(executable)?;

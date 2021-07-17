@@ -14,28 +14,14 @@ pub use method::Method;
 pub use nullable::Nullable;
 pub use object::Object;
 
+/*
 use crate::runtime::scope::GcScope;
 use crate::runtime::reference::GcReference;
 use crate::runtime::utilities::parameters::Parameters;
 use crate::runtime::utilities::tag::Tag;
 use crate::runtime::value::GcValue;
 
-pub enum Data<'a> {
-    Array(Array<'a>),
-    Class(Class<'a>),
-    Function(Function<'a>),
-    Generic(Generic<'a>),
-    Method(Method<'a>),
-    Nullable(Nullable<'a>),
-    Object(Object<'a>),
-    String(String),
-}
-
 impl<'a> Data<'a> {
-    pub fn array(elements: Vec<GcReference<'a>>) -> Self {
-        Data::Array(Array::new(elements))
-    }
-
     pub fn class(tag: Tag, scope: GcScope<'a>, parent: Option<GcValue<'a>>) -> Self {
         Data::Class(Class::new(tag, scope, parent))
     }
@@ -66,3 +52,4 @@ impl<'a> Data<'a> {
         Data::String(string)
     }
 }
+ */

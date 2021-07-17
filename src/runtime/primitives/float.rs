@@ -1,11 +1,11 @@
 use crate::runtime::engine::Engine;
 use crate::runtime::primitives::Primitives;
 use crate::runtime::r#return::ReturnReference;
-use crate::runtime::value::GcValue;
+use crate::runtime::value::Value;
 
 pub fn populate(engine: &mut Engine) {
     let Primitives { any, boolean, float, string, .. } = engine.primitives;
-    engine.set_constant_value("Float", float);
+    engine.populate_class("Float", float);
     engine.primitive_method(float, "__sstr__", [], None, Some(string), &sstr);
     engine.primitive_method(float, "__eq__", [("other", any)], None, Some(boolean), &eq);
     engine.primitive_method(float, "__lt__", [("other", float)], None, Some(boolean), &lt);
@@ -18,46 +18,46 @@ pub fn populate(engine: &mut Engine) {
     engine.primitive_method(float, "__rem__", [("other", float)], None, Some(float), &rem);
 }
 
-fn sstr<'a>(engine: &mut Engine<'a>, arguments: &mut [GcValue<'a>]) -> ReturnReference<'a> {
+fn sstr<'a>(engine: &mut Engine<'a>, arguments: &mut [Value<'a>]) -> ReturnReference<'a> {
     Ok(engine.new_string(arguments[0].get::<f64>(engine).to_string()))
 }
 
-fn eq<'a>(engine: &mut Engine<'a>, arguments: &mut [GcValue<'a>]) -> ReturnReference<'a> {
-    Ok(engine.new_boolean(if arguments[1].isa(engine, engine.primitives.float) {
+fn eq<'a>(engine: &mut Engine<'a>, arguments: &mut [Value<'a>]) -> ReturnReference<'a> {
+    Ok(engine.new_boolean(if arguments[1].isa(engine.primitives.float) {
         arguments[0].get::<f64>(engine) == arguments[1].get(engine)
     } else {
         false
     }))
 }
 
-fn lt<'a>(engine: &mut Engine<'a>, arguments: &mut [GcValue<'a>]) -> ReturnReference<'a> {
+fn lt<'a>(engine: &mut Engine<'a>, arguments: &mut [Value<'a>]) -> ReturnReference<'a> {
     Ok(engine.new_boolean(arguments[0].get::<f64>(engine) < arguments[1].get::<f64>(engine)))
 }
 
-fn pos<'a>(engine: &mut Engine<'a>, arguments: &mut [GcValue<'a>]) -> ReturnReference<'a> {
+fn pos<'a>(engine: &mut Engine<'a>, arguments: &mut [Value<'a>]) -> ReturnReference<'a> {
     Ok(engine.new_float(arguments[0].get::<f64>(engine)))
 }
 
-fn neg<'a>(engine: &mut Engine<'a>, arguments: &mut [GcValue<'a>]) -> ReturnReference<'a> {
+fn neg<'a>(engine: &mut Engine<'a>, arguments: &mut [Value<'a>]) -> ReturnReference<'a> {
     Ok(engine.new_float(-arguments[0].get::<f64>(engine)))
 }
 
-fn add<'a>(engine: &mut Engine<'a>, arguments: &mut [GcValue<'a>]) -> ReturnReference<'a> {
+fn add<'a>(engine: &mut Engine<'a>, arguments: &mut [Value<'a>]) -> ReturnReference<'a> {
     Ok(engine.new_float(arguments[0].get::<f64>(engine) + arguments[1].get::<f64>(engine)))
 }
 
-fn sub<'a>(engine: &mut Engine<'a>, arguments: &mut [GcValue<'a>]) -> ReturnReference<'a> {
+fn sub<'a>(engine: &mut Engine<'a>, arguments: &mut [Value<'a>]) -> ReturnReference<'a> {
     Ok(engine.new_float(arguments[0].get::<f64>(engine) - arguments[1].get::<f64>(engine)))
 }
 
-fn mul<'a>(engine: &mut Engine<'a>, arguments: &mut [GcValue<'a>]) -> ReturnReference<'a> {
+fn mul<'a>(engine: &mut Engine<'a>, arguments: &mut [Value<'a>]) -> ReturnReference<'a> {
     Ok(engine.new_float(arguments[0].get::<f64>(engine) * arguments[1].get::<f64>(engine)))
 }
 
-fn div<'a>(engine: &mut Engine<'a>, arguments: &mut [GcValue<'a>]) -> ReturnReference<'a> {
+fn div<'a>(engine: &mut Engine<'a>, arguments: &mut [Value<'a>]) -> ReturnReference<'a> {
     Ok(engine.new_float(arguments[0].get::<f64>(engine) / arguments[1].get::<f64>(engine)))
 }
 
-fn rem<'a>(engine: &mut Engine<'a>, arguments: &mut [GcValue<'a>]) -> ReturnReference<'a> {
+fn rem<'a>(engine: &mut Engine<'a>, arguments: &mut [Value<'a>]) -> ReturnReference<'a> {
     Ok(engine.new_float(arguments[0].get::<f64>(engine) % arguments[1].get::<f64>(engine)))
 }

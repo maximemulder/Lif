@@ -1,17 +1,18 @@
+use crate::runtime::data::Generic;
 use crate::runtime::engine::Engine;
 use crate::runtime::gc::{ GcRef, GcTrace };
-use crate::runtime::value::GcValue;
+use crate::runtime::value::Value;
 
 pub type GcConstructor<'a> = GcRef<Constructor<'a>>;
 
 pub struct Constructor<'a> {
-    pub generic: GcValue<'a>,
-    pub arguments: Box<[GcValue<'a>]>,
-    pub value: GcValue<'a>,
+    pub generic: GcRef<Generic<'a>>,
+    pub arguments: Box<[Value<'a>]>,
+    pub value: Value<'a>,
 }
 
 impl<'a> Constructor<'a> {
-    pub fn new(generic: GcValue<'a>, arguments: Box<[GcValue<'a>]>, value: GcValue<'a>) -> Self {
+    pub fn new(generic: GcRef<Generic<'a>>, arguments: Box<[Value<'a>]>, value: Value<'a>) -> Self {
         Self {
             generic,
             arguments,
@@ -19,12 +20,12 @@ impl<'a> Constructor<'a> {
         }
     }
 
-    fn check(&self, engine: &Engine<'a>, values: &mut [GcValue<'a>]) -> bool {
+    fn check(&self, values: &mut [Value<'a>]) -> bool {
         if self.arguments.len() != values.len() {
             return false;
         }
 
-        self.arguments.iter().copied().zip(values.iter().copied()).all(|(argument, value)| argument.is(engine, value))
+        self.arguments.iter().copied().zip(values.iter().copied()).all(|(argument, value)| argument == value)
     }
 }
 
@@ -49,14 +50,14 @@ impl<'a> Constructors<'a> {
         }
     }
 
-    pub fn record(&mut self, engine: &mut Engine<'a>, generic: GcValue<'a>, arguments: Box<[GcValue<'a>]>, value: GcValue<'a>) -> GcConstructor<'a> {
+    pub fn record(&mut self, engine: &mut Engine<'a>, generic: GcRef<Generic<'a>>, arguments: Box<[Value<'a>]>, value: Value<'a>) -> GcConstructor<'a> {
         let constructor = engine.alloc(Constructor::new(generic, arguments, value));
         self.constructors.push(constructor);
         constructor
     }
 
-    pub fn get(&self, engine: &Engine<'a>, values: &mut [GcValue<'a>]) -> Option<GcValue<'a>> {
-        Some(self.constructors.iter().find(|constructor| constructor.check(engine, values))?.value)
+    pub fn get(&self, values: &mut [Value<'a>]) -> Option<Value<'a>> {
+        Some(self.constructors.iter().find(|constructor| constructor.check(values))?.value)
     }
 }
 

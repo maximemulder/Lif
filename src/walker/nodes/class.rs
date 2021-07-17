@@ -23,23 +23,22 @@ impl Class {
 impl Walkable for Class {
     fn walk<'a>(&self, engine: &mut Engine<'a>) -> ReturnFlow<'a> {
         let parent = if let Some(parent) = self.parent.as_ref() {
-            engine.walk(parent)?.none()?.read()?
+            engine.walk(parent)?.none()?.read()?.get_cast_class(engine)?
         } else {
             engine.primitives.object
         };
 
-        let class = engine.new_class(Ref::as_option(&self.name), Some(parent));
-        let mut value = class.read()?;
-        engine.run_frame(value.get_ref::<Class2>(engine).scope(), |engine| {
-            let data = value.get_mut::<Class2>(engine);
+        let value = engine.new_class(Ref::as_option(&self.name), Some(parent));
+        let mut class = value.read()?.get_gc::<Class2>(engine);
+        engine.run_frame(class.scope(), |engine| {
             for method in self.methods.iter() {
                 let function = engine.walk(method)?.none()?.read()?;
-                data.set_method(function.get_tag(engine).get_name().unwrap(), function);
+                class.set_method(function.get_tag(engine).get_name().unwrap(), function);
             }
 
             Ok(())
         })?;
 
-        Flow::new(class)
+        Flow::new(value)
     }
 }

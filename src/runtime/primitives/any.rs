@@ -1,11 +1,11 @@
 use crate::runtime::engine::Engine;
 use crate::runtime::primitives::Primitives;
 use crate::runtime::r#return::ReturnReference;
-use crate::runtime::value::GcValue;
+use crate::runtime::value::Value;
 
 pub fn populate(engine: &mut Engine) {
     let Primitives { any, boolean, method, string, .. } = engine.primitives;
-    engine.set_constant_value("Any", any);
+    engine.populate_class("Any", any);
     engine.primitive_method(any, "__fstr__", [], None, Some(string), &fstr);
     engine.primitive_method(any, "__sstr__", [], None, Some(string), &sstr);
     engine.primitive_method(any, "__cn__", [("property", string)], None, Some(method), &chain);
@@ -16,44 +16,44 @@ pub fn populate(engine: &mut Engine) {
     engine.primitive_method(any, "__ge__", [("other", any)], None, Some(boolean), &ge);
 }
 
-fn fstr<'a>(engine: &mut Engine<'a>, arguments: &mut [GcValue<'a>]) -> ReturnReference<'a> {
+fn fstr<'a>(engine: &mut Engine<'a>, arguments: &mut [Value<'a>]) -> ReturnReference<'a> {
     let string = arguments[0].call_sstr(engine)?;
     Ok(engine.new_string(string))
 }
 
-fn sstr<'a>(engine: &mut Engine<'a>, arguments: &mut [GcValue<'a>]) -> ReturnReference<'a> {
-    let string = arguments[0].class.call_sstr(engine)?;
+fn sstr<'a>(engine: &mut Engine<'a>, arguments: &mut [Value<'a>]) -> ReturnReference<'a> {
+    let string = Value::new_gc(engine.primitives.class, arguments[0].class).call_sstr(engine)?;
     Ok(engine.new_string(string))
 }
 
-fn chain<'a>(engine: &mut Engine<'a>, arguments: &mut [GcValue<'a>]) -> ReturnReference<'a> {
+fn chain<'a>(engine: &mut Engine<'a>, arguments: &mut [Value<'a>]) -> ReturnReference<'a> {
     let this = arguments[0];
-    let name = arguments[1].get_ref::<String>(engine);
-    Ok(engine.new_method(this.get_method(engine, &name)?, this))
+    let name = arguments[1].get_gc::<String>(engine);
+    Ok(engine.new_method(this.get_method(&name)?, this))
 }
 
-fn eq<'a>(engine: &mut Engine<'a>, arguments: &mut [GcValue<'a>]) -> ReturnReference<'a> {
+fn eq<'a>(engine: &mut Engine<'a>, arguments: &mut [Value<'a>]) -> ReturnReference<'a> {
     Ok(engine.new_boolean(arguments[0] == arguments[1]))
 }
 
-fn ne<'a>(engine: &mut Engine<'a>, arguments: &mut [GcValue<'a>]) -> ReturnReference<'a> {
+fn ne<'a>(engine: &mut Engine<'a>, arguments: &mut [Value<'a>]) -> ReturnReference<'a> {
     let reference = arguments[0].call_method_self(engine, "__eq__", arguments)?;
     Ok(engine.new_boolean(!reference.read()?.get::<bool>(engine)))
 }
 
-fn le<'a>(engine: &mut Engine<'a>, arguments: &mut [GcValue<'a>]) -> ReturnReference<'a> {
+fn le<'a>(engine: &mut Engine<'a>, arguments: &mut [Value<'a>]) -> ReturnReference<'a> {
     let left  = arguments[0].call_method_self(engine, "__lt__", arguments)?;
     let right = arguments[0].call_method_self(engine, "__eq__", arguments)?;
     Ok(engine.new_boolean(left.read()?.get(engine) || right.read()?.get(engine)))
 }
 
-fn gt<'a>(engine: &mut Engine<'a>, arguments: &mut [GcValue<'a>]) -> ReturnReference<'a> {
+fn gt<'a>(engine: &mut Engine<'a>, arguments: &mut [Value<'a>]) -> ReturnReference<'a> {
     let left  = arguments[0].call_method_self(engine, "__lt__", arguments)?;
     let right = arguments[0].call_method_self(engine, "__eq__", arguments)?;
     Ok(engine.new_boolean(!left.read()?.get::<bool>(engine) && !right.read()?.get::<bool>(engine)))
 }
 
-fn ge<'a>(engine: &mut Engine<'a>, arguments: &mut [GcValue<'a>]) -> ReturnReference<'a> {
+fn ge<'a>(engine: &mut Engine<'a>, arguments: &mut [Value<'a>]) -> ReturnReference<'a> {
     let reference = arguments[0].call_method_self(engine, "__lt__", arguments)?;
     Ok(engine.new_boolean(!reference.read()?.get::<bool>(engine)))
 }

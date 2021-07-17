@@ -1,13 +1,13 @@
 use crate::runtime::gc::GcTrace;
-use crate::runtime::value::GcValue;
+use crate::runtime::value::Value;
 
 pub struct Method<'a> {
-    pub function: GcValue<'a>,
-    pub this: GcValue<'a>,
+    pub function: Value<'a>,
+    pub this: Value<'a>,
 }
 
 impl<'a> Method<'a> {
-    pub fn new(function: GcValue<'a>, this: GcValue<'a>) -> Self {
+    pub fn new(function: Value<'a>, this: Value<'a>) -> Self {
         Self {
             function,
             this,

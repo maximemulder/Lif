@@ -1,33 +1,28 @@
+use crate::runtime::data::Class;
 use crate::runtime::error::Error;
-use crate::runtime::engine::Engine;
 use crate::runtime::gc::{ GcRef, GcTrace };
 use crate::runtime::r#return::{ Return, ReturnValue };
-use crate::runtime::value::GcValue;
+use crate::runtime::value::Value;
 
 pub type GcReference<'a> = GcRef<Reference<'a>>;
 
 pub struct Reference<'a> {
-    value: Option<GcValue<'a>>,
-    r#type: Type<'a>,
-}
-
-enum Type<'a> {
-    Variable(GcValue<'a>),
-    Constant,
+    value: Option<Value<'a>>,
+    r#type: Option<GcRef<Class<'a>>>,
 }
 
 impl<'a> Reference<'a> {
-    pub fn new_variable(value: Option<GcValue<'a>>, r#type: GcValue<'a>) -> Self {
+    pub fn new_variable(value: Option<Value<'a>>, r#type: GcRef<Class<'a>>) -> Self {
         Self {
             value,
-            r#type: Type::Variable(r#type),
+            r#type: Some(r#type),
         }
     }
 
-    pub fn new_constant(value: Option<GcValue<'a>>) -> Self {
+    pub fn new_constant(value: Option<Value<'a>>) -> Self {
         Self {
             value,
-            r#type: Type::Constant,
+            r#type: None,
         }
     }
 
@@ -35,13 +30,13 @@ impl<'a> Reference<'a> {
         self.value.ok_or_else(error_undefined)
     }
 
-    pub fn write(&mut self, engine: &Engine<'a>, value: GcValue<'a>) -> Return<()> {
+    pub fn write(&mut self, value: Value<'a>) -> Return<()> {
         match self.r#type {
-            Type::Variable(r#type) => {
-                value.cast(engine, r#type)?;
+            Some(r#type) => {
+                value.cast(r#type)?;
                 self.set_value(value);
             },
-            Type::Constant => if self.value.is_none() {
+            None => if self.value.is_none() {
                 self.set_value(value);
             } else {
                 return Err(error_write_constant());
@@ -59,11 +54,11 @@ impl<'a> Reference<'a> {
         !self.is_defined()
     }
 
-    pub fn get_value(&self) -> GcValue<'a> {
+    pub fn get_value(&self) -> Value<'a> {
         self.value.unwrap()
     }
 
-    pub fn set_value(&mut self, value: GcValue<'a>) {
+    pub fn set_value(&mut self, value: Value<'a>) {
         self.value = Some(value);
     }
 }
