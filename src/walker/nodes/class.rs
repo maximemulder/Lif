@@ -34,7 +34,7 @@ impl Walkable for Class {
             let data = value.get_mut::<Class2>(engine);
             for method in self.methods.iter() {
                 let function = engine.walk(method)?.none()?.read()?;
-                data.set_method(function.data_tag().get_name().unwrap(), function);
+                data.set_method(function.get_tag(engine).get_name().unwrap(), function);
             }
 
             Ok(())

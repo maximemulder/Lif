@@ -366,13 +366,16 @@ impl GcTrace for Value<'_> {
     }
 }
 
-impl<'a> Value<'a> {
-    pub fn data_tag(&self) -> Tag {
-        match &self.data {
-            Data::Class(class)       => class.tag().clone(),
-            Data::Function(function) => function.tag().clone(),
-            Data::Generic(generic)   => generic.tag().clone(),
-            _ => panic!(),
+impl<'a> GcValue<'a> {
+    pub fn get_tag(&self, engine: &Engine<'a>) -> Tag {
+        if self.isa(engine, engine.primitives.class) {
+            self.get_ref::<Class>(engine).tag().clone()
+        } else if self.isa(engine, engine.primitives.function) {
+            self.get_ref::<Function>(engine).tag().clone()
+        } else if self.isa(engine, engine.primitives.generic) {
+            self.get_ref::<Generic>(engine).tag().clone()
+        } else {
+            panic!();
         }
     }
 }
