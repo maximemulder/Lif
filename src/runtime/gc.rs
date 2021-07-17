@@ -38,7 +38,7 @@ impl Gc {
     }
 
     pub fn collect(&mut self) {
-        self.guards.drain_filter(|guard| guard.reset());
+        // self.guards.drain_filter(|guard| guard.reset());
         self.allocations = 0;
     }
 
