@@ -82,7 +82,7 @@ impl Engine<'_> {
 
 impl<'a> Engine<'a> {
     pub fn new_value(&mut self, class: GcValue<'a>, data: Data<'a>) -> GcValue<'a> {
-        self.alloc(Value::new(class, data))
+        self.alloc(Value::new_old(class, data))
     }
 
     pub fn new_reference(&mut self, value: GcValue<'a>) -> GcReference<'a> {

@@ -19,7 +19,7 @@ pub trait Primitive<'a> {
     fn get(engine: &Engine<'a>, value: GcValue<'a>) -> Self;
 }
 
-pub trait PrimitivePtr<'a> {
+pub trait PrimitiveGc<'a> {
     fn get_ref<'b>(engine: &Engine<'a>, value: &'b GcValue<'a>) -> &'b Self;
     fn get_mut<'b>(engine: &Engine<'a>, value: &'b mut GcValue<'a>) -> &'b mut Self;
 }
@@ -81,7 +81,26 @@ impl<'a> Primitive<'a> for f64 {
     }
 }
 
-impl<'a> PrimitivePtr<'a> for Array<'a> {
+impl<'a, T: GcTrace> Primitive<'a> for GcRef<T> {
+    fn set(class: GcValue<'a>, primitive: Self) -> Value<'a> {
+        Value {
+            class,
+            data: Data::Nullable(Nullable::new(None)),
+            data_new: unsafe {
+                std::mem::transmute::<GcRef<T>, usize>(primitive)
+            },
+        }
+    }
+
+    fn get(engine: &Engine<'a>, value: GcValue<'a>) -> Self {
+        debug_assert!(value.class == engine.primitives.float);
+        unsafe {
+            std::mem::transmute::<usize, GcRef<T>>(value.data_new)
+        }
+    }
+}
+
+impl<'a> PrimitiveGc<'a> for Array<'a> {
     fn get_ref<'b>(_: &Engine<'a>, value: &'b GcValue<'a>) -> &'b Self {
         // TODO assert array class
         if let Data::Array(array) = value.data() {
@@ -101,7 +120,7 @@ impl<'a> PrimitivePtr<'a> for Array<'a> {
     }
 }
 
-impl<'a> PrimitivePtr<'a> for Class<'a> {
+impl<'a> PrimitiveGc<'a> for Class<'a> {
     fn get_ref<'b>(engine: &Engine<'a>, value: &'b GcValue<'a>) -> &'b Self {
         debug_assert!(value.class == engine.primitives.class);
         if let Data::Class(class) = value.data() {
@@ -121,7 +140,7 @@ impl<'a> PrimitivePtr<'a> for Class<'a> {
     }
 }
 
-impl<'a> PrimitivePtr<'a> for Function<'a> {
+impl<'a> PrimitiveGc<'a> for Function<'a> {
     fn get_ref<'b>(engine: &Engine<'a>, value: &'b GcValue<'a>) -> &'b Self {
         debug_assert!(value.class == engine.primitives.function);
         if let Data::Function(function) = value.data() {
@@ -141,7 +160,7 @@ impl<'a> PrimitivePtr<'a> for Function<'a> {
     }
 }
 
-impl<'a> PrimitivePtr<'a> for Generic<'a> {
+impl<'a> PrimitiveGc<'a> for Generic<'a> {
     fn get_ref<'b>(engine: &Engine<'a>, value: &'b GcValue<'a>) -> &'b Self {
         debug_assert!(value.class == engine.primitives.generic);
         if let Data::Generic(generic) = value.data() {
@@ -161,7 +180,7 @@ impl<'a> PrimitivePtr<'a> for Generic<'a> {
     }
 }
 
-impl<'a> PrimitivePtr<'a> for Method<'a> {
+impl<'a> PrimitiveGc<'a> for Method<'a> {
     fn get_ref<'b>(engine: &Engine<'a>, value: &'b GcValue<'a>) -> &'b Self {
         debug_assert!(value.class == engine.primitives.method);
         if let Data::Method(method) = value.data() {
@@ -181,7 +200,7 @@ impl<'a> PrimitivePtr<'a> for Method<'a> {
     }
 }
 
-impl<'a> PrimitivePtr<'a> for Nullable<'a> {
+impl<'a> PrimitiveGc<'a> for Nullable<'a> {
     fn get_ref<'b>(_: &Engine<'a>, value: &'b GcValue<'a>) -> &'b Self {
         // TODO assert nullable class
         if let Data::Nullable(nullable) = value.data() {
@@ -201,7 +220,7 @@ impl<'a> PrimitivePtr<'a> for Nullable<'a> {
     }
 }
 
-impl<'a> PrimitivePtr<'a> for Object<'a> {
+impl<'a> PrimitiveGc<'a> for Object<'a> {
     fn get_ref<'b>(_: &Engine<'a>, value: &'b GcValue<'a>) -> &'b Self {
         // TODO assert object class
         if let Data::Object(object) = value.data() {
@@ -221,7 +240,7 @@ impl<'a> PrimitivePtr<'a> for Object<'a> {
     }
 }
 
-impl<'a> PrimitivePtr<'a> for String {
+impl<'a> PrimitiveGc<'a> for String {
     fn get_ref<'b>(engine: &Engine<'a>, value: &'b GcValue<'a>) -> &'b Self {
         debug_assert!(value.class == engine.primitives.string);
         if let Data::String(string) = value.data() {
@@ -241,22 +260,28 @@ impl<'a> PrimitivePtr<'a> for String {
     }
 }
 
+impl<'a> Value<'a> {
+    pub fn new<T: Primitive<'a>>(class: GcValue<'a>, primitive: T) -> Self {
+        T::set(class, primitive)
+    }
+}
+
 impl<'a> GcValue<'a> {
     pub fn get<T: Primitive<'a>>(self, engine: &Engine<'a>) -> T {
         T::get(engine, self)
     }
 
-    pub fn get_ref<T: PrimitivePtr<'a>>(&self, engine: &Engine<'a>) -> &T {
+    pub fn get_ref<T: PrimitiveGc<'a>>(&self, engine: &Engine<'a>) -> &T {
         T::get_ref(engine, self)
     }
 
-    pub fn get_mut<T: PrimitivePtr<'a>>(&mut self, engine: &Engine<'a>) -> &mut T {
+    pub fn get_mut<T: PrimitiveGc<'a>>(&mut self, engine: &Engine<'a>) -> &mut T {
         T::get_mut(engine, self)
     }
 }
 
 impl<'a> Value<'a> {
-    pub fn new(class: GcValue<'a>, data: Data<'a>) -> Self {
+    pub fn new_old(class: GcValue<'a>, data: Data<'a>) -> Self {
         Self {
             class,
             data,
@@ -362,7 +387,6 @@ impl<'a> GcValue<'a> {
 impl GcTrace for Value<'_> {
     fn trace(&mut self) {
         self.class.trace();
-        self.data.trace();
     }
 }
 

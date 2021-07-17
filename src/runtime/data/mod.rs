@@ -14,7 +14,6 @@ pub use method::Method;
 pub use nullable::Nullable;
 pub use object::Object;
 
-use crate::runtime::gc::GcTrace;
 use crate::runtime::scope::GcScope;
 use crate::runtime::reference::GcReference;
 use crate::runtime::utilities::parameters::Parameters;
@@ -65,20 +64,5 @@ impl<'a> Data<'a> {
 
     pub fn string(string: String) -> Self {
         Data::String(string)
-    }
-}
-
-impl GcTrace for Data<'_> {
-    fn trace(&mut self) {
-        match self {
-            Data::Array(array)       => array.trace(),
-            Data::Class(class)       => class.trace(),
-            Data::Function(function) => function.trace(),
-            Data::Generic(generic)   => generic.trace(),
-            Data::Method(method)     => method.trace(),
-            Data::Nullable(nullable) => nullable.trace(),
-            Data::Object(object)     => object.trace(),
-            _ => (),
-        }
     }
 }
