@@ -27,10 +27,6 @@ pub trait PrimitiveGc<'a> : GcTrace + Sized {
     fn get_gc(engine: &Engine<'a>, value: Value<'a>) -> GcRef<Self>;
 }
 
-pub trait Reflective<'a> : PrimitiveGc<'a> {
-    fn class(engine: &Engine<'a>) -> GcRef<Class<'a>>;
-}
-
 impl<'a> Primitive<'a> for bool {
     fn set(class: GcRef<Class<'a>>, primitive: Self) -> Value<'a> {
         Value {
@@ -42,7 +38,7 @@ impl<'a> Primitive<'a> for bool {
     }
 
     fn get(engine: &Engine<'a>, value: Value<'a>) -> Self {
-        debug_assert!(value.class == engine.primitives.boolean);
+        debug_assert!(value.isa(engine.primitives.boolean));
         unsafe {
             std::mem::transmute::<u8, bool>(value.data as u8)
         }
@@ -60,7 +56,7 @@ impl<'a> Primitive<'a> for isize {
     }
 
     fn get(engine: &Engine<'a>, value: Value<'a>) -> Self {
-        debug_assert!(value.class == engine.primitives.integer);
+        debug_assert!(value.isa(engine.primitives.integer));
         unsafe {
             std::mem::transmute::<usize, isize>(value.data)
         }
@@ -78,7 +74,7 @@ impl<'a> Primitive<'a> for f64 {
     }
 
     fn get(engine: &Engine<'a>, value: Value<'a>) -> Self {
-        debug_assert!(value.class == engine.primitives.float);
+        debug_assert!(value.isa(engine.primitives.float));
         unsafe {
             std::mem::transmute::<usize, f64>(value.data)
         }
