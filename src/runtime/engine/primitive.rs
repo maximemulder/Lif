@@ -24,12 +24,12 @@ impl<'a> Engine<'a> {
     }
 
     pub fn populate_class(&mut self, name: &str, class: GcRef<Class<'a>>) {
-        let reference = self.new_constant(Value::new_gc(self, class));
+        let reference = self.new_constant(Value::primitive_gc(self, class));
         self.set_variable(name, reference);
     }
 
     pub fn populate_generic(&mut self, name: &str, generic: GcRef<Generic<'a>>) {
-        let reference = self.new_constant(Value::new_gc(self, generic));
+        let reference = self.new_constant(Value::primitive_gc(self, generic));
         self.set_variable(name, reference);
     }
 

@@ -26,9 +26,9 @@ pub struct Data<'a> {
 }
 
 impl<'a> Data<'a> {
-    pub fn new(bits: usize) -> Self {
+    pub fn new<T: Primitive<'a>>(primitive: T) -> Self {
         Self {
-            bits,
+            bits: Primitive::set(primitive),
             phantom: PhantomData,
         }
     }
@@ -170,25 +170,19 @@ impl<'a> PrimitiveClass<'a> for String {
 }
 
 impl<'a> Value<'a> {
-    pub fn new<T: Primitive<'a> + PrimitiveClass<'a>>(engine: &Engine<'a>, primitive: T) -> Self {
-        Self {
-            class: T::get_class(engine),
-            data: Data::new(T::set(primitive)),
-        }
-    }
-
-    pub fn new_gc<T: PrimitiveClass<'a> + GcTrace>(engine: &Engine<'a>, primitive: GcRef<T>) -> Self {
-        Self {
-            class: T::get_class(engine),
-            data: Data::new(GcRef::set(primitive)),
-        }
-    }
-
-    pub fn new_class<T: GcTrace>(class: GcRef<Class<'a>>, primitive: GcRef<T>) -> Self {
+    pub fn new<T: Primitive<'a>>(class: GcRef<Class<'a>>, primitive: T) -> Self {
         Self {
             class,
-            data: Data::new(GcRef::set(primitive)),
+            data: Data::new(primitive),
         }
+    }
+
+    pub fn primitive<T: Primitive<'a> + PrimitiveClass<'a>>(engine: &Engine<'a>, primitive: T) -> Self {
+        Self::new(T::get_class(engine), primitive)
+    }
+
+    pub fn primitive_gc<T: PrimitiveClass<'a> + GcTrace>(engine: &Engine<'a>, primitive: GcRef<T>) -> Self {
+        Self::new(T::get_class(engine), primitive)
     }
 
     pub fn get<T: Primitive<'a> + PrimitiveClass<'a>>(self, engine: &Engine<'a>) -> T {

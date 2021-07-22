@@ -26,7 +26,7 @@ pub fn create<'a>(engine: &mut Engine<'a>, arguments: &mut [Value<'a>]) -> Retur
     engine.primitive_method(array, "insert", [("index", integer), ("element", r#type)], None, None, &insert);
     engine.primitive_method(array, "remove", [("index", integer)], None, None, &remove);
     engine.primitive_method(array, "__cl__", [("arguments", array_any)], None, Some(r#type), &access);
-    Ok(engine.new_constant(Value::new_gc(engine, array)))
+    Ok(engine.new_constant(Value::primitive_gc(engine, array)))
 }
 
 fn get_type<'a>(engine: &Engine<'a>) -> GcRef<Class<'a>> {
@@ -45,7 +45,7 @@ fn init<'a>(engine: &mut Engine<'a>, arguments: &mut [Value<'a>]) -> ReturnRefer
 
 fn fstr<'a>(engine: &mut Engine<'a>, arguments: &mut [Value<'a>]) -> ReturnReference<'a> {
     let this = arguments[0];
-    let mut string = Value::new_gc(engine, this.class).call_sstr(engine)?;
+    let mut string = Value::primitive_gc(engine, this.class).call_sstr(engine)?;
     string.push_str("(");
     string.push_str(&this.get_gn::<Array>(engine).elements().iter()
         .map(|element| element.read()?.call_sstr(engine))

@@ -18,7 +18,7 @@ pub fn create<'a>(engine: &mut Engine<'a>, arguments: &mut [Value<'a>]) -> Retur
     engine.primitive_static(nullable, "none", [], None, Some(nullable), &none);
     engine.primitive_method(nullable, "__fstr__", [], None, Some(string), &fstr);
     engine.primitive_method(nullable, "get", [], None, Some(r#type), &get);
-    Ok(engine.new_constant(Value::new_gc(engine, nullable)))
+    Ok(engine.new_constant(Value::primitive_gc(engine, nullable)))
 }
 
 fn get_type<'a>(engine: &Engine<'a>) -> GcRef<Class<'a>> {
@@ -27,7 +27,7 @@ fn get_type<'a>(engine: &Engine<'a>) -> GcRef<Class<'a>> {
 
 fn fstr<'a>(engine: &mut Engine<'a>, arguments: &mut [Value<'a>]) -> ReturnReference<'a> {
     let this = arguments[0];
-    let mut string = Value::new_gc(engine, this.class).call_sstr(engine)?;
+    let mut string = Value::primitive_gc(engine, this.class).call_sstr(engine)?;
     if let Some(value) = this.get_gn::<Nullable>(engine).option {
         string.push_str(".some(");
         string.push_str(&value.call_sstr(engine)?);
@@ -40,14 +40,14 @@ fn fstr<'a>(engine: &mut Engine<'a>, arguments: &mut [Value<'a>]) -> ReturnRefer
 }
 
 fn some<'a>(engine: &mut Engine<'a>, arguments: &mut [Value<'a>]) -> ReturnReference<'a> {
-    let class = Value::new_gc(engine, get_type(engine));
+    let class = Value::primitive_gc(engine, get_type(engine));
     let generic = engine.primitives.nullable;
     let nullable = generic.clone().call(engine, generic, &mut [class])?.read()?.get_gc::<Class>(engine);
     Ok(engine.new_nullable(nullable, Some(arguments[0])))
 }
 
 fn none<'a>(engine: &mut Engine<'a>, _: &mut [Value<'a>]) -> ReturnReference<'a> {
-    let class = Value::new_gc(engine, get_type(engine));
+    let class = Value::primitive_gc(engine, get_type(engine));
     let generic = engine.primitives.nullable;
     let nullable = generic.clone().call(engine, generic, &mut [class])?.read()?.get_gc::<Class>(engine);
     Ok(engine.new_nullable(nullable, None))

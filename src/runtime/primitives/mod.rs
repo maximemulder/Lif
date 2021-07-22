@@ -107,7 +107,7 @@ impl<'a> Engine<'a> {
 
         self.primitives.array_any = {
             let array = self.primitives.array;
-            array.clone().call(self, array, &mut [Value::new_gc(self, self.primitives.any)]).ok().unwrap().get_value().get_gc::<Class>(self)
+            array.clone().call(self, array, &mut [Value::primitive_gc(self, self.primitives.any)]).ok().unwrap().get_value().get_gc::<Class>(self)
         };
 
         any::populate(self);
