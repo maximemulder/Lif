@@ -192,12 +192,16 @@ impl<'a> Value<'a> {
 
     pub fn get_gc<T: PrimitiveClass<'a> + GcTrace>(self, engine: &Engine<'a>) -> GcRef<T> {
         debug_assert!(self.isa(T::get_class(engine)));
-        GcRef::<T>::get(self.data.bits)
+        GcRef::get(self.data.bits)
     }
 
     pub fn get_gn<T: PrimitiveGeneric<'a> + GcTrace>(self, engine: &Engine<'a>) -> GcRef<T> {
         debug_assert!(self.isa_generic(T::get_generic(engine)));
-        GcRef::<T>::get(self.data.bits)
+        GcRef::get(self.data.bits)
+    }
+
+    pub fn get_unchecked<T: Primitive<'a>>(self) -> T {
+        T::get(self.data.bits)
     }
 }
 
