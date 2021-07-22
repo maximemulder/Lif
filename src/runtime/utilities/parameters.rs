@@ -105,7 +105,7 @@ pub fn pack<'a>(engine: &mut Engine<'a>, values: &mut [Value<'a>]) -> Value<'a> 
 }
 
 pub fn unpack<'a>(engine: &Engine<'a>, value: Value<'a>) -> Return<Box<[Value<'a>]>> {
-    value.get_gc::<Array>(engine).elements().iter()
+    value.get_gn::<Array>(engine).elements().iter()
         .copied()
         .map(|element| element.read())
         .collect()

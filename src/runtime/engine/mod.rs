@@ -12,7 +12,7 @@ use crate::runtime::registries::Registries;
 use crate::runtime::r#return::{ ReturnFlow, ReturnReference };
 use crate::runtime::scope::{ GcScope, Scope };
 use crate::runtime::utilities::tag::Tagger;
-use crate::runtime::value::{ PrimitiveGc, Value };
+use crate::runtime::value::Value;
 use crate::walker::WNode;
 
 use std::io::{ Read, Write };
@@ -81,10 +81,6 @@ impl Engine<'_> {
 }
 
 impl<'a> Engine<'a> {
-    pub fn new_gc<T: PrimitiveGc<'a>>(&mut self, class: GcRef<Class<'a>>, data: T) -> Value<'a> {
-        Value::new(class, self.alloc(data))
-    }
-
     pub fn new_reference(&mut self, value: Value<'a>) -> GcReference<'a> {
         self.alloc(Reference::new_variable(Some(value), self.primitives.any))
     }

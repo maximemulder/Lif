@@ -22,7 +22,7 @@ fn fstr<'a>(engine: &mut Engine<'a>, arguments: &mut [Value<'a>]) -> ReturnRefer
 }
 
 fn sstr<'a>(engine: &mut Engine<'a>, arguments: &mut [Value<'a>]) -> ReturnReference<'a> {
-    let string = Value::new_gc(engine.primitives.class, arguments[0].class).call_sstr(engine)?;
+    let string = Value::new_gc(engine, arguments[0].class).call_sstr(engine)?;
     Ok(engine.new_string(string))
 }
 

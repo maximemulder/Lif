@@ -20,7 +20,7 @@ fn apply<'a>(engine: &mut Engine<'a>, arguments: &mut [Value<'a>]) -> ReturnRefe
 fn call<'a>(engine: &mut Engine<'a>, arguments: &mut [Value<'a>]) -> ReturnReference<'a> {
     let this = arguments[0].get_gc::<Method>(engine).this;
     let reference = engine.new_reference(this);
-    arguments[1].get_gc::<Array>(engine).insert(0, reference);
+    arguments[1].get_gn::<Array>(engine).insert(0, reference);
     let method = arguments[0].get_gc::<Method>(engine);
     method.function.call_method(engine, "__cl__", &mut [arguments[1]])
 }

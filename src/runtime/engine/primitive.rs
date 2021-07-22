@@ -16,20 +16,20 @@ fn create_parameters<'a>(parameters: &[(&str, GcRef<Class<'a>>)], rest: Option<(
 
 impl<'a> Engine<'a> {
     pub fn primitive_class(&mut self, name: &str, parent: Option<GcRef<Class<'a>>>) -> GcRef<Class<'a>> {
-        self.new_class_value(Some(name), parent).get::<GcRef<Class>>(self)
+        self.new_class_value(Some(name), parent).get_gc::<Class>(self)
     }
 
     pub fn primitive_generic(&mut self, name: &str, parameters: Box<[Box<str>]>, implementation: impl GenericImplementation<'a> + 'a) -> GcRef<Generic<'a>> {
-        self.new_generic_value(Some(name), parameters, implementation).get::<GcRef<Generic>>(self)
+        self.new_generic_value(Some(name), parameters, implementation).get_gc::<Generic>(self)
     }
 
     pub fn populate_class(&mut self, name: &str, class: GcRef<Class<'a>>) {
-        let reference = self.new_constant(Value::new(self.primitives.class, class));
+        let reference = self.new_constant(Value::new_gc(self, class));
         self.set_variable(name, reference);
     }
 
     pub fn populate_generic(&mut self, name: &str, generic: GcRef<Generic<'a>>) {
-        let reference = self.new_constant(Value::new(self.primitives.generic, generic));
+        let reference = self.new_constant(Value::new_gc(self, generic));
         self.set_variable(name, reference);
     }
 

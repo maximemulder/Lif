@@ -7,6 +7,7 @@ use crate::runtime::utilities::parameters;
 use crate::runtime::utilities::tag::Tag;
 
 use std::ops::Deref;
+use std::marker::PhantomData;
 
 impl GcTrace for String {
     fn trace(&mut self) {}
@@ -15,160 +16,194 @@ impl GcTrace for String {
 #[derive(Clone, Copy, PartialEq, Eq)]
 pub struct Value<'a> {
     pub class: GcRef<Class<'a>>,
-    data: usize,
+    data: Data<'a>,
+}
+
+#[derive(Clone, Copy, PartialEq, Eq)]
+pub struct Data<'a> {
+    bits: usize,
+    phantom: PhantomData<&'a ()>
+}
+
+impl<'a> Data<'a> {
+    pub fn new(bits: usize) -> Self {
+        Self {
+            bits,
+            phantom: PhantomData,
+        }
+    }
 }
 
 pub trait Primitive<'a> {
-    fn set(class: GcRef<Class<'a>>, primitive: Self) -> Value<'a>;
-    fn get(engine: &Engine<'a>, value: Value<'a>) -> Self;
+    fn get(bits: usize) -> Self;
+    fn set(primitive: Self) -> usize;
 }
 
-pub trait PrimitiveGc<'a> : GcTrace + Sized {
-    fn get_gc(engine: &Engine<'a>, value: Value<'a>) -> GcRef<Self>;
+pub trait PrimitiveClass<'a> {
+    fn get_class(engine: &Engine<'a>) -> GcRef<Class<'a>>;
+}
+
+pub trait PrimitiveGeneric<'a> {
+    fn get_generic(engine: &Engine<'a>) -> GcRef<Generic<'a>>;
 }
 
 impl<'a> Primitive<'a> for bool {
-    fn set(class: GcRef<Class<'a>>, primitive: Self) -> Value<'a> {
-        Value {
-            class,
-            data: unsafe {
-                std::mem::transmute::<bool, u8>(primitive) as usize
-            },
+    fn get(bits: usize) -> Self {
+        unsafe {
+            std::mem::transmute::<u8, bool>(bits as u8)
         }
     }
 
-    fn get(engine: &Engine<'a>, value: Value<'a>) -> Self {
-        debug_assert!(value.isa(engine.primitives.boolean));
+    fn set(primitive: Self) -> usize {
         unsafe {
-            std::mem::transmute::<u8, bool>(value.data as u8)
+            std::mem::transmute::<bool, u8>(primitive) as usize
         }
     }
 }
 
 impl<'a> Primitive<'a> for isize {
-    fn set(class: GcRef<Class<'a>>, primitive: Self) -> Value<'a> {
-        Value {
-            class,
-            data: unsafe {
-                std::mem::transmute::<isize, usize>(primitive)
-            },
+    fn get(bits: usize) -> Self {
+        unsafe {
+            std::mem::transmute::<usize, isize>(bits)
         }
     }
 
-    fn get(engine: &Engine<'a>, value: Value<'a>) -> Self {
-        debug_assert!(value.isa(engine.primitives.integer));
+    fn set(primitive: Self) -> usize {
         unsafe {
-            std::mem::transmute::<usize, isize>(value.data)
+            std::mem::transmute::<isize, usize>(primitive)
         }
     }
 }
 
 impl<'a> Primitive<'a> for f64 {
-    fn set(class: GcRef<Class<'a>>, primitive: Self) -> Value<'a> {
-        Value {
-            class,
-            data: unsafe {
-                std::mem::transmute::<f64, usize>(primitive)
-            },
+    fn get(bits: usize) -> Self {
+        unsafe {
+            std::mem::transmute::<usize, f64>(bits)
         }
     }
 
-    fn get(engine: &Engine<'a>, value: Value<'a>) -> Self {
-        debug_assert!(value.isa(engine.primitives.float));
+    fn set(primitive: Self) -> usize {
         unsafe {
-            std::mem::transmute::<usize, f64>(value.data)
+            std::mem::transmute::<f64, usize>(primitive)
         }
     }
 }
 
 impl<'a, T: GcTrace> Primitive<'a> for GcRef<T> {
-    fn set(class: GcRef<Class<'a>>, primitive: Self) -> Value<'a> {
-        Value {
-            class,
-            data: unsafe {
-                std::mem::transmute::<GcRef<T>, usize>(primitive)
-            },
-        }
-    }
-
-    fn get(_: &Engine<'a>, value: Value<'a>) -> Self {
+    fn get(bits: usize) -> Self {
         unsafe {
-            std::mem::transmute::<usize, GcRef<T>>(value.data)
+            std::mem::transmute::<usize, GcRef<T>>(bits)
+        }
+    }
+
+    fn set(primitive: Self) -> usize {
+        unsafe {
+            std::mem::transmute::<GcRef<T>, usize>(primitive)
         }
     }
 }
 
-impl<'a> PrimitiveGc<'a> for Array<'a> {
-    fn get_gc(engine: &Engine<'a>, value: Value<'a>) -> GcRef<Self> {
-        debug_assert!(value.isa_generic(engine.primitives.array));
-        value.get::<GcRef<Array>>(engine)
+impl<'a> PrimitiveGeneric<'a> for Array<'a> {
+    fn get_generic(engine: &Engine<'a>) -> GcRef<Generic<'a>> {
+        engine.primitives.array
     }
 }
 
-impl<'a> PrimitiveGc<'a> for Class<'a> {
-    fn get_gc(engine: &Engine<'a>, value: Value<'a>) -> GcRef<Self> {
-        debug_assert!(value.isa(engine.primitives.class));
-        value.get::<GcRef<Class>>(engine)
+impl<'a> PrimitiveGeneric<'a> for Nullable<'a> {
+    fn get_generic(engine: &Engine<'a>) -> GcRef<Generic<'a>> {
+        engine.primitives.nullable
     }
 }
 
-impl<'a> PrimitiveGc<'a> for Function<'a> {
-    fn get_gc(engine: &Engine<'a>, value: Value<'a>) -> GcRef<Self> {
-        debug_assert!(value.isa(engine.primitives.function));
-        value.get::<GcRef<Function>>(engine)
+impl<'a> PrimitiveClass<'a> for bool {
+    fn get_class(engine: &Engine<'a>) -> GcRef<Class<'a>> {
+        engine.primitives.boolean
     }
 }
 
-impl<'a> PrimitiveGc<'a> for Generic<'a> {
-    fn get_gc(engine: &Engine<'a>, value: Value<'a>) -> GcRef<Self> {
-        debug_assert!(value.isa(engine.primitives.generic));
-        value.get::<GcRef<Generic>>(engine)
+impl<'a> PrimitiveClass<'a> for isize {
+    fn get_class(engine: &Engine<'a>) -> GcRef<Class<'a>> {
+        engine.primitives.integer
     }
 }
 
-impl<'a> PrimitiveGc<'a> for Method<'a> {
-    fn get_gc(engine: &Engine<'a>, value: Value<'a>) -> GcRef<Self> {
-        debug_assert!(value.isa(engine.primitives.method));
-        value.get::<GcRef<Method>>(engine)
+impl<'a> PrimitiveClass<'a> for f64 {
+    fn get_class(engine: &Engine<'a>) -> GcRef<Class<'a>> {
+        engine.primitives.float
     }
 }
 
-impl<'a> PrimitiveGc<'a> for Nullable<'a> {
-    fn get_gc(engine: &Engine<'a>, value: Value<'a>) -> GcRef<Self> {
-        debug_assert!(value.isa_generic(engine.primitives.nullable));
-        value.get::<GcRef<Nullable>>(engine)
+impl<'a> PrimitiveClass<'a> for Class<'a> {
+    fn get_class(engine: &Engine<'a>) -> GcRef<Class<'a>> {
+        engine.primitives.class
     }
 }
 
-impl<'a> PrimitiveGc<'a> for Object<'a> {
-    fn get_gc(engine: &Engine<'a>, value: Value<'a>) -> GcRef<Self> {
-        debug_assert!(value.isa(engine.primitives.object));
-        value.get::<GcRef<Object>>(engine)
+impl<'a> PrimitiveClass<'a> for Function<'a> {
+    fn get_class(engine: &Engine<'a>) -> GcRef<Class<'a>> {
+        engine.primitives.function
     }
 }
 
-impl<'a> PrimitiveGc<'a> for String {
-    fn get_gc(engine: &Engine<'a>, value: Value<'a>) -> GcRef<Self> {
-        debug_assert!(value.isa(engine.primitives.string));
-        value.get::<GcRef<String>>(engine)
+impl<'a> PrimitiveClass<'a> for Generic<'a> {
+    fn get_class(engine: &Engine<'a>) -> GcRef<Class<'a>> {
+        engine.primitives.generic
+    }
+}
+
+impl<'a> PrimitiveClass<'a> for Method<'a> {
+    fn get_class(engine: &Engine<'a>) -> GcRef<Class<'a>> {
+        engine.primitives.method
+    }
+}
+
+impl<'a> PrimitiveClass<'a> for Object<'a> {
+    fn get_class(engine: &Engine<'a>) -> GcRef<Class<'a>> {
+        engine.primitives.object
+    }
+}
+
+impl<'a> PrimitiveClass<'a> for String {
+    fn get_class(engine: &Engine<'a>) -> GcRef<Class<'a>> {
+        engine.primitives.string
     }
 }
 
 impl<'a> Value<'a> {
-    pub fn new<T: Primitive<'a>>(class: GcRef<Class<'a>>, primitive: T) -> Self {
-        T::set(class, primitive)
+    pub fn new<T: Primitive<'a> + PrimitiveClass<'a>>(engine: &Engine<'a>, primitive: T) -> Self {
+        Self {
+            class: T::get_class(engine),
+            data: Data::new(T::set(primitive)),
+        }
     }
 
-    pub fn new_gc<T: GcTrace>(class: GcRef<Class<'a>>, value: GcRef<T>) -> Self {
-        Self::new(class, value)
+    pub fn new_gc<T: PrimitiveClass<'a> + GcTrace>(engine: &Engine<'a>, primitive: GcRef<T>) -> Self {
+        Self {
+            class: T::get_class(engine),
+            data: Data::new(GcRef::set(primitive)),
+        }
     }
 
-    pub fn get<T: Primitive<'a>>(self, engine: &Engine<'a>) -> T {
-        T::get(engine, self)
+    pub fn new_class<T: GcTrace>(class: GcRef<Class<'a>>, primitive: GcRef<T>) -> Self {
+        Self {
+            class,
+            data: Data::new(GcRef::set(primitive)),
+        }
     }
 
-    pub fn get_gc<T: PrimitiveGc<'a>>(self, engine: &Engine<'a>) -> GcRef<T> {
-        T::get_gc(engine, self)
+    pub fn get<T: Primitive<'a> + PrimitiveClass<'a>>(self, engine: &Engine<'a>) -> T {
+        debug_assert!(self.isa(T::get_class(engine)));
+        T::get(self.data.bits)
+    }
+
+    pub fn get_gc<T: PrimitiveClass<'a> + GcTrace>(self, engine: &Engine<'a>) -> GcRef<T> {
+        debug_assert!(self.isa(T::get_class(engine)));
+        GcRef::<T>::get(self.data.bits)
+    }
+
+    pub fn get_gn<T: PrimitiveGeneric<'a> + GcTrace>(self, engine: &Engine<'a>) -> GcRef<T> {
+        debug_assert!(self.isa_generic(T::get_generic(engine)));
+        GcRef::<T>::get(self.data.bits)
     }
 }
 
@@ -237,12 +272,12 @@ impl<'a> Value<'a> {
 
     pub fn get_cast_array(self, engine: &Engine<'a>) -> Return<GcRef<Array<'a>>> {
         self.cast_generic(engine.primitives.array)?;
-        Ok(self.get(engine))
+        Ok(self.get_gn(engine))
     }
 
     pub fn get_cast_class(self, engine: &Engine<'a>) -> Return<GcRef<Class<'a>>> {
         self.cast(engine.primitives.class)?;
-        Ok(self.get(engine))
+        Ok(self.get_gc(engine))
     }
 }
 

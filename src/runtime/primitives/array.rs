@@ -26,10 +26,10 @@ pub fn create<'a>(engine: &mut Engine<'a>, arguments: &mut [Value<'a>]) -> Retur
     engine.primitive_method(array, "insert", [("index", integer), ("element", r#type)], None, None, &insert);
     engine.primitive_method(array, "remove", [("index", integer)], None, None, &remove);
     engine.primitive_method(array, "__cl__", [("arguments", array_any)], None, Some(r#type), &access);
-    Ok(engine.new_constant(Value::new(engine.primitives.class, array)))
+    Ok(engine.new_constant(Value::new_gc(engine, array)))
 }
 
-fn get_type<'a>(engine: &mut Engine<'a>) -> GcRef<Class<'a>> {
+fn get_type<'a>(engine: &Engine<'a>) -> GcRef<Class<'a>> {
     engine.scope().parent().unwrap().source().unwrap().get_gc::<Class>(engine).constructor().unwrap().arguments[0].get_gc::<Class>(engine)
 }
 
@@ -45,9 +45,9 @@ fn init<'a>(engine: &mut Engine<'a>, arguments: &mut [Value<'a>]) -> ReturnRefer
 
 fn fstr<'a>(engine: &mut Engine<'a>, arguments: &mut [Value<'a>]) -> ReturnReference<'a> {
     let this = arguments[0];
-    let mut string = Value::new(engine.primitives.class, this.class).call_sstr(engine)?;
+    let mut string = Value::new_gc(engine, this.class).call_sstr(engine)?;
     string.push_str("(");
-    string.push_str(&this.get_gc::<Array>(engine).elements().iter()
+    string.push_str(&this.get_gn::<Array>(engine).elements().iter()
         .map(|element| element.read()?.call_sstr(engine))
         .collect::<Return<Box<[_]>>>()?
         .join(", ")
@@ -61,7 +61,7 @@ fn append<'a>(engine: &mut Engine<'a>, arguments: &mut [Value<'a>]) -> ReturnRef
     for index in 1 .. arguments.len() {
         let r#type = get_type(engine);
         let reference = engine.new_variable(Some(arguments[index]), r#type);
-        arguments[0].get_gc::<Array>(engine).append(reference);
+        arguments[0].get_gn::<Array>(engine).append(reference);
     }
 
     Ok(engine.undefined())
@@ -71,7 +71,7 @@ fn prepend<'a>(engine: &mut Engine<'a>, arguments: &mut [Value<'a>]) -> ReturnRe
     for index in 1 .. arguments.len() {
         let r#type = get_type(engine);
         let reference = engine.new_variable(Some(arguments[index]), r#type);
-        arguments[0].get_gc::<Array>(engine).insert(index - 1, reference);
+        arguments[0].get_gn::<Array>(engine).insert(index - 1, reference);
     }
 
     Ok(engine.undefined())
@@ -81,16 +81,16 @@ fn insert<'a>(engine: &mut Engine<'a>, arguments: &mut [Value<'a>]) -> ReturnRef
     let index = arguments[1].get::<isize>(engine) as usize;
     let r#type = get_type(engine);
     let reference = engine.new_variable(Some(arguments[2]), r#type);
-    arguments[0].get_gc::<Array>(engine).insert(index, reference);
+    arguments[0].get_gn::<Array>(engine).insert(index, reference);
     Ok(engine.undefined())
 }
 
 fn remove<'a>(engine: &mut Engine<'a>, arguments: &mut [Value<'a>]) -> ReturnReference<'a> {
     let index = arguments[1].get::<isize>(engine) as usize;
-    arguments[0].get_gc::<Array>(engine).remove(index);
+    arguments[0].get_gn::<Array>(engine).remove(index);
     Ok(engine.undefined())
 }
 
 fn access<'a>(engine: &mut Engine<'a>, arguments: &mut [Value<'a>]) -> ReturnReference<'a> {
-    Ok(arguments[0].get_gc::<Array>(engine).get(arguments[1].get_gc::<Array>(engine).get(0).read()?.get::<isize>(engine) as usize))
+    Ok(arguments[0].get_gn::<Array>(engine).get(arguments[1].get_gn::<Array>(engine).get(0).read()?.get::<isize>(engine) as usize))
 }

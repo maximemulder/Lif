@@ -7,19 +7,19 @@ use crate::runtime::value::Value;
 
 impl<'a> Engine<'a> {
     pub fn new_boolean_value(&mut self, boolean: bool) -> Value<'a> {
-        Value::new(self.primitives.boolean, boolean)
+        Value::new(self, boolean)
     }
 
     pub fn new_float_value(&mut self, float: f64) -> Value<'a> {
-        Value::new(self.primitives.float, float)
+        Value::new(self, float)
     }
 
     pub fn new_integer_value(&mut self, integer: isize) -> Value<'a> {
-        Value::new(self.primitives.integer, integer)
+        Value::new(self, integer)
     }
 
     pub fn new_array_value(&mut self, class: GcRef<Class<'a>>, elements: Vec<GcReference<'a>>) -> Value<'a> {
-        self.new_gc(class, Array::new(elements))
+        Value::new_class(class, self.alloc(Array::new(elements)))
     }
 
     pub fn new_array_any_value(&mut self, elements: Vec<GcReference<'a>>) -> Value<'a> {
@@ -29,7 +29,8 @@ impl<'a> Engine<'a> {
     pub fn new_class_value(&mut self, name: Option<&str>, parent: Option<GcRef<Class<'a>>>) -> Value<'a> {
         let tag = self.taggers.classes.generate(name);
         self.run_source_scope("__class__", |engine, scope| {
-            engine.new_gc(engine.primitives.class, Class::new(tag, scope, parent))
+            let primitive = engine.alloc(Class::new(tag, scope, parent));
+            Value::new_gc(engine, primitive)
         })
     }
 
@@ -38,31 +39,35 @@ impl<'a> Engine<'a> {
     ) -> Value<'a> {
         let tag = self.taggers.functions.generate(name);
         self.run_source_scope("__function__", |engine, scope| {
-            engine.new_gc(engine.primitives.function, Function::new(tag, scope, parameters, r#return, implementation))
+            let primitive = engine.alloc(Function::new(tag, scope, parameters, r#return, implementation));
+            Value::new_gc(engine, primitive)
         })
     }
 
     pub fn new_generic_value(&mut self, name: Option<&str>, parameters: Box<[Box<str>]>, implementation: impl GenericImplementation<'a> + 'a) -> Value<'a> {
         let tag = self.taggers.generics.generate(name);
         self.run_source_scope("__generic__", |engine, scope| {
-            engine.new_gc(engine.primitives.generic, Generic::new(tag, scope, parameters, implementation))
+            let primitive = engine.alloc(Generic::new(tag, scope, parameters, implementation));
+            Value::new_gc(engine, primitive)
         })
     }
 
     pub fn new_method_value(&mut self, function: Value<'a>, this: Value<'a>) -> Value<'a> {
-        self.new_gc(self.primitives.method, Method::new(function, this))
+        let primitive = self.alloc(Method::new(function, this));
+        Value::new_gc(self, primitive)
     }
 
     pub fn new_object_value(&mut self, parent: GcRef<Class<'a>>) -> Value<'a> {
-        self.new_gc(parent, Object::new())
+        Value::new_class(parent, self.alloc(Object::new()))
     }
 
     pub fn new_nullable_value(&mut self, class: GcRef<Class<'a>>, option: Option<Value<'a>>) -> Value<'a> {
-        self.new_gc(class, Nullable::new(option))
+        Value::new_class(class, self.alloc(Nullable::new(option)))
     }
 
     pub fn new_string_value(&mut self, string: String) -> Value<'a> {
-        self.new_gc(self.primitives.string, string)
+        let primitive = self.alloc(string);
+        Value::new_gc(self, primitive)
     }
 }
 
