@@ -1,4 +1,4 @@
-use crate::runtime::data::{ Array, Class, Data, Function, Generic, Method, Nullable, Object };
+use crate::runtime::data::{ Array, Class, Function, Generic, Method, Nullable, Object };
 use crate::runtime::engine::Engine;
 use crate::runtime::error::Error;
 use crate::runtime::gc::{ GcRef, GcTrace };
@@ -6,238 +6,315 @@ use crate::runtime::r#return::{ Return, ReturnReference, ReturnValue };
 use crate::runtime::utilities::parameters;
 use crate::runtime::utilities::tag::Tag;
 
-pub type GcValue<'a> = GcRef<Value<'a>>;
+use std::ops::Deref;
+use std::marker::PhantomData;
 
+impl GcTrace for String {
+    fn trace(&mut self) {}
+}
+
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct Value<'a> {
-    pub class: GcValue<'a>,
+    pub class: GcRef<Class<'a>>,
     data: Data<'a>,
 }
 
+#[derive(Clone, Copy, PartialEq, Eq)]
+pub struct Data<'a> {
+    bits: usize,
+    phantom: PhantomData<&'a ()>
+}
+
+impl<'a> Data<'a> {
+    pub fn new<T: Primitive<'a>>(primitive: T) -> Self {
+        Self {
+            bits: Primitive::set(primitive),
+            phantom: PhantomData,
+        }
+    }
+}
+
+pub trait Primitive<'a> {
+    fn get(bits: usize) -> Self;
+    fn set(primitive: Self) -> usize;
+}
+
+pub trait PrimitiveClass<'a> {
+    fn get_class(engine: &Engine<'a>) -> GcRef<Class<'a>>;
+}
+
+pub trait PrimitiveGeneric<'a> {
+    fn get_generic(engine: &Engine<'a>) -> GcRef<Generic<'a>>;
+}
+
+impl<'a> Primitive<'a> for bool {
+    fn get(bits: usize) -> Self {
+        unsafe {
+            std::mem::transmute::<u8, bool>(bits as u8)
+        }
+    }
+
+    fn set(primitive: Self) -> usize {
+        unsafe {
+            std::mem::transmute::<bool, u8>(primitive) as usize
+        }
+    }
+}
+
+impl<'a> Primitive<'a> for isize {
+    fn get(bits: usize) -> Self {
+        unsafe {
+            std::mem::transmute::<usize, isize>(bits)
+        }
+    }
+
+    fn set(primitive: Self) -> usize {
+        unsafe {
+            std::mem::transmute::<isize, usize>(primitive)
+        }
+    }
+}
+
+impl<'a> Primitive<'a> for f64 {
+    fn get(bits: usize) -> Self {
+        unsafe {
+            std::mem::transmute::<usize, f64>(bits)
+        }
+    }
+
+    fn set(primitive: Self) -> usize {
+        unsafe {
+            std::mem::transmute::<f64, usize>(primitive)
+        }
+    }
+}
+
+impl<'a, T: GcTrace> Primitive<'a> for GcRef<T> {
+    fn get(bits: usize) -> Self {
+        unsafe {
+            std::mem::transmute::<usize, GcRef<T>>(bits)
+        }
+    }
+
+    fn set(primitive: Self) -> usize {
+        unsafe {
+            std::mem::transmute::<GcRef<T>, usize>(primitive)
+        }
+    }
+}
+
+impl<'a> PrimitiveGeneric<'a> for Array<'a> {
+    fn get_generic(engine: &Engine<'a>) -> GcRef<Generic<'a>> {
+        engine.primitives.array
+    }
+}
+
+impl<'a> PrimitiveGeneric<'a> for Nullable<'a> {
+    fn get_generic(engine: &Engine<'a>) -> GcRef<Generic<'a>> {
+        engine.primitives.nullable
+    }
+}
+
+impl<'a> PrimitiveClass<'a> for bool {
+    fn get_class(engine: &Engine<'a>) -> GcRef<Class<'a>> {
+        engine.primitives.boolean
+    }
+}
+
+impl<'a> PrimitiveClass<'a> for isize {
+    fn get_class(engine: &Engine<'a>) -> GcRef<Class<'a>> {
+        engine.primitives.integer
+    }
+}
+
+impl<'a> PrimitiveClass<'a> for f64 {
+    fn get_class(engine: &Engine<'a>) -> GcRef<Class<'a>> {
+        engine.primitives.float
+    }
+}
+
+impl<'a> PrimitiveClass<'a> for Class<'a> {
+    fn get_class(engine: &Engine<'a>) -> GcRef<Class<'a>> {
+        engine.primitives.class
+    }
+}
+
+impl<'a> PrimitiveClass<'a> for Function<'a> {
+    fn get_class(engine: &Engine<'a>) -> GcRef<Class<'a>> {
+        engine.primitives.function
+    }
+}
+
+impl<'a> PrimitiveClass<'a> for Generic<'a> {
+    fn get_class(engine: &Engine<'a>) -> GcRef<Class<'a>> {
+        engine.primitives.generic
+    }
+}
+
+impl<'a> PrimitiveClass<'a> for Method<'a> {
+    fn get_class(engine: &Engine<'a>) -> GcRef<Class<'a>> {
+        engine.primitives.method
+    }
+}
+
+impl<'a> PrimitiveClass<'a> for Object<'a> {
+    fn get_class(engine: &Engine<'a>) -> GcRef<Class<'a>> {
+        engine.primitives.object
+    }
+}
+
+impl<'a> PrimitiveClass<'a> for String {
+    fn get_class(engine: &Engine<'a>) -> GcRef<Class<'a>> {
+        engine.primitives.string
+    }
+}
+
 impl<'a> Value<'a> {
-    pub fn new(class: GcValue<'a>, data: Data<'a>) -> Self {
+    pub fn new<T: Primitive<'a>>(class: GcRef<Class<'a>>, primitive: T) -> Self {
         Self {
             class,
-            data,
+            data: Data::new(primitive),
         }
+    }
+
+    pub fn primitive<T: Primitive<'a> + PrimitiveClass<'a>>(engine: &Engine<'a>, primitive: T) -> Self {
+        Self::new(T::get_class(engine), primitive)
+    }
+
+    pub fn primitive_gc<T: PrimitiveClass<'a> + GcTrace>(engine: &Engine<'a>, primitive: GcRef<T>) -> Self {
+        Self::new(T::get_class(engine), primitive)
+    }
+
+    pub fn alloc<T: GcTrace>(engine: &mut Engine<'a>, class: GcRef<Class<'a>>, primitive: T) -> Self {
+        Self::new(class, engine.alloc(primitive))
+    }
+
+    pub fn alloc_primitive<T: PrimitiveClass<'a> + GcTrace>(engine: &mut Engine<'a>, primitive: T) -> Self {
+        Self::alloc(engine, T::get_class(engine), primitive)
+    }
+
+    pub fn get<T: Primitive<'a> + PrimitiveClass<'a>>(self, engine: &Engine<'a>) -> T {
+        debug_assert!(self.isa(T::get_class(engine)));
+        T::get(self.data.bits)
+    }
+
+    pub fn get_gc<T: PrimitiveClass<'a> + GcTrace>(self, engine: &Engine<'a>) -> GcRef<T> {
+        debug_assert!(self.isa(T::get_class(engine)));
+        GcRef::get(self.data.bits)
+    }
+
+    pub fn get_gn<T: PrimitiveGeneric<'a> + GcTrace>(self, engine: &Engine<'a>) -> GcRef<T> {
+        debug_assert!(self.isa_generic(T::get_generic(engine)));
+        GcRef::get(self.data.bits)
+    }
+
+    pub fn get_unchecked<T: Primitive<'a>>(self) -> T {
+        T::get(self.data.bits)
     }
 }
 
-impl<'a> GcValue<'a> {
-    pub fn is(self, class: GcValue<'a>) -> bool {
-        if self == class {
-            true
-        } else if let Some(parent) = self.data_class().parent() {
-            parent.is(class)
-        } else {
-            false
-        }
-    }
-
-    pub fn is_generic(self, generic: GcValue<'a>) -> bool {
-        if let Some(constructor) = self.data_class().constructor() {
-            if constructor.generic == generic {
-                return true;
-            }
-        }
-
-        false
-    }
-}
-
-impl<'a> GcValue<'a> {
-    pub fn isa(self, class: GcValue<'a>) -> bool {
+impl<'a> Value<'a> {
+    pub fn isa(self, class: GcRef<Class<'a>>) -> bool {
         self.class.is(class)
     }
 
-    pub fn isa_generic(self, generic: GcValue<'a>) -> bool {
+    pub fn isa_generic(self, generic: GcRef<Generic<'a>>) -> bool {
         self.class.is_generic(generic)
     }
 
-    pub fn cast(self, class: GcValue<'a>) -> Return<()> {
+    pub fn cast(self, class: GcRef<Class<'a>>) -> Return<()> {
         if self.isa(class) {
             Ok(())
         } else {
-            Err(error_cast(self, class))
+            Err(error_cast(self.class, class))
+        }
+    }
+
+    pub fn cast_generic(self, generic: GcRef<Generic<'a>>) -> Return<()> {
+        if self.isa_generic(generic) {
+            Ok(())
+        } else {
+            Err(error_cast_generic(self.class, generic))
         }
     }
 }
 
-impl<'a> GcValue<'a> {
+impl<'a> Value<'a> {
     pub fn get_method(&self, name: &str) -> ReturnValue<'a> {
-        if let Some(method) = self.class.data_class().get_method(name) {
+        if let Some(method) = self.class.get_method(name) {
             Ok(method)
         } else {
             Err(error_undefined_method(name, self.class))
         }
     }
 
-    pub fn call_method(self, engine: &mut Engine<'a>, name: &str, arguments: &mut [GcValue<'a>]) -> ReturnReference<'a> {
+    pub fn call_method(self, engine: &mut Engine<'a>, name: &str, arguments: &mut [Value<'a>]) -> ReturnReference<'a> {
         let mut values = Vec::new();
         values.push(self);
         values.extend_from_slice(arguments);
         self.call_method_self(engine, name, &mut values)
     }
 
-    pub fn call_method_self(self, engine: &mut Engine<'a>, name: &str, arguments: &mut [GcValue<'a>]) -> ReturnReference<'a> {
+    pub fn call_method_self(self, engine: &mut Engine<'a>, name: &str, arguments: &mut [Value<'a>]) -> ReturnReference<'a> {
         let method = self.get_method(name)?;
         let array = parameters::pack(engine, arguments);
-        method.get_method("__cl__")?.data_function().call(engine, &mut [method, array])
+        method.get_method("__cl__")?.get_gc::<Function>(engine).call(engine, &mut [method, array])
     }
 
     pub fn call_fstr(self, engine: &mut Engine<'a>) -> Return<String> {
-        Ok(self.call_method(engine, "__fstr__", &mut [])?.read()?.data_string().clone())
+        Ok(self.call_method(engine, "__fstr__", &mut [])?.read()?.get_gc::<String>(engine).deref().clone())
     }
 
     pub fn call_sstr(self, engine: &mut Engine<'a>) -> Return<String> {
-        Ok(self.call_method(engine, "__sstr__", &mut [])?.read()?.data_string().clone())
+        Ok(self.call_method(engine, "__sstr__", &mut [])?.read()?.get_gc::<String>(engine).deref().clone())
     }
 }
 
-impl<'a> GcValue<'a> {
-    pub fn get_cast_array(&self, engine: &Engine<'a>) -> Return<&Array<'a>> {
-        if self.isa_generic(engine.primitives.array) {
-            Ok(&self.data_array())
-        } else {
-            Err(error_cast(*self, engine.primitives.array_any))
-        }
+impl<'a> Value<'a> {
+    pub fn get_cast_boolean(self, engine: &Engine<'a>) -> Return<bool> {
+        self.cast(engine.primitives.boolean)?;
+        Ok(self.get(engine))
     }
 
-    pub fn get_cast_boolean(&self, engine: &Engine<'a>) -> Return<&bool> {
-        self.cast(engine.primitives.boolean)?;
-        Ok(self.data_boolean())
+    pub fn get_cast_array(self, engine: &Engine<'a>) -> Return<GcRef<Array<'a>>> {
+        self.cast_generic(engine.primitives.array)?;
+        Ok(self.get_gn(engine))
+    }
+
+    pub fn get_cast_class(self, engine: &Engine<'a>) -> Return<GcRef<Class<'a>>> {
+        self.cast(engine.primitives.class)?;
+        Ok(self.get_gc(engine))
     }
 }
 
 impl GcTrace for Value<'_> {
     fn trace(&mut self) {
         self.class.trace();
-        self.data.trace();
     }
-}
-
-macro_rules! data {
-    ( $this:expr, $variant:ident ) => {
-        if let Data::$variant(variant) = &$this.data {
-            return variant;
-        }
-
-        panic!();
-    };
-}
-
-macro_rules! data_mut {
-    ( $this:expr, $variant:ident ) => {
-        if let Data::$variant(variant) = &mut $this.data {
-            return variant;
-        }
-
-        panic!();
-    };
 }
 
 impl<'a> Value<'a> {
-    pub fn data_tag(&self) -> Tag {
-        match &self.data {
-            Data::Class(class)       => class.tag().clone(),
-            Data::Function(function) => function.tag().clone(),
-            Data::Generic(generic)   => generic.tag().clone(),
-            _ => panic!(),
+    pub fn get_tag(&self, engine: &Engine<'a>) -> Tag {
+        if self.isa(engine.primitives.class) {
+            self.get_gc::<Class>(engine).tag().clone()
+        } else if self.isa(engine.primitives.function) {
+            self.get_gc::<Function>(engine).tag().clone()
+        } else if self.isa(engine.primitives.generic) {
+            self.get_gc::<Generic>(engine).tag().clone()
+        } else {
+            panic!();
         }
     }
-
-    pub fn data_array(&self) -> &Array<'a> {
-        data!(self, Array);
-    }
-
-    pub fn data_array_mut(&mut self) -> &mut Array<'a> {
-        data_mut!(self, Array);
-    }
-
-    pub fn data_boolean(&self) -> &bool {
-        data!(self, Boolean);
-    }
-
-    pub fn data_boolean_mut(&mut self) -> &mut bool {
-        data_mut!(self, Boolean);
-    }
-
-    pub fn data_class(&self) -> &Class<'a> {
-        data!(self, Class);
-    }
-
-    pub fn data_class_mut(&mut self) -> &mut Class<'a> {
-        data_mut!(self, Class);
-    }
-
-    pub fn data_float(&self) -> &f64 {
-        data!(self, Float);
-    }
-
-    pub fn data_float_mut(&mut self) -> &mut f64 {
-        data_mut!(self, Float);
-    }
-
-    pub fn data_function(&self) -> &Function<'a> {
-        data!(self, Function);
-    }
-
-    pub fn data_function_mut(&mut self) -> &mut Function<'a> {
-        data_mut!(self, Function);
-    }
-
-    pub fn data_generic(&self) -> &Generic<'a> {
-        data!(self, Generic);
-    }
-
-    pub fn data_generic_mut(&mut self) -> &mut Generic<'a> {
-        data_mut!(self, Generic);
-    }
-
-    pub fn data_integer(&self) -> &isize {
-        data!(self, Integer);
-    }
-
-    pub fn data_integer_mut(&mut self) -> &mut isize {
-        data_mut!(self, Integer);
-    }
-
-    pub fn data_method(&self) -> &Method<'a> {
-        data!(self, Method);
-    }
-
-    pub fn data_method_mut(&mut self) -> &mut Method<'a> {
-        data_mut!(self, Method);
-    }
-
-    pub fn data_object(&self) -> &Object<'a> {
-        data!(self, Object);
-    }
-
-    pub fn data_object_mut(&mut self) -> &mut Object<'a> {
-        data_mut!(self, Object);
-    }
-
-    pub fn data_nullable(&self) -> &Nullable<'a> {
-        data!(self, Nullable);
-    }
-
-    pub fn data_nullable_mut(&mut self) -> &mut Nullable<'a> {
-        data_mut!(self, Nullable);
-    }
-
-    pub fn data_string(&self) -> &String {
-        data!(self, String);
-    }
-
-    pub fn data_string_mut(&mut self) -> &mut String {
-        data_mut!(self, String);
-    }
 }
 
-fn error_undefined_method(method: &str, class: GcValue) -> Error {
-    Error::new_runtime(&format!("Method `{}` is undefined for type `{}`.", method, class.data_class().tag()))
+fn error_undefined_method<'a>(method: &str, class: GcRef<Class<'a>>) -> Error {
+    Error::new_runtime(&format!("Method `{}` is undefined for the type `{}`.", method, class.tag()))
 }
 
-fn error_cast(value: GcValue, r#type: GcValue) -> Error {
-    Error::new_runtime(&format!("Cannot cast a value of the type `{}` to the type `{}`.", value.class.data_class().tag(), r#type.data_class().tag()))
+fn error_cast<'a>(value: GcRef<Class<'a>>, r#type: GcRef<Class<'a>>) -> Error {
+    Error::new_runtime(&format!("Cannot cast a value of the type `{}` to the type `{}`.", value.tag(), r#type.tag()))
+}
+
+fn error_cast_generic<'a>(value: GcRef<Class<'a>>, r#type: GcRef<Generic<'a>>) -> Error {
+    Error::new_runtime(&format!("Cannot cast a value of the type `{}` to the type `{}`.", value.tag(), r#type.tag()))
 }

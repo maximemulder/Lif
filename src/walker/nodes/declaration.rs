@@ -22,6 +22,6 @@ impl Declaration {
 impl Walkable for Declaration {
     fn walk<'a>(&self, engine: &mut Engine<'a>) -> ReturnFlow<'a> {
         let r#type = utilities::new_type(engine, self.r#type.as_ref())?;
-        Flow::new(Variable::new(engine, Box::from(self.identifier.as_ref()), r#type)?.build(engine))
+        Flow::new(Variable::new(Box::from(self.identifier.as_ref()), r#type).build(engine))
     }
 }

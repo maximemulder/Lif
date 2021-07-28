@@ -1,31 +1,32 @@
 mod code;
 mod primitive;
 
-use crate::runtime::data::Tag;
+use crate::runtime::data::Class;
 use crate::runtime::engine::Engine;
-use crate::runtime::gc::GcTrace;
+use crate::runtime::gc::{ GcRef, GcTrace };
 use crate::runtime::r#return::ReturnReference;
 use crate::runtime::scope::GcScope;
 use crate::runtime::utilities::parameters::Parameters;
-use crate::runtime::value::GcValue;
+use crate::runtime::utilities::tag::Tag;
+use crate::runtime::value::Value;
 
 pub use code::FunctionCode;
 pub use primitive::FunctionPrimitive;
 
 pub trait FunctionImplementation<'a> {
-    fn call(&self, engine: &mut Engine<'a>, parameters: &Parameters<'a>, arguments: &mut [GcValue<'a>]) -> ReturnReference<'a>;
+    fn call(&self, engine: &mut Engine<'a>, parameters: &Parameters<'a>, arguments: &mut [Value<'a>]) -> ReturnReference<'a>;
 }
 
 pub struct Function<'a> {
     tag: Tag,
     scope: GcScope<'a>,
     parameters: Parameters<'a>,
-    r#return: Option<GcValue<'a>>,
+    r#return: Option<GcRef<Class<'a>>>,
     implementation: Box<dyn FunctionImplementation<'a> + 'a>,
 }
 
 impl<'a> Function<'a> {
-    pub fn new(tag: Tag, scope: GcScope<'a>, parameters: Parameters<'a>, r#return: Option<GcValue<'a>>, implementation: impl FunctionImplementation<'a> + 'a) -> Self {
+    pub fn new(tag: Tag, scope: GcScope<'a>, parameters: Parameters<'a>, r#return: Option<GcRef<Class<'a>>>, implementation: impl FunctionImplementation<'a> + 'a) -> Self {
         Self {
             tag,
             scope,
@@ -45,7 +46,7 @@ impl<'a> Function<'a> {
 }
 
 impl<'a> Function<'a> {
-    pub fn call(&self, engine: &mut Engine<'a>, arguments: &mut [GcValue<'a>]) -> ReturnReference<'a> {
+    pub fn call(&self, engine: &mut Engine<'a>, arguments: &mut [Value<'a>]) -> ReturnReference<'a> {
         self.parameters.validate(engine, arguments)?;
         let reference = engine.run_frame(self.scope, |engine| self.implementation.call(engine, &self.parameters, arguments))?;
         if let Some(r#return) = self.r#return {

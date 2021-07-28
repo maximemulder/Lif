@@ -1,28 +1,21 @@
+use crate::runtime::data::Class;
 use crate::runtime::engine::Engine;
-use crate::runtime::gc::GcTrace;
+use crate::runtime::gc::{ GcRef, GcTrace };
 use crate::runtime::reference::GcReference;
 use crate::runtime::r#return::Return;
-use crate::runtime::value::GcValue;
+use crate::runtime::value::Value;
 
 pub struct Variable<'a> {
     pub name: Box<str>,
-    pub r#type: Option<GcValue<'a>>,
+    pub r#type: Option<GcRef<Class<'a>>>,
 }
 
 impl<'a> Variable<'a> {
-    pub fn new_unchecked(name: Box<str>, r#type: Option<GcValue<'a>>) -> Self {
+    pub fn new(name: Box<str>, r#type: Option<GcRef<Class<'a>>>) -> Self {
         Self {
             name,
             r#type,
         }
-    }
-
-    pub fn new(engine: &Engine<'a>, name: Box<str>, r#type: Option<GcValue<'a>>) -> Return<Self> {
-        if let Some(r#type) = r#type {
-            r#type.cast(engine.primitives.class)?;
-        }
-
-        Ok(Self::new_unchecked(name, r#type))
     }
 
     pub fn build(&self, engine: &mut Engine<'a>) -> GcReference<'a> {
@@ -31,7 +24,7 @@ impl<'a> Variable<'a> {
         reference
     }
 
-    pub fn cast(&self, value: GcValue<'a>) -> Return<()> {
+    pub fn check(&self, value: Value<'a>) -> Return<()> {
         if let Some(r#type) = self.r#type {
             value.cast(r#type)?;
         }

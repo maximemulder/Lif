@@ -1,13 +1,13 @@
 use crate::runtime::engine::Engine;
 use crate::runtime::scope::{ GcScope, Scope };
-use crate::runtime::value::GcValue;
+use crate::runtime::value::Value;
 
 impl<'a> Engine<'a> {
     pub fn scope(&self) -> GcScope<'a> {
         self.scope
     }
 
-    pub fn run_source_scope(&mut self, name: &str, callback: impl FnOnce(&mut Engine<'a>, GcScope<'a>) -> GcValue<'a>) -> GcValue<'a> {
+    pub fn run_source_scope(&mut self, name: &str, callback: impl FnOnce(&mut Engine<'a>, GcScope<'a>) -> Value<'a>) -> Value<'a> {
         let mut scope = self.new_scope();
         let value = callback(self, scope);
         scope.set_source(self, name, value);

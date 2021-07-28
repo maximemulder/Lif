@@ -4,15 +4,15 @@ mod scope;
 
 use crate::memory::{ Own, Ref };
 use crate::parser::{ Code, Grammar };
-use crate::runtime::data::Data;
-use crate::runtime::primitives::Primitives;
+use crate::runtime::data::Class;
 use crate::runtime::gc::{ GC_THRESHOLD, Gc, GcRef, GcTrace };
+use crate::runtime::primitives::Primitives;
 use crate::runtime::reference::{ GcReference, Reference };
 use crate::runtime::registries::Registries;
 use crate::runtime::r#return::{ ReturnFlow, ReturnReference };
 use crate::runtime::scope::{ GcScope, Scope };
 use crate::runtime::utilities::tag::Tagger;
-use crate::runtime::value::{ GcValue, Value };
+use crate::runtime::value::Value;
 use crate::walker::WNode;
 
 use std::io::{ Read, Write };
@@ -81,19 +81,15 @@ impl Engine<'_> {
 }
 
 impl<'a> Engine<'a> {
-    pub fn new_value(&mut self, class: GcValue<'a>, data: Data<'a>) -> GcValue<'a> {
-        self.alloc(Value::new(class, data))
-    }
-
-    pub fn new_reference(&mut self, value: GcValue<'a>) -> GcReference<'a> {
+    pub fn new_reference(&mut self, value: Value<'a>) -> GcReference<'a> {
         self.alloc(Reference::new_variable(Some(value), self.primitives.any))
     }
 
-    pub fn new_variable(&mut self, value: Option<GcValue<'a>>, r#type: GcValue<'a>) -> GcReference<'a> {
+    pub fn new_variable(&mut self, value: Option<Value<'a>>, r#type: GcRef<Class<'a>>) -> GcReference<'a> {
         self.alloc(Reference::new_variable(value, r#type))
     }
 
-    pub fn new_constant(&mut self, value: GcValue<'a>) -> GcReference<'a> {
+    pub fn new_constant(&mut self, value: Value<'a>) -> GcReference<'a> {
         self.alloc(Reference::new_constant(Some(value)))
     }
 
@@ -103,11 +99,6 @@ impl<'a> Engine<'a> {
 }
 
 impl<'a> Engine<'a> {
-    pub fn set_constant_value(&mut self, name: &str, value: GcValue<'a>) {
-        let reference = self.new_constant(value);
-        self.set_variable(name, reference);
-    }
-
     pub fn set_variable(&mut self, name: &str, reference: GcReference<'a>) {
         self.scope.set_variable(name, reference);
     }
@@ -125,8 +116,8 @@ impl<'a> Engine<'a> {
 
         self.registries.pop();
         if self.gc.get_allocations() > GC_THRESHOLD {
-            self.trace();
-            self.gc.collect();
+            // self.trace();
+            // self.gc.collect();
         }
 
         r#return

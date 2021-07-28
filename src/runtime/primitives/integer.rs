@@ -1,13 +1,13 @@
 use crate::runtime::engine::Engine;
 use crate::runtime::primitives::Primitives;
 use crate::runtime::r#return::ReturnReference;
-use crate::runtime::value::GcValue;
+use crate::runtime::value::Value;
 
 use std::mem::size_of;
 
 pub fn populate(engine: &mut Engine) {
     let Primitives { any, boolean, integer, string, .. } = engine.primitives;
-    engine.set_constant_value("Integer", integer);
+    engine.populate_class("Integer", integer);
     engine.primitive_method(integer, "__sstr__", [], None, Some(string), &sstr);
     engine.primitive_method(integer, "__eq__", [("other", any)], None, Some(boolean), &eq);
     engine.primitive_method(integer, "__lt__", [("other", integer)], None, Some(boolean), &lt);
@@ -28,82 +28,82 @@ pub fn populate(engine: &mut Engine) {
     engine.primitive_method(integer, "__bcrs__", [("other", integer)], None, Some(integer), &bcrs);
 }
 
-fn sstr<'a>(engine: &mut Engine<'a>, arguments: &mut [GcValue<'a>]) -> ReturnReference<'a> {
-    Ok(engine.new_string(arguments[0].data_integer().to_string()))
+fn sstr<'a>(engine: &mut Engine<'a>, arguments: &mut [Value<'a>]) -> ReturnReference<'a> {
+    Ok(engine.new_string(arguments[0].get::<isize>(engine).to_string()))
 }
 
-fn eq<'a>(engine: &mut Engine<'a>, arguments: &mut [GcValue<'a>]) -> ReturnReference<'a> {
+fn eq<'a>(engine: &mut Engine<'a>, arguments: &mut [Value<'a>]) -> ReturnReference<'a> {
     Ok(engine.new_boolean(if arguments[1].isa(engine.primitives.integer) {
-        *arguments[0].data_integer() == *arguments[1].data_integer()
+        arguments[0].get::<isize>(engine) == arguments[1].get(engine)
     } else {
         false
     }))
 }
 
-fn lt<'a>(engine: &mut Engine<'a>, arguments: &mut [GcValue<'a>]) -> ReturnReference<'a> {
-    Ok(engine.new_boolean(*arguments[0].data_integer() < *arguments[1].data_integer()))
+fn lt<'a>(engine: &mut Engine<'a>, arguments: &mut [Value<'a>]) -> ReturnReference<'a> {
+    Ok(engine.new_boolean(arguments[0].get::<isize>(engine) < arguments[1].get::<isize>(engine)))
 }
 
-fn pos<'a>(engine: &mut Engine<'a>, arguments: &mut [GcValue<'a>]) -> ReturnReference<'a> {
-    Ok(engine.new_integer(*arguments[0].data_integer()))
+fn pos<'a>(engine: &mut Engine<'a>, arguments: &mut [Value<'a>]) -> ReturnReference<'a> {
+    Ok(engine.new_integer(arguments[0].get::<isize>(engine)))
 }
 
-fn neg<'a>(engine: &mut Engine<'a>, arguments: &mut [GcValue<'a>]) -> ReturnReference<'a> {
-    Ok(engine.new_integer(-arguments[0].data_integer()))
+fn neg<'a>(engine: &mut Engine<'a>, arguments: &mut [Value<'a>]) -> ReturnReference<'a> {
+    Ok(engine.new_integer(-arguments[0].get::<isize>(engine)))
 }
 
-fn add<'a>(engine: &mut Engine<'a>, arguments: &mut [GcValue<'a>]) -> ReturnReference<'a> {
-    Ok(engine.new_integer(*arguments[0].data_integer() + *arguments[1].data_integer()))
+fn add<'a>(engine: &mut Engine<'a>, arguments: &mut [Value<'a>]) -> ReturnReference<'a> {
+    Ok(engine.new_integer(arguments[0].get::<isize>(engine) + arguments[1].get::<isize>(engine)))
 }
 
-fn sub<'a>(engine: &mut Engine<'a>, arguments: &mut [GcValue<'a>]) -> ReturnReference<'a> {
-    Ok(engine.new_integer(*arguments[0].data_integer() - *arguments[1].data_integer()))
+fn sub<'a>(engine: &mut Engine<'a>, arguments: &mut [Value<'a>]) -> ReturnReference<'a> {
+    Ok(engine.new_integer(arguments[0].get::<isize>(engine) - arguments[1].get::<isize>(engine)))
 }
 
-fn mul<'a>(engine: &mut Engine<'a>, arguments: &mut [GcValue<'a>]) -> ReturnReference<'a> {
-    Ok(engine.new_integer(*arguments[0].data_integer() * *arguments[1].data_integer()))
+fn mul<'a>(engine: &mut Engine<'a>, arguments: &mut [Value<'a>]) -> ReturnReference<'a> {
+    Ok(engine.new_integer(arguments[0].get::<isize>(engine) * arguments[1].get::<isize>(engine)))
 }
 
-fn div<'a>(engine: &mut Engine<'a>, arguments: &mut [GcValue<'a>]) -> ReturnReference<'a> {
-    Ok(engine.new_integer(*arguments[0].data_integer() / *arguments[1].data_integer()))
+fn div<'a>(engine: &mut Engine<'a>, arguments: &mut [Value<'a>]) -> ReturnReference<'a> {
+    Ok(engine.new_integer(arguments[0].get::<isize>(engine) / arguments[1].get::<isize>(engine)))
 }
 
-fn rem<'a>(engine: &mut Engine<'a>, arguments: &mut [GcValue<'a>]) -> ReturnReference<'a> {
-    Ok(engine.new_integer(*arguments[0].data_integer() % *arguments[1].data_integer()))
+fn rem<'a>(engine: &mut Engine<'a>, arguments: &mut [Value<'a>]) -> ReturnReference<'a> {
+    Ok(engine.new_integer(arguments[0].get::<isize>(engine) % arguments[1].get::<isize>(engine)))
 }
 
-fn bnot<'a>(engine: &mut Engine<'a>, arguments: &mut [GcValue<'a>]) -> ReturnReference<'a> {
-    Ok(engine.new_integer(!arguments[0].data_integer()))
+fn bnot<'a>(engine: &mut Engine<'a>, arguments: &mut [Value<'a>]) -> ReturnReference<'a> {
+    Ok(engine.new_integer(!arguments[0].get::<isize>(engine)))
 }
 
-fn band<'a>(engine: &mut Engine<'a>, arguments: &mut [GcValue<'a>]) -> ReturnReference<'a> {
-    Ok(engine.new_integer(arguments[0].data_integer() & arguments[1].data_integer()))
+fn band<'a>(engine: &mut Engine<'a>, arguments: &mut [Value<'a>]) -> ReturnReference<'a> {
+    Ok(engine.new_integer(arguments[0].get::<isize>(engine) & arguments[1].get::<isize>(engine)))
 }
 
-fn bor<'a>(engine: &mut Engine<'a>, arguments: &mut [GcValue<'a>]) -> ReturnReference<'a> {
-    Ok(engine.new_integer(arguments[0].data_integer() | arguments[1].data_integer()))
+fn bor<'a>(engine: &mut Engine<'a>, arguments: &mut [Value<'a>]) -> ReturnReference<'a> {
+    Ok(engine.new_integer(arguments[0].get::<isize>(engine) | arguments[1].get::<isize>(engine)))
 }
 
-fn bxor<'a>(engine: &mut Engine<'a>, arguments: &mut [GcValue<'a>]) -> ReturnReference<'a> {
-    Ok(engine.new_integer(arguments[0].data_integer() ^ arguments[1].data_integer()))
+fn bxor<'a>(engine: &mut Engine<'a>, arguments: &mut [Value<'a>]) -> ReturnReference<'a> {
+    Ok(engine.new_integer(arguments[0].get::<isize>(engine) ^ arguments[1].get::<isize>(engine)))
 }
 
-fn bls<'a>(engine: &mut Engine<'a>, arguments: &mut [GcValue<'a>]) -> ReturnReference<'a> {
-    Ok(engine.new_integer(arguments[0].data_integer() << arguments[1].data_integer()))
+fn bls<'a>(engine: &mut Engine<'a>, arguments: &mut [Value<'a>]) -> ReturnReference<'a> {
+    Ok(engine.new_integer(arguments[0].get::<isize>(engine) << arguments[1].get::<isize>(engine)))
 }
 
-fn brs<'a>(engine: &mut Engine<'a>, arguments: &mut [GcValue<'a>]) -> ReturnReference<'a> {
-    Ok(engine.new_integer(arguments[0].data_integer() >> arguments[1].data_integer()))
+fn brs<'a>(engine: &mut Engine<'a>, arguments: &mut [Value<'a>]) -> ReturnReference<'a> {
+    Ok(engine.new_integer(arguments[0].get::<isize>(engine) >> arguments[1].get::<isize>(engine)))
 }
 
-fn bcls<'a>(engine: &mut Engine<'a>, arguments: &mut [GcValue<'a>]) -> ReturnReference<'a> {
-    let x = *arguments[0].data_integer();
-    let y = *arguments[1].data_integer();
+fn bcls<'a>(engine: &mut Engine<'a>, arguments: &mut [Value<'a>]) -> ReturnReference<'a> {
+    let x = arguments[0].get::<isize>(engine);
+    let y = arguments[1].get::<isize>(engine);
     Ok(engine.new_integer((x << y) | (x >> (-y & size_of::<usize>() as isize))))
 }
 
-fn bcrs<'a>(engine: &mut Engine<'a>, arguments: &mut [GcValue<'a>]) -> ReturnReference<'a> {
-    let x = *arguments[0].data_integer();
-    let y = *arguments[1].data_integer();
+fn bcrs<'a>(engine: &mut Engine<'a>, arguments: &mut [Value<'a>]) -> ReturnReference<'a> {
+    let x = arguments[0].get::<isize>(engine);
+    let y = arguments[1].get::<isize>(engine);
     Ok(engine.new_integer((x >> y) | (x << (-y & size_of::<usize>() as isize))))
 }

@@ -48,11 +48,8 @@ impl Walkable for Binop {
         let left = get!(engine.walk(&self.left)?).read()?;
         match self.operator.deref() {
             "__and__" => {
-                left.cast(engine.primitives.boolean)?;
-                let boolean = if *left.data_boolean() {
-                    let right = get!(engine.walk(&self.right)?).read()?;
-                    right.cast(engine.primitives.boolean)?;
-                    *right.data_boolean()
+                let boolean = if left.get_cast_boolean(engine)? {
+                    get!(engine.walk(&self.right)?).read()?.get_cast_boolean(engine)?
                 } else {
                     false
                 };
@@ -60,13 +57,10 @@ impl Walkable for Binop {
                 Flow::new(engine.new_boolean(boolean))
             },
             "__or__" => {
-                left.cast(engine.primitives.boolean)?;
-                let boolean = if *left.data_boolean() {
+                let boolean = if left.get_cast_boolean(engine)? {
                     true
                 } else {
-                    let right = get!(engine.walk(&self.right)?).read()?;
-                    right.cast(engine.primitives.boolean)?;
-                    *right.data_boolean()
+                    get!(engine.walk(&self.right)?).read()?.get_cast_boolean(engine)?
                 };
 
                 Flow::new(engine.new_boolean(boolean))

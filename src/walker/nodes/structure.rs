@@ -17,7 +17,7 @@ impl Structure {
 impl Walkable for Structure {
     fn walk<'a>(&self, engine: &mut Engine<'a>) -> ReturnFlow<'a> {
         let structure = get!(engine.walk(&self.structure)?);
-        engine.set_variable(structure.read()?.data_tag().get_name().unwrap(), structure);
+        engine.set_variable(structure.read()?.get_tag(engine).get_name().unwrap(), structure);
         Flow::new(engine.undefined())
     }
 }

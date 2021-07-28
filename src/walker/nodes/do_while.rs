@@ -35,7 +35,7 @@ impl Walkable for DoWhile {
             }
 
             let reference = get!(engine.walk(&self.condition)?);
-            let condition = !*reference.read()?.get_cast_boolean(engine)?;
+            let condition = !reference.read()?.get_cast_boolean(engine)?;
             if condition {
                 break;
             }

@@ -1,12 +1,12 @@
 use crate::runtime::gc::GcTrace;
-use crate::runtime::value::GcValue;
+use crate::runtime::value::Value;
 
 pub struct Nullable<'a> {
-    pub option: Option<GcValue<'a>>,
+    pub option: Option<Value<'a>>,
 }
 
 impl<'a> Nullable<'a> {
-    pub fn new(option: Option<GcValue<'a>>) -> Self {
+    pub fn new(option: Option<Value<'a>>) -> Self {
         Self {
             option,
         }

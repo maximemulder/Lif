@@ -21,7 +21,7 @@ impl Walkable for While {
         let mut elements = Vec::new();
         while {
             let reference = get!(engine.walk(&self.condition)?);
-            *reference.read()?.get_cast_boolean(engine)?
+            reference.read()?.get_cast_boolean(engine)?
         } {
             let flow = engine.walk(&self.body)?;
             let reference = get_loop!(flow);

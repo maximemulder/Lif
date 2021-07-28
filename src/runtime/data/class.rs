@@ -1,22 +1,25 @@
-use crate::runtime::data::Tag;
-use crate::runtime::gc::GcTrace;
+use crate::runtime::data::Generic;
+use crate::runtime::gc::{ GcRef, GcTrace };
 use crate::runtime::reference::GcReference;
 use crate::runtime::scope::GcScope;
 use crate::runtime::utilities::constructors::GcConstructor;
-use crate::runtime::value::GcValue;
+use crate::runtime::utilities::tag::Tag;
+use crate::runtime::value::Value;
+
 use std::collections::HashMap;
+use std::ops::Deref;
 
 pub struct Class<'a> {
     tag: Tag,
     scope: GcScope<'a>,
     constructor: Option<GcConstructor<'a>>,
-    parent: Option<GcValue<'a>>,
+    parent: Option<GcRef<Class<'a>>>,
     statics: HashMap<Box<str>, GcReference<'a>>,
-    methods: HashMap<Box<str>, GcValue<'a>>,
+    methods: HashMap<Box<str>, Value<'a>>,
 }
 
 impl<'a> Class<'a> {
-    pub fn new(tag: Tag, scope: GcScope<'a>, parent: Option<GcValue<'a>>) -> Self {
+    pub fn new(tag: Tag, scope: GcScope<'a>, parent: Option<GcRef<Class<'a>>>) -> Self {
         Self {
             tag,
             constructor: None,
@@ -44,28 +47,28 @@ impl<'a> Class<'a> {
         self.constructor = Some(constructor);
     }
 
-    pub fn parent(&self) -> Option<GcValue<'a>> {
+    pub fn parent(&self) -> Option<GcRef<Class<'a>>> {
         self.parent
     }
 
-    pub fn set_parent(&mut self, parent: GcValue<'a>) {
+    pub fn set_parent(&mut self, parent: GcRef<Class<'a>>) {
         debug_assert!(self.parent.is_none());
         self.parent = Some(parent);
     }
 
-    pub fn get_method(&self, name: &str) -> Option<GcValue<'a>> {
+    pub fn get_method(&self, name: &str) -> Option<Value<'a>> {
         if let Some(method) = self.methods.get(name).copied() {
             return Some(method);
         }
 
         if let Some(parent) = self.parent {
-            return parent.data_class().get_method(name);
+            return parent.get_method(name);
         }
 
         None
     }
 
-    pub fn set_method(&mut self, name: &str, reference: GcValue<'a>) {
+    pub fn set_method(&mut self, name: &str, reference: Value<'a>) {
         self.methods.insert(Box::from(name), reference);
     }
 
@@ -75,6 +78,26 @@ impl<'a> Class<'a> {
 
     pub fn set_static(&mut self, name: &str, reference: GcReference<'a>) {
         self.statics.insert(Box::from(name), reference);
+    }
+
+    pub fn is(&self, class: GcRef<Class<'a>>) -> bool {
+        if self as *const Class == class.deref() as *const Class {
+            true
+        } else if let Some(parent) = self.parent() {
+            parent.is(class)
+        } else {
+            false
+        }
+    }
+
+    pub fn is_generic(&self, generic: GcRef<Generic<'a>>) -> bool {
+        if let Some(constructor) = self.constructor() {
+            if constructor.generic == generic {
+                return true;
+            }
+        }
+
+        false
     }
 }
 
