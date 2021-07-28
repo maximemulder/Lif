@@ -19,7 +19,7 @@ impl<'a> Engine<'a> {
     }
 
     pub fn new_array_value(&mut self, class: GcRef<Class<'a>>, elements: Vec<GcReference<'a>>) -> Value<'a> {
-        Value::new(class, self.alloc(Array::new(elements)))
+        Value::alloc(self, class, Array::new(elements))
     }
 
     pub fn new_array_any_value(&mut self, elements: Vec<GcReference<'a>>) -> Value<'a> {
@@ -29,8 +29,7 @@ impl<'a> Engine<'a> {
     pub fn new_class_value(&mut self, name: Option<&str>, parent: Option<GcRef<Class<'a>>>) -> Value<'a> {
         let tag = self.taggers.classes.generate(name);
         self.run_source_scope("__class__", |engine, scope| {
-            let primitive = engine.alloc(Class::new(tag, scope, parent));
-            Value::primitive_gc(engine, primitive)
+            Value::alloc_primitive(engine, Class::new(tag, scope, parent))
         })
     }
 
@@ -39,35 +38,31 @@ impl<'a> Engine<'a> {
     ) -> Value<'a> {
         let tag = self.taggers.functions.generate(name);
         self.run_source_scope("__function__", |engine, scope| {
-            let primitive = engine.alloc(Function::new(tag, scope, parameters, r#return, implementation));
-            Value::primitive_gc(engine, primitive)
+            Value::alloc_primitive(engine, Function::new(tag, scope, parameters, r#return, implementation))
         })
     }
 
     pub fn new_generic_value(&mut self, name: Option<&str>, parameters: Box<[Box<str>]>, implementation: impl GenericImplementation<'a> + 'a) -> Value<'a> {
         let tag = self.taggers.generics.generate(name);
         self.run_source_scope("__generic__", |engine, scope| {
-            let primitive = engine.alloc(Generic::new(tag, scope, parameters, implementation));
-            Value::primitive_gc(engine, primitive)
+            Value::alloc_primitive(engine, Generic::new(tag, scope, parameters, implementation))
         })
     }
 
     pub fn new_method_value(&mut self, function: Value<'a>, this: Value<'a>) -> Value<'a> {
-        let primitive = self.alloc(Method::new(function, this));
-        Value::primitive_gc(self, primitive)
+        Value::alloc_primitive(self, Method::new(function, this))
     }
 
     pub fn new_object_value(&mut self, parent: GcRef<Class<'a>>) -> Value<'a> {
-        Value::new(parent, self.alloc(Object::new()))
+        Value::alloc(self, parent, Object::new())
     }
 
     pub fn new_nullable_value(&mut self, class: GcRef<Class<'a>>, option: Option<Value<'a>>) -> Value<'a> {
-        Value::new(class, self.alloc(Nullable::new(option)))
+        Value::alloc(self, class, Nullable::new(option))
     }
 
     pub fn new_string_value(&mut self, string: String) -> Value<'a> {
-        let primitive = self.alloc(string);
-        Value::primitive_gc(self, primitive)
+        Value::alloc_primitive(self, string)
     }
 }
 

@@ -185,6 +185,14 @@ impl<'a> Value<'a> {
         Self::new(T::get_class(engine), primitive)
     }
 
+    pub fn alloc<T: GcTrace>(engine: &mut Engine<'a>, class: GcRef<Class<'a>>, primitive: T) -> Self {
+        Self::new(class, engine.alloc(primitive))
+    }
+
+    pub fn alloc_primitive<T: PrimitiveClass<'a> + GcTrace>(engine: &mut Engine<'a>, primitive: T) -> Self {
+        Self::alloc(engine, T::get_class(engine), primitive)
+    }
+
     pub fn get<T: Primitive<'a> + PrimitiveClass<'a>>(self, engine: &Engine<'a>) -> T {
         debug_assert!(self.isa(T::get_class(engine)));
         T::get(self.data.bits)
