@@ -5,7 +5,6 @@
 #![feature(const_generics)]
 #![feature(const_fn_fn_ptr_basics)]
 #![feature(const_fn_trait_bound)]
-#![feature(maybe_uninit_ref)]
 #![feature(maybe_uninit_extra)]
 #![feature(new_uninit)]
 #![feature(raw)]
