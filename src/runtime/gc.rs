@@ -35,7 +35,15 @@ impl Gc {
     }
 
     pub fn collect(&mut self) {
-        // self.guards.drain_filter(|guard| guard.reset());
+        self.guards.drain_filter(|guard| {
+            let flag = guard.flag;
+            if flag {
+                guard.flag = false;
+            }
+
+            !flag
+        });
+
         self.allocations = 0;
     }
 
@@ -51,9 +59,9 @@ pub struct GcGuard {
 }
 
 impl GcGuard {
-    fn new<T: GcTrace>(mut object: T) -> Self {
+    fn new<T: GcTrace>(object: T) -> Self {
         unsafe {
-            let pointer: *mut dyn GcTrace = &mut object;
+            let pointer: *mut dyn GcTrace = Box::into_raw(Box::new(object));
             let (object, metadata) = pointer.to_raw_parts();
             Self {
                 flag: false,
