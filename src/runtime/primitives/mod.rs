@@ -87,7 +87,7 @@ impl GcTrace for Primitives<'_> {
 
 impl<'a> Engine<'a> {
     pub fn populate(&mut self) {
-        self.primitives.class = self.primitive_class("Class", None, true);
+        self.primitives.class = self.primitive_origin_class("Class", None, true);
         self.primitives.any   = self.primitive_class("Any", None, false);
 
         self.primitives.class.set_parent(self.primitives.any);

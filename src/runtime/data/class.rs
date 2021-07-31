@@ -11,7 +11,7 @@ use std::ops::Deref;
 
 pub struct Class<'a> {
     tag: Tag,
-    scope: GcScope<'a>,
+    pub scope: GcScope<'a>,
     constructor: Option<GcConstructor<'a>>,
     parent: Option<GcRef<Class<'a>>>,
     gc: bool,

@@ -19,6 +19,16 @@ impl<'a> Engine<'a> {
         self.new_class_value(Some(name), parent, gc).get_unchecked::<GcRef<Class>>()
     }
 
+    pub fn primitive_origin_class(&mut self, name: &str, parent: Option<GcRef<Class<'a>>>, gc: bool) -> GcRef<Class<'a>> {
+        let tag = self.taggers.classes.generate(Some(name));
+        let class = self.run_scope(|engine| {
+            engine.alloc(Class::new(tag, engine.scope, parent, gc))
+        });
+
+        class.clone().scope.set_source(self, "__class__", Value::new(class, class));
+        class
+    }
+
     pub fn primitive_generic(&mut self, name: &str, parameters: Box<[Box<str>]>, implementation: impl GenericImplementation<'a> + 'a) -> GcRef<Generic<'a>> {
         self.new_generic_value(Some(name), parameters, implementation).get_gc::<Generic>(self)
     }
