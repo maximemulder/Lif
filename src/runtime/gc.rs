@@ -7,7 +7,7 @@ use std::mem::transmute;
 use std::ops::{ Deref, DerefMut };
 use std::ptr::{ from_raw_parts_mut, DynMetadata };
 
-pub const GC_THRESHOLD: usize = 250;
+pub const GC_THRESHOLD: usize = 0;
 
 pub trait GcTrace {
     fn trace(&mut self);
@@ -47,7 +47,7 @@ impl Gc {
         self.allocations = 0;
     }
 
-    pub fn get_allocations(&self) -> usize {
+    pub fn allocations(&self) -> usize {
         self.allocations
     }
 }
@@ -119,6 +119,10 @@ impl<T: GcTrace> GcRef<T> {
     pub fn get_guard(self) -> Mut<GcGuard> {
         self.guard
     }
+}
+
+impl GcTrace for () {
+    fn trace(&mut self) {}
 }
 
 impl<T: GcTrace> GcTrace for GcRef<T> {

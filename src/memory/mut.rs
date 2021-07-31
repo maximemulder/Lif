@@ -25,13 +25,17 @@ impl<T: ?Sized> Deref for Mut<T> {
     type Target = T;
 
     fn deref(&self) -> &Self::Target {
-        unsafe { self.pointer.as_ref().unwrap() }
+        unsafe {
+            self.pointer.as_ref().unwrap()
+        }
     }
 }
 
 impl<T: ?Sized> DerefMut for Mut<T> {
     fn deref_mut(&mut self) -> &mut Self::Target {
-        unsafe { self.pointer.as_mut().unwrap() }
+        unsafe {
+            self.pointer.as_mut().unwrap()
+        }
     }
 }
 

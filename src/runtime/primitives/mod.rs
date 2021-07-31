@@ -87,20 +87,20 @@ impl GcTrace for Primitives<'_> {
 
 impl<'a> Engine<'a> {
     pub fn populate(&mut self) {
-        self.primitives.class = self.primitive_class("Class", None);
-        self.primitives.any   = self.primitive_class("Any", None);
+        self.primitives.class = self.primitive_class("Class", None, true);
+        self.primitives.any   = self.primitive_class("Any", None, false);
 
         self.primitives.class.set_parent(self.primitives.any);
 
-        self.primitives.boolean  = self.primitive_class("Boolean",  Some(self.primitives.any));
-        self.primitives.file     = self.primitive_class("File",     Some(self.primitives.any));
-        self.primitives.float    = self.primitive_class("Float",    Some(self.primitives.any));
-        self.primitives.function = self.primitive_class("Function", Some(self.primitives.any));
-        self.primitives.generic  = self.primitive_class("Generic",  Some(self.primitives.any));
-        self.primitives.integer  = self.primitive_class("Integer",  Some(self.primitives.any));
-        self.primitives.method   = self.primitive_class("Method",   Some(self.primitives.any));
-        self.primitives.object   = self.primitive_class("Object",   Some(self.primitives.any));
-        self.primitives.string   = self.primitive_class("String",   Some(self.primitives.any));
+        self.primitives.boolean  = self.primitive_class("Boolean",  Some(self.primitives.any), false);
+        self.primitives.file     = self.primitive_class("File",     Some(self.primitives.any), false);
+        self.primitives.float    = self.primitive_class("Float",    Some(self.primitives.any), true);
+        self.primitives.function = self.primitive_class("Function", Some(self.primitives.any), true);
+        self.primitives.generic  = self.primitive_class("Generic",  Some(self.primitives.any), true);
+        self.primitives.integer  = self.primitive_class("Integer",  Some(self.primitives.any), false);
+        self.primitives.method   = self.primitive_class("Method",   Some(self.primitives.any), true);
+        self.primitives.object   = self.primitive_class("Object",   Some(self.primitives.any), true);
+        self.primitives.string   = self.primitive_class("String",   Some(self.primitives.any), true);
 
         self.primitives.array    = self.primitive_generic("Array",  Box::new([Box::from("T")]), GenericPrimitive::new(&array::create));
         self.primitives.nullable = self.primitive_generic("Option", Box::new([Box::from("T")]), GenericPrimitive::new(&nullable::create));

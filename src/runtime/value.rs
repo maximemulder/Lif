@@ -290,6 +290,11 @@ impl<'a> Value<'a> {
 impl GcTrace for Value<'_> {
     fn trace(&mut self) {
         self.class.trace();
+        if self.class.gc() {
+            unsafe {
+                std::mem::transmute::<Data, GcRef<()>>(self.data);
+            }
+        }
     }
 }
 

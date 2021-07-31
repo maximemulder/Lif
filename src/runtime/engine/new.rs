@@ -26,10 +26,10 @@ impl<'a> Engine<'a> {
         self.new_array_value(self.primitives.array_any, elements)
     }
 
-    pub fn new_class_value(&mut self, name: Option<&str>, parent: Option<GcRef<Class<'a>>>) -> Value<'a> {
+    pub fn new_class_value(&mut self, name: Option<&str>, parent: Option<GcRef<Class<'a>>>, gc: bool) -> Value<'a> {
         let tag = self.taggers.classes.generate(name);
         self.run_source_scope("__class__", |engine, scope| {
-            Value::alloc_primitive(engine, Class::new(tag, scope, parent))
+            Value::alloc_primitive(engine, Class::new(tag, scope, parent, gc))
         })
     }
 
@@ -91,8 +91,8 @@ impl<'a> Engine<'a> {
         self.new_array(self.primitives.array_any, elements)
     }
 
-    pub fn new_class(&mut self, name: Option<&str>, parent: Option<GcRef<Class<'a>>>) -> GcReference<'a> {
-        let value = self.new_class_value(name, parent);
+    pub fn new_class(&mut self, name: Option<&str>, parent: Option<GcRef<Class<'a>>>, gc: bool) -> GcReference<'a> {
+        let value = self.new_class_value(name, parent, gc);
         self.new_constant(value)
     }
 

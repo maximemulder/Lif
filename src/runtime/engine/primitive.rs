@@ -15,8 +15,8 @@ fn create_parameters<'a>(parameters: &[(&str, GcRef<Class<'a>>)], rest: Option<(
 }
 
 impl<'a> Engine<'a> {
-    pub fn primitive_class(&mut self, name: &str, parent: Option<GcRef<Class<'a>>>) -> GcRef<Class<'a>> {
-        self.new_class_value(Some(name), parent).get_unchecked::<GcRef<Class>>()
+    pub fn primitive_class(&mut self, name: &str, parent: Option<GcRef<Class<'a>>>, gc: bool) -> GcRef<Class<'a>> {
+        self.new_class_value(Some(name), parent, gc).get_unchecked::<GcRef<Class>>()
     }
 
     pub fn primitive_generic(&mut self, name: &str, parameters: Box<[Box<str>]>, implementation: impl GenericImplementation<'a> + 'a) -> GcRef<Generic<'a>> {
