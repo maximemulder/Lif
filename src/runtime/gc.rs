@@ -26,15 +26,12 @@ impl Gc {
         }
     }
 
-    pub fn alloc<T: GcTrace>(&mut self, value: T) -> GcRef<T> {
-        unsafe {
-            let pointers: *mut dyn GcTrace = Box::into_raw(Box::new(value));
-            let mut guard = Own::new(GcGuard::new(transmute::<*mut dyn GcTrace, TraitObject>(pointers)));
-            let r#ref = GcRef::new(guard.get_mut());
-            self.guards.push(guard);
-            self.allocations += 1;
-            r#ref
-        }
+    pub fn alloc<T: GcTrace>(&mut self, object: T) -> GcRef<T> {
+        let mut guard = Own::new(GcGuard::new(object));
+        let r#ref = GcRef::new(guard.get_mut());
+        self.guards.push(guard);
+        self.allocations += 1;
+        r#ref
     }
 
     pub fn collect(&mut self) {
@@ -48,32 +45,30 @@ impl Gc {
 }
 
 pub struct GcGuard {
-    pointers: TraitObject,
     flag: bool,
+    metadata: *const (),
+    object: *mut (),
 }
 
 impl GcGuard {
-    fn new(pointers: TraitObject) -> Self {
-        Self {
-            pointers,
-            flag: false,
+    fn new<T: GcTrace>(mut object: T) -> Self {
+        unsafe {
+            let pointer: *mut dyn GcTrace = &mut object;
+            let (object, metadata) = pointer.to_raw_parts();
+            Self {
+                flag: false,
+                metadata: transmute::<DynMetadata<dyn GcTrace>, *const ()>(metadata),
+                object,
+            }
         }
     }
 
-    fn mark(&mut self) {
-        self.flag = true;
+    fn object(&mut self) -> &mut dyn GcTrace {
+        unsafe {
+            let metadata = transmute::<*const (), DynMetadata<dyn GcTrace>>(self.metadata);
+            std::ptr::from_raw_parts_mut::<dyn GcTrace>(self.object, metadata).as_mut().unwrap()
+        }
     }
-
-    fn flag(&self) -> bool {
-        self.flag
-    }
-
-    fn reset(&mut self) -> bool {
-        let reset = !self.flag;
-        self.flag = false;
-        reset
-    }
-}
 
 impl Drop for GcGuard {
     fn drop(&mut self) {
@@ -114,7 +109,7 @@ impl<T: GcTrace> GcRef<T> {
         }
     }
 
-    pub fn get_guard(&self) -> Mut<GcGuard> {
+    pub fn get_guard(self) -> Mut<GcGuard> {
         self.pointer
     }
 }
@@ -135,7 +130,7 @@ impl<T: GcTrace> Deref for GcRef<T> {
 
     fn deref(&self) -> &Self::Target {
         unsafe {
-            transmute::<*mut (), *mut T>(self.pointer.pointers.data).as_ref().unwrap()
+            transmute::<*mut (), &T>(self.pointer.object)
         }
     }
 }
@@ -143,7 +138,7 @@ impl<T: GcTrace> Deref for GcRef<T> {
 impl<T: GcTrace> DerefMut for GcRef<T> {
     fn deref_mut(&mut self) -> &mut Self::Target {
         unsafe {
-            transmute::<*mut (), *mut T>(self.pointer.pointers.data).as_mut().unwrap()
+            transmute::<*mut (), &mut T>(self.pointer.object)
         }
     }
 }
