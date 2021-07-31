@@ -5,7 +5,7 @@ use std::cmp::{ Eq, PartialEq };
 use std::marker::{ Copy, PhantomData };
 use std::mem::transmute;
 use std::ops::{ Deref, DerefMut };
-use std::raw::TraitObject;
+use std::ptr::{ from_raw_parts_mut, DynMetadata };
 
 pub const GC_THRESHOLD: usize = 250;
 
@@ -66,62 +66,56 @@ impl GcGuard {
     fn object(&mut self) -> &mut dyn GcTrace {
         unsafe {
             let metadata = transmute::<*const (), DynMetadata<dyn GcTrace>>(self.metadata);
-            std::ptr::from_raw_parts_mut::<dyn GcTrace>(self.object, metadata).as_mut().unwrap()
+            from_raw_parts_mut::<dyn GcTrace>(self.object, metadata).as_mut().unwrap()
         }
     }
+}
 
 impl Drop for GcGuard {
     fn drop(&mut self) {
         unsafe {
-            Box::<dyn GcTrace>::from_raw(transmute::<TraitObject, *mut dyn GcTrace>(self.pointers));
+            Box::<dyn GcTrace>::from_raw(self.object());
         }
     }
 }
 
 impl GcTrace for GcGuard {
     fn trace(&mut self) {
-        if !self.flag() {
-            self.mark();
-            unsafe {
-                transmute::<TraitObject, *mut dyn GcTrace>(self.pointers).as_mut().unwrap().trace();
-            }
+        if !self.flag {
+            self.flag = true;
+            self.object().trace();
         }
     }
 }
 
 pub struct GcRef<T: GcTrace> {
-    pointer: Mut<GcGuard>,
+    guard: Mut<GcGuard>,
     phantom: PhantomData<*const T>,
 }
 
 impl<T: GcTrace> GcRef<T> {
     pub fn null() -> Self {
         Self {
-            pointer: Mut::null(),
+            guard: Mut::null(),
             phantom: PhantomData,
         }
     }
 
-    fn new(pointer: Mut<GcGuard>) -> Self {
+    fn new(guard: Mut<GcGuard>) -> Self {
         Self {
-            pointer,
+            guard,
             phantom: PhantomData,
         }
     }
 
     pub fn get_guard(self) -> Mut<GcGuard> {
-        self.pointer
+        self.guard
     }
 }
 
 impl<T: GcTrace> GcTrace for GcRef<T> {
     fn trace(&mut self) {
-        unsafe {
-            if !self.pointer.flag() {
-                self.pointer.mark();
-                transmute::<*mut (), *mut T>(self.pointer.pointers.data).as_mut().unwrap().trace()
-            }
-        }
+        self.guard.trace();
     }
 }
 
@@ -130,7 +124,7 @@ impl<T: GcTrace> Deref for GcRef<T> {
 
     fn deref(&self) -> &Self::Target {
         unsafe {
-            transmute::<*mut (), &T>(self.pointer.object)
+            transmute::<*mut (), &T>(self.guard.object)
         }
     }
 }
@@ -138,14 +132,14 @@ impl<T: GcTrace> Deref for GcRef<T> {
 impl<T: GcTrace> DerefMut for GcRef<T> {
     fn deref_mut(&mut self) -> &mut Self::Target {
         unsafe {
-            transmute::<*mut (), &mut T>(self.pointer.object)
+            transmute::<*mut (), &mut T>(self.guard.object)
         }
     }
 }
 
 impl<T: GcTrace> PartialEq for GcRef<T> {
     fn eq(&self, other: &GcRef<T>) -> bool {
-        self.pointer == other.pointer
+        self.guard == other.guard
     }
 }
 
@@ -154,7 +148,7 @@ impl<T: GcTrace> Eq for GcRef<T> {}
 impl<T: GcTrace> Clone for GcRef<T> {
     fn clone(&self) -> Self {
         Self {
-            pointer: self.pointer,
+            guard: self.guard,
             phantom: PhantomData,
         }
     }
