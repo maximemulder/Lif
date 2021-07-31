@@ -68,6 +68,10 @@ impl GcTrace for Reference<'_> {
         if let Some(value) = self.value.as_mut() {
             value.trace();
         }
+
+        if let Some(r#type) = self.r#type.as_mut() {
+            r#type.trace();
+        }
     }
 }
 
