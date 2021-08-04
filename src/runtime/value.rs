@@ -9,9 +9,7 @@ use crate::runtime::utilities::tag::Tag;
 use std::ops::Deref;
 use std::marker::PhantomData;
 
-impl GcTrace for String {
-    fn trace(&mut self) {}
-}
+impl GcTrace for String {}
 
 #[derive(Clone, Copy, PartialEq, Eq)]
 pub struct Value<'a> {

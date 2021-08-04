@@ -1,6 +1,6 @@
 use crate::memory::{ Mut, Ref };
 
-use std::ops::{ Deref, DerefMut, Drop };
+use std::ops::{ Deref, DerefMut };
 
 fn alloc<T>(value: T) -> *mut T {
     Box::into_raw(Box::new(value))
