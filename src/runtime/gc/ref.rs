@@ -2,7 +2,6 @@ use crate::memory::Mut;
 use crate::runtime::gc::{ GcGuard, GcTrace };
 
 use std::marker::PhantomData;
-use std::mem::transmute;
 use std::ops::{ Deref, DerefMut };
 
 pub struct GcRef<T: GcTrace> {
@@ -40,17 +39,13 @@ impl<T: GcTrace> Deref for GcRef<T> {
     type Target = T;
 
     fn deref(&self) -> &Self::Target {
-        unsafe {
-            transmute::<*mut (), &T>(self.guard.object)
-        }
+        self.guard.cast_ref::<T>()
     }
 }
 
 impl<T: GcTrace> DerefMut for GcRef<T> {
     fn deref_mut(&mut self) -> &mut Self::Target {
-        unsafe {
-            transmute::<*mut (), &mut T>(self.guard.object)
-        }
+        self.guard.cast_mut::<T>()
     }
 }
 

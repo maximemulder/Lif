@@ -4,8 +4,8 @@ use std::mem::transmute;
 use std::ptr::{ from_raw_parts_mut, DynMetadata };
 
 pub struct GcGuard {
-    pub flag: bool,
-    pub object: *mut (),
+    flag: bool,
+    object: *mut (),
     metadata: *const (),
 }
 
@@ -22,18 +22,28 @@ impl GcGuard {
         }
     }
 
+    pub fn reset(&mut self) -> bool {
+        let flag = self.flag;
+        self.flag = false;
+        !flag
+    }
+
+    pub fn cast_ref<T>(&self) -> &T {
+        unsafe {
+            transmute::<*mut (), &T>(self.object)
+        }
+    }
+
+    pub fn cast_mut<T>(&mut self) -> &mut T {
+        unsafe {
+            transmute::<*mut (), &mut T>(self.object)
+        }
+    }
+
     fn object(&mut self) -> &mut dyn GcTrace {
         unsafe {
             let metadata = transmute::<*const (), DynMetadata<dyn GcTrace>>(self.metadata);
             from_raw_parts_mut::<dyn GcTrace>(self.object, metadata).as_mut().unwrap()
-        }
-    }
-}
-
-impl Drop for GcGuard {
-    fn drop(&mut self) {
-        unsafe {
-            Box::<dyn GcTrace>::from_raw(self.object());
         }
     }
 }
@@ -43,6 +53,14 @@ impl GcTrace for GcGuard {
         if !self.flag {
             self.flag = true;
             self.object().trace();
+        }
+    }
+}
+
+impl Drop for GcGuard {
+    fn drop(&mut self) {
+        unsafe {
+            Box::<dyn GcTrace>::from_raw(self.object());
         }
     }
 }

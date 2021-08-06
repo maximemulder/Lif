@@ -32,15 +32,7 @@ impl Gc {
     }
 
     pub fn collect(&mut self) {
-        self.guards.drain_filter(|guard| {
-            let flag = guard.flag;
-            if flag {
-                guard.flag = false;
-            }
-
-            !flag
-        });
-
+        self.guards.drain_filter(|guard| guard.reset());
         self.allocations = 0;
     }
 
