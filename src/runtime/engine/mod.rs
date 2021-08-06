@@ -117,7 +117,7 @@ impl<'a> Engine<'a> {
         self.registries.pop();
         if self.gc.allocations() > GC_THRESHOLD {
             self.trace();
-            // self.gc.collect();
+            self.gc.collect();
         }
 
         r#return

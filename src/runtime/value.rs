@@ -290,7 +290,7 @@ impl GcTrace for Value<'_> {
         self.class.trace();
         if self.class.gc() {
             unsafe {
-                std::mem::transmute::<Data, GcRef<()>>(self.data);
+                std::mem::transmute::<Data, GcRef<()>>(self.data).trace();
             }
         }
     }

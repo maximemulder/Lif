@@ -94,7 +94,7 @@ impl<'a> Engine<'a> {
 
         self.primitives.boolean  = self.primitive_class("Boolean",  Some(self.primitives.any), false);
         self.primitives.file     = self.primitive_class("File",     Some(self.primitives.any), false);
-        self.primitives.float    = self.primitive_class("Float",    Some(self.primitives.any), true);
+        self.primitives.float    = self.primitive_class("Float",    Some(self.primitives.any), false);
         self.primitives.function = self.primitive_class("Function", Some(self.primitives.any), true);
         self.primitives.generic  = self.primitive_class("Generic",  Some(self.primitives.any), true);
         self.primitives.integer  = self.primitive_class("Integer",  Some(self.primitives.any), false);
