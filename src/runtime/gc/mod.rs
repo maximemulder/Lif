@@ -10,7 +10,7 @@ pub use trace::GcTrace;
 use crate::memory::Own;
 use guard::GcGuard;
 
-pub const GC_THRESHOLD: usize = 0;
+pub const GC_THRESHOLD: usize = 1000;
 
 pub struct Gc {
     guards: Vec<Own<GcGuard>>,
