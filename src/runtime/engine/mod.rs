@@ -110,7 +110,7 @@ impl<'a> Engine<'a> {
         self.cache.push();
         let r#return = node.walk(self);
         if let Ok(flow) = r#return.as_ref() {
-            self.cache.transmit(flow.reference);
+            self.cache.bubble(flow.reference);
         }
 
         self.cache.pop();

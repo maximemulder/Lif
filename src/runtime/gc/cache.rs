@@ -7,7 +7,7 @@ pub struct GcCache {
 impl GcCache {
     pub fn new() -> Self {
         Self {
-            caches: vec![Vec::new()],
+            caches: vec![vec![]],
         }
     }
 
@@ -23,7 +23,7 @@ impl GcCache {
         self.insert(1, r#ref);
     }
 
-    pub fn transmit<T: GcTrace>(&mut self, r#ref: GcRef<T>) {
+    pub fn bubble<T: GcTrace>(&mut self, r#ref: GcRef<T>) {
         self.insert(2, r#ref);
     }
 
