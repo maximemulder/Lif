@@ -11,20 +11,22 @@ use std::ops::Deref;
 
 pub struct Class<'a> {
     tag: Tag,
-    scope: GcScope<'a>,
+    pub scope: GcScope<'a>,
     constructor: Option<GcConstructor<'a>>,
     parent: Option<GcRef<Class<'a>>>,
+    gc: bool,
     statics: HashMap<Box<str>, GcReference<'a>>,
     methods: HashMap<Box<str>, Value<'a>>,
 }
 
 impl<'a> Class<'a> {
-    pub fn new(tag: Tag, scope: GcScope<'a>, parent: Option<GcRef<Class<'a>>>) -> Self {
+    pub fn new(tag: Tag, scope: GcScope<'a>, parent: Option<GcRef<Class<'a>>>, gc: bool) -> Self {
         Self {
             tag,
             constructor: None,
             scope,
             parent,
+            gc,
             statics: HashMap::new(),
             methods: HashMap::new(),
         }
@@ -54,6 +56,10 @@ impl<'a> Class<'a> {
     pub fn set_parent(&mut self, parent: GcRef<Class<'a>>) {
         debug_assert!(self.parent.is_none());
         self.parent = Some(parent);
+    }
+
+    pub fn gc(&self) -> bool {
+        self.gc
     }
 
     pub fn get_method(&self, name: &str) -> Option<Value<'a>> {

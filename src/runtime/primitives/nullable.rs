@@ -13,7 +13,7 @@ pub fn populate(engine: &mut Engine) {
 pub fn create<'a>(engine: &mut Engine<'a>, arguments: &mut [Value<'a>]) -> ReturnReference<'a> {
     let Primitives { any, string, .. } = engine.primitives;
     let r#type = arguments[0].get_cast_class(engine)?;
-    let nullable = engine.primitive_class("Option", Some(any));
+    let nullable = engine.primitive_class("Option", Some(any), true);
     engine.primitive_static(nullable, "some", [("value", r#type)], None, Some(nullable), &some);
     engine.primitive_static(nullable, "none", [], None, Some(nullable), &none);
     engine.primitive_method(nullable, "__fstr__", [], None, Some(string), &fstr);

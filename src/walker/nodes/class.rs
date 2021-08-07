@@ -28,7 +28,7 @@ impl Walkable for Class {
             engine.primitives.object
         };
 
-        let value = engine.new_class(Ref::as_option(&self.name), Some(parent));
+        let value = engine.new_class(Ref::as_option(&self.name), Some(parent), true);
         let mut class = value.read()?.get_gc::<Class2>(engine);
         engine.run_frame(class.scope(), |engine| {
             for method in self.methods.iter() {

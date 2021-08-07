@@ -4,7 +4,6 @@ pub mod error;
 pub mod gc;
 pub mod primitives;
 pub mod reference;
-pub mod registries;
 pub mod r#return;
 pub mod scope;
 pub mod value;

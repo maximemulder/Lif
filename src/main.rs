@@ -7,7 +7,7 @@
 #![feature(const_fn_trait_bound)]
 #![feature(maybe_uninit_extra)]
 #![feature(new_uninit)]
-#![feature(raw)]
+#![feature(ptr_metadata)]
 #![feature(unsize)]
 #![warn(clippy::all)]
 

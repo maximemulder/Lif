@@ -5,10 +5,9 @@ mod scope;
 use crate::memory::{ Own, Ref };
 use crate::parser::{ Code, Grammar };
 use crate::runtime::data::Class;
-use crate::runtime::gc::{ GC_THRESHOLD, Gc, GcRef, GcTrace };
+use crate::runtime::gc::{ GC_THRESHOLD, Gc, GcCache, GcRef, GcTrace };
 use crate::runtime::primitives::Primitives;
 use crate::runtime::reference::{ GcReference, Reference };
-use crate::runtime::registries::Registries;
 use crate::runtime::r#return::{ ReturnFlow, ReturnReference };
 use crate::runtime::scope::{ GcScope, Scope };
 use crate::runtime::utilities::tag::Tagger;
@@ -39,9 +38,9 @@ pub struct Engine<'a> {
     pub output:     &'a mut dyn Write,
     pub error:      &'a mut dyn Write,
     pub primitives: Primitives<'a>,
-    registries:     Registries,
     taggers:        Taggers,
     gc:             Gc,
+    cache:          GcCache,
     codes:          Vec<Own<Code>>,
     frames:         Vec<GcScope<'a>>,
     scope:          GcScope<'a>,
@@ -55,14 +54,14 @@ impl<'a> Engine<'a> {
             input,
             output,
             error,
-            primitives:  Primitives::new(),
-            registries:  Registries::new(),
-            taggers:     Taggers::new(),
-            gc:          Gc::new(),
-            codes:       Vec::new(),
-            frames:      Vec::new(),
-            scope:       GcScope::null(),
-            undefined:   GcReference::null(),
+            primitives: Primitives::new(),
+            taggers:    Taggers::new(),
+            gc:         Gc::new(),
+            cache:      GcCache::new(),
+            codes:      Vec::new(),
+            frames:     Vec::new(),
+            scope:      GcScope::null(),
+            undefined:  GcReference::null(),
         };
 
         engine.scope = engine.alloc(Scope::new(None));
@@ -75,7 +74,7 @@ impl<'a> Engine<'a> {
 impl Engine<'_> {
     pub fn alloc<T: GcTrace>(&mut self, object: T) -> GcRef<T> {
         let r#ref = self.gc.alloc(object);
-        self.registries.store(r#ref);
+        self.cache.store(r#ref);
         r#ref
     }
 }
@@ -108,18 +107,18 @@ impl<'a> Engine<'a> {
     }
 
     pub fn walk(&mut self, node: &WNode) -> ReturnFlow<'a> {
-        self.registries.push();
+        self.cache.push();
         let r#return = node.walk(self);
         if let Ok(flow) = r#return.as_ref() {
-            self.registries.cache(flow.reference);
+            self.cache.transmit(flow.reference);
         }
 
-        self.registries.pop();
-        if self.gc.get_allocations() > GC_THRESHOLD {
-            // self.trace();
-            // self.gc.collect();
-        }
+        self.cache.pop();
 
+        if self.gc.allocations() > GC_THRESHOLD {
+            self.trace();
+            self.gc.collect();
+        }
         r#return
     }
 
@@ -140,7 +139,7 @@ impl<'a> Engine<'a> {
 impl GcTrace for Engine<'_> {
     fn trace(&mut self) {
         self.primitives.trace();
-        self.registries.trace();
+        self.cache.trace();
         self.scope.trace();
         self.undefined.trace();
         for frame in self.frames.iter_mut() {

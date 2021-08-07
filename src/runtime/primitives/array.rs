@@ -12,7 +12,7 @@ pub fn populate(engine: &mut Engine) {
 pub fn create<'a>(engine: &mut Engine<'a>, arguments: &mut [Value<'a>]) -> ReturnReference<'a> {
     let Primitives { any, integer, string, .. } = engine.primitives;
     let r#type = arguments[0].get_cast_class(engine)?;
-    let array = engine.primitive_class("Array", Some(any));
+    let array = engine.primitive_class("Array", Some(any), true);
     let array_any = if r#type == any {
         array
     } else {
