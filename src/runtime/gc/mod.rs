@@ -1,12 +1,14 @@
+mod cache;
 mod guard;
 mod r#ref;
 mod trace;
 
-pub use guard::GcGuard;
+pub use cache::GcCache;
 pub use r#ref::GcRef;
 pub use trace::GcTrace;
 
 use crate::memory::Own;
+use guard::GcGuard;
 
 pub const GC_THRESHOLD: usize = 0;
 

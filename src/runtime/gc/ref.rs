@@ -24,8 +24,8 @@ impl<T: GcTrace> GcRef<T> {
         }
     }
 
-    pub fn get_guard(self) -> Mut<GcGuard> {
-        self.guard
+    pub fn anonymize(self) -> GcRef<()> {
+        GcRef::new(self.guard)
     }
 }
 
