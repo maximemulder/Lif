@@ -1,6 +1,6 @@
-use crate::runtime::data::{ Array, Class, Function, FunctionImplementation, Generic, GenericImplementation, Method, Nullable, Object };
 use crate::runtime::engine::Engine;
 use crate::runtime::gc::GcRef;
+use crate::runtime::primitives::{ Array, Class, Function, FunctionImplementation, Generic, GenericImplementation, Method, Nullable, Object };
 use crate::runtime::reference::GcReference;
 use crate::runtime::utilities::parameters::Parameters;
 use crate::runtime::value::Value;
@@ -23,7 +23,7 @@ impl<'a> Engine<'a> {
     }
 
     pub fn new_array_any_value(&mut self, elements: Vec<GcReference<'a>>) -> Value<'a> {
-        self.new_array_value(self.primitives.array_any, elements)
+        self.new_array_value(self.environment.array_any, elements)
     }
 
     pub fn new_class_value(&mut self, name: Option<&str>, parent: Option<GcRef<Class<'a>>>, gc: bool) -> Value<'a> {
@@ -88,7 +88,7 @@ impl<'a> Engine<'a> {
     }
 
     pub fn new_array_any(&mut self, elements: Vec<GcReference<'a>>) -> GcReference<'a> {
-        self.new_array(self.primitives.array_any, elements)
+        self.new_array(self.environment.array_any, elements)
     }
 
     pub fn new_class(&mut self, name: Option<&str>, parent: Option<GcRef<Class<'a>>>, gc: bool) -> GcReference<'a> {

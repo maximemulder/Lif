@@ -1,9 +1,10 @@
 mod code;
 mod primitive;
 
-use crate::runtime::data::Class;
+use crate::runtime::data::PrimitiveClass;
 use crate::runtime::engine::Engine;
 use crate::runtime::gc::{ GcRef, GcTrace };
+use crate::runtime::primitives::Class;
 use crate::runtime::r#return::ReturnReference;
 use crate::runtime::scope::GcScope;
 use crate::runtime::utilities::constructors::Constructors;
@@ -65,11 +66,17 @@ impl<'a> Generic<'a> {
         let values = Vec::from(arguments);
         let constructor = self.constructors.record(engine, generic, values.into_boxed_slice(), reference.get_value());
         let value = reference.read()?;
-        if value.class.is(engine.primitives.class) {
+        if value.class.is(engine.environment.class) {
             value.get_gc::<Class>(engine).set_constructor(constructor);
         }
 
         Ok(reference)
+    }
+}
+
+impl<'a> PrimitiveClass<'a> for Generic<'a> {
+    fn get_class(engine: &Engine<'a>) -> GcRef<Class<'a>> {
+        engine.environment.generic
     }
 }
 

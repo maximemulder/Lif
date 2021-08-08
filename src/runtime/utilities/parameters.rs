@@ -1,7 +1,7 @@
-use crate::runtime::data::{ Array, Class };
 use crate::runtime::engine::Engine;
 use crate::runtime::error::Error;
 use crate::runtime::gc::{ GcRef, GcTrace };
+use crate::runtime::primitives::{ Array, Class };
 use crate::runtime::r#return::Return;
 use crate::runtime::utilities::variable::Variable;
 use crate::runtime::value::Value;
@@ -22,7 +22,7 @@ impl<'a> Parameters<'a> {
     pub fn get_rest_array(&self, engine: &Engine<'a>) -> Option<GcRef<Class<'a>>> {
         self.rest.as_ref()
             .and_then(|parameter| parameter.r#type)
-            .and_then(|class| class.is_generic(engine.primitives.array).then_some(class))
+            .and_then(|class| class.is_generic(engine.environment.array).then_some(class))
     }
 
     pub fn get_rest_array_type(&self, engine: &Engine<'a>) -> Option<GcRef<Class<'a>>> {

@@ -1,6 +1,6 @@
-use crate::runtime::data::Class;
 use crate::runtime::gc::GcRef;
 use crate::runtime::engine::Engine;
+use crate::runtime::primitives::Class;
 use crate::runtime::r#return::{ Flow, Jump, Return, ReturnFlow };
 use crate::walker::WNode;
 

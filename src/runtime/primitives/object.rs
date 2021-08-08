@@ -1,41 +1,45 @@
-use crate::runtime::data::Object;
+use crate::runtime::data::PrimitiveClass;
 use crate::runtime::engine::Engine;
-use crate::runtime::primitives::Primitives;
-use crate::runtime::r#return::{ Return, ReturnReference };
-use crate::runtime::value::Value;
+use crate::runtime::gc::{ GcRef, GcTrace };
+use crate::runtime::primitives::Class;
+use crate::runtime::reference::GcReference;
 
-pub fn populate(engine: &mut Engine) {
-    let Primitives { object, string, .. } = engine.primitives;
-    engine.populate_class("Object", object);
-    engine.primitive_method(object, "to_string", [], None, Some(string), &to_string);
-    engine.primitive_method(object, "__cn__", [("property", string)], None, None, &chain);
+use std::collections::HashMap;
+
+pub struct Object<'a> {
+    attributes: HashMap<Box<str>, GcReference<'a>>,
 }
 
-fn to_string<'a>(engine: &mut Engine<'a>, arguments: &mut [Value<'a>]) -> ReturnReference<'a> {
-    let mut string = String::from("{");
-    string.push_str(&arguments[0].get_gc::<Object>(engine).attributes().iter()
-        .map(|(name, attribute)| Ok(format!("{}: {}", &name, &attribute.read()?.call_sstr(engine)?)))
-        .collect::<Return<Box<[String]>>>()?
-        .join(", ")
-    );
-
-    string.push('}');
-    Ok(engine.new_string(string))
-}
-
-fn chain<'a>(engine: &mut Engine<'a>, arguments: &mut [Value<'a>]) -> ReturnReference<'a> {
-    let this = arguments[0];
-    let name = &arguments[1].get_gc::<String>(engine);
-    if let Some(method) = this.class.get_method(name) {
-        return Ok(engine.new_method(method, this));
+impl<'a> Object<'a> {
+    pub fn new() -> Self {
+        Self {
+            attributes: HashMap::new(),
+        }
     }
 
-    let member = engine.new_variable(None, engine.primitives.any);
-    let mut object = this.get_gc::<Object>(engine);
-    Ok(if let Some(member) = object.get_attribute(name) {
-        member
-    } else {
-        object.set_attribute(name, member);
-        member
-    })
+    pub fn attributes(&self) -> &HashMap<Box<str>, GcReference<'a>> {
+        &self.attributes
+    }
+
+    pub fn get_attribute(&self, name: &str) -> Option<GcReference<'a>> {
+        self.attributes.get(name).copied()
+    }
+
+    pub fn set_attribute(&mut self, name: &str, reference: GcReference<'a>) {
+        self.attributes.insert(Box::from(name), reference);
+    }
+}
+
+impl<'a> PrimitiveClass<'a> for Object<'a> {
+    fn get_class(engine: &Engine<'a>) -> GcRef<Class<'a>> {
+        engine.environment.object
+    }
+}
+
+impl GcTrace for Object<'_> {
+    fn trace(&mut self) {
+        for attribute in self.attributes.values_mut() {
+            attribute.trace();
+        }
+    }
 }

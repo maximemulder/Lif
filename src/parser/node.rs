@@ -1,5 +1,3 @@
-use std::usize;
-
 use crate::parser::Code;
 use crate::parser::Element;
 use crate::memory::Ref;

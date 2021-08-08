@@ -1,6 +1,6 @@
-use crate::runtime::data::Class;
 use crate::runtime::error::Error;
 use crate::runtime::gc::{ GcRef, GcTrace };
+use crate::runtime::primitives::Class;
 use crate::runtime::r#return::{ Return, ReturnValue };
 use crate::runtime::value::Value;
 

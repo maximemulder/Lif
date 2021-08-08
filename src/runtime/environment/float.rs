@@ -1,10 +1,10 @@
 use crate::runtime::engine::Engine;
-use crate::runtime::primitives::Primitives;
+use crate::runtime::environment::Environment;
 use crate::runtime::r#return::ReturnReference;
 use crate::runtime::value::Value;
 
 pub fn populate(engine: &mut Engine) {
-    let Primitives { any, boolean, float, string, .. } = engine.primitives;
+    let Environment { any, boolean, float, string, .. } = engine.environment;
     engine.populate_class("Float", float);
     engine.primitive_method(float, "__sstr__", [], None, Some(string), &sstr);
     engine.primitive_method(float, "__eq__", [("other", any)], None, Some(boolean), &eq);
@@ -23,7 +23,7 @@ fn sstr<'a>(engine: &mut Engine<'a>, arguments: &mut [Value<'a>]) -> ReturnRefer
 }
 
 fn eq<'a>(engine: &mut Engine<'a>, arguments: &mut [Value<'a>]) -> ReturnReference<'a> {
-    Ok(engine.new_boolean(if arguments[1].isa(engine.primitives.float) {
+    Ok(engine.new_boolean(if arguments[1].isa(engine.environment.float) {
         arguments[0].get::<f64>(engine) == arguments[1].get(engine)
     } else {
         false

@@ -1,7 +1,7 @@
 use crate::memory::Ref;
-use crate::runtime::data::function::FunctionImplementation;
 use crate::runtime::engine::Engine;
 use crate::runtime::error::Error;
+use crate::runtime::primitives::function::FunctionImplementation;
 use crate::runtime::r#return::{ Jump, ReturnReference };
 use crate::runtime::utilities::parameters::Parameters;
 use crate::runtime::value::Value;

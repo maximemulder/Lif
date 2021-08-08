@@ -1,12 +1,12 @@
-use crate::runtime::data::Function;
 use crate::runtime::engine::Engine;
-use crate::runtime::primitives::Primitives;
+use crate::runtime::environment::Environment;
+use crate::runtime::primitives::Function;
 use crate::runtime::r#return::ReturnReference;
 use crate::runtime::utilities::parameters;
 use crate::runtime::value::Value;
 
 pub fn populate(engine: &mut Engine) {
-    let Primitives { array_any, function, .. } = engine.primitives;
+    let Environment { array_any, function, .. } = engine.environment;
     engine.populate_class("Function", function);
     engine.primitive_method(function, "__cl__", [("arguments", array_any)], None, None, &call);
 }

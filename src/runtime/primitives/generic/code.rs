@@ -1,6 +1,6 @@
 use crate::memory::Ref;
-use crate::runtime::data::generic::GenericImplementation;
 use crate::runtime::engine::Engine;
+use crate::runtime::primitives::generic::GenericImplementation;
 use crate::runtime::r#return::ReturnReference;
 use crate::runtime::value::Value;
 use crate::walker::WNode;

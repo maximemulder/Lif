@@ -1,6 +1,6 @@
-use crate::runtime::data::Class;
 use crate::runtime::engine::Engine;
 use crate::runtime::gc::{ GcRef, GcTrace };
+use crate::runtime::primitives::Class;
 use crate::runtime::reference::GcReference;
 use crate::runtime::r#return::Return;
 use crate::runtime::value::Value;
@@ -19,7 +19,7 @@ impl<'a> Variable<'a> {
     }
 
     pub fn build(&self, engine: &mut Engine<'a>) -> GcReference<'a> {
-        let reference = engine.new_variable(None, self.r#type.unwrap_or(engine.primitives.any));
+        let reference = engine.new_variable(None, self.r#type.unwrap_or(engine.environment.any));
         engine.set_variable(self.name.as_ref(), reference);
         reference
     }

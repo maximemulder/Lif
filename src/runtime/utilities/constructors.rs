@@ -1,6 +1,6 @@
-use crate::runtime::data::Generic;
 use crate::runtime::engine::Engine;
 use crate::runtime::gc::{ GcRef, GcTrace };
+use crate::runtime::primitives::Generic;
 use crate::runtime::value::Value;
 
 pub type GcConstructor<'a> = GcRef<Constructor<'a>>;

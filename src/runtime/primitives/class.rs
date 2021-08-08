@@ -1,62 +1,137 @@
-use crate::runtime::data::{ Class, Function };
+use crate::runtime::data::PrimitiveClass;
 use crate::runtime::engine::Engine;
-use crate::runtime::error::Error;
-use crate::runtime::primitives::Primitives;
-use crate::runtime::r#return::{ Return, ReturnReference };
-use crate::runtime::utilities::parameters;
+use crate::runtime::gc::{ GcRef, GcTrace };
+use crate::runtime::primitives::Generic;
+use crate::runtime::reference::GcReference;
+use crate::runtime::scope::GcScope;
+use crate::runtime::utilities::constructors::GcConstructor;
+use crate::runtime::utilities::tag::Tag;
 use crate::runtime::value::Value;
 
-pub fn populate(engine: &mut Engine) {
-    let Primitives { any, array_any, class, string, .. } = engine.primitives;
-    engine.populate_class("Class", class);
-    engine.primitive_method(class, "__sstr__", [], None, Some(string), &sstr);
-    engine.primitive_method(class, "__cn__", [("property", string)], None, Some(any), &chain);
-    engine.primitive_method(class, "__cl__", [("arguments", array_any)], None, Some(any), &call);
+use std::collections::HashMap;
+use std::ops::Deref;
+
+pub struct Class<'a> {
+    tag: Tag,
+    pub scope: GcScope<'a>,
+    constructor: Option<GcConstructor<'a>>,
+    parent: Option<GcRef<Class<'a>>>,
+    gc: bool,
+    statics: HashMap<Box<str>, GcReference<'a>>,
+    methods: HashMap<Box<str>, Value<'a>>,
 }
 
-fn sstr<'a>(engine: &mut Engine<'a>, arguments: &mut [Value<'a>]) -> ReturnReference<'a> {
-    let this = arguments[0].get_gc::<Class>(engine);
-    let mut string = this.tag().to_string();
-    if let Some(constructor) = this.constructor() {
-        string.push_str("[");
-        string.push_str(&constructor.arguments.iter()
-            .map(|argument| argument.call_sstr(engine))
-            .collect::<Return<Box<[_]>>>()?
-            .join(", ")
-        );
-
-        string.push_str("]");
+impl<'a> Class<'a> {
+    pub fn new(tag: Tag, scope: GcScope<'a>, parent: Option<GcRef<Class<'a>>>, gc: bool) -> Self {
+        Self {
+            tag,
+            constructor: None,
+            scope,
+            parent,
+            gc,
+            statics: HashMap::new(),
+            methods: HashMap::new(),
+        }
     }
 
-    Ok(engine.new_string(string))
-}
-
-fn chain<'a>(engine: &mut Engine<'a>, arguments: &mut [Value<'a>]) -> ReturnReference<'a> {
-    let this = arguments[0];
-    let name = &arguments[1].get_gc::<String>(engine);
-    if let Some(method) = this.class.get_method(name) {
-        return Ok(engine.new_method(method, this));
+    pub fn tag(&self) -> &Tag {
+        &self.tag
     }
 
-    let member = engine.new_variable(None, engine.primitives.any);
-    let mut class = this.get_gc::<Class>(engine);
-    Ok(if let Some(member) = class.get_static(name) {
-        member
-    } else {
-        class.set_static(name, member);
-        member
-    })
+    pub fn scope(&self) -> GcScope<'a> {
+        self.scope
+    }
+
+    pub fn constructor(&self) -> Option<GcConstructor<'a>> {
+        self.constructor
+    }
+
+    pub fn set_constructor(&mut self, constructor: GcConstructor<'a>) {
+        debug_assert!(self.constructor.is_none());
+        self.constructor = Some(constructor);
+    }
+
+    pub fn parent(&self) -> Option<GcRef<Class<'a>>> {
+        self.parent
+    }
+
+    pub fn set_parent(&mut self, parent: GcRef<Class<'a>>) {
+        debug_assert!(self.parent.is_none());
+        self.parent = Some(parent);
+    }
+
+    pub fn gc(&self) -> bool {
+        self.gc
+    }
+
+    pub fn get_method(&self, name: &str) -> Option<Value<'a>> {
+        if let Some(method) = self.methods.get(name).copied() {
+            return Some(method);
+        }
+
+        if let Some(parent) = self.parent {
+            return parent.get_method(name);
+        }
+
+        None
+    }
+
+    pub fn set_method(&mut self, name: &str, reference: Value<'a>) {
+        self.methods.insert(Box::from(name), reference);
+    }
+
+    pub fn get_static(&self, name: &str) -> Option<GcReference<'a>> {
+        self.statics.get(name).copied()
+    }
+
+    pub fn set_static(&mut self, name: &str, reference: GcReference<'a>) {
+        self.statics.insert(Box::from(name), reference);
+    }
+
+    pub fn is(&self, class: GcRef<Class<'a>>) -> bool {
+        if self as *const Class == class.deref() as *const Class {
+            true
+        } else if let Some(parent) = self.parent() {
+            parent.is(class)
+        } else {
+            false
+        }
+    }
+
+    pub fn is_generic(&self, generic: GcRef<Generic<'a>>) -> bool {
+        if let Some(constructor) = self.constructor() {
+            if constructor.generic == generic {
+                return true;
+            }
+        }
+
+        false
+    }
 }
 
-fn call<'a>(engine: &mut Engine<'a>, arguments: &mut [Value<'a>]) -> ReturnReference<'a> {
-    let class = arguments[0];
-    Ok(if let Some(member) = class.get_gc::<Class>(engine).get_static("__init__") {
-        member.read()?.get_gc::<Function>(engine).call(engine, &mut parameters::unpack(engine, arguments[1])?)?
-    } else {
-        return Err(error_constructor(engine, class))
-    })
+impl<'a> PrimitiveClass<'a> for Class<'a> {
+    fn get_class(engine: &Engine<'a>) -> GcRef<Class<'a>> {
+        engine.environment.class
+    }
 }
 
-fn error_constructor<'a>(engine: &Engine<'a>, class: Value<'a>) -> Error {
-    Error::new_runtime(&format!("Class {} has no default constructor.", class.get_gc::<Class>(engine).tag()))
+impl GcTrace for Class<'_> {
+    fn trace(&mut self) {
+        self.scope.trace();
+        if let Some(constructor) = self.constructor.as_mut() {
+            constructor.trace();
+        }
+
+        if let Some(parent) = self.parent.as_mut() {
+            parent.trace();
+        }
+
+        for r#static in self.statics.values_mut() {
+            r#static.trace();
+        }
+
+        for method in self.methods.values_mut() {
+            method.trace();
+        }
+    }
 }

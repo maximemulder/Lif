@@ -4,9 +4,9 @@ mod scope;
 
 use crate::memory::{ Own, Ref };
 use crate::parser::{ Code, Grammar };
-use crate::runtime::data::Class;
+use crate::runtime::environment::Environment;
 use crate::runtime::gc::{ GC_THRESHOLD, Gc, GcCache, GcRef, GcTrace };
-use crate::runtime::primitives::Primitives;
+use crate::runtime::primitives::Class;
 use crate::runtime::reference::{ GcReference, Reference };
 use crate::runtime::r#return::{ ReturnFlow, ReturnReference };
 use crate::runtime::scope::{ GcScope, Scope };
@@ -33,18 +33,18 @@ impl Taggers {
 }
 
 pub struct Engine<'a> {
-    pub grammar:    &'a Grammar,
-    pub input:      &'a mut dyn Read,
-    pub output:     &'a mut dyn Write,
-    pub error:      &'a mut dyn Write,
-    pub primitives: Primitives<'a>,
-    taggers:        Taggers,
-    gc:             Gc,
-    cache:          GcCache,
-    codes:          Vec<Own<Code>>,
-    frames:         Vec<GcScope<'a>>,
-    scope:          GcScope<'a>,
-    undefined:      GcReference<'a>,
+    pub grammar:     &'a Grammar,
+    pub input:       &'a mut dyn Read,
+    pub output:      &'a mut dyn Write,
+    pub error:       &'a mut dyn Write,
+    pub environment: Environment<'a>,
+    taggers:         Taggers,
+    gc:              Gc,
+    cache:           GcCache,
+    codes:           Vec<Own<Code>>,
+    frames:          Vec<GcScope<'a>>,
+    scope:           GcScope<'a>,
+    undefined:       GcReference<'a>,
 }
 
 impl<'a> Engine<'a> {
@@ -54,14 +54,14 @@ impl<'a> Engine<'a> {
             input,
             output,
             error,
-            primitives: Primitives::new(),
-            taggers:    Taggers::new(),
-            gc:         Gc::new(),
-            cache:      GcCache::new(),
-            codes:      Vec::new(),
-            frames:     Vec::new(),
-            scope:      GcScope::null(),
-            undefined:  GcReference::null(),
+            environment: Environment::new(),
+            taggers:     Taggers::new(),
+            gc:          Gc::new(),
+            cache:       GcCache::new(),
+            codes:       Vec::new(),
+            frames:      Vec::new(),
+            scope:       GcScope::null(),
+            undefined:   GcReference::null(),
         };
 
         engine.scope = engine.alloc(Scope::new(None));
@@ -81,7 +81,7 @@ impl Engine<'_> {
 
 impl<'a> Engine<'a> {
     pub fn new_reference(&mut self, value: Value<'a>) -> GcReference<'a> {
-        self.alloc(Reference::new_variable(Some(value), self.primitives.any))
+        self.alloc(Reference::new_variable(Some(value), self.environment.any))
     }
 
     pub fn new_variable(&mut self, value: Option<Value<'a>>, r#type: GcRef<Class<'a>>) -> GcReference<'a> {
@@ -138,7 +138,7 @@ impl<'a> Engine<'a> {
 
 impl GcTrace for Engine<'_> {
     fn trace(&mut self) {
-        self.primitives.trace();
+        self.environment.trace();
         self.cache.trace();
         self.scope.trace();
         self.undefined.trace();

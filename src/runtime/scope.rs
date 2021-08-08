@@ -4,6 +4,7 @@ use crate::runtime::gc::{ GcRef, GcTrace };
 use crate::runtime::reference::GcReference;
 use crate::runtime::r#return::ReturnReference;
 use crate::runtime::value::Value;
+
 use std::collections::HashMap;
 
 pub type GcScope<'a> = GcRef<Scope<'a>>;

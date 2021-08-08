@@ -1,12 +1,12 @@
 use crate::runtime::engine::Engine;
-use crate::runtime::primitives::Primitives;
+use crate::runtime::environment::Environment;
 use crate::runtime::r#return::ReturnReference;
 use crate::runtime::value::Value;
 
 use std::ops::Deref;
 
 pub fn populate(engine: &mut Engine) {
-    let Primitives { any, string, .. } = engine.primitives;
+    let Environment { any, string, .. } = engine.environment;
     engine.populate_class("String", string);
     engine.primitive_method(string, "__sstr__", [], None, Some(string), &sstr);
     engine.primitive_method(string, "__eq__", [("other", any)], None, Some(string), &eq);
@@ -18,7 +18,7 @@ fn sstr<'a>(engine: &mut Engine<'a>, arguments: &mut [Value<'a>]) -> ReturnRefer
 }
 
 fn eq<'a>(engine: &mut Engine<'a>, arguments: &mut [Value<'a>]) -> ReturnReference<'a> {
-    Ok(engine.new_boolean(if arguments[1].isa(engine.primitives.string) {
+    Ok(engine.new_boolean(if arguments[1].isa(engine.environment.string) {
         arguments[0].get_gc::<String>(engine) == arguments[1].get_gc::<String>(engine)
     } else {
         false

@@ -1,12 +1,12 @@
-use crate::runtime::data::Generic;
 use crate::runtime::engine::Engine;
-use crate::runtime::primitives::Primitives;
+use crate::runtime::environment::Environment;
+use crate::runtime::primitives::Generic;
 use crate::runtime::r#return::ReturnReference;
 use crate::runtime::utilities::parameters;
 use crate::runtime::value::Value;
 
 pub fn populate(engine: &mut Engine) {
-    let Primitives { array_any, generic, .. } = engine.primitives;
+    let Environment { array_any, generic, .. } = engine.environment;
     engine.populate_class("Generic", generic);
     engine.primitive_method(generic, "__gn__", [("arguments", array_any)], None, None, &apply);
 }

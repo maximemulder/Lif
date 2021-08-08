@@ -1,6 +1,6 @@
 use crate::memory::Ref;
-use crate::runtime::data::Class as Class2;
 use crate::runtime::engine::Engine;
+use crate::runtime::primitives::Class as Class2;
 use crate::runtime::r#return::{ Flow, ReturnFlow };
 use crate::walker::{ Walkable, WNode };
 
@@ -25,7 +25,7 @@ impl Walkable for Class {
         let parent = if let Some(parent) = self.parent.as_ref() {
             engine.walk(parent)?.none()?.read()?.get_cast_class(engine)?
         } else {
-            engine.primitives.object
+            engine.environment.object
         };
 
         let value = engine.new_class(Ref::as_option(&self.name), Some(parent), true);

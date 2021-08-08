@@ -1,6 +1,6 @@
 use crate::memory::Ref;
-use crate::runtime::data::GenericCode;
 use crate::runtime::engine::Engine;
+use crate::runtime::primitives::GenericCode;
 use crate::runtime::r#return::{ Flow, ReturnFlow };
 use crate::walker::{ Walkable, WNode };
 

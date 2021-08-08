@@ -1,6 +1,6 @@
-use crate::runtime::data::{ Class, FunctionPrimitive, Generic, GenericImplementation };
 use crate::runtime::engine::Engine;
 use crate::runtime::gc::GcRef;
+use crate::runtime::primitives::{ Class, FunctionPrimitive, Generic, GenericImplementation };
 use crate::runtime::utilities::Callable;
 use crate::runtime::utilities::parameters::Parameters;
 use crate::runtime::utilities::variable::Variable;

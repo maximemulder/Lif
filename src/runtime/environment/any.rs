@@ -1,10 +1,10 @@
 use crate::runtime::engine::Engine;
-use crate::runtime::primitives::Primitives;
+use crate::runtime::environment::Environment;
 use crate::runtime::r#return::ReturnReference;
 use crate::runtime::value::Value;
 
 pub fn populate(engine: &mut Engine) {
-    let Primitives { any, boolean, method, string, .. } = engine.primitives;
+    let Environment { any, boolean, method, string, .. } = engine.environment;
     engine.populate_class("Any", any);
     engine.primitive_method(any, "__fstr__", [], None, Some(string), &fstr);
     engine.primitive_method(any, "__sstr__", [], None, Some(string), &sstr);

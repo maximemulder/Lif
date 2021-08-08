@@ -1,7 +1,7 @@
 use crate::memory::Ref;
-use crate::runtime::data::FunctionCode;
 use crate::runtime::engine::Engine;
 use crate::runtime::error::Error;
+use crate::runtime::primitives::FunctionCode;
 use crate::runtime::r#return::{ Flow, Return, ReturnFlow };
 use crate::runtime::utilities::parameters::Parameters;
 use crate::runtime::utilities::variable::Variable;
@@ -40,7 +40,7 @@ impl Walkable for Function {
         let rest = self.rest.as_ref().map(|(name, parameter)| {
             let r#type = parameter.as_ref().map(|parameter| {
                 let r#type = engine.walk(parameter)?.none()?.read()?.get_cast_class(engine)?;
-                if r#type.is_generic(engine.primitives.array) || r#type.is(engine.primitives.any) {
+                if r#type.is_generic(engine.environment.array) || r#type.is(engine.environment.any) {
                     Ok(r#type)
                 } else {
                     Err(error_rest())

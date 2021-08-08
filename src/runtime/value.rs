@@ -1,7 +1,8 @@
-use crate::runtime::data::{ Array, Class, Data, Function, Generic, Primitive, PrimitiveClass, PrimitiveGeneric };
+use crate::runtime::data::{ Data, Primitive, PrimitiveClass, PrimitiveGeneric };
 use crate::runtime::engine::Engine;
 use crate::runtime::error::Error;
 use crate::runtime::gc::{ GcRef, GcTrace };
+use crate::runtime::primitives::{ Array, Class, Function, Generic };
 use crate::runtime::r#return::{ Return, ReturnReference, ReturnValue };
 use crate::runtime::utilities::parameters;
 use crate::runtime::utilities::tag::Tag;
@@ -119,17 +120,17 @@ impl<'a> Value<'a> {
 
 impl<'a> Value<'a> {
     pub fn get_cast_boolean(self, engine: &Engine<'a>) -> Return<bool> {
-        self.cast(engine.primitives.boolean)?;
+        self.cast(engine.environment.boolean)?;
         Ok(self.get(engine))
     }
 
     pub fn get_cast_array(self, engine: &Engine<'a>) -> Return<GcRef<Array<'a>>> {
-        self.cast_generic(engine.primitives.array)?;
+        self.cast_generic(engine.environment.array)?;
         Ok(self.get_gn(engine))
     }
 
     pub fn get_cast_class(self, engine: &Engine<'a>) -> Return<GcRef<Class<'a>>> {
-        self.cast(engine.primitives.class)?;
+        self.cast(engine.environment.class)?;
         Ok(self.get_gc(engine))
     }
 }
@@ -145,11 +146,11 @@ impl GcTrace for Value<'_> {
 
 impl<'a> Value<'a> {
     pub fn get_tag(&self, engine: &Engine<'a>) -> Tag {
-        if self.isa(engine.primitives.class) {
+        if self.isa(engine.environment.class) {
             self.get_gc::<Class>(engine).tag().clone()
-        } else if self.isa(engine.primitives.function) {
+        } else if self.isa(engine.environment.function) {
             self.get_gc::<Function>(engine).tag().clone()
-        } else if self.isa(engine.primitives.generic) {
+        } else if self.isa(engine.environment.generic) {
             self.get_gc::<Generic>(engine).tag().clone()
         } else {
             panic!();

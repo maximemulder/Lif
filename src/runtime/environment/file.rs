@@ -1,5 +1,5 @@
 use crate::runtime::engine::Engine;
-use crate::runtime::primitives::Primitives;
+use crate::runtime::environment::Environment;
 use crate::runtime::r#return::ReturnReference;
 use crate::runtime::value::Value;
 
@@ -7,7 +7,7 @@ use std::fs;
 use std::ops::Deref;
 
 pub fn populate(engine: &mut Engine) {
-    let Primitives { any, file, string, .. } = engine.primitives;
+    let Environment { any, file, string, .. } = engine.environment;
     engine.populate_class("File", file);
     engine.primitive_static(file, "read", [("file", string)], None, Some(string), &read);
     engine.primitive_static(file, "write", [("file", string), ("content", any)], None, None, &write);

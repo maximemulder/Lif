@@ -10,6 +10,9 @@ pub use trace::GcTrace;
 use crate::memory::Own;
 use guard::GcGuard;
 
+#[cfg(test)]
+pub const GC_THRESHOLD: usize = 0;
+#[cfg(not(test))]
 pub const GC_THRESHOLD: usize = 1000;
 
 pub struct Gc {
