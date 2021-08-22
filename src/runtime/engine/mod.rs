@@ -8,7 +8,7 @@ use crate::runtime::environment::Environment;
 use crate::runtime::gc::{ GC_THRESHOLD, Gc, GcCache, GcRef, GcTrace };
 use crate::runtime::primitives::Class;
 use crate::runtime::reference::{ GcReference, Reference };
-use crate::runtime::r#return::ReturnReference;
+use crate::runtime::r#return::{ ReturnFlow, ReturnReference };
 use crate::runtime::scope::{ GcScope, Scope };
 use crate::runtime::utilities::tag::Tagger;
 use crate::runtime::value::Value;
@@ -74,11 +74,6 @@ impl Engine<'_> {
     pub fn alloc<T: GcTrace>(&mut self, object: T) -> GcRef<T> {
         let r#ref = self.gc.alloc(object);
         self.cache.store(r#ref);
-        /* if self.gc.allocations() > GC_THRESHOLD {
-            self.trace();
-            self.gc.collect();
-        } */
-
         r#ref
     }
 }
@@ -121,6 +116,22 @@ impl<'a> Engine<'a> {
                 None
             },
         }
+    }
+
+    pub fn run_gc(&mut self, callback: impl FnOnce(&mut Engine<'a>) -> ReturnFlow<'a>) -> ReturnFlow<'a> {
+        self.cache.push();
+        let r#return = callback(self);
+        if let Ok(flow) = r#return.as_ref() {
+            self.cache.bubble(flow.reference);
+        }
+
+        self.cache.pop();
+        if self.gc.allocations() > GC_THRESHOLD {
+            self.trace();
+            self.gc.collect();
+        }
+
+        r#return
     }
 }
 
