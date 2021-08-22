@@ -1,12 +1,13 @@
 use crate::runtime::r#return::Jump;
-use crate::walker::WNode;
-use crate::walker::nodes::AJumpTrait;
+use crate::walker::ANode;
+use crate::walker::nodes::{ AExpression, AJumpTrait };
 
 pub struct AReturn {
-    expression: Option<WNode>}
+    expression: Option<ANode<AExpression>>
+}
 
 impl AReturn {
-    pub fn new(expression: Option<WNode>) -> Self {
+    pub fn new(expression: Option<ANode<AExpression>>) -> Self {
         Self {
             expression,
         }
@@ -18,7 +19,7 @@ impl AJumpTrait for AReturn {
         Jump::Return
     }
 
-    fn expression(&self) -> Option<&WNode> {
+    fn expression(&self) -> Option<&ANode<AExpression>> {
         self.expression.as_ref()
     }
 }

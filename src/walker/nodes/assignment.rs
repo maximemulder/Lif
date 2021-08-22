@@ -1,16 +1,17 @@
 use crate::memory::Ref;
 use crate::runtime::engine::Engine;
 use crate::runtime::r#return::{ Flow, ReturnFlow };
-use crate::walker::{ Walkable, WNode };
+use crate::walker::ANode;
+use crate::walker::nodes::{ AExpression, AExpressionTrait };
 
-pub struct Assignment {
-    reference:  WNode,
-    expression: WNode,
+pub struct AAssignment {
+    reference:  ANode<AExpression>,
+    expression: ANode<AExpression>,
     operator:   Option<Ref<str>>,
 }
 
-impl Assignment {
-    pub fn new(reference: WNode, expression: WNode, operator: Ref<str>) -> Self {
+impl AAssignment {
+    pub fn new(reference: ANode<AExpression>, expression: ANode<AExpression>, operator: Ref<str>) -> Self {
         Self {
             reference,
             expression,
@@ -19,10 +20,10 @@ impl Assignment {
     }
 }
 
-impl Walkable for Assignment {
+impl AExpressionTrait for AAssignment {
     fn walk<'a>(&self, engine: &mut Engine<'a>) -> ReturnFlow<'a> {
-        let mut reference  = get!(engine.walk(&self.reference)?);
-        let mut expression = get!(engine.walk(&self.expression)?).read()?;
+        let mut reference  = get!(self.reference.get().walk(engine)?);
+        let mut expression = get!(self.expression.get().walk(engine)?).read()?;
         if let Some(operator) = self.operator.as_ref() {
             let left = reference.read()?;
             expression = left.call_method(engine, operator, &mut [expression])?.read()?;

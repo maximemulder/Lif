@@ -3,7 +3,8 @@ use crate::parser::Grammar;
 use crate::parser::SNode;
 use crate::parser::arena::ArenaRef;
 use crate::parser::descent::Descent;
-use crate::walker::WNode;
+use crate::walker::ANode;
+use crate::walker::nodes::AExecutableTrait;
 
 use std::fs::read_to_string;
 
@@ -11,11 +12,11 @@ pub struct Code {
     pub name:        Option<Box<str>>,
     pub text:        Box<str>,
     pub syntax_tree: Option<SNode>,
-    pub walk_tree:   Option<WNode>,
+    pub walk_tree:   Option<Box<ANode<dyn AExecutableTrait>>>,
 }
 
 impl Code {
-    fn new(grammar: &Grammar, production: ArenaRef<dyn Descent>, program: &dyn Fn(Ref<SNode>) -> WNode, name: Option<&str>, text: Box<str>) -> Own<Self> {
+    fn new(grammar: &Grammar, production: ArenaRef<dyn Descent>, program: impl FnOnce(Ref<SNode>) -> Box<ANode<dyn AExecutableTrait>>, name: Option<&str>, text: Box<str>) -> Own<Self> {
         let mut code = Own::new(Self {
             text,
             name: name.map(Box::from),
@@ -29,11 +30,11 @@ impl Code {
         code
     }
 
-    pub fn from_file(grammar: &Grammar, production: ArenaRef<dyn Descent>, program: &dyn Fn(Ref<SNode>) -> WNode, name: &str) -> Option<Own<Self>> {
+    pub fn from_file(grammar: &Grammar, production: ArenaRef<dyn Descent>, program: impl FnOnce(Ref<SNode>) -> Box<ANode<dyn AExecutableTrait>>, name: &str) -> Option<Own<Self>> {
         Some(Code::new(grammar, production, program, Some(name), read_to_string(name).ok()?.into_boxed_str()))
     }
 
-    pub fn from_string(grammar: &Grammar, production: ArenaRef<dyn Descent>, program: &dyn Fn(Ref<SNode>) -> WNode, text: &str) -> Own<Self> {
+    pub fn from_string(grammar: &Grammar, production: ArenaRef<dyn Descent>, program: impl FnOnce(Ref<SNode>) -> Box<ANode<dyn AExecutableTrait>>, text: &str) -> Own<Self> {
         Code::new(grammar, production, program, None, Box::from(text))
     }
 

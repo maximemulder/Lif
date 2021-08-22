@@ -1,17 +1,17 @@
 use crate::memory::Ref;
 use crate::runtime::engine::Engine;
 use crate::runtime::r#return::{ Flow, Jump, ReturnFlow };
-use crate::walker::{ ANode, WNode };
-use crate::walker::nodes::{ ABlock, AControlTrait };
+use crate::walker::ANode;
+use crate::walker::nodes::{ ABlock, AExpression, AControlTrait };
 
 pub struct AFor {
     identifier: Ref<str>,
-    expression: WNode,
+    expression: ANode<AExpression>,
     body:       ANode<ABlock>,
 }
 
 impl AFor {
-    pub fn new(identifier: Ref<str>, expression: WNode, body: ANode<ABlock>) -> Self {
+    pub fn new(identifier: Ref<str>, expression: ANode<AExpression>, body: ANode<ABlock>) -> Self {
         Self {
             identifier,
             expression,
@@ -24,7 +24,7 @@ impl AControlTrait for AFor {
     fn walk<'a>(&self, engine: &mut Engine<'a>) -> ReturnFlow<'a> {
         let mut elements = Vec::new();
         for element in {
-            let reference = get!(engine.walk(&self.expression)?);
+            let reference = get!(self.expression.get().walk(engine)?);
             reference.read()?.get_cast_array(engine)?.elements().iter().copied().clone()
         } {
             engine.set_variable(&self.identifier, element);

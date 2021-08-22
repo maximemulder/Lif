@@ -1,23 +1,22 @@
 use crate::runtime::engine::Engine;
 use crate::runtime::r#return::{ Flow, ReturnFlow };
-use crate::walker::{ Walkable, WNode };
+use crate::walker::ANode;
+use crate::walker::nodes::AStatement;
 
-pub struct Statements {
-    statements: Box<[WNode]>,
+pub struct AStatements {
+    statements: Box<[ANode<AStatement>]>,
 }
 
-impl Statements {
-    pub fn new(statements: Box<[WNode]>) -> Self {
+impl AStatements {
+    pub fn new(statements: Box<[ANode<AStatement>]>) -> Self {
         Self {
             statements,
         }
     }
-}
 
-impl Walkable for Statements {
-    fn walk<'a>(&self, engine: &mut Engine<'a>) -> ReturnFlow<'a> {
+    pub fn walk<'a>(&self, engine: &mut Engine<'a>) -> ReturnFlow<'a> {
         for statement in self.statements.iter() {
-            get!(engine.walk(statement)?);
+            get!(statement.get().walk(engine)?);
         }
 
         Flow::new(engine.undefined())

@@ -26,7 +26,7 @@ fn test() {
 
         {
             let mut engine = Engine::new(&grammar, &mut input, &mut output, &mut error);
-            let code = Code::from_string(engine.grammar, engine.grammar.program, &build::program, &strings.0);
+            let code = Code::from_string(engine.grammar, engine.grammar.program, build::traitify(&build::program), &strings.0);
             engine.run(code);
         }
 

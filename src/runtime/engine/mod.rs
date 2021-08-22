@@ -8,11 +8,10 @@ use crate::runtime::environment::Environment;
 use crate::runtime::gc::{ GC_THRESHOLD, Gc, GcCache, GcRef, GcTrace };
 use crate::runtime::primitives::Class;
 use crate::runtime::reference::{ GcReference, Reference };
-use crate::runtime::r#return::{ ReturnFlow, ReturnReference };
+use crate::runtime::r#return::ReturnReference;
 use crate::runtime::scope::{ GcScope, Scope };
 use crate::runtime::utilities::tag::Tagger;
 use crate::runtime::value::Value;
-use crate::walker::WNode;
 
 use std::io::{ Read, Write };
 
@@ -75,6 +74,11 @@ impl Engine<'_> {
     pub fn alloc<T: GcTrace>(&mut self, object: T) -> GcRef<T> {
         let r#ref = self.gc.alloc(object);
         self.cache.store(r#ref);
+        /* if self.gc.allocations() > GC_THRESHOLD {
+            self.trace();
+            self.gc.collect();
+        } */
+
         r#ref
     }
 }
@@ -106,28 +110,12 @@ impl<'a> Engine<'a> {
         self.scope.get_variable(name)
     }
 
-    pub fn walk(&mut self, node: &WNode) -> ReturnFlow<'a> {
-        self.cache.push();
-        let r#return = node.walk(self);
-        if let Ok(flow) = r#return.as_ref() {
-            self.cache.bubble(flow.reference);
-        }
-
-        self.cache.pop();
-
-        if self.gc.allocations() > GC_THRESHOLD {
-            self.trace();
-            self.gc.collect();
-        }
-        r#return
-    }
-
     pub fn run(&mut self, code: Own<Code>) -> Option<GcReference<'a>> {
         self.codes.push(code);
         let node = Ref::new(self.codes.last().unwrap().walk_tree.as_ref().unwrap());
         let executable = Ref::as_ref(&node);
-        match self.walk(executable) {
-            Ok(flow) => Some(flow.reference),
+        match executable.get().walk(self) {
+            Ok(reference) => Some(reference),
             Err(error) => {
                 writeln!(self.error, "{}", error.get_message()).unwrap();
                 None

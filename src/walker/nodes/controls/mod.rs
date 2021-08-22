@@ -12,7 +12,8 @@ pub use r#for::AFor;
 
 use crate::runtime::engine::Engine;
 use crate::runtime::r#return::ReturnFlow;
-use crate::walker::{ ANode, Walkable };
+use crate::walker::ANode;
+use crate::walker::nodes::{ AExpressionTrait, AStatementTrait };
 
 pub trait AControlTrait {
 	fn walk<'a>(&self, engine: &mut Engine<'a>) -> ReturnFlow<'a>;
@@ -30,8 +31,14 @@ impl AControl {
 	}
 }
 
-impl Walkable for AControl {
+impl AExpressionTrait for AControl {
     fn walk<'a>(&self, engine: &mut Engine<'a>) -> ReturnFlow<'a> {
 		self.control.get().walk(engine)
+    }
+}
+
+impl AStatementTrait for AControl {
+    fn walk<'a>(&self, engine: &mut Engine<'a>) -> ReturnFlow<'a> {
+        AExpressionTrait::walk(self, engine)
     }
 }

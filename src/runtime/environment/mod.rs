@@ -151,7 +151,7 @@ fn error<'a>(engine: &mut Engine<'a>, arguments: &mut [Value<'a>]) -> ReturnRefe
 }
 
 fn eval<'a>(engine: &mut Engine<'a>, arguments: &mut [Value<'a>]) -> ReturnReference<'a> {
-    let code = Code::from_string(&engine.grammar, engine.grammar.expression, &build::expression, &arguments[0].get_gc::<String>(engine));
+    let code = Code::from_string(&engine.grammar, engine.grammar.expression, build::traitify(&build::expression), &arguments[0].get_gc::<String>(engine));
     Ok(match engine.run(code) {
         Some(reference) => reference,
         None => engine.undefined(),
@@ -159,7 +159,7 @@ fn eval<'a>(engine: &mut Engine<'a>, arguments: &mut [Value<'a>]) -> ReturnRefer
 }
 
 fn exec<'a>(engine: &mut Engine<'a>, arguments: &mut [Value<'a>]) -> ReturnReference<'a> {
-    let code = Code::from_string(&engine.grammar, engine.grammar.program, &build::program, &arguments[0].get_gc::<String>(engine));
+    let code = Code::from_string(&engine.grammar, engine.grammar.program, build::traitify(&build::program), &arguments[0].get_gc::<String>(engine));
     engine.run(code);
     Ok(engine.undefined())
 }
@@ -170,7 +170,7 @@ fn exit<'a>(engine: &mut Engine<'a>, arguments: &mut [Value<'a>]) -> ReturnRefer
 
 fn include<'a>(engine: &mut Engine<'a>, arguments: &mut [Value<'a>]) -> ReturnReference<'a> {
     engine.run_frame(engine.scope().parent().unwrap(), |engine| {
-        let code = Code::from_file(&engine.grammar, engine.grammar.program, &build::program, &arguments[0].get_gc::<String>(engine)).unwrap();
+        let code = Code::from_file(&engine.grammar, engine.grammar.program, build::traitify(&build::program), &arguments[0].get_gc::<String>(engine)).unwrap();
         engine.run(code);
     });
 

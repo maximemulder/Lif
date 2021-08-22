@@ -1,15 +1,15 @@
 use crate::runtime::engine::Engine;
 use crate::runtime::r#return::{ Flow, ReturnFlow };
-use crate::walker::WNode;
-use crate::walker::nodes::AControlTrait;
+use crate::walker::ANode;
+use crate::walker::nodes::{ AExpression, AStatements, AControlTrait };
 
 pub struct ABlock {
-    statements: WNode,
-    expression: Option<WNode>,
+    statements: ANode<AStatements>,
+    expression: Option<ANode<AExpression>>,
 }
 
 impl ABlock {
-    pub fn new(statements: WNode, expression: Option<WNode>) -> Self {
+    pub fn new(statements: ANode<AStatements>, expression: Option<ANode<AExpression>>) -> Self {
         Self {
             statements,
             expression,
@@ -20,9 +20,9 @@ impl ABlock {
 impl AControlTrait for ABlock {
     fn walk<'a>(&self, engine: &mut Engine<'a>) -> ReturnFlow<'a> {
         engine.run_scope(|engine| {
-            get!(engine.walk(&self.statements)?);
+            get!(self.statements.get().walk(engine)?);
             Flow::new(if let Some(expression) = self.expression.as_ref() {
-                get!(engine.walk(expression)?)
+                get!(expression.get().walk(engine)?)
             } else {
                 engine.undefined()
             })

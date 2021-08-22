@@ -1,57 +1,63 @@
 use crate::memory::Ref;
 use crate::parser::SNode;
 use crate::parser::elements;
-use crate::walker::{ ANode, WNode };
+use crate::walker::ANode;
 use crate::walker::nodes::*;
 
-pub fn program(node: Ref<SNode>) -> WNode {
-    WNode::new(node, Program::new(statements(node.front(0))))
+use std::marker::Unsize;
+
+pub fn traitify<T: ?Sized, N: Unsize<T>>(builder: impl FnOnce(Ref<SNode>) -> ANode<N>) -> impl FnOnce(Ref<SNode>) -> Box<ANode<T>> {
+    |node| Box::<ANode<N>>::new(builder(node))
 }
 
-fn statements(node: Ref<SNode>) -> WNode {
-    WNode::new(node, Statements::new(node.children().iter()
+pub fn program(node: Ref<SNode>) -> ANode<AProgram> {
+    ANode::new(node, AProgram::new(statements(node.front(0))))
+}
+
+fn statements(node: Ref<SNode>) -> ANode<AStatements> {
+    ANode::new(node, AStatements::new(node.children().iter()
         .map(|child| statement(Ref::new(child)))
         .collect()
     ))
 }
 
-fn statement(node: Ref<SNode>) -> WNode {
+fn statement(node: Ref<SNode>) -> ANode<AStatement> {
     let child = node.front(0);
-    WNode::new(node, Statement::new(match *child.element {
-        elements::structures::STRUCTURE   => structure(child),
-        elements::controls::CONTROL       => control(child),
-        elements::expressions::EXPRESSION => expression(child),
+    ANode::new(node, AStatement::new(match *child.element {
+        elements::structures::STRUCTURE   => Box::new(structure(child)),
+        elements::controls::CONTROL       => Box::new(control(child)),
+        elements::expressions::EXPRESSION => Box::new(expression(child)),
         _ => panic!(),
     }))
 }
 
-pub fn expression(node: Ref<SNode>) -> WNode {
+pub fn expression(node: Ref<SNode>) -> ANode<AExpression> {
     let child = node.front(0);
-    match *child.element {
-        elements::controls::CONTROL       => control(child),
-        elements::jumps::JUMP             => jump(child),
-        elements::expressions::LET        => r#let(child),
-        elements::expressions::LITERAL    => literal(child),
-        elements::expressions::CHAIN      => chain(child),
-        elements::expressions::SEQUENCE   => sequence(child),
-        elements::expressions::BINOP      => binop(child),
-        elements::expressions::PREOP      => preop(child),
-        elements::expressions::ASSIGNMENT => assignment(child),
+    ANode::new(node, AExpression::new(match *child.element {
+        elements::controls::CONTROL       => Box::new(control(child)),
+        elements::jumps::JUMP             => Box::new(jump(child)),
+        elements::expressions::LET        => Box::new(r#let(child)),
+        elements::expressions::LITERAL    => Box::new(literal(child)),
+        elements::expressions::CHAIN      => Box::new(chain(child)),
+        elements::expressions::SEQUENCE   => Box::new(sequence(child)),
+        elements::expressions::BINOP      => Box::new(binop(child)),
+        elements::expressions::PREOP      => Box::new(preop(child)),
+        elements::expressions::ASSIGNMENT => Box::new(assignment(child)),
         _ => panic!(),
-    }
+    }))
 }
 
-fn r#type(node: Ref<SNode>) -> Option<WNode> {
-    node.children().get(1).map(|child| expression(Ref::new(child)))
+fn r#type(node: Ref<SNode>) -> ANode<AType> {
+    ANode::new(node, AType::new(node.children().get(1).map(|child| expression(Ref::new(child)))))
 }
 
 fn name(node: Ref<SNode>) -> Option<Ref<str>> {
     node.children().get(0).map(|child| token(Ref::new(child)))
 }
 
-fn literal(node: Ref<SNode>) -> WNode {
+fn literal(node: Ref<SNode>) -> ANode<ALiteral> {
     let child = node.front(0);
-    WNode::new(node, ALiteral::new(match *child.element {
+    ANode::new(node, ALiteral::new(match *child.element {
         elements::keywords::TRUE        => Box::new(r#true(child)),
         elements::keywords::FALSE       => Box::new(r#false(child)),
         elements::variables::INTEGER    => Box::new(integer(child)),
@@ -86,18 +92,18 @@ fn identifier(node: Ref<SNode>) -> ANode<AIdentifier> {
     ANode::new(node, AIdentifier::new(node.text()))
 }
 
-fn structure(node: Ref<SNode>) -> WNode {
+fn structure(node: Ref<SNode>) -> ANode<AStructure> {
     let child = node.front(0);
-    WNode::new(node, AStructure::new(match *child.element {
+    ANode::new(node, AStructure::new(match *child.element {
         elements::structures::CLASS    => class(child),
         elements::structures::FUNCTION => function(child),
         _ => panic!(),
     }))
 }
 
-fn control(node: Ref<SNode>) -> WNode {
+fn control(node: Ref<SNode>) -> ANode<AControl> {
     let child = node.front(0);
-    WNode::new(node, AControl::new(match *child.element {
+    ANode::new(node, AControl::new(match *child.element {
         elements::controls::BLOCK => Box::new(block(child)),
         elements::controls::IF    => Box::new(r#if(child)),
         elements::controls::LOOP  => Box::new(r#loop(child)),
@@ -127,17 +133,17 @@ fn r#for(node: Ref<SNode>) -> ANode<AFor> {
     ANode::new(node, AFor::new(token(node.front(1)), expression(node.front(3)), block(node.front(4))))
 }
 
-fn r#let(node: Ref<SNode>) -> WNode {
-    declaration(node.front(1))
+fn r#let(node: Ref<SNode>) -> ANode<ALet> {
+    ANode::new(node, ALet::new(declaration(node.front(1))))
 }
 
-fn declaration(node: Ref<SNode>) -> WNode {
-    WNode::new(node, Declaration::new(token(node.front(0)), r#type(node.front(1))))
+fn declaration(node: Ref<SNode>) -> ANode<ADeclaration> {
+    ANode::new(node, ADeclaration::new(token(node.front(0)), r#type(node.front(1))))
 }
 
-fn jump(node: Ref<SNode>) -> WNode {
+fn jump(node: Ref<SNode>) -> ANode<AJump> {
     let child = node.front(0);
-    WNode::new(node, AJump::new(match *child.element {
+    ANode::new(node, AJump::new(match *child.element {
         elements::jumps::CONTINUE => Box::new(r#continue(child)),
         elements::jumps::BREAK    => Box::new(r#break(child)),
         elements::jumps::RETURN   => Box::new(r#return(child)),
@@ -190,11 +196,11 @@ fn function(node: Ref<SNode>) -> Box<ANode<dyn AStructureTrait>> {
     }
 }
 
-fn rest(node: Ref<SNode>) -> Option<(Ref<str>, Option<WNode>)> {
+fn rest(node: Ref<SNode>) -> Option<(Ref<str>, ANode<AType>)> {
     node.children().get(1).map(|child| parameter(Ref::new(child)))
 }
 
-fn parameters(node: Ref<SNode>) -> (Box<[(Ref<str>, Option<WNode>)]>, Option<(Ref<str>, Option<WNode>)>) {
+fn parameters(node: Ref<SNode>) -> (Box<[(Ref<str>, ANode<AType>)]>, Option<(Ref<str>, ANode<AType>)>) {
     let parameters = node.front(1).children().iter()
         .step_by(2)
         .map(|child| parameter(Ref::new(child)))
@@ -203,35 +209,35 @@ fn parameters(node: Ref<SNode>) -> (Box<[(Ref<str>, Option<WNode>)]>, Option<(Re
     (parameters, rest(node.back(2)))
 }
 
-fn parameter(node: Ref<SNode>) -> (Ref<str>, Option<WNode>) {
+fn parameter(node: Ref<SNode>) -> (Ref<str>, ANode<AType>) {
     (token(node.front(0)), r#type(node.front(1)))
 }
 
-fn chain(node: Ref<SNode>) -> WNode {
-    WNode::new(node, Chain::new(expression(node.front(0)), token(node.front(2))))
+fn chain(node: Ref<SNode>) -> ANode<AChain> {
+    ANode::new(node, AChain::new(expression(node.front(0)), token(node.front(2))))
 }
 
-fn sequence(node: Ref<SNode>) -> WNode {
-    WNode::new(node, Sequence::new(expression(node.front(0)), token(node.front(1)), expressions(node.front(2)), token(node.front(3))))
+fn sequence(node: Ref<SNode>) -> ANode<ASequence> {
+    ANode::new(node, ASequence::new(expression(node.front(0)), token(node.front(1)), expressions(node.front(2)), token(node.front(3))))
 }
 
-fn expressions(node: Ref<SNode>) -> Box<[WNode]> {
+fn expressions(node: Ref<SNode>) -> Box<[ANode<AExpression>]> {
     node.children().iter()
         .step_by(2)
         .map(|child| expression(Ref::new(child)))
         .collect()
 }
 
-fn assignment(node: Ref<SNode>) -> WNode {
-    WNode::new(node, Assignment::new(expression(node.front(0)), expression(node.front(2)), token(node.front(1))))
+fn assignment(node: Ref<SNode>) -> ANode<AAssignment> {
+    ANode::new(node, AAssignment::new(expression(node.front(0)), expression(node.front(2)), token(node.front(1))))
 }
 
-fn binop(node: Ref<SNode>) -> WNode {
-    WNode::new(node, Binop::new(expression(node.front(0)), token(node.front(1)), expression(node.front(2))))
+fn preop(node: Ref<SNode>) -> ANode<APreop> {
+    ANode::new(node, APreop::new(token(node.front(0)), expression(node.front(1))))
 }
 
-fn preop(node: Ref<SNode>) -> WNode {
-    WNode::new(node, Preop::new(token(node.front(0)), expression(node.front(1))))
+fn binop(node: Ref<SNode>) -> ANode<ABinop> {
+    ANode::new(node, ABinop::new(expression(node.front(0)), token(node.front(1)), expression(node.front(2))))
 }
 
 fn token(node: Ref<SNode>) -> Ref<str> {

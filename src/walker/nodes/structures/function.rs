@@ -5,25 +5,24 @@ use crate::runtime::primitives::FunctionCode;
 use crate::runtime::r#return::{ Return, ReturnReference };
 use crate::runtime::utilities::parameters::Parameters;
 use crate::runtime::utilities::variable::Variable;
-use crate::walker::{ ANode, WNode };
-use crate::walker::nodes::{ ABlock, AStructureTrait };
-use crate::walker::utilities;
+use crate::walker::ANode;
+use crate::walker::nodes::{ ABlock, AType, AStructureTrait };
 
 pub struct AFunction {
     name: Option<Ref<str>>,
-    parameters: Box<[(Ref<str>, Option<WNode>)]>,
-    rest: Option<(Ref<str>, Option<WNode>)>,
-    r#type: Option<WNode>,
+    parameters: Box<[(Ref<str>, ANode<AType>)]>,
+    rest: Option<(Ref<str>, ANode<AType>)>,
+    r#return: ANode<AType>,
     block: ANode<ABlock>,
 }
 
 impl AFunction {
-    pub fn new(name: Option<Ref<str>>, parameters: (Box<[(Ref<str>, Option<WNode>)]>, Option<(Ref<str>, Option<WNode>)>), r#type: Option<WNode>, block: ANode<ABlock>) -> Self {
+    pub fn new(name: Option<Ref<str>>, parameters: (Box<[(Ref<str>, ANode<AType>)]>, Option<(Ref<str>, ANode<AType>)>), r#return: ANode<AType>, block: ANode<ABlock>) -> Self {
         Self {
             name,
             parameters: parameters.0,
             rest: parameters.1,
-            r#type,
+            r#return,
             block,
         }
     }
@@ -33,14 +32,13 @@ impl AStructureTrait for AFunction {
     fn walk<'a>(&self, engine: &mut Engine<'a>) -> ReturnReference<'a> {
         let parameters = self.parameters.iter()
             .map(|(name, parameter)| {
-                let r#type = utilities::new_type(engine, parameter.as_ref())?;
+                let r#type = parameter.get().walk(engine)?;
                 Ok(Variable::new(Box::from(name.as_ref()), r#type))
             })
             .collect::<Return<_>>()?;
 
         let rest = self.rest.as_ref().map(|(name, parameter)| {
-            let r#type = parameter.as_ref().map(|parameter| {
-                let r#type = engine.walk(parameter)?.none()?.read()?.get_cast_class(engine)?;
+            let r#type = parameter.get().walk(engine)?.map(|r#type| {
                 if r#type.is_generic(engine.environment.array) || r#type.is(engine.environment.any) {
                     Ok(r#type)
                 } else {
@@ -51,8 +49,8 @@ impl AStructureTrait for AFunction {
             Ok(Variable::new(Box::from(name.as_ref()), r#type))
         }).transpose()?;
 
-        let r#type = utilities::new_type(engine, self.r#type.as_ref())?;
-        Ok(engine.new_function(Ref::as_option(&self.name), Parameters::new(parameters, rest), r#type, FunctionCode::new(Ref::new(&self.block))))
+        let r#return = self.r#return.get().walk(engine)?;
+        Ok(engine.new_function(Ref::as_option(&self.name), Parameters::new(parameters, rest), r#return, FunctionCode::new(Ref::new(&self.block))))
     }
 }
 

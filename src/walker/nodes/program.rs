@@ -1,22 +1,22 @@
 use crate::runtime::engine::Engine;
-use crate::runtime::r#return::{ Flow, ReturnFlow };
-use crate::walker::{ Walkable, WNode };
+use crate::runtime::r#return::ReturnReference;
+use crate::walker::ANode;
+use crate::walker::nodes::{ AStatements, AExecutableTrait };
 
-pub struct Program {
-    statements: WNode,
+pub struct AProgram {
+    statements: ANode<AStatements>,
 }
 
-impl Program {
-    pub fn new(statements: WNode) -> Self {
+impl AProgram {
+    pub fn new(statements: ANode<AStatements>) -> Self {
         Self {
             statements,
         }
     }
 }
 
-impl Walkable for Program {
-    fn walk<'a>(&self, engine: &mut Engine<'a>) -> ReturnFlow<'a> {
-        engine.walk(&self.statements)?.none()?;
-        Flow::new(engine.undefined())
+impl AExecutableTrait for AProgram {
+    fn walk<'a>(&self, engine: &mut Engine<'a>) -> ReturnReference<'a> {
+        self.statements.get().walk(engine)?.none()
     }
 }

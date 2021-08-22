@@ -2,17 +2,17 @@ use crate::memory::Ref;
 use crate::runtime::engine::Engine;
 use crate::runtime::primitives::Class;
 use crate::runtime::r#return::ReturnReference;
-use crate::walker::{ ANode, WNode };
-use crate::walker::nodes::AStructureTrait;
+use crate::walker::ANode;
+use crate::walker::nodes::{ AType, AStructureTrait };
 
 pub struct AClass {
     name: Option<Ref<str>>,
-    parent: Option<WNode>,
+    parent: ANode<AType>,
     methods: Box<[Box<ANode<dyn AStructureTrait>>]>,
 }
 
 impl AClass {
-    pub fn new(name: Option<Ref<str>>, parent: Option<WNode>, methods: Box<[Box<ANode<dyn AStructureTrait>>]>) -> Self {
+    pub fn new(name: Option<Ref<str>>, parent: ANode<AType>, methods: Box<[Box<ANode<dyn AStructureTrait>>]>) -> Self {
         Self {
             name,
             parent,
@@ -23,12 +23,7 @@ impl AClass {
 
 impl AStructureTrait for AClass {
     fn walk<'a>(&self, engine: &mut Engine<'a>) -> ReturnReference<'a> {
-        let parent = if let Some(parent) = self.parent.as_ref() {
-            engine.walk(parent)?.none()?.read()?.get_cast_class(engine)?
-        } else {
-            engine.environment.object
-        };
-
+        let parent = self.parent.get().walk(engine)?.unwrap_or(engine.environment.object);
         let value = engine.new_class(Ref::as_option(&self.name), Some(parent), true);
         let mut class = value.read()?.get_gc::<Class>(engine);
         engine.run_frame(class.scope(), |engine| {

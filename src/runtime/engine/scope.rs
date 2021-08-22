@@ -1,4 +1,5 @@
 use crate::runtime::engine::Engine;
+use crate::runtime::r#return::ReturnFlow;
 use crate::runtime::scope::{ GcScope, Scope };
 use crate::runtime::value::Value;
 
@@ -25,6 +26,18 @@ impl<'a> Engine<'a> {
         self.push_frame(frame);
         let r#return = callback(self);
         self.pop_frame();
+        r#return
+    }
+
+
+    pub fn run_gc(&mut self, callback: impl FnOnce(&mut Engine<'a>) -> ReturnFlow<'a>) -> ReturnFlow<'a> {
+        self.cache.push();
+        let r#return = callback(self);
+        if let Ok(flow) = r#return.as_ref() {
+            self.cache.bubble(flow.reference);
+        }
+
+        self.cache.pop();
         r#return
     }
 }

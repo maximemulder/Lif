@@ -1,17 +1,18 @@
 use crate::memory::Ref;
 use crate::runtime::engine::Engine;
 use crate::runtime::r#return::{ Flow, ReturnFlow };
-use crate::walker::{ Walkable, WNode };
+use crate::walker::ANode;
+use crate::walker::nodes::{ AExpression, AExpressionTrait };
 
 use std::ops::Deref;
 
-pub struct Preop {
-    expression: WNode,
+pub struct APreop {
+    expression: ANode<AExpression>,
     operator:   Ref<str>,
 }
 
-impl Preop {
-    pub fn new(operator: Ref<str>, expression: WNode) -> Self {
+impl APreop {
+    pub fn new(operator: Ref<str>, expression: ANode<AExpression>) -> Self {
         Self {
             expression,
             operator: Ref::new(match operator.deref() {
@@ -25,9 +26,9 @@ impl Preop {
     }
 }
 
-impl Walkable for Preop {
+impl AExpressionTrait for APreop {
     fn walk<'a>(&self, engine: &mut Engine<'a>) -> ReturnFlow<'a> {
-        let expression = get!(engine.walk(&self.expression)?).read()?;
+        let expression = get!(self.expression.get().walk(engine)?).read()?;
         Flow::new(expression.call_method(engine, &self.operator, &mut [])?)
     }
 }

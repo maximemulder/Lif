@@ -8,7 +8,8 @@ pub use generic::AGeneric;
 
 use crate::runtime::engine::Engine;
 use crate::runtime::r#return::{ Flow, ReturnFlow, ReturnReference };
-use crate::walker::{ ANode, Walkable };
+use crate::walker::ANode;
+use crate::walker::nodes::{ AExpressionTrait, AStatementTrait };
 
 pub trait AStructureTrait {
 	fn walk<'a>(&self, engine: &mut Engine<'a>) -> ReturnReference<'a>;
@@ -26,10 +27,16 @@ impl AStructure {
     }
 }
 
-impl Walkable for AStructure {
+impl AExpressionTrait for AStructure {
     fn walk<'a>(&self, engine: &mut Engine<'a>) -> ReturnFlow<'a> {
         let structure = self.structure.get().walk(engine)?;
         engine.set_variable(structure.read()?.get_tag(engine).get_name().unwrap(), structure);
         Flow::new(engine.undefined())
+    }
+}
+
+impl AStatementTrait for AStructure {
+    fn walk<'a>(&self, engine: &mut Engine<'a>) -> ReturnFlow<'a> {
+        AExpressionTrait::walk(self, engine)
     }
 }

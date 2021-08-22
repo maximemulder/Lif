@@ -14,7 +14,8 @@ pub use identifier::AIdentifier;
 
 use crate::runtime::engine::Engine;
 use crate::runtime::r#return::{ Flow, ReturnFlow, ReturnReference };
-use crate::walker::{ ANode, Walkable };
+use crate::walker::ANode;
+use crate::walker::nodes::AExpressionTrait;
 
 pub trait ALiteralTrait {
 	fn walk<'a>(&self, engine: &mut Engine<'a>) -> ReturnReference<'a>;
@@ -32,7 +33,7 @@ impl ALiteral {
 	}
 }
 
-impl Walkable for ALiteral {
+impl AExpressionTrait for ALiteral {
     fn walk<'a>(&self, engine: &mut Engine<'a>) -> ReturnFlow<'a> {
         self.literal.get().walk(engine).map(Flow::new_tmp)
     }
