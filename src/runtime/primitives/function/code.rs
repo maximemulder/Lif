@@ -5,14 +5,15 @@ use crate::runtime::primitives::function::FunctionImplementation;
 use crate::runtime::r#return::{ Jump, ReturnReference };
 use crate::runtime::utilities::parameters::Parameters;
 use crate::runtime::value::Value;
-use crate::walker::WNode;
+use crate::walker::ANode;
+use crate::walker::nodes::{ ABlock, AControlTrait };
 
 pub struct FunctionCode {
-    block: Ref<WNode>,
+    block: Ref<ANode<ABlock>>,
 }
 
 impl FunctionCode {
-    pub fn new(block: Ref<WNode>) -> Self {
+    pub fn new(block: Ref<ANode<ABlock>>) -> Self {
         Self {
             block,
         }
@@ -22,8 +23,8 @@ impl FunctionCode {
 impl<'a> FunctionImplementation<'a> for FunctionCode {
     fn call(&self, engine: &mut Engine<'a>, parameters: &Parameters<'a>, arguments: &mut [Value<'a>]) -> ReturnReference<'a> {
         parameters.build(engine, arguments);
-        let executable = Ref::as_ref(&self.block);
-        let flow = engine.walk(executable)?;
+        let block = Ref::as_ref(&self.block);
+        let flow = block.get().walk(engine)?;
         if flow.jump == Jump::Return && flow.reference.is_defined() {
             Ok(engine.new_constant(flow.reference.get_value()))
         } else if flow.jump == Jump::None {

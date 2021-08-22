@@ -2,22 +2,23 @@ use crate::memory::Ref;
 use crate::runtime::engine::Engine;
 use crate::runtime::error::Error;
 use crate::runtime::primitives::FunctionCode;
-use crate::runtime::r#return::{ Flow, Return, ReturnFlow };
+use crate::runtime::r#return::{ Return, ReturnReference };
 use crate::runtime::utilities::parameters::Parameters;
 use crate::runtime::utilities::variable::Variable;
-use crate::walker::{ Walkable, WNode };
+use crate::walker::{ ANode, WNode };
+use crate::walker::nodes::{ ABlock, AStructureTrait };
 use crate::walker::utilities;
 
-pub struct Function {
+pub struct AFunction {
     name: Option<Ref<str>>,
     parameters: Box<[(Ref<str>, Option<WNode>)]>,
     rest: Option<(Ref<str>, Option<WNode>)>,
     r#type: Option<WNode>,
-    block: WNode,
+    block: ANode<ABlock>,
 }
 
-impl Function {
-    pub fn new(name: Option<Ref<str>>, parameters: (Box<[(Ref<str>, Option<WNode>)]>, Option<(Ref<str>, Option<WNode>)>), r#type: Option<WNode>, block: WNode) -> Self {
+impl AFunction {
+    pub fn new(name: Option<Ref<str>>, parameters: (Box<[(Ref<str>, Option<WNode>)]>, Option<(Ref<str>, Option<WNode>)>), r#type: Option<WNode>, block: ANode<ABlock>) -> Self {
         Self {
             name,
             parameters: parameters.0,
@@ -28,8 +29,8 @@ impl Function {
     }
 }
 
-impl Walkable for Function {
-    fn walk<'a>(&self, engine: &mut Engine<'a>) -> ReturnFlow<'a> {
+impl AStructureTrait for AFunction {
+    fn walk<'a>(&self, engine: &mut Engine<'a>) -> ReturnReference<'a> {
         let parameters = self.parameters.iter()
             .map(|(name, parameter)| {
                 let r#type = utilities::new_type(engine, parameter.as_ref())?;
@@ -51,7 +52,7 @@ impl Walkable for Function {
         }).transpose()?;
 
         let r#type = utilities::new_type(engine, self.r#type.as_ref())?;
-        Flow::new(engine.new_function(Ref::as_option(&self.name), Parameters::new(parameters, rest), r#type, FunctionCode::new(Ref::new(&self.block))))
+        Ok(engine.new_function(Ref::as_option(&self.name), Parameters::new(parameters, rest), r#type, FunctionCode::new(Ref::new(&self.block))))
     }
 }
 

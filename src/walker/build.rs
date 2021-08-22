@@ -28,8 +28,6 @@ fn statement(node: Ref<SNode>) -> WNode {
 pub fn expression(node: Ref<SNode>) -> WNode {
     let child = node.front(0);
     match *child.element {
-        elements::structures::CLASS       => class(child),
-        elements::structures::FUNCTION    => function(child),
         elements::controls::CONTROL       => control(child),
         elements::jumps::JUMP             => jump(child),
         elements::expressions::LET        => r#let(child),
@@ -90,9 +88,9 @@ fn identifier(node: Ref<SNode>) -> ANode<AIdentifier> {
 
 fn structure(node: Ref<SNode>) -> WNode {
     let child = node.front(0);
-    WNode::new(node, Structure::new(match *child.element {
-        elements::structures::CLASS    => class_named(child),
-        elements::structures::FUNCTION => function_named(child),
+    WNode::new(node, AStructure::new(match *child.element {
+        elements::structures::CLASS    => class(child),
+        elements::structures::FUNCTION => function(child),
         _ => panic!(),
     }))
 }
@@ -166,50 +164,27 @@ fn generics(node: Ref<SNode>) -> Box<[Ref<str>]> {
         .collect()
 }
 
-fn class(node: Ref<SNode>) -> WNode {
-    let name = name(node.front(1));
-    let class = WNode::new(node, Class::new(name, r#type(node.back(4)), methods(node.back(2))));
-    if node.children().len() >= 7 {
-        WNode::new(node, Generic::new(name, generics(node.front(2)), class))
-    } else {
-        class
-    }
-}
-
-fn class_named(node: Ref<SNode>) -> WNode {
+fn class(node: Ref<SNode>) -> Box<ANode<dyn AStructureTrait>> {
     let name = Some(token(node.front(1)));
-    let class = WNode::new(node, Class::new(name, r#type(node.back(4)), methods(node.back(2))));
+    let class = Box::new(ANode::new(node, AClass::new(name, r#type(node.back(4)), methods(node.back(2)))));
     if node.children().len() >= 7 {
-        WNode::new(node, Generic::new(name, generics(node.front(2)), class))
+        Box::new(ANode::new(node, AGeneric::new(name, generics(node.front(2)), class)))
     } else {
         class
     }
 }
 
-fn methods(node: Ref<SNode>) -> Box<[WNode]> {
+fn methods(node: Ref<SNode>) -> Box<[Box<ANode<dyn AStructureTrait>>]> {
     node.children().iter()
-        .map(|child| function_named(Ref::new(child)))
+        .map(|child| function(Ref::new(child)))
         .collect()
 }
 
-fn function(node: Ref<SNode>) -> WNode {
-    let name = name(node.front(1));
-    let block = WNode::new(node, AControl::new(Box::new(block(node.back(1)))));
-    let function = WNode::new(node, Function::new(name, parameters(node.back(3)), r#type(node.back(2)), block));
-    if node.children().len() >= 6 {
-        WNode::new(node, Generic::new(name, generics(node.front(2)), function))
-    } else {
-        function
-    }
-}
-
-fn function_named(node: Ref<SNode>) -> WNode {
+fn function(node: Ref<SNode>) -> Box<ANode<dyn AStructureTrait>> {
     let name = Some(token(node.front(1)));
-    let block = WNode::new(node, AControl::new(Box::new(block(node.back(1)))));
-
-    let function = WNode::new(node, Function::new(name, parameters(node.back(3)), r#type(node.back(2)), block));
+    let function = Box::new(ANode::new(node, AFunction::new(name, parameters(node.back(3)), r#type(node.back(2)), block(node.back(1)))));
     if node.children().len() >= 6 {
-        WNode::new(node, Generic::new(name, generics(node.front(2)), function))
+        Box::new(ANode::new(node, AGeneric::new(name, generics(node.front(2)), function)))
     } else {
         function
     }
