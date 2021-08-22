@@ -196,21 +196,17 @@ fn function(node: Ref<SNode>) -> Box<ANode<dyn AStructureTrait>> {
     }
 }
 
-fn rest(node: Ref<SNode>) -> Option<(Ref<str>, ANode<AType>)> {
-    node.children().get(1).map(|child| parameter(Ref::new(child)))
+fn rest(node: Ref<SNode>) -> Option<ANode<ADeclaration>> {
+    node.children().get(1).map(|child| declaration(Ref::new(child)))
 }
 
-fn parameters(node: Ref<SNode>) -> (Box<[(Ref<str>, ANode<AType>)]>, Option<(Ref<str>, ANode<AType>)>) {
+fn parameters(node: Ref<SNode>) -> (Box<[ANode<ADeclaration>]>, Option<ANode<ADeclaration>>) {
     let parameters = node.front(1).children().iter()
         .step_by(2)
-        .map(|child| parameter(Ref::new(child)))
+        .map(|child| declaration(Ref::new(child)))
         .collect();
 
     (parameters, rest(node.back(2)))
-}
-
-fn parameter(node: Ref<SNode>) -> (Ref<str>, ANode<AType>) {
-    (token(node.front(0)), r#type(node.front(1)))
 }
 
 fn chain(node: Ref<SNode>) -> ANode<AChain> {

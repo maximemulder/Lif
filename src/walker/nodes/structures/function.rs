@@ -4,20 +4,19 @@ use crate::runtime::error::Error;
 use crate::runtime::primitives::FunctionCode;
 use crate::runtime::r#return::{ Return, ReturnReference };
 use crate::runtime::utilities::parameters::Parameters;
-use crate::runtime::utilities::variable::Variable;
 use crate::walker::ANode;
-use crate::walker::nodes::{ ABlock, AType, AStructureTrait };
+use crate::walker::nodes::{ ABlock, ADeclaration, AType, AStructureTrait };
 
 pub struct AFunction {
     name: Option<Ref<str>>,
-    parameters: Box<[(Ref<str>, ANode<AType>)]>,
-    rest: Option<(Ref<str>, ANode<AType>)>,
+    parameters: Box<[ANode<ADeclaration>]>,
+    rest: Option<ANode<ADeclaration>>,
     r#return: ANode<AType>,
     block: ANode<ABlock>,
 }
 
 impl AFunction {
-    pub fn new(name: Option<Ref<str>>, parameters: (Box<[(Ref<str>, ANode<AType>)]>, Option<(Ref<str>, ANode<AType>)>), r#return: ANode<AType>, block: ANode<ABlock>) -> Self {
+    pub fn new(name: Option<Ref<str>>, parameters: (Box<[ANode<ADeclaration>]>, Option<ANode<ADeclaration>>), r#return: ANode<AType>, block: ANode<ABlock>) -> Self {
         Self {
             name,
             parameters: parameters.0,
@@ -31,22 +30,18 @@ impl AFunction {
 impl AStructureTrait for AFunction {
     fn walk<'a>(&self, engine: &mut Engine<'a>) -> ReturnReference<'a> {
         let parameters = self.parameters.iter()
-            .map(|(name, parameter)| {
-                let r#type = parameter.get().walk(engine)?;
-                Ok(Variable::new(Box::from(name.as_ref()), r#type))
-            })
+            .map(|parameter| parameter.get().walk(engine))
             .collect::<Return<_>>()?;
 
-        let rest = self.rest.as_ref().map(|(name, parameter)| {
-            let r#type = parameter.get().walk(engine)?.map(|r#type| {
-                if r#type.is_generic(engine.environment.array) || r#type.is(engine.environment.any) {
-                    Ok(r#type)
-                } else {
-                    Err(error_rest())
+        let rest = self.rest.as_ref().map(|parameter| {
+            let variable = parameter.get().walk(engine)?;
+            if let Some(r#type) = variable.r#type {
+                if !r#type.is_generic(engine.environment.array) && !r#type.is(engine.environment.any) {
+                    return Err(error_rest());
                 }
-            }).transpose()?;
+            }
 
-            Ok(Variable::new(Box::from(name.as_ref()), r#type))
+            Ok(variable)
         }).transpose()?;
 
         let r#return = self.r#return.get().walk(engine)?;

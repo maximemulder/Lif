@@ -6,19 +6,19 @@ use crate::walker::ANode;
 use crate::walker::nodes::AType;
 
 pub struct ADeclaration {
-    identifier: Ref<str>,
+    name: Ref<str>,
     r#type: ANode<AType>,
 }
 
 impl ADeclaration {
-    pub fn new(identifier: Ref<str>, r#type: ANode<AType>) -> Self {
+    pub fn new(name: Ref<str>, r#type: ANode<AType>) -> Self {
         Self {
-            identifier,
+            name,
             r#type,
         }
     }
 
     pub fn walk<'a>(&self, engine: &mut Engine<'a>) -> Return<Variable<'a>> {
-        Ok(Variable::new(Box::from(self.identifier.as_ref()), self.r#type.get().walk(engine)?))
+        Ok(Variable::new(Box::from(self.name.as_ref()), self.r#type.get().walk(engine)?))
     }
 }
