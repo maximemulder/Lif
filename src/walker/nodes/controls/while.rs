@@ -1,24 +1,30 @@
 use crate::runtime::engine::Engine;
 use crate::runtime::r#return::{ Flow, Jump, ReturnFlow };
-use crate::walker::{ Walkable, WNode };
+use crate::walker::{ ANode, WNode };
+use crate::walker::nodes::{ ABlock, AControlTrait };
 
-pub struct Loop {
-    body: WNode,
+pub struct AWhile {
+    condition: WNode,
+    body:      ANode<ABlock>,
 }
 
-impl Loop {
-    pub fn new(body: WNode) -> Self {
+impl AWhile {
+    pub fn new(condition: WNode, body: ANode<ABlock>) -> Self {
         Self {
+            condition,
             body,
         }
     }
 }
 
-impl Walkable for Loop {
+impl AControlTrait for AWhile {
     fn walk<'a>(&self, engine: &mut Engine<'a>) -> ReturnFlow<'a> {
         let mut elements = Vec::new();
-        loop {
-            let flow = engine.walk(&self.body)?;
+        while {
+            let reference = get!(engine.walk(&self.condition)?);
+            reference.read()?.get_cast_boolean(engine)?
+        } {
+            let flow = self.body.get().walk(engine)?;
             let reference = get_loop!(flow);
             if reference.is_defined() {
                 elements.push(engine.new_reference(reference.get_value()))

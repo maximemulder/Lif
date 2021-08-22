@@ -12,6 +12,13 @@ impl<'a> Flow<'a> {
         Self::new_jump(reference, Jump::None)
     }
 
+    pub fn new_tmp(reference: GcReference<'a>) -> Self {
+        Self {
+            reference,
+            jump: Jump::None,
+        }
+    }
+
     pub fn new_jump(reference: GcReference<'a>, jump: Jump) -> ReturnFlow<'a> {
         Ok(Self {
             reference,

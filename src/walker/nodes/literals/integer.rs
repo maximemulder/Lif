@@ -1,13 +1,13 @@
 use crate::memory::Ref;
 use crate::runtime::engine::Engine;
-use crate::runtime::r#return::{ Flow, ReturnFlow };
-use crate::walker::Walkable;
+use crate::runtime::r#return::ReturnReference;
+use crate::walker::nodes::ALiteralTrait;
 
-pub struct Integer {
+pub struct AInteger {
     integer: isize,
 }
 
-impl Integer {
+impl AInteger {
     pub fn new(integer: Ref<str>) -> Self {
         let string = integer.replace("_", "");
         Self {
@@ -19,10 +19,11 @@ impl Integer {
             }
         }
     }
+
 }
 
-impl Walkable for Integer {
-    fn walk<'a>(&self, engine: &mut Engine<'a>) -> ReturnFlow<'a> {
-        Flow::new(engine.new_integer(self.integer))
+impl ALiteralTrait for AInteger {
+    fn walk<'a>(&self, engine: &mut Engine<'a>) -> ReturnReference<'a> {
+        Ok(engine.new_integer(self.integer))
     }
 }

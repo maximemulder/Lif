@@ -295,11 +295,6 @@ pub fn get() -> Grammar {
         &elements::expressions::LITERAL
     );
 
-    let group = descent_element!(
-        descent_sequence![symbol_parenthesis_l, expression, symbol_parenthesis_r],
-        &elements::expressions::GROUP
-    );
-
     let declaration = descent_element!(
         descent_sequence![variable_identifier, r#type],
         &elements::productions::DECLARATION
@@ -321,7 +316,7 @@ pub fn get() -> Grammar {
 
     let block = descent_element!(
         descent_sequence![symbol_brace_l, statements, expression_option, symbol_brace_r],
-        &elements::flows::BLOCK
+        &elements::controls::BLOCK
     );
 
     let r#if = descent_element!(
@@ -333,27 +328,27 @@ pub fn get() -> Grammar {
                 descent_sequence![keyword_else, block]
             ),
         ],
-        &elements::flows::IF
+        &elements::controls::IF
     );
 
     let r#loop = descent_element!(
         descent_sequence![keyword_loop, block],
-        &elements::flows::LOOP
+        &elements::controls::LOOP
     );
 
     let r#while = descent_element!(
         descent_sequence![keyword_while, expression, block],
-        &elements::flows::WHILE
+        &elements::controls::WHILE
     );
 
-    let for_in = descent_element!(
+    let r#for = descent_element!(
         descent_sequence![keyword_for, variable_identifier, keyword_in, expression, block],
-        &elements::flows::FOR_IN
+        &elements::controls::FOR
     );
 
     let flow = descent_element!(
-        descent_choice![block, r#if, r#loop, r#while, for_in],
-        &elements::flows::FLOW
+        descent_choice![block, r#if, r#loop, r#while, r#for],
+        &elements::controls::CONTROL
     );
 
     let generics = descent_option!(
@@ -448,7 +443,7 @@ pub fn get() -> Grammar {
     );
 
     let expression_core = descent_element!(
-        descent_choice![class, function, flow, jump, r#let, group, literal, preop],
+        descent_choice![class, function, flow, jump, r#let, literal, preop],
         &elements::expressions::EXPRESSION
     );
 

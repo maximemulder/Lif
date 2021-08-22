@@ -1,13 +1,14 @@
 use crate::runtime::engine::Engine;
 use crate::runtime::r#return::{ Flow, ReturnFlow };
-use crate::walker::{ Walkable, WNode };
+use crate::walker::WNode;
+use crate::walker::nodes::AControlTrait;
 
-pub struct Block {
+pub struct ABlock {
     statements: WNode,
     expression: Option<WNode>,
 }
 
-impl Block {
+impl ABlock {
     pub fn new(statements: WNode, expression: Option<WNode>) -> Self {
         Self {
             statements,
@@ -16,7 +17,7 @@ impl Block {
     }
 }
 
-impl Walkable for Block {
+impl AControlTrait for ABlock {
     fn walk<'a>(&self, engine: &mut Engine<'a>) -> ReturnFlow<'a> {
         engine.run_scope(|engine| {
             get!(engine.walk(&self.statements)?);

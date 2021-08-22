@@ -1,7 +1,7 @@
 use crate::memory::Ref;
 use crate::parser::SNode;
 use crate::parser::elements;
-use crate::walker::WNode;
+use crate::walker::{ ANode, WNode };
 use crate::walker::nodes::*;
 
 pub fn program(node: Ref<SNode>) -> WNode {
@@ -19,7 +19,7 @@ fn statement(node: Ref<SNode>) -> WNode {
     let child = node.front(0);
     WNode::new(node, Statement::new(match *child.element {
         elements::structures::STRUCTURE   => structure(child),
-        elements::flows::FLOW             => flow(child),
+        elements::controls::CONTROL       => control(child),
         elements::expressions::EXPRESSION => expression(child),
         _ => panic!(),
     }))
@@ -28,18 +28,17 @@ fn statement(node: Ref<SNode>) -> WNode {
 pub fn expression(node: Ref<SNode>) -> WNode {
     let child = node.front(0);
     match *child.element {
-        elements::structures::CLASS        => class(child),
-        elements::structures::FUNCTION     => function(child),
-        elements::flows::FLOW              => flow(child),
-        elements::jumps::JUMP              => jump(child),
-        elements::expressions::LET         => r#let(child),
-        elements::expressions::GROUP       => group(child),
-        elements::expressions::LITERAL     => literal(child),
-        elements::expressions::CHAIN       => chain(child),
-        elements::expressions::SEQUENCE    => sequence(child),
-        elements::expressions::BINOP       => binop(child),
-        elements::expressions::PREOP       => preop(child),
-        elements::expressions::ASSIGNMENT  => assignment(child),
+        elements::structures::CLASS       => class(child),
+        elements::structures::FUNCTION    => function(child),
+        elements::controls::CONTROL       => control(child),
+        elements::jumps::JUMP             => jump(child),
+        elements::expressions::LET        => r#let(child),
+        elements::expressions::LITERAL    => literal(child),
+        elements::expressions::CHAIN      => chain(child),
+        elements::expressions::SEQUENCE   => sequence(child),
+        elements::expressions::BINOP      => binop(child),
+        elements::expressions::PREOP      => preop(child),
+        elements::expressions::ASSIGNMENT => assignment(child),
         _ => panic!(),
     }
 }
@@ -54,39 +53,39 @@ fn name(node: Ref<SNode>) -> Option<Ref<str>> {
 
 fn literal(node: Ref<SNode>) -> WNode {
     let child = node.front(0);
-    match *child.element {
-        elements::keywords::TRUE        => r#true(child),
-        elements::keywords::FALSE       => r#false(child),
-        elements::variables::INTEGER    => integer(child),
-        elements::variables::FLOAT      => float(child),
-        elements::variables::STRING     => string(child),
-        elements::variables::IDENTIFIER => identifier(child),
+    WNode::new(node, ALiteral::new(match *child.element {
+        elements::keywords::TRUE        => Box::new(r#true(child)),
+        elements::keywords::FALSE       => Box::new(r#false(child)),
+        elements::variables::INTEGER    => Box::new(integer(child)),
+        elements::variables::FLOAT      => Box::new(float(child)),
+        elements::variables::STRING     => Box::new(string(child)),
+        elements::variables::IDENTIFIER => Box::new(identifier(child)),
         _ => panic!(),
-    }
+    }))
 }
 
-fn r#true(node: Ref<SNode>) -> WNode {
-    WNode::new(node, True::new())
+fn r#true(node: Ref<SNode>) -> ANode<ATrue> {
+    ANode::new(node, ATrue::new())
 }
 
-fn r#false(node: Ref<SNode>) -> WNode {
-    WNode::new(node, False::new())
+fn r#false(node: Ref<SNode>) -> ANode<AFalse> {
+    ANode::new(node, AFalse::new())
 }
 
-fn integer(node: Ref<SNode>) -> WNode {
-    WNode::new(node, Integer::new(node.text()))
+fn integer(node: Ref<SNode>) -> ANode<AInteger> {
+    ANode::new(node, AInteger::new(node.text()))
 }
 
-fn float(node: Ref<SNode>) -> WNode {
-    WNode::new(node, Float::new(node.text()))
+fn float(node: Ref<SNode>) -> ANode<AFloat> {
+    ANode::new(node, AFloat::new(node.text()))
 }
 
-fn string(node: Ref<SNode>) -> WNode {
-    WNode::new(node, String::new(node.text()))
+fn string(node: Ref<SNode>) -> ANode<AString> {
+    ANode::new(node, AString::new(node.text()))
 }
 
-fn identifier(node: Ref<SNode>) -> WNode {
-    WNode::new(node, Identifier::new(node.text()))
+fn identifier(node: Ref<SNode>) -> ANode<AIdentifier> {
+    ANode::new(node, AIdentifier::new(node.text()))
 }
 
 fn structure(node: Ref<SNode>) -> WNode {
@@ -98,41 +97,36 @@ fn structure(node: Ref<SNode>) -> WNode {
     }))
 }
 
-fn flow(node: Ref<SNode>) -> WNode {
+fn control(node: Ref<SNode>) -> WNode {
     let child = node.front(0);
-    match *child.element {
-        elements::flows::BLOCK     => block(child),
-        elements::flows::IF        => r#if(child),
-        elements::flows::LOOP      => r#loop(child),
-        elements::flows::WHILE     => r#while(child),
-        elements::flows::DO_WHILE  => do_while(child),
-        elements::flows::FOR_IN    => for_in(child),
+    WNode::new(node, AControl::new(match *child.element {
+        elements::controls::BLOCK => Box::new(block(child)),
+        elements::controls::IF    => Box::new(r#if(child)),
+        elements::controls::LOOP  => Box::new(r#loop(child)),
+        elements::controls::WHILE => Box::new(r#while(child)),
+        elements::controls::FOR   => Box::new(r#for(child)),
         _ => panic!(),
-    }
+    }))
 }
 
-fn block(node: Ref<SNode>) -> WNode {
-    WNode::new(node, Block::new(statements(node.front(1)), (node.children().len() == 4).then(|| expression(node.front(2)))))
+fn block(node: Ref<SNode>) -> ANode<ABlock> {
+    ANode::new(node, ABlock::new(statements(node.front(1)), (node.children().len() == 4).then(|| expression(node.front(2)))))
 }
 
-fn r#if(node: Ref<SNode>) -> WNode {
-    WNode::new(node, If::new(expression(node.front(1)), block(node.front(2)), node.children().get(4).map(|child| block(Ref::new(child)))))
+fn r#if(node: Ref<SNode>) -> ANode<AIf> {
+    ANode::new(node, AIf::new(expression(node.front(1)), block(node.front(2)), node.children().get(4).map(|child| block(Ref::new(child)))))
 }
 
-fn r#loop(node: Ref<SNode>) -> WNode {
-    WNode::new(node, Loop::new(block(node.front(1))))
+fn r#loop(node: Ref<SNode>) -> ANode<ALoop> {
+    ANode::new(node, ALoop::new(block(node.front(1))))
 }
 
-fn r#while(node: Ref<SNode>) -> WNode {
-    WNode::new(node, While::new(expression(node.front(1)), block(node.front(2))))
+fn r#while(node: Ref<SNode>) -> ANode<AWhile> {
+    ANode::new(node, AWhile::new(expression(node.front(1)), block(node.front(2))))
 }
 
-fn do_while(node: Ref<SNode>) -> WNode {
-    WNode::new(node, DoWhile::new(block(node.front(1)), expression(node.front(3))))
-}
-
-fn for_in(node: Ref<SNode>) -> WNode {
-    WNode::new(node, ForIn::new(token(node.front(1)), expression(node.front(3)), block(node.front(4))))
+fn r#for(node: Ref<SNode>) -> ANode<AFor> {
+    ANode::new(node, AFor::new(token(node.front(1)), expression(node.front(3)), block(node.front(4))))
 }
 
 fn r#let(node: Ref<SNode>) -> WNode {
@@ -145,24 +139,24 @@ fn declaration(node: Ref<SNode>) -> WNode {
 
 fn jump(node: Ref<SNode>) -> WNode {
     let child = node.front(0);
-    match *child.element {
-        elements::jumps::CONTINUE => r#continue(child),
-        elements::jumps::BREAK    => r#break(child),
-        elements::jumps::RETURN   => r#return(child),
+    WNode::new(node, AJump::new(match *child.element {
+        elements::jumps::CONTINUE => Box::new(r#continue(child)),
+        elements::jumps::BREAK    => Box::new(r#break(child)),
+        elements::jumps::RETURN   => Box::new(r#return(child)),
         _ => panic!(),
-    }
+    }))
 }
 
-fn r#return(node: Ref<SNode>) -> WNode {
-    WNode::new(node, Return::new(node.children().get(1).map(|child| expression(Ref::new(child)))))
+fn r#continue(node: Ref<SNode>) -> ANode<AContinue> {
+    ANode::new(node, AContinue::new(node.children().get(1).map(|child| expression(Ref::new(child)))))
 }
 
-fn r#break(node: Ref<SNode>) -> WNode {
-    WNode::new(node, Break::new(node.children().get(1).map(|child| expression(Ref::new(child)))))
+fn r#break(node: Ref<SNode>) -> ANode<ABreak> {
+    ANode::new(node, ABreak::new(node.children().get(1).map(|child| expression(Ref::new(child)))))
 }
 
-fn r#continue(node: Ref<SNode>) -> WNode {
-    WNode::new(node, Continue::new(node.children().get(1).map(|child| expression(Ref::new(child)))))
+fn r#return(node: Ref<SNode>) -> ANode<AReturn> {
+    ANode::new(node, AReturn::new(node.children().get(1).map(|child| expression(Ref::new(child)))))
 }
 
 fn generics(node: Ref<SNode>) -> Box<[Ref<str>]> {
@@ -200,7 +194,8 @@ fn methods(node: Ref<SNode>) -> Box<[WNode]> {
 
 fn function(node: Ref<SNode>) -> WNode {
     let name = name(node.front(1));
-    let function = WNode::new(node, Function::new(name, parameters(node.back(3)), r#type(node.back(2)), block(node.back(1))));
+    let block = WNode::new(node, AControl::new(Box::new(block(node.back(1)))));
+    let function = WNode::new(node, Function::new(name, parameters(node.back(3)), r#type(node.back(2)), block));
     if node.children().len() >= 6 {
         WNode::new(node, Generic::new(name, generics(node.front(2)), function))
     } else {
@@ -210,7 +205,9 @@ fn function(node: Ref<SNode>) -> WNode {
 
 fn function_named(node: Ref<SNode>) -> WNode {
     let name = Some(token(node.front(1)));
-    let function = WNode::new(node, Function::new(name, parameters(node.back(3)), r#type(node.back(2)), block(node.back(1))));
+    let block = WNode::new(node, AControl::new(Box::new(block(node.back(1)))));
+
+    let function = WNode::new(node, Function::new(name, parameters(node.back(3)), r#type(node.back(2)), block));
     if node.children().len() >= 6 {
         WNode::new(node, Generic::new(name, generics(node.front(2)), function))
     } else {
@@ -233,10 +230,6 @@ fn parameters(node: Ref<SNode>) -> (Box<[(Ref<str>, Option<WNode>)]>, Option<(Re
 
 fn parameter(node: Ref<SNode>) -> (Ref<str>, Option<WNode>) {
     (token(node.front(0)), r#type(node.front(1)))
-}
-
-fn group(node: Ref<SNode>) -> WNode {
-    WNode::new(node, Group::new(expression(node.front(1))))
 }
 
 fn chain(node: Ref<SNode>) -> WNode {

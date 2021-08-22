@@ -5,7 +5,7 @@ macro_rules! declare_node {
 }
 
 pub mod expressions;
-pub mod flows;
+pub mod controls;
 pub mod ignores;
 pub mod jumps;
 pub mod keywords;
