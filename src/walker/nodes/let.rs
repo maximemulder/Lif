@@ -17,6 +17,6 @@ impl ALet {
 
 impl AExpressionTrait for ALet {
     fn walk<'a>(&self, engine: &mut Engine<'a>) -> ReturnFlow<'a> {
-        Flow::new(self.declaration.get().walk(engine)?.build(engine))
+        Flow::reference(self.declaration.get().walk(engine)?.build(engine))
     }
 }

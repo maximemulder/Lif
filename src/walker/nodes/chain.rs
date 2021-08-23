@@ -20,8 +20,8 @@ impl AChain {
 
 impl AExpressionTrait for AChain {
     fn walk<'a>(&self, engine: &mut Engine<'a>) -> ReturnFlow<'a> {
-        let value = get!(self.expression.get().walk(engine)?).read()?;
+        let value = flow!(self.expression.get().walk(engine)?).read()?;
         let name = engine.new_string(self.member.to_string());
-        Flow::new(value.call_method(engine, "__cn__", &mut [name.read()?])?)
+        Flow::reference(value.call_method(engine, "__cn__", &mut [name.read()?])?)
     }
 }

@@ -1,12 +1,10 @@
-mod r#true;
-mod r#false;
+mod boolean;
 mod integer;
 mod float;
 mod string;
 mod identifier;
 
-pub use r#true::ATrue;
-pub use r#false::AFalse;
+pub use boolean::ABoolean;
 pub use integer::AInteger;
 pub use float::AFloat;
 pub use string::AString;
@@ -35,6 +33,6 @@ impl ALiteral {
 
 impl AExpressionTrait for ALiteral {
     fn walk<'a>(&self, engine: &mut Engine<'a>) -> ReturnFlow<'a> {
-        self.literal.get().walk(engine).map(Flow::new_tmp)
+        Flow::reference(self.literal.get().walk(engine)?)
     }
 }

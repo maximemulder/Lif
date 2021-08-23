@@ -1,5 +1,5 @@
 use crate::runtime::engine::Engine;
-use crate::runtime::r#return::ReturnReference;
+use crate::runtime::r#return::{ Jump, ReturnReference };
 use crate::walker::ANode;
 use crate::walker::nodes::{ AStatements, AExecutableTrait };
 
@@ -17,6 +17,7 @@ impl AProgram {
 
 impl AExecutableTrait for AProgram {
     fn walk<'a>(&self, engine: &mut Engine<'a>) -> ReturnReference<'a> {
-        self.statements.get().walk(engine)?.none()
+        Jump::get(self.statements.get().walk(engine)?)?;
+        Ok(engine.undefined())
     }
 }

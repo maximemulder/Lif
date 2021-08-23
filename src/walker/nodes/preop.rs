@@ -28,7 +28,7 @@ impl APreop {
 
 impl AExpressionTrait for APreop {
     fn walk<'a>(&self, engine: &mut Engine<'a>) -> ReturnFlow<'a> {
-        let expression = get!(self.expression.get().walk(engine)?).read()?;
-        Flow::new(expression.call_method(engine, &self.operator, &mut [])?)
+        let expression = flow!(self.expression.get().walk(engine)?).read()?;
+        Flow::reference(expression.call_method(engine, &self.operator, &mut [])?)
     }
 }

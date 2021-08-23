@@ -2,7 +2,7 @@ use crate::memory::Ref;
 use crate::runtime::engine::Engine;
 use crate::runtime::error::Error;
 use crate::runtime::primitives::function::FunctionImplementation;
-use crate::runtime::r#return::{ Jump, ReturnReference };
+use crate::runtime::r#return::{ Flow, JumpType, ReturnReference };
 use crate::runtime::utilities::parameters::Parameters;
 use crate::runtime::value::Value;
 use crate::walker::ANode;
@@ -25,9 +25,13 @@ impl<'a> FunctionImplementation<'a> for FunctionCode {
         parameters.build(engine, arguments);
         let block = Ref::as_ref(&self.block);
         let flow = block.get().walk(engine)?;
-        if flow.jump == Jump::Return && flow.reference.is_defined() {
-            Ok(engine.new_constant(flow.reference.get_value()))
-        } else if flow.jump == Jump::None {
+        if let Some(reference) = flow.is_jump_reference(JumpType::Return) {
+            if reference.is_defined() {
+                Ok(engine.new_constant(reference.get_value()))
+            } else {
+                Ok(engine.undefined())
+            }
+        } else if let Flow::Reference(_) = flow {
             Ok(engine.undefined())
         } else {
             Err(error_jump())

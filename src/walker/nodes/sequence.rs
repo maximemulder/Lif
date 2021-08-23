@@ -13,13 +13,13 @@ pub struct ASequence {
 }
 
 impl ASequence {
-    pub fn new(expression: ANode<AExpression>, open: Ref<str>, expressions: Box<[ANode<AExpression>]>, close: Ref<str>) -> Self {
+    pub fn new(expression: ANode<AExpression>, open: Ref<str>, expressions: Box<[ANode<AExpression>]>) -> Self {
         Self {
             expression,
             expressions,
-            operator: Ref::new(match format!("{}{}", open.deref(), close.deref()).as_str() {
-                "()" => "__cl__",
-                "[]" => "__gn__",
+            operator: Ref::new(match open.deref() {
+                "(" => "__cl__",
+                "[" => "__gn__",
                 _ => panic!(),
             })
         }
@@ -28,13 +28,13 @@ impl ASequence {
 
 impl AExpressionTrait for ASequence {
     fn walk<'a>(&self, engine: &mut Engine<'a>) -> ReturnFlow<'a> {
-        let value = get!(self.expression.get().walk(engine)?).read()?;
+        let value = flow!(self.expression.get().walk(engine)?).read()?;
         let mut elements = Vec::new();
         for expression in self.expressions.iter() {
-            elements.push(get!(expression.get().walk(engine)?))
+            elements.push(flow!(expression.get().walk(engine)?))
         }
 
         let array = engine.new_array_any_value(elements);
-        Flow::new(value.call_method(engine, &self.operator, &mut [array])?)
+        Flow::reference(value.call_method(engine, &self.operator, &mut [array])?)
     }
 }

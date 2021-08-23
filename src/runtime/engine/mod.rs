@@ -122,7 +122,7 @@ impl<'a> Engine<'a> {
         self.cache.push();
         let r#return = callback(self);
         if let Ok(flow) = r#return.as_ref() {
-            self.cache.bubble(flow.reference);
+            self.cache.bubble(flow.get_reference());
         }
 
         self.cache.pop();

@@ -20,9 +20,9 @@ impl ABlock {
 impl AControlTrait for ABlock {
     fn walk<'a>(&self, engine: &mut Engine<'a>) -> ReturnFlow<'a> {
         engine.run_scope(|engine| {
-            get!(self.statements.get().walk(engine)?);
-            Flow::new(if let Some(expression) = self.expression.as_ref() {
-                get!(expression.get().walk(engine)?)
+            jump_flow!(self.statements.get().walk(engine)?);
+            Flow::reference(if let Some(expression) = self.expression.as_ref() {
+                flow!(expression.get().walk(engine)?)
             } else {
                 engine.undefined()
             })

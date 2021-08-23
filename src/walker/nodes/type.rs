@@ -17,6 +17,6 @@ impl AType {
     }
 
     pub fn walk<'a>(&self, engine: &mut Engine<'a>) -> Return<Option<GcRef<Class<'a>>>> {
-		self.r#type.as_ref().map(|r#type| r#type.get().walk(engine)?.none()?.read()?.get_cast_class(engine)).transpose()
+		self.r#type.as_ref().map(|r#type| r#type.get().walk(engine)?.get()?.read()?.get_cast_class(engine)).transpose()
     }
 }

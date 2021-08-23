@@ -22,14 +22,14 @@ impl AAssignment {
 
 impl AExpressionTrait for AAssignment {
     fn walk<'a>(&self, engine: &mut Engine<'a>) -> ReturnFlow<'a> {
-        let mut reference  = get!(self.reference.get().walk(engine)?);
-        let mut expression = get!(self.expression.get().walk(engine)?).read()?;
+        let mut reference  = flow!(self.reference.get().walk(engine)?);
+        let mut expression = flow!(self.expression.get().walk(engine)?).read()?;
         if let Some(operator) = self.operator.as_ref() {
             let left = reference.read()?;
             expression = left.call_method(engine, operator, &mut [expression])?.read()?;
         }
 
         reference.write(expression)?;
-        Flow::new(engine.undefined())
+        Flow::reference(engine.undefined())
     }
 }

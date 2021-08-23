@@ -21,14 +21,14 @@ impl AIf {
 
 impl AControlTrait for AIf {
     fn walk<'a>(&self, engine: &mut Engine<'a>) -> ReturnFlow<'a> {
-        let reference = get!(self.condition.get().walk(engine)?);
+        let reference = flow!(self.condition.get().walk(engine)?);
         let condition = reference.read()?.get_cast_boolean(engine)?;
         if condition {
             self.then.get().walk(engine)
         } else if let Some(r#else) = self.r#else.as_ref() {
             r#else.get().walk(engine)
         } else {
-            Flow::new(engine.undefined())
+            Flow::reference(engine.undefined())
         }
     }
 }

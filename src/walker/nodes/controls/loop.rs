@@ -1,5 +1,5 @@
 use crate::runtime::engine::Engine;
-use crate::runtime::r#return::{ Flow, Jump, ReturnFlow };
+use crate::runtime::r#return::{ Flow, JumpType, ReturnFlow };
 use crate::walker::ANode;
 use crate::walker::nodes::{ ABlock, AControlTrait };
 
@@ -20,20 +20,20 @@ impl AControlTrait for ALoop {
         let mut elements = Vec::new();
         loop {
             let flow = self.body.get().walk(engine)?;
-            let reference = get_loop!(flow);
+            let reference = flow_loop!(flow);
             if reference.is_defined() {
                 elements.push(engine.new_reference(reference.get_value()))
             }
 
-            if flow.jump == Jump::Continue {
+            if flow.is_jump(JumpType::Continue) {
                 continue;
             }
 
-            if flow.jump == Jump::Break {
+            if flow.is_jump(JumpType::Break) {
                 break;
             }
         }
 
-        Flow::new(engine.new_array_any(elements))
+        Flow::reference(engine.new_array_any(elements))
     }
 }

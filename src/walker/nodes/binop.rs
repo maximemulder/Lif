@@ -46,29 +46,29 @@ impl ABinop {
 
 impl AExpressionTrait for ABinop {
     fn walk<'a>(&self, engine: &mut Engine<'a>) -> ReturnFlow<'a> {
-        let left = get!(self.left.get().walk(engine)?).read()?;
+        let left = flow!(self.left.get().walk(engine)?).read()?;
         match self.operator.deref() {
             "__and__" => {
                 let boolean = if left.get_cast_boolean(engine)? {
-                    get!(self.right.get().walk(engine)?).read()?.get_cast_boolean(engine)?
+                    flow!(self.right.get().walk(engine)?).read()?.get_cast_boolean(engine)?
                 } else {
                     false
                 };
 
-                Flow::new(engine.new_boolean(boolean))
+                Flow::reference(engine.new_boolean(boolean))
             },
             "__or__" => {
                 let boolean = if left.get_cast_boolean(engine)? {
                     true
                 } else {
-                    get!(self.right.get().walk(engine)?).read()?.get_cast_boolean(engine)?
+                    flow!(self.right.get().walk(engine)?).read()?.get_cast_boolean(engine)?
                 };
 
-                Flow::new(engine.new_boolean(boolean))
+                Flow::reference(engine.new_boolean(boolean))
             },
             _ => {
-                let right = get!(self.right.get().walk(engine)?).read()?;
-                Flow::new(left.call_method(engine, &self.operator, &mut [right])?)
+                let right = flow!(self.right.get().walk(engine)?).read()?;
+                Flow::reference(left.call_method(engine, &self.operator, &mut [right])?)
             },
         }
     }

@@ -134,6 +134,10 @@ pub fn get() -> Grammar {
     let keyword_true            = descent_token!(&elements::keywords::TRUE);
     let keyword_try             = descent_token!(&elements::keywords::TRY);
     let keyword_while           = descent_token!(&elements::keywords::WHILE);
+    let literal_integer        = descent_token!(&elements::literals::INTEGER);
+    let literal_float          = descent_token!(&elements::literals::FLOAT);
+    let literal_string         = descent_token!(&elements::literals::STRING);
+    let literal_identifier     = descent_token!(&elements::literals::IDENTIFIER);
     let symbol_plus             = descent_token!(&elements::symbols::PLUS);
     let symbol_plus_eq          = descent_token!(&elements::symbols::PLUS_EQ);
     let symbol_minus            = descent_token!(&elements::symbols::MINUS);
@@ -190,10 +194,6 @@ pub fn get() -> Grammar {
     let symbol_colon            = descent_token!(&elements::symbols::COLON);
     let symbol_semicolon        = descent_token!(&elements::symbols::SEMICOLON);
     let symbol_backslash        = descent_token!(&elements::symbols::BACKSLASH);
-    let variable_integer        = descent_token!(&elements::variables::INTEGER);
-    let variable_float          = descent_token!(&elements::variables::FLOAT);
-    let variable_string         = descent_token!(&elements::variables::STRING);
-    let variable_identifier     = descent_token!(&elements::variables::IDENTIFIER);
 
     macro_rules! macro_jump {
         ( $keyword:expr, $element:expr ) => {
@@ -272,7 +272,7 @@ pub fn get() -> Grammar {
     }
 
     let name = descent_element!(
-        descent_option!(variable_identifier),
+        descent_option!(literal_identifier),
         &elements::productions::NAME
     );
 
@@ -291,12 +291,12 @@ pub fn get() -> Grammar {
     );
 
     let literal = descent_element!(
-        descent_choice![keyword_true, keyword_false, variable_integer, variable_float, variable_string, variable_identifier],
+        descent_choice![keyword_true, keyword_false, literal_integer, literal_float, literal_string, literal_identifier],
         &elements::expressions::LITERAL
     );
 
     let declaration = descent_element!(
-        descent_sequence![variable_identifier, r#type],
+        descent_sequence![literal_identifier, r#type],
         &elements::productions::DECLARATION
     );
 
@@ -342,7 +342,7 @@ pub fn get() -> Grammar {
     );
 
     let r#for = descent_element!(
-        descent_sequence![keyword_for, variable_identifier, keyword_in, expression, block],
+        descent_sequence![keyword_for, literal_identifier, keyword_in, expression, block],
         &elements::controls::FOR
     );
 
@@ -356,7 +356,7 @@ pub fn get() -> Grammar {
             descent_sequence![
                 symbol_crotchet_l,
                 descent_element!(
-                    macro_list!(variable_identifier, symbol_comma),
+                    macro_list!(literal_identifier, symbol_comma),
                     &elements::productions::GENERICS_LIST
                 ),
                 symbol_crotchet_r,
@@ -410,7 +410,7 @@ pub fn get() -> Grammar {
     );
 
     let function_named = descent_element!(
-        descent_sequence![keyword_function, variable_identifier, generics, parameters, r#type, block],
+        descent_sequence![keyword_function, literal_identifier, generics, parameters, r#type, block],
         &elements::structures::FUNCTION
     );
 
@@ -425,7 +425,7 @@ pub fn get() -> Grammar {
     );
 
     let class_named = descent_element!(
-        descent_sequence![keyword_class, variable_identifier, generics, r#type, symbol_brace_l, methods, symbol_brace_r],
+        descent_sequence![keyword_class, literal_identifier, generics, r#type, symbol_brace_l, methods, symbol_brace_r],
         &elements::structures::CLASS
     );
 
@@ -451,7 +451,7 @@ pub fn get() -> Grammar {
         ascent_descent!(
             descent_sequence![
                 symbol_dot,
-                variable_identifier,
+                literal_identifier,
             ]
         ),
         ascent_sequence![

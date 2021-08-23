@@ -1,9 +1,9 @@
 use crate::runtime::engine::Engine;
-use crate::runtime::r#return::{ Flow, ReturnFlow };
+use crate::runtime::r#return::{ Jump, ReturnJump };
 use crate::walker::ANode;
 
 pub trait AStatementTrait {
-	fn walk<'a>(&self, engine: &mut Engine<'a>) -> ReturnFlow<'a>;
+	fn walk<'a>(&self, engine: &mut Engine<'a>) -> ReturnJump<'a>;
 }
 
 pub struct AStatement {
@@ -17,8 +17,8 @@ impl AStatement {
         }
     }
 
-    pub fn walk<'a>(&self, engine: &mut Engine<'a>) -> ReturnFlow<'a> {
-        get!(self.node.get().walk(engine)?);
-        Flow::new(engine.undefined())
+    pub fn walk<'a>(&self, engine: &mut Engine<'a>) -> ReturnJump<'a> {
+        jump!(self.node.get().walk(engine)?);
+        Jump::none()
     }
 }

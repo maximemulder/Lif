@@ -1,5 +1,5 @@
 use crate::runtime::engine::Engine;
-use crate::runtime::r#return::{ ReturnFlow, ReturnReference };
+use crate::runtime::r#return::{ Jump, ReturnFlow, ReturnJump, ReturnReference };
 use crate::walker::ANode;
 use crate::walker::nodes::{ AExecutableTrait, AStatementTrait };
 
@@ -25,12 +25,12 @@ impl AExpression {
 
 impl AExecutableTrait for AExpression {
     fn walk<'a>(&self, engine: &mut Engine<'a>) -> ReturnReference<'a> {
-        self.walk(engine)?.none()
+        self.walk(engine)?.get()
     }
 }
 
 impl AStatementTrait for AExpression {
-    fn walk<'a>(&self, engine: &mut Engine<'a>) -> ReturnFlow<'a> {
-        self.walk(engine)
+    fn walk<'a>(&self, engine: &mut Engine<'a>) -> ReturnJump<'a> {
+        Jump::flow(self.walk(engine)?)
     }
 }

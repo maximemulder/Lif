@@ -58,22 +58,18 @@ fn name(node: Ref<SNode>) -> Option<Ref<str>> {
 fn literal(node: Ref<SNode>) -> ANode<ALiteral> {
     let child = node.front(0);
     ANode::new(node, ALiteral::new(match *child.element {
-        elements::keywords::TRUE        => Box::new(r#true(child)),
-        elements::keywords::FALSE       => Box::new(r#false(child)),
-        elements::variables::INTEGER    => Box::new(integer(child)),
-        elements::variables::FLOAT      => Box::new(float(child)),
-        elements::variables::STRING     => Box::new(string(child)),
-        elements::variables::IDENTIFIER => Box::new(identifier(child)),
+        elements::keywords::TRUE       => Box::new(boolean(child)),
+        elements::keywords::FALSE      => Box::new(boolean(child)),
+        elements::literals::INTEGER    => Box::new(integer(child)),
+        elements::literals::FLOAT      => Box::new(float(child)),
+        elements::literals::STRING     => Box::new(string(child)),
+        elements::literals::IDENTIFIER => Box::new(identifier(child)),
         _ => panic!(),
     }))
 }
 
-fn r#true(node: Ref<SNode>) -> ANode<ATrue> {
-    ANode::new(node, ATrue::new())
-}
-
-fn r#false(node: Ref<SNode>) -> ANode<AFalse> {
-    ANode::new(node, AFalse::new())
+fn boolean(node: Ref<SNode>) -> ANode<ABoolean> {
+    ANode::new(node, ABoolean::new(node.text()))
 }
 
 fn integer(node: Ref<SNode>) -> ANode<AInteger> {
@@ -143,24 +139,7 @@ fn declaration(node: Ref<SNode>) -> ANode<ADeclaration> {
 
 fn jump(node: Ref<SNode>) -> ANode<AJump> {
     let child = node.front(0);
-    ANode::new(node, AJump::new(match *child.element {
-        elements::jumps::CONTINUE => Box::new(r#continue(child)),
-        elements::jumps::BREAK    => Box::new(r#break(child)),
-        elements::jumps::RETURN   => Box::new(r#return(child)),
-        _ => panic!(),
-    }))
-}
-
-fn r#continue(node: Ref<SNode>) -> ANode<AContinue> {
-    ANode::new(node, AContinue::new(node.children().get(1).map(|child| expression(Ref::new(child)))))
-}
-
-fn r#break(node: Ref<SNode>) -> ANode<ABreak> {
-    ANode::new(node, ABreak::new(node.children().get(1).map(|child| expression(Ref::new(child)))))
-}
-
-fn r#return(node: Ref<SNode>) -> ANode<AReturn> {
-    ANode::new(node, AReturn::new(node.children().get(1).map(|child| expression(Ref::new(child)))))
+    ANode::new(node, AJump::new(token(child.front(0)), child.children().get(1).map(|child| expression(Ref::new(child)))))
 }
 
 fn generics(node: Ref<SNode>) -> Box<[Ref<str>]> {
@@ -214,7 +193,7 @@ fn chain(node: Ref<SNode>) -> ANode<AChain> {
 }
 
 fn sequence(node: Ref<SNode>) -> ANode<ASequence> {
-    ANode::new(node, ASequence::new(expression(node.front(0)), token(node.front(1)), expressions(node.front(2)), token(node.front(3))))
+    ANode::new(node, ASequence::new(expression(node.front(0)), token(node.front(1)), expressions(node.front(2)), ))
 }
 
 fn expressions(node: Ref<SNode>) -> Box<[ANode<AExpression>]> {

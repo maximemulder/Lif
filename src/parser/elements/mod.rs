@@ -9,7 +9,7 @@ pub mod controls;
 pub mod ignores;
 pub mod jumps;
 pub mod keywords;
+pub mod literals;
 pub mod productions;
 pub mod structures;
 pub mod symbols;
-pub mod variables;

@@ -1,5 +1,5 @@
 use crate::runtime::engine::Engine;
-use crate::runtime::r#return::{ Flow, ReturnFlow };
+use crate::runtime::r#return::{ Jump, ReturnJump };
 use crate::walker::ANode;
 use crate::walker::nodes::AStatement;
 
@@ -14,11 +14,11 @@ impl AStatements {
         }
     }
 
-    pub fn walk<'a>(&self, engine: &mut Engine<'a>) -> ReturnFlow<'a> {
+    pub fn walk<'a>(&self, engine: &mut Engine<'a>) -> ReturnJump<'a> {
         for statement in self.statements.iter() {
-            get!(statement.get().walk(engine)?);
+            jump!(statement.get().walk(engine)?);
         }
 
-        Flow::new(engine.undefined())
+        Jump::none()
     }
 }
