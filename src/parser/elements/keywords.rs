@@ -1,8 +1,8 @@
 use crate::parser::Element;
 
 declare_node!(BREAK);
-declare_node!(CONTINUE);
 declare_node!(CLASS);
+declare_node!(CONTINUE);
 declare_node!(ELSE);
 declare_node!(FALSE);
 declare_node!(FOR);

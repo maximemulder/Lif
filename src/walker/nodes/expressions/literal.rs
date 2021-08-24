@@ -8,11 +8,11 @@ pub struct ALiteral {
 }
 
 impl ALiteral {
-	pub fn new(literal: Box<ANode<dyn WLiteral>>) -> Self {
-		Self {
-			literal,
-		}
-	}
+    pub fn new(literal: Box<ANode<dyn WLiteral>>) -> Self {
+        Self {
+            literal,
+        }
+    }
 }
 
 impl WExpression for ALiteral {

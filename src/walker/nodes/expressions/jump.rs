@@ -8,33 +8,33 @@ use crate::walker::traits::WExpression;
 use std::ops::Deref;
 
 pub struct AJump {
-	r#type: JumpType,
+    r#type: JumpType,
     expression: Option<ANode<AExpression>>,
 }
 
 impl AJump {
-	pub fn new(r#type: Ref<str>, expression: Option<ANode<AExpression>>) -> Self {
-		Self {
-			r#type: match r#type.deref() {
+    pub fn new(r#type: Ref<str>, expression: Option<ANode<AExpression>>) -> Self {
+        Self {
+            r#type: match r#type.deref() {
                 "continue" => JumpType::Continue,
-				"break"    => JumpType::Break,
+                "break"    => JumpType::Break,
                 "return"   => JumpType::Return,
                 _ => panic!(),
             },
-			expression,
-		}
-	}
+            expression,
+        }
+    }
 }
 
 impl WExpression for AJump {
     fn walk<'a>(&self, engine: &mut Engine<'a>) -> ReturnFlow<'a> {
-		let reference = if let Some(expression) = &self.expression {
-			let value = flow!(expression.get().walk(engine)?).read()?;
-			engine.new_constant(value)
-		} else {
-			engine.undefined()
-		};
+        let reference = if let Some(expression) = &self.expression {
+            let value = flow!(expression.get().walk(engine)?).read()?;
+            engine.new_constant(value)
+        } else {
+            engine.undefined()
+        };
 
-		Flow::jump(Jump::new(reference, self.r#type))
+        Flow::jump(Jump::new(reference, self.r#type))
     }
 }
