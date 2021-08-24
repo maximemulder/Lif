@@ -1,7 +1,7 @@
 use crate::memory::Ref;
 use crate::runtime::engine::Engine;
 use crate::runtime::r#return::ReturnReference;
-use crate::walker::nodes::ALiteralTrait;
+use crate::walker::traits::WLiteral;
 
 pub struct AFloat {
     float: f64,
@@ -16,7 +16,7 @@ impl AFloat {
     }
 }
 
-impl ALiteralTrait for AFloat {
+impl WLiteral for AFloat {
     fn walk<'a>(&self, engine: &mut Engine<'a>) -> ReturnReference<'a> {
         Ok(engine.new_float(self.float))
     }

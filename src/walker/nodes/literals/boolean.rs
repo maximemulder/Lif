@@ -1,7 +1,7 @@
 use crate::memory::Ref;
 use crate::runtime::engine::Engine;
 use crate::runtime::r#return::ReturnReference;
-use crate::walker::nodes::ALiteralTrait;
+use crate::walker::traits::WLiteral;
 
 use std::ops::Deref;
 
@@ -21,7 +21,7 @@ impl ABoolean {
     }
 }
 
-impl ALiteralTrait for ABoolean {
+impl WLiteral for ABoolean {
     fn walk<'a>(&self, engine: &mut Engine<'a>) -> ReturnReference<'a> {
         Ok(engine.new_boolean(self.boolean))
     }

@@ -43,7 +43,7 @@ impl<'a> Jump<'a> {
 pub enum JumpType {
     Continue,
     Break,
-    Return
+    Return,
 }
 
 impl fmt::Display for JumpType {

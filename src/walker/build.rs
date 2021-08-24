@@ -3,6 +3,7 @@ use crate::parser::SNode;
 use crate::parser::elements;
 use crate::walker::ANode;
 use crate::walker::nodes::*;
+use crate::walker::traits::*;
 
 use std::marker::Unsize;
 
@@ -149,7 +150,7 @@ fn generics(node: Ref<SNode>) -> Box<[Ref<str>]> {
         .collect()
 }
 
-fn class(node: Ref<SNode>) -> Box<ANode<dyn AStructureTrait>> {
+fn class(node: Ref<SNode>) -> Box<ANode<dyn WStructure>> {
     let name = Some(token(node.front(1)));
     let class = Box::new(ANode::new(node, AClass::new(name, r#type(node.back(4)), methods(node.back(2)))));
     if node.children().len() >= 7 {
@@ -159,13 +160,13 @@ fn class(node: Ref<SNode>) -> Box<ANode<dyn AStructureTrait>> {
     }
 }
 
-fn methods(node: Ref<SNode>) -> Box<[Box<ANode<dyn AStructureTrait>>]> {
+fn methods(node: Ref<SNode>) -> Box<[Box<ANode<dyn WStructure>>]> {
     node.children().iter()
         .map(|child| function(Ref::new(child)))
         .collect()
 }
 
-fn function(node: Ref<SNode>) -> Box<ANode<dyn AStructureTrait>> {
+fn function(node: Ref<SNode>) -> Box<ANode<dyn WStructure>> {
     let name = Some(token(node.front(1)));
     let function = Box::new(ANode::new(node, AFunction::new(name, parameters(node.back(3)), r#type(node.back(2)), block(node.back(1)))));
     if node.children().len() >= 6 {

@@ -2,7 +2,8 @@ use crate::memory::Ref;
 use crate::runtime::engine::Engine;
 use crate::runtime::r#return::{ Flow, ReturnFlow };
 use crate::walker::ANode;
-use crate::walker::nodes::{ AExpression, AExpressionTrait };
+use crate::walker::nodes::AExpression;
+use crate::walker::traits::WExpression;
 
 use std::ops::Deref;
 
@@ -26,7 +27,7 @@ impl ASequence {
     }
 }
 
-impl AExpressionTrait for ASequence {
+impl WExpression for ASequence {
     fn walk<'a>(&self, engine: &mut Engine<'a>) -> ReturnFlow<'a> {
         let value = flow!(self.expression.get().walk(engine)?).read()?;
         let mut elements = Vec::new();

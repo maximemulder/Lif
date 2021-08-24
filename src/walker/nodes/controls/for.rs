@@ -2,7 +2,8 @@ use crate::memory::Ref;
 use crate::runtime::engine::Engine;
 use crate::runtime::r#return::{ Flow, JumpType, ReturnFlow };
 use crate::walker::ANode;
-use crate::walker::nodes::{ ABlock, AExpression, AControlTrait };
+use crate::walker::nodes::{ ABlock, AExpression };
+use crate::walker::traits::WControl;
 
 pub struct AFor {
     identifier: Ref<str>,
@@ -20,7 +21,7 @@ impl AFor {
     }
 }
 
-impl AControlTrait for AFor {
+impl WControl for AFor {
     fn walk<'a>(&self, engine: &mut Engine<'a>) -> ReturnFlow<'a> {
         let mut elements = Vec::new();
         for element in {

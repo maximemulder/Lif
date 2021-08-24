@@ -1,6 +1,6 @@
 use crate::runtime::engine::Engine;
 use crate::runtime::r#return::ReturnReference;
-use crate::walker::nodes::ALiteralTrait;
+use crate::walker::nodes::WLiteral;
 
 pub struct ATrue;
 
@@ -11,7 +11,7 @@ impl ATrue {
 
 }
 
-impl ALiteralTrait for ATrue {
+impl WLiteral for ATrue {
     fn walk<'a>(&self, engine: &mut Engine<'a>) -> ReturnReference<'a> {
         Ok(engine.new_boolean(true))
     }

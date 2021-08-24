@@ -1,7 +1,7 @@
 use crate::memory::Ref;
 use crate::runtime::engine::Engine;
 use crate::runtime::r#return::ReturnReference;
-use crate::walker::nodes::ALiteralTrait;
+use crate::walker::traits::WLiteral;
 
 pub struct AIdentifier {
     identifier: Ref<str>,
@@ -15,7 +15,7 @@ impl AIdentifier {
     }
 }
 
-impl ALiteralTrait for AIdentifier {
+impl WLiteral for AIdentifier {
     fn walk<'a>(&self, engine: &mut Engine<'a>) -> ReturnReference<'a> {
         engine.get_variable(&self.identifier)
     }

@@ -1,7 +1,8 @@
 use crate::runtime::engine::Engine;
 use crate::runtime::r#return::{ Flow, ReturnFlow };
 use crate::walker::ANode;
-use crate::walker::nodes::{ ABlock, AExpression, AControlTrait };
+use crate::walker::nodes::{ ABlock, AExpression };
+use crate::walker::traits::WControl;
 
 pub struct AIf {
     condition: ANode<AExpression>,
@@ -19,7 +20,7 @@ impl AIf {
     }
 }
 
-impl AControlTrait for AIf {
+impl WControl for AIf {
     fn walk<'a>(&self, engine: &mut Engine<'a>) -> ReturnFlow<'a> {
         let reference = flow!(self.condition.get().walk(engine)?);
         let condition = reference.read()?.get_cast_boolean(engine)?;

@@ -1,5 +1,6 @@
 pub mod build;
 pub mod nodes;
+pub mod traits;
 
 use crate::memory::Ref;
 use crate::parser::SNode;

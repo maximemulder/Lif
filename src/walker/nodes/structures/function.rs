@@ -5,7 +5,8 @@ use crate::runtime::primitives::FunctionCode;
 use crate::runtime::r#return::{ Return, ReturnReference };
 use crate::runtime::utilities::parameters::Parameters;
 use crate::walker::ANode;
-use crate::walker::nodes::{ ABlock, ADeclaration, AType, AStructureTrait };
+use crate::walker::nodes::{ ABlock, ADeclaration, AType };
+use crate::walker::traits::WStructure;
 
 pub struct AFunction {
     name: Option<Ref<str>>,
@@ -27,7 +28,7 @@ impl AFunction {
     }
 }
 
-impl AStructureTrait for AFunction {
+impl WStructure for AFunction {
     fn walk<'a>(&self, engine: &mut Engine<'a>) -> ReturnReference<'a> {
         let parameters = self.parameters.iter()
             .map(|parameter| parameter.get().walk(engine))

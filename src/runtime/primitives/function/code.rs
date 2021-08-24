@@ -6,7 +6,8 @@ use crate::runtime::r#return::{ Flow, JumpType, ReturnReference };
 use crate::runtime::utilities::parameters::Parameters;
 use crate::runtime::value::Value;
 use crate::walker::ANode;
-use crate::walker::nodes::{ ABlock, AControlTrait };
+use crate::walker::nodes::ABlock;
+use crate::walker::traits::WControl;
 
 pub struct FunctionCode {
     block: Ref<ANode<ABlock>>,

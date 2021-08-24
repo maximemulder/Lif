@@ -4,14 +4,14 @@ use crate::runtime::primitives::generic::GenericImplementation;
 use crate::runtime::r#return::ReturnReference;
 use crate::runtime::value::Value;
 use crate::walker::ANode;
-use crate::walker::nodes::AStructureTrait;
+use crate::walker::traits::WStructure;
 
 pub struct GenericCode {
-    node: Ref<ANode<dyn AStructureTrait>>,
+    node: Ref<ANode<dyn WStructure>>,
 }
 
 impl GenericCode {
-    pub fn new(node: Ref<ANode<dyn AStructureTrait>>) -> Self {
+    pub fn new(node: Ref<ANode<dyn WStructure>>) -> Self {
         Self {
             node,
         }

@@ -1,17 +1,14 @@
 use crate::runtime::engine::Engine;
 use crate::runtime::r#return::{ Jump, ReturnJump };
 use crate::walker::ANode;
-
-pub trait AStatementTrait {
-	fn walk<'a>(&self, engine: &mut Engine<'a>) -> ReturnJump<'a>;
-}
+use crate::walker::traits::WStatement;
 
 pub struct AStatement {
-    node: Box<ANode<dyn AStatementTrait>>,
+    node: Box<ANode<dyn WStatement>>,
 }
 
 impl AStatement {
-    pub fn new(node: Box<ANode<dyn AStatementTrait>>) -> Self {
+    pub fn new(node: Box<ANode<dyn WStatement>>) -> Self {
         Self {
             node,
         }
