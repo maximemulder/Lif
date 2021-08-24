@@ -6,7 +6,7 @@ use crate::runtime::r#return::{ Return, ReturnReference };
 use crate::runtime::utilities::parameters::Parameters;
 use crate::walker::ANode;
 use crate::walker::nodes::{ ABlock, ADeclaration, AType };
-use crate::walker::traits::WStructure;
+use crate::walker::traits::WDefinition;
 
 pub struct AFunction {
     name: Option<Ref<str>>,
@@ -28,7 +28,7 @@ impl AFunction {
     }
 }
 
-impl WStructure for AFunction {
+impl WDefinition for AFunction {
     fn walk<'a>(&self, engine: &mut Engine<'a>) -> ReturnReference<'a> {
         let parameters = self.parameters.iter()
             .map(|parameter| parameter.get().walk(engine))

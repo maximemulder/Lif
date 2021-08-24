@@ -2,7 +2,7 @@ use crate::runtime::engine::Engine;
 use crate::runtime::r#return::{ Flow, JumpType, ReturnFlow };
 use crate::walker::ANode;
 use crate::walker::nodes::ABlock;
-use crate::walker::traits::WControl;
+use crate::walker::traits::WStructure;
 
 pub struct ALoop {
     body: ANode<ABlock>,
@@ -16,7 +16,7 @@ impl ALoop {
     }
 }
 
-impl WControl for ALoop {
+impl WStructure for ALoop {
     fn walk<'a>(&self, engine: &mut Engine<'a>) -> ReturnFlow<'a> {
         let mut elements = Vec::new();
         loop {

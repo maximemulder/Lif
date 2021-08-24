@@ -25,9 +25,9 @@ fn statements(node: Ref<SNode>) -> ANode<AStatements> {
 fn statement(node: Ref<SNode>) -> ANode<AStatement> {
     let child = node.front(0);
     ANode::new(node, AStatement::new(match *child.element {
-        elements::structures::STRUCTURE   => Box::new(structure(child)),
-        elements::controls::CONTROL       => Box::new(control(child)),
-        elements::expressions::EXPRESSION => Box::new(expression(child)),
+        elements::definitions::DEFINITION => Box::new(definition(child)),
+        elements::productions::STRUCTURE  => Box::new(structure(child)),
+        elements::productions::EXPRESSION => Box::new(expression(child)),
         _ => panic!(),
     }))
 }
@@ -35,8 +35,8 @@ fn statement(node: Ref<SNode>) -> ANode<AStatement> {
 pub fn expression(node: Ref<SNode>) -> ANode<AExpression> {
     let child = node.front(0);
     ANode::new(node, AExpression::new(match *child.element {
-        elements::controls::CONTROL       => Box::new(control(child)),
-        elements::jumps::JUMP             => Box::new(jump(child)),
+        elements::productions::STRUCTURE  => Box::new(structure(child)),
+        elements::expressions::JUMP       => Box::new(jump(child)),
         elements::expressions::LET        => Box::new(r#let(child)),
         elements::expressions::LITERAL    => Box::new(literal(child)),
         elements::expressions::CHAIN      => Box::new(chain(child)),
@@ -50,10 +50,6 @@ pub fn expression(node: Ref<SNode>) -> ANode<AExpression> {
 
 fn r#type(node: Ref<SNode>) -> ANode<AType> {
     ANode::new(node, AType::new(node.children().get(1).map(|child| expression(Ref::new(child)))))
-}
-
-fn name(node: Ref<SNode>) -> Option<Ref<str>> {
-    node.children().get(0).map(|child| token(Ref::new(child)))
 }
 
 fn literal(node: Ref<SNode>) -> ANode<ALiteral> {
@@ -89,23 +85,23 @@ fn identifier(node: Ref<SNode>) -> ANode<AIdentifier> {
     ANode::new(node, AIdentifier::new(node.text()))
 }
 
-fn structure(node: Ref<SNode>) -> ANode<AStructure> {
+fn definition(node: Ref<SNode>) -> ANode<ADefinition> {
     let child = node.front(0);
-    ANode::new(node, AStructure::new(match *child.element {
-        elements::structures::CLASS    => class(child),
-        elements::structures::FUNCTION => function(child),
+    ANode::new(node, ADefinition::new(match *child.element {
+        elements::definitions::CLASS    => class(child),
+        elements::definitions::FUNCTION => function(child),
         _ => panic!(),
     }))
 }
 
-fn control(node: Ref<SNode>) -> ANode<AControl> {
+fn structure(node: Ref<SNode>) -> ANode<AStructure> {
     let child = node.front(0);
-    ANode::new(node, AControl::new(match *child.element {
-        elements::controls::BLOCK => Box::new(block(child)),
-        elements::controls::IF    => Box::new(r#if(child)),
-        elements::controls::LOOP  => Box::new(r#loop(child)),
-        elements::controls::WHILE => Box::new(r#while(child)),
-        elements::controls::FOR   => Box::new(r#for(child)),
+    ANode::new(node, AStructure::new(match *child.element {
+        elements::structures::BLOCK => Box::new(block(child)),
+        elements::structures::IF    => Box::new(r#if(child)),
+        elements::structures::LOOP  => Box::new(r#loop(child)),
+        elements::structures::WHILE => Box::new(r#while(child)),
+        elements::structures::FOR   => Box::new(r#for(child)),
         _ => panic!(),
     }))
 }
@@ -139,8 +135,7 @@ fn declaration(node: Ref<SNode>) -> ANode<ADeclaration> {
 }
 
 fn jump(node: Ref<SNode>) -> ANode<AJump> {
-    let child = node.front(0);
-    ANode::new(node, AJump::new(token(child.front(0)), child.children().get(1).map(|child| expression(Ref::new(child)))))
+    ANode::new(node, AJump::new(token(node.front(0)), node.children().get(1).map(|child| expression(Ref::new(child)))))
 }
 
 fn generics(node: Ref<SNode>) -> Box<[Ref<str>]> {
@@ -150,7 +145,7 @@ fn generics(node: Ref<SNode>) -> Box<[Ref<str>]> {
         .collect()
 }
 
-fn class(node: Ref<SNode>) -> Box<ANode<dyn WStructure>> {
+fn class(node: Ref<SNode>) -> Box<ANode<dyn WDefinition>> {
     let name = Some(token(node.front(1)));
     let class = Box::new(ANode::new(node, AClass::new(name, r#type(node.back(4)), methods(node.back(2)))));
     if node.children().len() >= 7 {
@@ -160,13 +155,13 @@ fn class(node: Ref<SNode>) -> Box<ANode<dyn WStructure>> {
     }
 }
 
-fn methods(node: Ref<SNode>) -> Box<[Box<ANode<dyn WStructure>>]> {
+fn methods(node: Ref<SNode>) -> Box<[Box<ANode<dyn WDefinition>>]> {
     node.children().iter()
         .map(|child| function(Ref::new(child)))
         .collect()
 }
 
-fn function(node: Ref<SNode>) -> Box<ANode<dyn WStructure>> {
+fn function(node: Ref<SNode>) -> Box<ANode<dyn WDefinition>> {
     let name = Some(token(node.front(1)));
     let function = Box::new(ANode::new(node, AFunction::new(name, parameters(node.back(3)), r#type(node.back(2)), block(node.back(1)))));
     if node.children().len() >= 6 {

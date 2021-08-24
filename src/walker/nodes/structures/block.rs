@@ -2,7 +2,7 @@ use crate::runtime::engine::Engine;
 use crate::runtime::r#return::{ Flow, ReturnFlow };
 use crate::walker::ANode;
 use crate::walker::nodes::{ AExpression, AStatements };
-use crate::walker::traits::WControl;
+use crate::walker::traits::WStructure;
 
 pub struct ABlock {
     statements: ANode<AStatements>,
@@ -18,7 +18,7 @@ impl ABlock {
     }
 }
 
-impl WControl for ABlock {
+impl WStructure for ABlock {
     fn walk<'a>(&self, engine: &mut Engine<'a>) -> ReturnFlow<'a> {
         engine.run_scope(|engine| {
             jump_flow!(self.statements.get().walk(engine)?);

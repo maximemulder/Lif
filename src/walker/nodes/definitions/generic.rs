@@ -3,16 +3,16 @@ use crate::runtime::engine::Engine;
 use crate::runtime::primitives::GenericCode;
 use crate::runtime::r#return::ReturnReference;
 use crate::walker::ANode;
-use crate::walker::traits::WStructure;
+use crate::walker::traits::WDefinition;
 
 pub struct AGeneric {
     name: Option<Ref<str>>,
     parameters: Box<[Ref<str>]>,
-    node: Box<ANode<dyn WStructure>>,
+    node: Box<ANode<dyn WDefinition>>,
 }
 
 impl AGeneric {
-    pub fn new(name: Option<Ref<str>>, parameters: Box<[Ref<str>]>, node: Box<ANode<dyn WStructure>>) -> Self {
+    pub fn new(name: Option<Ref<str>>, parameters: Box<[Ref<str>]>, node: Box<ANode<dyn WDefinition>>) -> Self {
         Self {
             name,
             parameters,
@@ -21,7 +21,7 @@ impl AGeneric {
     }
 }
 
-impl WStructure for AGeneric {
+impl WDefinition for AGeneric {
     fn walk<'a>(&self, engine: &mut Engine<'a>) -> ReturnReference<'a> {
         let parameters = self.parameters.iter()
             .map(|parameter| Box::from(parameter.as_ref()))

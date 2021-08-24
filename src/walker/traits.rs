@@ -9,7 +9,7 @@ pub trait WStatement {
 	fn walk<'a>(&self, engine: &mut Engine<'a>) -> ReturnJump<'a>;
 }
 
-pub trait WStructure {
+pub trait WDefinition {
 	fn walk<'a>(&self, engine: &mut Engine<'a>) -> ReturnReference<'a>;
 }
 
@@ -17,7 +17,7 @@ pub trait WExpression {
 	fn walk<'a>(&self, engine: &mut Engine<'a>) -> ReturnFlow<'a>;
 }
 
-pub trait WControl {
+pub trait WStructure {
 	fn walk<'a>(&self, engine: &mut Engine<'a>) -> ReturnFlow<'a>;
 }
 

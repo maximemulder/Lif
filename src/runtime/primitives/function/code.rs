@@ -7,7 +7,7 @@ use crate::runtime::utilities::parameters::Parameters;
 use crate::runtime::value::Value;
 use crate::walker::ANode;
 use crate::walker::nodes::ABlock;
-use crate::walker::traits::WControl;
+use crate::walker::traits::WStructure;
 
 pub struct FunctionCode {
     block: Ref<ANode<ABlock>>,

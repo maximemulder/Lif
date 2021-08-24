@@ -4,16 +4,16 @@ use crate::runtime::primitives::Class;
 use crate::runtime::r#return::ReturnReference;
 use crate::walker::ANode;
 use crate::walker::nodes::AType;
-use crate::walker::traits::WStructure;
+use crate::walker::traits::WDefinition;
 
 pub struct AClass {
     name: Option<Ref<str>>,
     parent: ANode<AType>,
-    methods: Box<[Box<ANode<dyn WStructure>>]>,
+    methods: Box<[Box<ANode<dyn WDefinition>>]>,
 }
 
 impl AClass {
-    pub fn new(name: Option<Ref<str>>, parent: ANode<AType>, methods: Box<[Box<ANode<dyn WStructure>>]>) -> Self {
+    pub fn new(name: Option<Ref<str>>, parent: ANode<AType>, methods: Box<[Box<ANode<dyn WDefinition>>]>) -> Self {
         Self {
             name,
             parent,
@@ -22,7 +22,7 @@ impl AClass {
     }
 }
 
-impl WStructure for AClass {
+impl WDefinition for AClass {
     fn walk<'a>(&self, engine: &mut Engine<'a>) -> ReturnReference<'a> {
         let parent = self.parent.get().walk(engine)?.unwrap_or(engine.environment.object);
         let value = engine.new_class(Ref::as_option(&self.name), Some(parent), true);

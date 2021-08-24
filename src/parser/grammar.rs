@@ -105,34 +105,19 @@ pub fn get() -> Grammar {
         ( $element:expr ) => { ascents.define(AscentElement::new($element)) }
     }
 
-    let keyword_as              = descent_token!(&elements::keywords::AS);
-    let keyword_catch           = descent_token!(&elements::keywords::CATCH);
+    let keyword_break           = descent_token!(&elements::keywords::BREAK);
     let keyword_class           = descent_token!(&elements::keywords::CLASS);
-    let keyword_default         = descent_token!(&elements::keywords::DEFAULT);
-    let keyword_do              = descent_token!(&elements::keywords::DO);
+    let keyword_continue        = descent_token!(&elements::keywords::CONTINUE);
     let keyword_else            = descent_token!(&elements::keywords::ELSE);
-    let keyword_export          = descent_token!(&elements::keywords::EXPORT);
     let keyword_false           = descent_token!(&elements::keywords::FALSE);
-    let keyword_finally         = descent_token!(&elements::keywords::FINALLY);
     let keyword_for             = descent_token!(&elements::keywords::FOR);
-    let keyword_from            = descent_token!(&elements::keywords::FROM);
     let keyword_function        = descent_token!(&elements::keywords::FUNCTION);
     let keyword_if              = descent_token!(&elements::keywords::IF);
-    let keyword_import          = descent_token!(&elements::keywords::IMPORT);
     let keyword_in              = descent_token!(&elements::keywords::IN);
     let keyword_let             = descent_token!(&elements::keywords::LET);
     let keyword_loop            = descent_token!(&elements::keywords::LOOP);
-    let keyword_private         = descent_token!(&elements::keywords::PRIVATE);
-    let keyword_protected       = descent_token!(&elements::keywords::PROTECTED);
-    let keyword_public          = descent_token!(&elements::keywords::PUBLIC);
-    let keyword_continue        = descent_token!(&elements::keywords::CONTINUE);
-    let keyword_break           = descent_token!(&elements::keywords::BREAK);
     let keyword_return          = descent_token!(&elements::keywords::RETURN);
-    let keyword_static          = descent_token!(&elements::keywords::STATIC);
-    let keyword_then            = descent_token!(&elements::keywords::THEN);
-    let keyword_throw           = descent_token!(&elements::keywords::THROW);
     let keyword_true            = descent_token!(&elements::keywords::TRUE);
-    let keyword_try             = descent_token!(&elements::keywords::TRY);
     let keyword_while           = descent_token!(&elements::keywords::WHILE);
     let literal_integer        = descent_token!(&elements::literals::INTEGER);
     let literal_float          = descent_token!(&elements::literals::FLOAT);
@@ -195,15 +180,6 @@ pub fn get() -> Grammar {
     let symbol_semicolon        = descent_token!(&elements::symbols::SEMICOLON);
     let symbol_backslash        = descent_token!(&elements::symbols::BACKSLASH);
 
-    macro_rules! macro_jump {
-        ( $keyword:expr, $element:expr ) => {
-            descent_element!(
-                descent_sequence![$keyword, expression_option],
-                $element
-            )
-        }
-    }
-
     macro_rules! macro_binop {
         ( $child:expr, $tokens:expr ) => {{
             let ascent = ascents.declare();
@@ -217,7 +193,7 @@ pub fn get() -> Grammar {
                     ),
                     ascent_sequence![
                         ascent_element!(&elements::expressions::BINOP),
-                        ascent_element!(&elements::expressions::EXPRESSION),
+                        ascent_element!(&elements::productions::EXPRESSION),
                         ascent,
                     ],
                 ]
@@ -245,7 +221,7 @@ pub fn get() -> Grammar {
                     ),
                     ascent_sequence![
                         ascent_element!(&elements::expressions::ASSIGNMENT),
-                        ascent_element!(&elements::expressions::EXPRESSION),
+                        ascent_element!(&elements::productions::EXPRESSION),
                         ascent,
                     ],
                 ]
@@ -270,11 +246,6 @@ pub fn get() -> Grammar {
             ]
         }}
     }
-
-    let name = descent_element!(
-        descent_option!(literal_identifier),
-        &elements::productions::NAME
-    );
 
     let expressions = descent_element!(
         descent_option!(
@@ -306,17 +277,16 @@ pub fn get() -> Grammar {
     );
 
     let jump = descent_element!(
-        descent_choice![
-            macro_jump!(keyword_continue, &elements::jumps::CONTINUE),
-            macro_jump!(keyword_break,    &elements::jumps::BREAK),
-            macro_jump!(keyword_return,   &elements::jumps::RETURN),
+        descent_sequence![
+            descent_choice![keyword_continue, keyword_break, keyword_return],
+            expression_option,
         ],
-        &elements::jumps::JUMP
+        &elements::expressions::JUMP
     );
 
     let block = descent_element!(
         descent_sequence![symbol_brace_l, statements, expression_option, symbol_brace_r],
-        &elements::controls::BLOCK
+        &elements::structures::BLOCK
     );
 
     let r#if = descent_element!(
@@ -328,27 +298,27 @@ pub fn get() -> Grammar {
                 descent_sequence![keyword_else, block]
             ),
         ],
-        &elements::controls::IF
+        &elements::structures::IF
     );
 
     let r#loop = descent_element!(
         descent_sequence![keyword_loop, block],
-        &elements::controls::LOOP
+        &elements::structures::LOOP
     );
 
     let r#while = descent_element!(
         descent_sequence![keyword_while, expression, block],
-        &elements::controls::WHILE
+        &elements::structures::WHILE
     );
 
     let r#for = descent_element!(
         descent_sequence![keyword_for, literal_identifier, keyword_in, expression, block],
-        &elements::controls::FOR
+        &elements::structures::FOR
     );
 
-    let flow = descent_element!(
+    let structure = descent_element!(
         descent_choice![block, r#if, r#loop, r#while, r#for],
-        &elements::controls::CONTROL
+        &elements::productions::STRUCTURE
     );
 
     let generics = descent_option!(
@@ -405,33 +375,23 @@ pub fn get() -> Grammar {
     );
 
     let function = descent_element!(
-        descent_sequence![keyword_function, name, generics, parameters, r#type, block],
-        &elements::structures::FUNCTION
-    );
-
-    let function_named = descent_element!(
         descent_sequence![keyword_function, literal_identifier, generics, parameters, r#type, block],
-        &elements::structures::FUNCTION
+        &elements::definitions::FUNCTION
     );
 
     let methods = descent_element!(
-        descent_zero_or_more!(function_named),
+        descent_zero_or_more!(function),
         &elements::productions::METHODS
     );
 
     let class = descent_element!(
-        descent_sequence![keyword_class, name, generics, r#type, symbol_brace_l, methods, symbol_brace_r],
-        &elements::structures::CLASS
-    );
-
-    let class_named = descent_element!(
         descent_sequence![keyword_class, literal_identifier, generics, r#type, symbol_brace_l, methods, symbol_brace_r],
-        &elements::structures::CLASS
+        &elements::definitions::CLASS
     );
 
-    let structure = descent_element!(
-        descent_choice![class_named, function_named],
-        &elements::structures::STRUCTURE
+    let definition = descent_element!(
+        descent_choice![class, function],
+        &elements::definitions::DEFINITION
     );
 
     let preop = descent_element!(
@@ -443,8 +403,8 @@ pub fn get() -> Grammar {
     );
 
     let expression_core = descent_element!(
-        descent_choice![class, function, flow, jump, r#let, literal, preop],
-        &elements::expressions::EXPRESSION
+        descent_choice![structure, jump, r#let, literal, preop],
+        &elements::productions::EXPRESSION
     );
 
     let chain = ascent_sequence![
@@ -456,7 +416,7 @@ pub fn get() -> Grammar {
         ),
         ascent_sequence![
             ascent_element!(&elements::expressions::CHAIN),
-            ascent_element!(&elements::expressions::EXPRESSION),
+            ascent_element!(&elements::productions::EXPRESSION),
             extension,
         ],
     ];
@@ -470,7 +430,7 @@ pub fn get() -> Grammar {
         ),
         ascent_sequence![
             ascent_element!(&elements::expressions::SEQUENCE),
-            ascent_element!(&elements::expressions::EXPRESSION),
+            ascent_element!(&elements::productions::EXPRESSION),
             extension,
         ],
     ];
@@ -492,7 +452,7 @@ pub fn get() -> Grammar {
 
     let binop_2  = macro_binop!(binop_1, descent_choice![symbol_plus, symbol_minus]);
 
-    let binop_3  = macro_binop!(binop_2, descent_choice![symbol_guillemet_l_d, symbol_guillemet_r_d, symbol_guillemet_l_t, symbol_guillemet_l_t]);
+    let binop_3  = macro_binop!(binop_2, descent_choice![symbol_guillemet_l_d, symbol_guillemet_r_d, symbol_guillemet_l_t, symbol_guillemet_r_t]);
 
     let binop_4  = macro_binop!(binop_3, descent_choice![symbol_ampersand]);
 
@@ -523,8 +483,8 @@ pub fn get() -> Grammar {
 
     let statement = descent_element!(
         descent_choice![
+            descent_sequence![definition, no_semicolon],
             descent_sequence![structure, no_semicolon],
-            descent_sequence![flow, no_semicolon],
             descent_sequence![expression, symbol_semicolon],
         ],
         &elements::productions::STATEMENT

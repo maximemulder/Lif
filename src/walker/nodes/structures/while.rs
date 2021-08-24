@@ -2,7 +2,7 @@ use crate::runtime::engine::Engine;
 use crate::runtime::r#return::{ Flow, JumpType, ReturnFlow };
 use crate::walker::ANode;
 use crate::walker::nodes::{ ABlock, AExpression };
-use crate::walker::traits::WControl;
+use crate::walker::traits::WStructure;
 
 pub struct AWhile {
     condition: ANode<AExpression>,
@@ -18,7 +18,7 @@ impl AWhile {
     }
 }
 
-impl WControl for AWhile {
+impl WStructure for AWhile {
     fn walk<'a>(&self, engine: &mut Engine<'a>) -> ReturnFlow<'a> {
         let mut elements = Vec::new();
         while {

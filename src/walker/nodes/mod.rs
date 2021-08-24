@@ -42,25 +42,27 @@ macro_rules! flow_loop {
     }
 }}
 
-mod controls;
+mod definitions;
 mod expressions;
-mod structures;
 mod literals;
+mod structures;
 mod program;
 mod statements;
 mod statement;
+mod definition;
 mod structure;
 mod expression;
 mod declaration;
 mod r#type;
 
-pub use controls::*;
+pub use definitions::*;
 pub use expressions::*;
 pub use literals::*;
 pub use structures::*;
 pub use program::AProgram;
 pub use statements::AStatements;
 pub use statement::AStatement;
+pub use definition::ADefinition;
 pub use structure::AStructure;
 pub use expression::AExpression;
 pub use declaration::ADeclaration;
