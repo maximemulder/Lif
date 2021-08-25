@@ -11,8 +11,8 @@ impl Tagger {
         }
     }
 
-    pub fn generate(&mut self, name: Option<&str>) -> Tag {
-        let tag = Tag::new(self.index, name.map(Box::from));
+    pub fn generate(&mut self, name: &str) -> Tag {
+        let tag = Tag::new(self.index, Box::from(name));
         self.index += 1;
         tag
     }
@@ -21,32 +21,28 @@ impl Tagger {
 #[derive(Clone)]
 pub struct Tag {
     index: usize,
-    name: Option<Box<str>>,
+    name: Box<str>,
 }
 
 impl Tag {
-    fn new(index: usize, name: Option<Box<str>>) -> Self {
+    fn new(index: usize, name: Box<str>) -> Self {
         Self {
             index,
             name,
         }
     }
 
-    pub fn get_index(&self) -> usize {
+    pub fn index(&self) -> usize {
         self.index
     }
 
-    pub fn get_name(&self) -> Option<&str> {
-        self.name.as_ref().map(Box::as_ref)
+    pub fn name(&self) -> &str {
+        &self.name
     }
 }
 
 impl fmt::Display for Tag {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        if let Some(name) = self.name.as_ref() {
-            write!(f, "{}", name)?;
-        }
-
-        write!(f, "#{}", self.index)
+        write!(f, "{}#{}", self.name, self.index)
     }
 }

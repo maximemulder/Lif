@@ -26,7 +26,7 @@ impl<'a> Engine<'a> {
         self.new_array_value(self.environment.array_any, elements)
     }
 
-    pub fn new_class_value(&mut self, name: Option<&str>, parent: Option<GcRef<Class<'a>>>, gc: bool) -> Value<'a> {
+    pub fn new_class_value(&mut self, name: &str, parent: Option<GcRef<Class<'a>>>, gc: bool) -> Value<'a> {
         let tag = self.taggers.classes.generate(name);
         self.run_source_scope("__class__", |engine, scope| {
             Value::alloc_primitive(engine, Class::new(tag, scope, parent, gc))
@@ -34,7 +34,7 @@ impl<'a> Engine<'a> {
     }
 
     pub fn new_function_value(&mut self,
-        name: Option<&str>, parameters: Parameters<'a>, r#return: Option<GcRef<Class<'a>>>, implementation: impl FunctionImplementation<'a> + 'a
+        name: &str, parameters: Parameters<'a>, r#return: Option<GcRef<Class<'a>>>, implementation: impl FunctionImplementation<'a> + 'a
     ) -> Value<'a> {
         let tag = self.taggers.functions.generate(name);
         self.run_source_scope("__function__", |engine, scope| {
@@ -42,7 +42,7 @@ impl<'a> Engine<'a> {
         })
     }
 
-    pub fn new_generic_value(&mut self, name: Option<&str>, parameters: Box<[Box<str>]>, implementation: impl GenericImplementation<'a> + 'a) -> Value<'a> {
+    pub fn new_generic_value(&mut self, name: &str, parameters: Box<[Box<str>]>, implementation: impl GenericImplementation<'a> + 'a) -> Value<'a> {
         let tag = self.taggers.generics.generate(name);
         self.run_source_scope("__generic__", |engine, scope| {
             Value::alloc_primitive(engine, Generic::new(tag, scope, parameters, implementation))
@@ -91,19 +91,19 @@ impl<'a> Engine<'a> {
         self.new_array(self.environment.array_any, elements)
     }
 
-    pub fn new_class(&mut self, name: Option<&str>, parent: Option<GcRef<Class<'a>>>, gc: bool) -> GcReference<'a> {
+    pub fn new_class(&mut self, name: &str, parent: Option<GcRef<Class<'a>>>, gc: bool) -> GcReference<'a> {
         let value = self.new_class_value(name, parent, gc);
         self.new_constant(value)
     }
 
     pub fn new_function(&mut self,
-        name: Option<&str>, parameters: Parameters<'a>, r#return: Option<GcRef<Class<'a>>>, implementation: impl FunctionImplementation<'a> + 'a
+        name: &str, parameters: Parameters<'a>, r#return: Option<GcRef<Class<'a>>>, implementation: impl FunctionImplementation<'a> + 'a
     ) -> GcReference<'a> {
        let value = self.new_function_value(name, parameters, r#return, implementation);
         self.new_constant(value)
     }
 
-    pub fn new_generic(&mut self, name: Option<&str>, parameters: Box<[Box<str>]>, implementation: impl GenericImplementation<'a> + 'a) -> GcReference<'a> {
+    pub fn new_generic(&mut self, name: &str, parameters: Box<[Box<str>]>, implementation: impl GenericImplementation<'a> + 'a) -> GcReference<'a> {
         let value = self.new_generic_value(name, parameters, implementation);
         self.new_constant(value)
     }

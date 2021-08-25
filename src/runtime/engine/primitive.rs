@@ -16,11 +16,11 @@ fn create_parameters<'a>(parameters: &[(&str, GcRef<Class<'a>>)], rest: Option<(
 
 impl<'a> Engine<'a> {
     pub fn primitive_class(&mut self, name: &str, parent: Option<GcRef<Class<'a>>>, gc: bool) -> GcRef<Class<'a>> {
-        self.new_class_value(Some(name), parent, gc).get_unchecked::<GcRef<Class>>()
+        self.new_class_value(name, parent, gc).get_unchecked::<GcRef<Class>>()
     }
 
     pub fn primitive_origin_class(&mut self, name: &str, parent: Option<GcRef<Class<'a>>>, gc: bool) -> GcRef<Class<'a>> {
-        let tag = self.taggers.classes.generate(Some(name));
+        let tag = self.taggers.classes.generate(name);
         let class = self.run_scope(|engine| {
             engine.alloc(Class::new(tag, engine.scope, parent, gc))
         });
@@ -30,7 +30,7 @@ impl<'a> Engine<'a> {
     }
 
     pub fn primitive_generic(&mut self, name: &str, parameters: Box<[Box<str>]>, implementation: impl GenericImplementation<'a> + 'a) -> GcRef<Generic<'a>> {
-        self.new_generic_value(Some(name), parameters, implementation).get_gc::<Generic>(self)
+        self.new_generic_value(name, parameters, implementation).get_gc::<Generic>(self)
     }
 
     pub fn populate_class(&mut self, name: &str, class: GcRef<Class<'a>>) {
@@ -46,7 +46,7 @@ impl<'a> Engine<'a> {
     pub fn primitive_function<const N: usize>(
         &mut self, name: &str, parameters: [(&str, GcRef<Class<'a>>); N], rest: Option<(&str, GcRef<Class<'a>>)>, r#return: Option<GcRef<Class<'a>>>, callback: &'a Callable<'a>
     ) {
-        let primitive = self.new_function(Some(name), create_parameters(&parameters, rest), r#return, FunctionPrimitive::new(callback));
+        let primitive = self.new_function(name, create_parameters(&parameters, rest), r#return, FunctionPrimitive::new(callback));
         self.set_variable(name, primitive);
     }
 
@@ -57,7 +57,7 @@ impl<'a> Engine<'a> {
         elements.push(("self", class));
         elements.extend_from_slice(&parameters);
         let primitive = self.run_frame(class.scope(), |engine| {
-            engine.new_function_value(Some(&name), create_parameters(&elements, rest), r#return, FunctionPrimitive::new(callback))
+            engine.new_function_value(&name, create_parameters(&elements, rest), r#return, FunctionPrimitive::new(callback))
         });
 
         class.set_method(name, primitive);
@@ -67,7 +67,7 @@ impl<'a> Engine<'a> {
         &mut self, mut class: GcRef<Class<'a>>, name: &str, parameters: [(&str, GcRef<Class<'a>>); N], rest: Option<(&str, GcRef<Class<'a>>)>, r#return: Option<GcRef<Class<'a>>>, callback: &'a Callable<'a>
     ) {
         let primitive = self.run_frame(class.scope(), |engine| {
-            engine.new_function_value(Some(&name), create_parameters(&parameters, rest), r#return, FunctionPrimitive::new(callback))
+            engine.new_function_value(&name, create_parameters(&parameters, rest), r#return, FunctionPrimitive::new(callback))
         });
 
         class.set_static(name, self.new_constant(primitive));

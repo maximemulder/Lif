@@ -38,6 +38,6 @@ impl WDefinition for AFunction {
     fn walk<'a>(&self, engine: &mut Engine<'a>) -> ReturnReference<'a> {
         let parameters = self.parameters.get().walk(engine)?;
         let r#return = self.r#return.get().walk(engine)?;
-        Ok(engine.new_function(Some(&self.name), parameters, r#return, FunctionCode::new(Ref::new(&self.block))))
+        Ok(engine.new_function(&self.name, parameters, r#return, FunctionCode::new(Ref::new(&self.block))))
     }
 }

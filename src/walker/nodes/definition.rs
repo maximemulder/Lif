@@ -20,12 +20,12 @@ impl ADefinition {
 impl WStatement for ADefinition {
     fn walk<'a>(&self, engine: &mut Engine<'a>) -> ReturnJump<'a> {
         let definition = if let Some(generics) = self.definition.get().generics().get().build() {
-            engine.new_generic(Some(self.definition.get().name()), generics, GenericCode::new(Ref::new(self.definition.as_ref())))
+            engine.new_generic(self.definition.get().name(), generics, GenericCode::new(Ref::new(self.definition.as_ref())))
         } else {
             self.definition.get().walk(engine)?
         };
 
-        engine.set_variable(definition.read()?.get_tag(engine).get_name().unwrap(), definition);
+        engine.set_variable(self.definition.get().name(), definition);
         Jump::none()
     }
 }
