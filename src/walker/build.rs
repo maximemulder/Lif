@@ -3,7 +3,6 @@ use crate::parser::SNode;
 use crate::parser::elements;
 use crate::walker::ANode;
 use crate::walker::nodes::*;
-use crate::walker::traits::*;
 
 use std::marker::Unsize;
 
@@ -25,7 +24,7 @@ fn statements(node: Ref<SNode>) -> ANode<AStatements> {
 fn statement(node: Ref<SNode>) -> ANode<AStatement> {
     let child = node.front(0);
     ANode::new(node, AStatement::new(match *child.element {
-        elements::definitions::DEFINITION => Box::new(definition(child)),
+        elements::productions::DEFINITION => Box::new(definition(child)),
         elements::productions::STRUCTURE  => Box::new(structure(child)),
         elements::productions::EXPRESSION => Box::new(expression(child)),
         _ => panic!(),
@@ -88,8 +87,8 @@ fn identifier(node: Ref<SNode>) -> ANode<AIdentifier> {
 fn definition(node: Ref<SNode>) -> ANode<ADefinition> {
     let child = node.front(0);
     ANode::new(node, ADefinition::new(match *child.element {
-        elements::definitions::CLASS    => class(child),
-        elements::definitions::FUNCTION => function(child),
+        elements::definitions::CLASS    => Box::new(class(child)),
+        elements::definitions::FUNCTION => Box::new(function(child)),
         _ => panic!(),
     }))
 }
@@ -138,50 +137,48 @@ fn jump(node: Ref<SNode>) -> ANode<AJump> {
     ANode::new(node, AJump::new(token(node.front(0)), node.children().get(1).map(|child| expression(Ref::new(child)))))
 }
 
-fn generics(node: Ref<SNode>) -> Box<[Ref<str>]> {
-    node.front(1).children().iter()
-        .step_by(2)
-        .map(|child| token(Ref::new(child)))
-        .collect()
-}
-
-fn class(node: Ref<SNode>) -> Box<ANode<dyn WDefinition>> {
-    let name = Some(token(node.front(1)));
-    let class = Box::new(ANode::new(node, AClass::new(name, r#type(node.back(4)), methods(node.back(2)))));
-    if node.children().len() >= 7 {
-        Box::new(ANode::new(node, AGeneric::new(name, generics(node.front(2)), class)))
+fn generics(node: Ref<SNode>) -> ANode<AGenerics> {
+    ANode::new(node, AGenerics::new(if let Some(child) = node.children().get(1) {
+        child.children().iter()
+            .step_by(2)
+            .map(|child| token(Ref::new(child)))
+            .collect()
     } else {
-        class
-    }
+        Box::new([])
+    }))
 }
 
-fn methods(node: Ref<SNode>) -> Box<[Box<ANode<dyn WDefinition>>]> {
+fn class(node: Ref<SNode>) -> ANode<AClass> {
+    ANode::new(node, AClass::new(
+        token(node.front(1)),
+        generics(node.front(2)),
+        r#type(node.back(4)),
+        methods(node.back(2))
+    ))
+}
+
+fn methods(node: Ref<SNode>) -> Box<[ANode<AFunction>]> {
     node.children().iter()
         .map(|child| function(Ref::new(child)))
         .collect()
 }
 
-fn function(node: Ref<SNode>) -> Box<ANode<dyn WDefinition>> {
-    let name = Some(token(node.front(1)));
-    let function = Box::new(ANode::new(node, AFunction::new(name, parameters(node.back(3)), r#type(node.back(2)), block(node.back(1)))));
-    if node.children().len() >= 6 {
-        Box::new(ANode::new(node, AGeneric::new(name, generics(node.front(2)), function)))
-    } else {
-        function
-    }
+fn function(node: Ref<SNode>) -> ANode<AFunction> {
+    ANode::new(node, AFunction::new(
+        token(node.front(1)),
+        generics(node.front(2)),
+        parameters(node.front(3)),
+        r#type(node.front(4)),
+        block(node.front(5))
+    ))
 }
 
 fn rest(node: Ref<SNode>) -> Option<ANode<ADeclaration>> {
     node.children().get(1).map(|child| declaration(Ref::new(child)))
 }
 
-fn parameters(node: Ref<SNode>) -> (Box<[ANode<ADeclaration>]>, Option<ANode<ADeclaration>>) {
-    let parameters = node.front(1).children().iter()
-        .step_by(2)
-        .map(|child| declaration(Ref::new(child)))
-        .collect();
-
-    (parameters, rest(node.back(2)))
+fn parameters(node: Ref<SNode>) -> ANode<AParameters> {
+    ANode::new(node, AParameters::new(node.front(1).children().iter().step_by(2).map(|child| declaration(Ref::new(child))).collect(), rest(node.back(2))))
 }
 
 fn chain(node: Ref<SNode>) -> ANode<AChain> {

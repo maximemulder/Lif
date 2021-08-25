@@ -321,8 +321,8 @@ pub fn get() -> Grammar {
         &elements::productions::STRUCTURE
     );
 
-    let generics = descent_option!(
-        descent_element!(
+    let generics = descent_element!(
+        descent_option!(
             descent_sequence![
                 symbol_crotchet_l,
                 descent_element!(
@@ -330,9 +330,9 @@ pub fn get() -> Grammar {
                     &elements::productions::GENERICS_LIST
                 ),
                 symbol_crotchet_r,
-            ],
-            &elements::productions::GENERICS
-        )
+            ]
+        ),
+        &elements::productions::GENERICS
     );
 
     let rest = descent_element!(
@@ -391,7 +391,7 @@ pub fn get() -> Grammar {
 
     let definition = descent_element!(
         descent_choice![class, function],
-        &elements::definitions::DEFINITION
+        &elements::productions::DEFINITION
     );
 
     let preop = descent_element!(

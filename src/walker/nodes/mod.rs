@@ -52,6 +52,8 @@ mod statement;
 mod definition;
 mod structure;
 mod expression;
+mod generics;
+mod parameters;
 mod declaration;
 mod r#type;
 
@@ -65,5 +67,7 @@ pub use statement::AStatement;
 pub use definition::ADefinition;
 pub use structure::AStructure;
 pub use expression::AExpression;
+pub use generics::AGenerics;
+pub use parameters::AParameters;
 pub use declaration::ADeclaration;
 pub use r#type::AType;

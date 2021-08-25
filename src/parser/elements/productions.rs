@@ -3,6 +3,7 @@ use crate::parser::Element;
 declare_node!(PROGRAM);
 declare_node!(STATEMENTS);
 declare_node!(STATEMENT);
+declare_node!(DEFINITION);
 declare_node!(STRUCTURE);
 declare_node!(EXPRESSION);
 declare_node!(DECLARATION);
