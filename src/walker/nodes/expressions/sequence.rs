@@ -1,20 +1,21 @@
 use crate::memory::Ref;
+use crate::parser::CNode;
 use crate::runtime::engine::Engine;
 use crate::runtime::r#return::{ Flow, ReturnFlow };
-use crate::walker::ANode;
+use crate::walker::{ ANode, SNode };
 use crate::walker::nodes::AExpression;
 use crate::walker::traits::WExpression;
 
 use std::ops::Deref;
 
 pub struct ASequence {
-    expression:  ANode<AExpression>,
-    expressions: Box<[ANode<AExpression>]>,
+    expression:  SNode<AExpression>,
+    expressions: Box<[SNode<AExpression>]>,
     operator:    Ref<str>,
 }
 
 impl ASequence {
-    pub fn new(expression: ANode<AExpression>, open: Ref<str>, expressions: Box<[ANode<AExpression>]>) -> Self {
+    pub fn new(expression: SNode<AExpression>, open: Ref<str>, expressions: Box<[SNode<AExpression>]>) -> Self {
         Self {
             expression,
             expressions,
@@ -24,6 +25,19 @@ impl ASequence {
                 _ => panic!(),
             })
         }
+    }
+}
+
+impl ANode for ASequence {
+    fn build(node: Ref<CNode>) -> Self {
+        Self::new(
+            SNode::build(node.front(0)),
+            node.front(1).text(),
+            node.front(2).children().iter()
+                .step_by(2)
+                .map(|child| SNode::build(Ref::new(child)))
+                .collect(),
+        )
     }
 }
 

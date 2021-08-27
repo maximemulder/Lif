@@ -1,47 +1,58 @@
 use crate::memory::Ref;
+use crate::parser::CNode;
+use crate::parser::elements;
 use crate::runtime::engine::Engine;
 use crate::runtime::r#return::{ Flow, ReturnFlow };
-use crate::walker::ANode;
+use crate::walker::{ ANode, SNode };
 use crate::walker::nodes::AExpression;
 use crate::walker::traits::WExpression;
 
 use std::ops::Deref;
 
 pub struct ABinop {
-    left:     ANode<AExpression>,
-    right:    ANode<AExpression>,
+    left:     SNode<AExpression>,
     operator: Ref<str>,
+    right:    SNode<AExpression>,
 }
 
 impl ABinop {
-    pub fn new(left: ANode<AExpression>, operator: Ref<str>, right: ANode<AExpression>) -> Self {
+    pub fn new(left: SNode<AExpression>, operator: Ref<str>, right: SNode<AExpression>) -> Self {
         Self {
             left,
+            operator,
             right,
-            operator: Ref::new(match operator.deref() {
-                "=="  => "__eq__",
-                "!="  => "__ne__",
-                "<"   => "__lt__",
-                ">"   => "__gt__",
-                "<="  => "__le__",
-                ">="  => "__ge__",
-                "&&"  => "__and__",
-                "||"  => "__or__",
-                "+"   => "__add__",
-                "-"   => "__sub__",
-                "*"   => "__mul__",
-                "/"   => "__div__",
-                "%"   => "__rem__",
-                "&"   => "__band__",
-                "|"   => "__bor__",
-                "^"   => "__bxor__",
-                "<<"  => "__bls__",
-                ">>"  => "__brs__",
-                "<<<" => "__bcls__",
-                ">>>" => "__bcrs__",
-                _     => panic!(),
-            }),
         }
+    }
+}
+
+impl ANode for ABinop {
+    fn build(node: Ref<CNode>) -> Self {
+        Self::new(SNode::build(
+            node.front(0)),
+            Ref::new(match node.front(1).element {
+                &elements::symbols::EQUAL_D        => "__eq__",
+                &elements::symbols::EXCLAMATION_EQ => "__ne__",
+                &elements::symbols::GUILLEMET_L    => "__lt__",
+                &elements::symbols::GUILLEMET_R    => "__gt__",
+                &elements::symbols::GUILLEMET_L_EQ => "__le__",
+                &elements::symbols::GUILLEMET_R_EQ => "__ge__",
+                &elements::symbols::AMPERSAND_D    => "__and__",
+                &elements::symbols::PIPE_D         => "__or__",
+                &elements::symbols::PLUS           => "__add__",
+                &elements::symbols::MINUS          => "__sub__",
+                &elements::symbols::ASTERISK       => "__mul__",
+                &elements::symbols::SLASH          => "__div__",
+                &elements::symbols::PERCENT        => "__rem__",
+                &elements::symbols::AMPERSAND      => "__band__",
+                &elements::symbols::PIPE           => "__bor__",
+                &elements::symbols::CARET          => "__bxor__",
+                &elements::symbols::GUILLEMET_L_D  => "__bls__",
+                &elements::symbols::GUILLEMET_R_D  => "__brs__",
+                &elements::symbols::GUILLEMET_L_T  => "__bcls__",
+                &elements::symbols::GUILLEMET_R_T  => "__bcrs__",
+                _ => panic!(),
+            }),
+            SNode::build(node.front(2)))
     }
 }
 

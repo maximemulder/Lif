@@ -1,18 +1,20 @@
+use crate::memory::Ref;
+use crate::parser::CNode;
 use crate::runtime::engine::Engine;
 use crate::runtime::error::Error;
 use crate::runtime::r#return::Return;
 use crate::runtime::utilities::parameters::Parameters;
-use crate::walker::ANode;
+use crate::walker::{ ANode, SNode };
 use crate::walker::nodes::ADeclaration;
 
 
 pub struct AParameters {
-    parameters: Box<[ANode<ADeclaration>]>,
-    rest: Option<ANode<ADeclaration>>,
+    parameters: Box<[SNode<ADeclaration>]>,
+    rest: Option<SNode<ADeclaration>>,
 }
 
 impl AParameters {
-    pub fn new(parameters: Box<[ANode<ADeclaration>]>, rest: Option<ANode<ADeclaration>>) -> Self {
+    pub fn new(parameters: Box<[SNode<ADeclaration>]>, rest: Option<SNode<ADeclaration>>) -> Self {
         Self {
             parameters,
             rest,
@@ -36,6 +38,18 @@ impl AParameters {
         }).transpose()?;
 
         Ok(Parameters::new(parameters, rest))
+    }
+}
+
+impl ANode for AParameters {
+    fn build(node: Ref<CNode>) -> Self {
+        Self::new(
+            node.front(1).children().iter()
+                .step_by(2)
+                .map(|child| SNode::build(Ref::new(child)))
+                .collect(),
+            node.back(2).children().get(1).map(|child| SNode::build(Ref::new(child))),
+        )
     }
 }
 

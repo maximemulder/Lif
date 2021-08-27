@@ -1,9 +1,9 @@
-use crate::parser::{ Element, Parse, SNode };
+use crate::parser::{ CNode, Element, Parse };
 use crate::parser::arena::ArenaRef;
 use crate::parser::descent::Descent;
 
 pub trait Ascent {
-    fn ascent(&self, parse: &mut Parse, nodes: Vec<SNode>) -> Option<Vec<SNode>>;
+    fn ascent(&self, parse: &mut Parse, nodes: Vec<CNode>) -> Option<Vec<CNode>>;
 }
 
 pub struct AscentDescent {
@@ -19,7 +19,7 @@ impl AscentDescent {
 }
 
 impl Ascent for AscentDescent {
-    fn ascent(&self, parse: &mut Parse, nodes: Vec<SNode>) -> Option<Vec<SNode>> {
+    fn ascent(&self, parse: &mut Parse, nodes: Vec<CNode>) -> Option<Vec<CNode>> {
         parse.descent(self.descent).map(|others| nodes.into_iter().chain(others).collect())
     }
 }
@@ -37,7 +37,7 @@ impl AscentChoice {
 }
 
 impl Ascent for AscentChoice {
-    fn ascent(&self, parse: &mut Parse, nodes: Vec<SNode>) -> Option<Vec<SNode>> {
+    fn ascent(&self, parse: &mut Parse, nodes: Vec<CNode>) -> Option<Vec<CNode>> {
         self.ascents.iter()
             .copied()
             .find_map(|ascent| parse.ascent(ascent, nodes.clone()))
@@ -57,7 +57,7 @@ impl AscentSequence {
 }
 
 impl Ascent for AscentSequence {
-    fn ascent(&self, parse: &mut Parse, nodes: Vec<SNode>) -> Option<Vec<SNode>> {
+    fn ascent(&self, parse: &mut Parse, nodes: Vec<CNode>) -> Option<Vec<CNode>> {
         self.ascents.iter()
             .copied()
             .fold(Some(nodes), |nodes, ascent| parse.ascent(ascent, nodes?))
@@ -77,7 +77,7 @@ impl AscentOption {
 }
 
 impl Ascent for AscentOption {
-    fn ascent(&self, parse: &mut Parse, nodes: Vec<SNode>) -> Option<Vec<SNode>> {
+    fn ascent(&self, parse: &mut Parse, nodes: Vec<CNode>) -> Option<Vec<CNode>> {
         parse.ascent(self.ascent, nodes.clone()).or(Some(nodes))
     }
 }
@@ -95,7 +95,7 @@ impl AscentElement {
 }
 
 impl Ascent for AscentElement {
-    fn ascent(&self, parse: &mut Parse, nodes: Vec<SNode>) -> Option<Vec<SNode>> {
-        Some(vec![SNode::new_production(parse.code, self.element, nodes.into_boxed_slice())])
+    fn ascent(&self, parse: &mut Parse, nodes: Vec<CNode>) -> Option<Vec<CNode>> {
+        Some(vec![CNode::new_production(parse.code, self.element, nodes.into_boxed_slice())])
     }
 }

@@ -1,21 +1,28 @@
 use crate::memory::Ref;
+use crate::parser::CNode;
 use crate::runtime::engine::Engine;
 use crate::runtime::r#return::{ Flow, ReturnFlow };
-use crate::walker::ANode;
+use crate::walker::{ ANode, SNode };
 use crate::walker::nodes::AExpression;
 use crate::walker::traits::WExpression;
 
 pub struct AChain {
-    expression: ANode<AExpression>,
+    expression: SNode<AExpression>,
     member:     Ref<str>,
 }
 
 impl AChain {
-    pub fn new(expression: ANode<AExpression>, member: Ref<str>) -> Self {
+    pub fn new(expression: SNode<AExpression>, member: Ref<str>) -> Self {
         Self {
             expression,
             member,
         }
+    }
+}
+
+impl ANode for AChain {
+    fn build(node: Ref<CNode>) -> Self {
+        Self::new(SNode::build(node.front(0)), node.front(2).text())
     }
 }
 

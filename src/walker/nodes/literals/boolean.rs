@@ -1,23 +1,30 @@
 use crate::memory::Ref;
+use crate::parser::CNode;
+use crate::parser::elements;
 use crate::runtime::engine::Engine;
 use crate::runtime::r#return::ReturnReference;
+use crate::walker::ANode;
 use crate::walker::traits::WLiteral;
-
-use std::ops::Deref;
 
 pub struct ABoolean {
     boolean: bool,
 }
 
 impl ABoolean {
-    pub fn new(boolean: Ref<str>) -> Self {
+    pub fn new(boolean: bool) -> Self {
         Self {
-            boolean: match boolean.deref() {
-                "true"  => true,
-                "false" => false,
-                _ => panic!(),
-            }
+            boolean,
         }
+    }
+}
+
+impl ANode for ABoolean {
+    fn build(node: Ref<CNode>) -> Self {
+        Self::new(match node.element {
+            &elements::keywords::TRUE => true,
+            &elements::keywords::FALSE => false,
+            _ => panic!(),
+        })
     }
 }
 

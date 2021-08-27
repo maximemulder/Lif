@@ -1,6 +1,8 @@
 use crate::memory::Ref;
+use crate::parser::CNode;
 use crate::runtime::engine::Engine;
 use crate::runtime::r#return::ReturnReference;
+use crate::walker::ANode;
 use crate::walker::traits::WLiteral;
 
 pub struct AFloat {
@@ -8,11 +10,16 @@ pub struct AFloat {
 }
 
 impl AFloat {
-    pub fn new(float: Ref<str>) -> Self {
-        let string = float.replace("_", "");
+    pub fn new(float: f64) -> Self {
         Self {
-            float: string.parse::<f64>().unwrap(),
+            float,
         }
+    }
+}
+
+impl ANode for AFloat {
+    fn build(node: Ref<CNode>) -> Self {
+        Self::new(node.text().replace("_", "").parse::<f64>().unwrap())
     }
 }
 

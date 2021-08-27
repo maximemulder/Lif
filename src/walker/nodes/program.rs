@@ -1,18 +1,26 @@
+use crate::memory::Ref;
+use crate::parser::CNode;
 use crate::runtime::engine::Engine;
 use crate::runtime::r#return::{ Jump, ReturnReference };
-use crate::walker::ANode;
+use crate::walker::{ ANode, SNode };
 use crate::walker::nodes::AStatements;
 use crate::walker::traits::WExecutable;
 
 pub struct AProgram {
-    statements: ANode<AStatements>,
+    statements: SNode<AStatements>,
 }
 
 impl AProgram {
-    pub fn new(statements: ANode<AStatements>) -> Self {
+    pub fn new(statements: SNode<AStatements>) -> Self {
         Self {
             statements,
         }
+    }
+}
+
+impl ANode for AProgram {
+    fn build(node: Ref<CNode>) -> Self {
+        Self::new(SNode::build(node.front(0)))
     }
 }
 

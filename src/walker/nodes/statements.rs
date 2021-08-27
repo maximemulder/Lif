@@ -1,14 +1,16 @@
+use crate::memory::Ref;
+use crate::parser::CNode;
 use crate::runtime::engine::Engine;
 use crate::runtime::r#return::{ Jump, ReturnJump };
-use crate::walker::ANode;
+use crate::walker::{ ANode, SNode };
 use crate::walker::nodes::AStatement;
 
 pub struct AStatements {
-    statements: Box<[ANode<AStatement>]>,
+    statements: Box<[SNode<AStatement>]>,
 }
 
 impl AStatements {
-    pub fn new(statements: Box<[ANode<AStatement>]>) -> Self {
+    pub fn new(statements: Box<[SNode<AStatement>]>) -> Self {
         Self {
             statements,
         }
@@ -20,5 +22,14 @@ impl AStatements {
         }
 
         Jump::none()
+    }
+}
+
+impl ANode for AStatements {
+    fn build(node: Ref<CNode>) -> Self {
+        Self::new(node.children().iter()
+            .map(|child| SNode::build(Ref::new(child)))
+            .collect()
+        )
     }
 }

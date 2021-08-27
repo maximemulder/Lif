@@ -1,20 +1,31 @@
+use crate::memory::Ref;
+use crate::parser::CNode;
 use crate::runtime::engine::Engine;
 use crate::runtime::r#return::{ Flow, ReturnFlow };
-use crate::walker::ANode;
+use crate::walker::{ ANode, SNode };
 use crate::walker::nodes::{ AExpression, AStatements };
 use crate::walker::traits::WStructure;
 
 pub struct ABlock {
-    statements: ANode<AStatements>,
-    expression: Option<ANode<AExpression>>,
+    statements: SNode<AStatements>,
+    expression: Option<SNode<AExpression>>,
 }
 
 impl ABlock {
-    pub fn new(statements: ANode<AStatements>, expression: Option<ANode<AExpression>>) -> Self {
+    pub fn new(statements: SNode<AStatements>, expression: Option<SNode<AExpression>>) -> Self {
         Self {
             statements,
             expression,
         }
+    }
+}
+
+impl ANode for ABlock {
+    fn build(node: Ref<CNode>) -> Self {
+        Self::new(
+            SNode::build(node.front(1)),
+            (node.children().len() == 4).then(|| SNode::build(node.front(2)))
+        )
     }
 }
 

@@ -21,7 +21,7 @@ mod tests;
 
 use parser::Code;
 use runtime::engine::Engine;
-use walker::build;
+use walker::nodes::AProgram;
 
 use std::env::args;
 use std::io::{ stderr, stdin, stdout };
@@ -38,6 +38,6 @@ fn main() {
     let mut output = stdout();
     let mut error  = stderr();
     let mut engine = Engine::new(&parser, &mut input, &mut output, &mut error);
-    let code = Code::from_file(engine.grammar, engine.grammar.program, build::traitify(build::program), &args[1]).unwrap();
+    let code = Code::from_file::<AProgram>(engine.grammar, engine.grammar.program, &args[1]).unwrap();
     engine.run(code);
 }

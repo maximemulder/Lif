@@ -1,6 +1,8 @@
 use crate::memory::Ref;
+use crate::parser::CNode;
 use crate::runtime::engine::Engine;
 use crate::runtime::r#return::ReturnReference;
+use crate::walker::ANode;
 use crate::walker::traits::WLiteral;
 
 pub struct AString {
@@ -10,8 +12,15 @@ pub struct AString {
 impl AString {
     pub fn new(string: Ref<str>) -> Self {
         Self {
-            string: Ref::new(&string[1 .. string.len() - 1]),
+            string,
         }
+    }
+}
+
+impl ANode for AString {
+    fn build(node: Ref<CNode>) -> Self {
+        let string = node.text();
+        Self::new(Ref::new(&string[1 .. string.len() - 1]))
     }
 }
 

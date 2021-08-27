@@ -1,7 +1,7 @@
 use crate::memory::Ref;
-use crate::parser::{ Element, SNode };
+use crate::parser::{ Element, CNode };
 
-pub fn tokens(nodes: &[SNode]) {
+pub fn tokens(nodes: &[CNode]) {
     for node in nodes {
         let children = node.children();
         if children.is_empty() {
@@ -12,11 +12,11 @@ pub fn tokens(nodes: &[SNode]) {
     }
 }
 
-pub fn tree(tree: &SNode) {
+pub fn tree(tree: &CNode) {
     node(tree, "", "");
 }
 
-fn node(tree: &SNode, prefix: &str, infix: &str) {
+fn node(tree: &CNode, prefix: &str, infix: &str) {
     element(&prefix, tree.element);
     let children = tree.children();
     for (i, child) in children.iter().enumerate() {

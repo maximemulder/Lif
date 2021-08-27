@@ -1,19 +1,33 @@
 use crate::memory::Ref;
+use crate::parser::CNode;
+use crate::parser::elements;
 use crate::runtime::engine::Engine;
 use crate::runtime::primitives::GenericCode;
 use crate::runtime::r#return::{ Jump, ReturnJump };
-use crate::walker::ANode;
+use crate::walker::{ ANode, SNode };
+use crate::walker::nodes::{ AClass, AFunction };
 use crate::walker::traits::{ WDefinition, WStatement };
 
 pub struct ADefinition {
-    definition: Box<ANode<dyn WDefinition>>,
+    definition: Box<SNode<dyn WDefinition>>,
 }
 
 impl ADefinition {
-    pub fn new(definition: Box<ANode<dyn WDefinition>>) -> Self {
+    pub fn new(definition: Box<SNode<dyn WDefinition>>) -> Self {
         Self {
             definition
         }
+    }
+}
+
+impl ANode for ADefinition {
+    fn build(node: Ref<CNode>) -> Self {
+        let child = node.front(0);
+        Self::new(match child.element {
+            &elements::definitions::CLASS    => Box::new(SNode::<AClass>::build(child)),
+            &elements::definitions::FUNCTION => Box::new(SNode::<AFunction>::build(child)),
+            _ => panic!(),
+        })
     }
 }
 

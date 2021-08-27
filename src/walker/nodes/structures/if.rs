@@ -1,22 +1,34 @@
+use crate::memory::Ref;
+use crate::parser::CNode;
 use crate::runtime::engine::Engine;
 use crate::runtime::r#return::{ Flow, ReturnFlow };
-use crate::walker::ANode;
+use crate::walker::{ ANode, SNode };
 use crate::walker::nodes::{ ABlock, AExpression };
 use crate::walker::traits::WStructure;
 
 pub struct AIf {
-    condition: ANode<AExpression>,
-    then:      ANode<ABlock>,
-    r#else:    Option<ANode<ABlock>>,
+    condition: SNode<AExpression>,
+    then:      SNode<ABlock>,
+    r#else:    Option<SNode<ABlock>>,
 }
 
 impl AIf {
-    pub fn new(condition: ANode<AExpression>, then: ANode<ABlock>, r#else: Option<ANode<ABlock>>) -> Self {
+    pub fn new(condition: SNode<AExpression>, then: SNode<ABlock>, r#else: Option<SNode<ABlock>>) -> Self {
         Self {
             condition,
             then,
             r#else,
         }
+    }
+}
+
+impl ANode for AIf {
+    fn build(node: Ref<CNode>) -> Self {
+        Self::new(
+            SNode::build(node.front(1)),
+            SNode::build(node.front(2)),
+            node.children().get(4).map(|child| SNode::build(Ref::new(child)))
+        )
     }
 }
 

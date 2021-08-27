@@ -1,5 +1,5 @@
 use crate::memory::Ref;
-use crate::parser::{ Code, Grammar, SNode };
+use crate::parser::{ Code, CNode, Grammar };
 use crate::parser::arena::ArenaRef;
 use crate::parser::ascent::*;
 use crate::parser::descent::*;
@@ -9,13 +9,13 @@ use std::cmp;
 pub struct Parse<'a> {
     grammar: &'a Grammar,
     pub code: Ref<Code>,
-    tokens: &'a [SNode],
+    tokens: &'a [CNode],
     cursor: usize,
     reach: usize,
 }
 
 impl<'a> Parse<'a> {
-    pub fn new(grammar: &'a Grammar, code: Ref<Code>, tokens: &'a [SNode]) -> Self {
+    pub fn new(grammar: &'a Grammar, code: Ref<Code>, tokens: &'a [CNode]) -> Self {
         Self {
             grammar,
             code,
@@ -29,7 +29,7 @@ impl<'a> Parse<'a> {
         self.cursor == self.tokens.len()
     }
 
-    pub fn next(&mut self) -> Option<SNode> {
+    pub fn next(&mut self) -> Option<CNode> {
         let option = self.tokens.get(self.cursor);
         if let Some(token) = option {
             if self.reach < self.cursor {
@@ -43,7 +43,7 @@ impl<'a> Parse<'a> {
         None
     }
 
-    fn run(&mut self, callback: impl FnOnce(&mut Self) -> Option<Vec<SNode>>) -> Option<Vec<SNode>>{
+    fn run(&mut self, callback: impl FnOnce(&mut Self) -> Option<Vec<CNode>>) -> Option<Vec<CNode>>{
         let cursor = self.cursor;
         let nodes = callback(self);
         if nodes.is_none() {
@@ -53,14 +53,14 @@ impl<'a> Parse<'a> {
         nodes
     }
 
-    fn run_predicate(&mut self, callback: impl FnOnce(&mut Self) -> Option<Vec<SNode>>) -> bool {
+    fn run_predicate(&mut self, callback: impl FnOnce(&mut Self) -> Option<Vec<CNode>>) -> bool {
         let cursor = self.cursor;
         let nodes = callback(self);
         self.cursor = cursor;
         nodes.is_some()
     }
 
-    pub fn descent(&mut self, r#ref: ArenaRef<dyn Descent>) -> Option<Vec<SNode>> {
+    pub fn descent(&mut self, r#ref: ArenaRef<dyn Descent>) -> Option<Vec<CNode>> {
         self.run(|parse| parse.grammar.descents.get(r#ref).descent(parse))
     }
 
@@ -68,15 +68,15 @@ impl<'a> Parse<'a> {
         self.run_predicate(|parse| parse.grammar.descents.get(r#ref).descent(parse))
     }
 
-    pub fn ascent(&mut self, r#ref: ArenaRef<dyn Ascent>, nodes: Vec<SNode>) -> Option<Vec<SNode>> {
+    pub fn ascent(&mut self, r#ref: ArenaRef<dyn Ascent>, nodes: Vec<CNode>) -> Option<Vec<CNode>> {
         self.run(|parse| parse.grammar.ascents.get(r#ref).ascent(parse, nodes))
     }
 
-    pub fn ascent_predicate(&mut self, r#ref: ArenaRef<dyn Ascent>, nodes: Vec<SNode>) -> bool {
+    pub fn ascent_predicate(&mut self, r#ref: ArenaRef<dyn Ascent>, nodes: Vec<CNode>) -> bool {
         self.run_predicate(|parse| parse.grammar.ascents.get(r#ref).ascent(parse, nodes))
     }
 
-    pub fn parse(&mut self, production: ArenaRef<dyn Descent>) -> Option<SNode> {
+    pub fn parse(&mut self, production: ArenaRef<dyn Descent>) -> Option<CNode> {
         let node = if let Some(mut nodes) = self.grammar.descents.get(production).descent(self) {
             nodes.pop()
         } else {

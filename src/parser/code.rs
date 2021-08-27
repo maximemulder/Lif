@@ -1,9 +1,8 @@
 use crate::memory::{ Own, Ref };
-use crate::parser::Grammar;
-use crate::parser::SNode;
+use crate::parser::{ CNode, Grammar };
 use crate::parser::arena::ArenaRef;
 use crate::parser::descent::Descent;
-use crate::walker::ANode;
+use crate::walker::{ ANode, SNode };
 use crate::walker::traits::WExecutable;
 
 use std::fs::read_to_string;
@@ -11,12 +10,12 @@ use std::fs::read_to_string;
 pub struct Code {
     pub name:        Option<Box<str>>,
     pub text:        Box<str>,
-    pub syntax_tree: Option<SNode>,
-    pub walk_tree:   Option<Box<ANode<dyn WExecutable>>>,
+    pub syntax_tree: Option<CNode>,
+    pub walk_tree:   Option<Box<SNode<dyn WExecutable>>>,
 }
 
 impl Code {
-    fn new(grammar: &Grammar, production: ArenaRef<dyn Descent>, program: impl FnOnce(Ref<SNode>) -> Box<ANode<dyn WExecutable>>, name: Option<&str>, text: Box<str>) -> Own<Self> {
+    fn new<T: ANode + WExecutable + 'static>(grammar: &Grammar, production: ArenaRef<dyn Descent>, name: Option<&str>, text: Box<str>) -> Own<Self> {
         let mut code = Own::new(Self {
             text,
             name: name.map(Box::from),
@@ -26,32 +25,32 @@ impl Code {
 
         let syntax_tree = grammar.parse(production, code.get_ref()).unwrap();
         code.syntax_tree = Some(syntax_tree);
-        code.walk_tree = Some(program(Ref::new(code.syntax_tree.as_ref().unwrap())));
+        code.walk_tree = Some(Box::new(SNode::<T>::build(Ref::new(code.syntax_tree.as_ref().unwrap()))));
         code
     }
 
-    pub fn from_file(grammar: &Grammar, production: ArenaRef<dyn Descent>, program: impl FnOnce(Ref<SNode>) -> Box<ANode<dyn WExecutable>>, name: &str) -> Option<Own<Self>> {
-        Some(Code::new(grammar, production, program, Some(name), read_to_string(name).ok()?.into_boxed_str()))
+    pub fn from_file<T: ANode + WExecutable + 'static>(grammar: &Grammar, production: ArenaRef<dyn Descent>, name: &str) -> Option<Own<Self>> {
+        Some(Code::new::<T>(grammar, production, Some(name), read_to_string(name).ok()?.into_boxed_str()))
     }
 
-    pub fn from_string(grammar: &Grammar, production: ArenaRef<dyn Descent>, program: impl FnOnce(Ref<SNode>) -> Box<ANode<dyn WExecutable>>, text: &str) -> Own<Self> {
-        Code::new(grammar, production, program, None, Box::from(text))
+    pub fn from_string<T: ANode + WExecutable + 'static>(grammar: &Grammar, production: ArenaRef<dyn Descent>, text: &str) -> Own<Self> {
+        Code::new::<T>(grammar, production, None, Box::from(text))
     }
 
-    pub fn node_str(&self, node: &SNode) -> &str {
+    pub fn node_str(&self, node: &CNode) -> &str {
         &self.text[node.left() .. node.right()]
     }
 
-    pub fn node_line(&self, node: &SNode) -> &str {
+    pub fn node_line(&self, node: &CNode) -> &str {
         let index = node.left();
         &self.text[index - self.line_pos_left(index) .. index + self.line_pos_right(index)]
     }
 
-    pub fn node_x(&self, node: &SNode) -> usize {
+    pub fn node_x(&self, node: &CNode) -> usize {
         self.line_pos_left(node.left()) + 1
     }
 
-    pub fn node_y(&self, node: &SNode) -> usize {
+    pub fn node_y(&self, node: &CNode) -> usize {
         let index = node.left();
         let mut x = 1;
         for (counter, r#char) in self.text.chars().enumerate() {
@@ -67,11 +66,11 @@ impl Code {
         x
     }
 
-    pub fn node_shift_left(&self, node: &SNode) -> usize {
+    pub fn node_shift_left(&self, node: &CNode) -> usize {
         self.line_shift(self.index_iterator_reverse(node.left()))
     }
 
-    pub fn node_shift_right(&self, node: &SNode) -> usize {
+    pub fn node_shift_right(&self, node: &CNode) -> usize {
         self.line_shift(self.index_iterator(node.left()))
     }
 

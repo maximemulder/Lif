@@ -1,17 +1,24 @@
 use crate::memory::Ref;
+use crate::parser::CNode;
 use crate::runtime::engine::Engine;
 use crate::runtime::r#return::Return;
 use crate::runtime::utilities::variable::Variable;
-use crate::walker::ANode;
+use crate::walker::{ ANode, SNode };
 use crate::walker::nodes::AType;
 
 pub struct ADeclaration {
     name: Ref<str>,
-    r#type: ANode<AType>,
+    r#type: SNode<AType>,
+}
+
+impl ANode for ADeclaration {
+    fn build(node: Ref<CNode>) -> Self {
+        Self::new(node.front(0).text(), SNode::build(node.front(1)))
+    }
 }
 
 impl ADeclaration {
-    pub fn new(name: Ref<str>, r#type: ANode<AType>) -> Self {
+    pub fn new(name: Ref<str>, r#type: SNode<AType>) -> Self {
         Self {
             name,
             r#type,

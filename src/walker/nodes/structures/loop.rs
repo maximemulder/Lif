@@ -1,18 +1,26 @@
+use crate::memory::Ref;
+use crate::parser::CNode;
 use crate::runtime::engine::Engine;
 use crate::runtime::r#return::{ Flow, JumpType, ReturnFlow };
-use crate::walker::ANode;
+use crate::walker::{ ANode, SNode };
 use crate::walker::nodes::ABlock;
 use crate::walker::traits::WStructure;
 
 pub struct ALoop {
-    body: ANode<ABlock>,
+    body: SNode<ABlock>,
 }
 
 impl ALoop {
-    pub fn new(body: ANode<ABlock>) -> Self {
+    pub fn new(body: SNode<ABlock>) -> Self {
         Self {
             body,
         }
+    }
+}
+
+impl ANode for ALoop {
+    fn build(node: Ref<CNode>) -> Self {
+        Self::new(SNode::build(node.front(1)))
     }
 }
 

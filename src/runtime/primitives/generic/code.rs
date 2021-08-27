@@ -3,15 +3,15 @@ use crate::runtime::engine::Engine;
 use crate::runtime::primitives::generic::GenericImplementation;
 use crate::runtime::r#return::ReturnReference;
 use crate::runtime::value::Value;
-use crate::walker::ANode;
+use crate::walker::SNode;
 use crate::walker::traits::WDefinition;
 
 pub struct GenericCode {
-    node: Ref<ANode<dyn WDefinition>>,
+    node: Ref<SNode<dyn WDefinition>>,
 }
 
 impl GenericCode {
-    pub fn new(node: Ref<ANode<dyn WDefinition>>) -> Self {
+    pub fn new(node: Ref<SNode<dyn WDefinition>>) -> Self {
         Self {
             node,
         }

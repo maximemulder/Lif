@@ -1,20 +1,28 @@
+use crate::memory::Ref;
+use crate::parser::CNode;
 use crate::runtime::engine::Engine;
 use crate::runtime::r#return::{ Flow, JumpType, ReturnFlow };
-use crate::walker::ANode;
+use crate::walker::{ ANode, SNode };
 use crate::walker::nodes::{ ABlock, AExpression };
 use crate::walker::traits::WStructure;
 
 pub struct AWhile {
-    condition: ANode<AExpression>,
-    body:      ANode<ABlock>,
+    condition: SNode<AExpression>,
+    body:      SNode<ABlock>,
 }
 
 impl AWhile {
-    pub fn new(condition: ANode<AExpression>, body: ANode<ABlock>) -> Self {
+    pub fn new(condition: SNode<AExpression>, body: SNode<ABlock>) -> Self {
         Self {
             condition,
             body,
         }
+    }
+}
+
+impl ANode for AWhile {
+    fn build(node: Ref<CNode>) -> Self {
+        Self::new(SNode::build(node.front(1)), SNode::build(node.front(2)))
     }
 }
 

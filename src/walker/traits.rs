@@ -1,6 +1,6 @@
 use crate::runtime::engine::Engine;
 use crate::runtime::r#return::{ ReturnFlow, ReturnJump, ReturnReference };
-use crate::walker::ANode;
+use crate::walker::SNode;
 use crate::walker::nodes::AGenerics;
 
 pub trait WExecutable {
@@ -13,7 +13,7 @@ pub trait WStatement {
 
 pub trait WDefinition {
     fn name(&self) -> &str;
-    fn generics(&self) -> &ANode<AGenerics>;
+    fn generics(&self) -> &SNode<AGenerics>;
     fn walk<'a>(&self, engine: &mut Engine<'a>) -> ReturnReference<'a>;
 }
 

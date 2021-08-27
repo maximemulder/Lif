@@ -2,17 +2,17 @@ mod node;
 mod nodes;
 
 use crate::memory::Ref;
-use crate::parser::{ Code, Element, SNode };
+use crate::parser::{ Code, CNode, Element };
 use crate::parser::elements::ignores::{ WHITESPACE, ENDLINE, COMMENT_LINE, COMMENT_BLOCK };
 
 use nodes::ROOT;
 
-pub fn lex(code: Ref<Code>) -> Vec<SNode> {
+pub fn lex(code: Ref<Code>) -> Vec<CNode> {
     let mut tokens = Vec::new();
     let mut shift = 0;
     while let Some((element, length)) = automaton(&code.text[shift ..]) {
         if element != &WHITESPACE && element != &ENDLINE && element != &COMMENT_LINE && element != &COMMENT_BLOCK {
-            tokens.push(SNode::new_token(code, element, shift, shift + length));
+            tokens.push(CNode::new_token(code, element, shift, shift + length));
         }
 
         shift += length;

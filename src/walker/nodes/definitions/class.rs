@@ -1,20 +1,21 @@
 use crate::memory::Ref;
+use crate::parser::CNode;
 use crate::runtime::engine::Engine;
 use crate::runtime::primitives::Class;
 use crate::runtime::r#return::ReturnReference;
-use crate::walker::ANode;
+use crate::walker::{ ANode, SNode };
 use crate::walker::nodes::{ AFunction, AGenerics, AType };
 use crate::walker::traits::WDefinition;
 
 pub struct AClass {
     name: Ref<str>,
-    generics: ANode<AGenerics>,
-    parent: ANode<AType>,
-    methods: Box<[ANode<AFunction>]>,
+    generics: SNode<AGenerics>,
+    parent: SNode<AType>,
+    methods: Box<[SNode<AFunction>]>,
 }
 
 impl AClass {
-    pub fn new(name: Ref<str>, generics: ANode<AGenerics>, parent: ANode<AType>, methods: Box<[ANode<AFunction>]>) -> Self {
+    pub fn new(name: Ref<str>, generics: SNode<AGenerics>, parent: SNode<AType>, methods: Box<[SNode<AFunction>]>) -> Self {
         Self {
             name,
             generics,
@@ -24,12 +25,25 @@ impl AClass {
     }
 }
 
+impl ANode for AClass {
+    fn build(node: Ref<CNode>) -> Self {
+        Self::new(
+            node.front(1).text(),
+            SNode::build(node.front(2)),
+            SNode::build(node.front(3)),
+            node.front(5).children().iter()
+                .map(|child| SNode::build(Ref::new(child)))
+                .collect(),
+        )
+    }
+}
+
 impl WDefinition for AClass {
     fn name(&self) -> &str {
         &self.name
     }
 
-    fn generics(&self) -> &ANode<AGenerics> {
+    fn generics(&self) -> &SNode<AGenerics> {
         &self.generics
     }
 

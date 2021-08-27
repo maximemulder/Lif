@@ -1,7 +1,7 @@
 #![allow(unused_variables)]
 
 use crate::memory::Ref;
-use crate::parser::{ Code, Parse, SNode };
+use crate::parser::{ Code, CNode, Parse };
 use crate::parser::arena::{ Arena, ArenaRef };
 use crate::parser::elements;
 use crate::parser::ascent::*;
@@ -25,7 +25,7 @@ impl Grammar {
         }
     }
 
-    pub fn parse(&self, production: ArenaRef<dyn Descent>, code: Ref<Code>) -> Option<SNode> {
+    pub fn parse(&self, production: ArenaRef<dyn Descent>, code: Ref<Code>) -> Option<CNode> {
         let tokens = lex(code);
         let mut parse = Parse::new(self, code, &tokens);
         parse.parse(production)

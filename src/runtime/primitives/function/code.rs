@@ -5,16 +5,16 @@ use crate::runtime::primitives::function::FunctionImplementation;
 use crate::runtime::r#return::{ Flow, JumpType, ReturnReference };
 use crate::runtime::utilities::parameters::Parameters;
 use crate::runtime::value::Value;
-use crate::walker::ANode;
+use crate::walker::SNode;
 use crate::walker::nodes::ABlock;
 use crate::walker::traits::WStructure;
 
 pub struct FunctionCode {
-    block: Ref<ANode<ABlock>>,
+    block: Ref<SNode<ABlock>>,
 }
 
 impl FunctionCode {
-    pub fn new(block: Ref<ANode<ABlock>>) -> Self {
+    pub fn new(block: Ref<SNode<ABlock>>) -> Self {
         Self {
             block,
         }
