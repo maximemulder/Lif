@@ -5,7 +5,6 @@ use crate::runtime::gc::{ GcRef, GcTrace };
 use crate::runtime::primitives::{ Array, Class, Function, Generic };
 use crate::runtime::r#return::{ Return, ReturnReference, ReturnValue };
 use crate::runtime::utilities::parameters;
-use crate::runtime::utilities::tag::Tag;
 
 use std::ops::Deref;
 
@@ -140,20 +139,6 @@ impl GcTrace for Value<'_> {
         self.class.trace();
         if self.class.gc() {
             self.data.trace();
-        }
-    }
-}
-
-impl<'a> Value<'a> {
-    pub fn get_tag(&self, engine: &Engine<'a>) -> Tag {
-        if self.isa(engine.environment.class) {
-            self.get_gc::<Class>(engine).tag().clone()
-        } else if self.isa(engine.environment.function) {
-            self.get_gc::<Function>(engine).tag().clone()
-        } else if self.isa(engine.environment.generic) {
-            self.get_gc::<Generic>(engine).tag().clone()
-        } else {
-            panic!();
         }
     }
 }

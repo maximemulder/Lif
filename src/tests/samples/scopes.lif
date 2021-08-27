@@ -11,11 +11,13 @@ print(variable);
 
 let test = {
     let variable = 2;
-    function() {
+    function test() {
         print(variable);
         let variable = 3;
         print(variable);
     }
+
+    test
 };
 
 test();

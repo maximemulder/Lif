@@ -19,4 +19,4 @@ pub use code::Code;
 pub use element::Element;
 pub use grammar::Grammar;
 pub use parse::Parse;
-pub use node::SNode;
+pub use node::CNode;

@@ -3,16 +3,16 @@ use crate::parser::Element;
 use crate::memory::Ref;
 
 #[derive(Clone)]
-pub struct SNode {
+pub struct CNode {
     pub code: Ref<Code>,
     pub element: &'static Element,
-    children: Box<[SNode]>,
+    children: Box<[CNode]>,
     left: usize,
     right: usize,
 }
 
-impl SNode {
-    pub fn new(code: Ref<Code>,  element: &'static Element, children: Box<[SNode]>, left: usize, right: usize) -> Self {
+impl CNode {
+    pub fn new(code: Ref<Code>,  element: &'static Element, children: Box<[CNode]>, left: usize, right: usize) -> Self {
         debug_assert!(right >= left);
         Self {
             code,
@@ -27,7 +27,7 @@ impl SNode {
         Self::new(code, element,  Box::new([]), left, right)
     }
 
-    pub fn new_production(code: Ref<Code>, element: &'static Element, children: Box<[SNode]>) -> Self {
+    pub fn new_production(code: Ref<Code>, element: &'static Element, children: Box<[CNode]>) -> Self {
         let (left, right) = if !children.is_empty() {
             (children.first().unwrap().left(), children.first().unwrap().right())
         } else {
@@ -37,7 +37,7 @@ impl SNode {
         Self::new(code, element, children, left, right)
     }
 
-    pub fn children(&self) -> &[SNode] {
+    pub fn children(&self) -> &[CNode] {
         &self.children
     }
 
@@ -49,11 +49,11 @@ impl SNode {
         self.right
     }
 
-    pub fn front(&self, index: usize) -> Ref<SNode>{
+    pub fn front(&self, index: usize) -> Ref<CNode>{
         Ref::new(&self.children()[index])
     }
 
-    pub fn back(&self, index: usize) -> Ref<SNode> {
+    pub fn back(&self, index: usize) -> Ref<CNode> {
         let children = self.children();
         Ref::new(&children[children.len() - index])
     }

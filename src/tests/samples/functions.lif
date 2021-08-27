@@ -5,9 +5,9 @@ function twenty(number: Integer): Integer {
 print(twenty(22));
 
 function greet(greeting: String, ...persons: Array[String]) {
-	for person in persons {
-		print(greeting + " " + person + " !");
-	}
+    for person in persons {
+        print(greeting + " " + person + " !");
+    }
 }
 
 greet("Hello", "Alice", "Bob");

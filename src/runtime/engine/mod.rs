@@ -12,7 +12,6 @@ use crate::runtime::r#return::{ ReturnFlow, ReturnReference };
 use crate::runtime::scope::{ GcScope, Scope };
 use crate::runtime::utilities::tag::Tagger;
 use crate::runtime::value::Value;
-use crate::walker::WNode;
 
 use std::io::{ Read, Write };
 
@@ -106,33 +105,33 @@ impl<'a> Engine<'a> {
         self.scope.get_variable(name)
     }
 
-    pub fn walk(&mut self, node: &WNode) -> ReturnFlow<'a> {
-        self.cache.push();
-        let r#return = node.walk(self);
-        if let Ok(flow) = r#return.as_ref() {
-            self.cache.bubble(flow.reference);
-        }
-
-        self.cache.pop();
-
-        if self.gc.allocations() > GC_THRESHOLD {
-            self.trace();
-            self.gc.collect();
-        }
-        r#return
-    }
-
     pub fn run(&mut self, code: Own<Code>) -> Option<GcReference<'a>> {
         self.codes.push(code);
         let node = Ref::new(self.codes.last().unwrap().walk_tree.as_ref().unwrap());
         let executable = Ref::as_ref(&node);
-        match self.walk(executable) {
-            Ok(flow) => Some(flow.reference),
+        match executable.get().walk(self) {
+            Ok(reference) => Some(reference),
             Err(error) => {
                 writeln!(self.error, "{}", error.get_message()).unwrap();
                 None
             },
         }
+    }
+
+    pub fn run_gc(&mut self, callback: impl FnOnce(&mut Engine<'a>) -> ReturnFlow<'a>) -> ReturnFlow<'a> {
+        self.cache.push();
+        let r#return = callback(self);
+        if let Ok(flow) = r#return.as_ref() {
+            self.cache.bubble(flow.get_reference());
+        }
+
+        self.cache.pop();
+        if self.gc.allocations() > GC_THRESHOLD {
+            self.trace();
+            self.gc.collect();
+        }
+
+        r#return
     }
 }
 

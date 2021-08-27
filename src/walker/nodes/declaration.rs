@@ -1,27 +1,31 @@
 use crate::memory::Ref;
+use crate::parser::CNode;
 use crate::runtime::engine::Engine;
-use crate::runtime::r#return::{ Flow, ReturnFlow };
+use crate::runtime::r#return::Return;
 use crate::runtime::utilities::variable::Variable;
-use crate::walker::{ Walkable, WNode };
-use crate::walker::utilities;
+use crate::walker::{ ANode, SNode };
+use crate::walker::nodes::AType;
 
-pub struct Declaration {
-    identifier: Ref<str>,
-    r#type: Option<WNode>,
+pub struct ADeclaration {
+    name: Ref<str>,
+    r#type: SNode<AType>,
 }
 
-impl Declaration {
-    pub fn new(identifier: Ref<str>, r#type: Option<WNode>) -> Self {
-        Self {
-            identifier,
-            r#type,
-        }
+impl ANode for ADeclaration {
+    fn build(node: Ref<CNode>) -> Self {
+        Self::new(node.front(0).text(), SNode::build(node.front(1)))
     }
 }
 
-impl Walkable for Declaration {
-    fn walk<'a>(&self, engine: &mut Engine<'a>) -> ReturnFlow<'a> {
-        let r#type = utilities::new_type(engine, self.r#type.as_ref())?;
-        Flow::new(Variable::new(Box::from(self.identifier.as_ref()), r#type).build(engine))
+impl ADeclaration {
+    pub fn new(name: Ref<str>, r#type: SNode<AType>) -> Self {
+        Self {
+            name,
+            r#type,
+        }
+    }
+
+    pub fn walk<'a>(&self, engine: &mut Engine<'a>) -> Return<Variable<'a>> {
+        Ok(Variable::new(Box::from(self.name.as_ref()), self.r#type.get().walk(engine)?))
     }
 }

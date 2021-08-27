@@ -1,4 +1,4 @@
-use crate::parser::{ Element, Parse, SNode };
+use crate::parser::{ CNode, Element, Parse };
 use crate::parser::arena::ArenaRef;
 use crate::parser::ascent::Ascent;
 
@@ -6,7 +6,7 @@ use std::iter;
 use std::ops::Not;
 
 pub trait Descent {
-    fn descent(&self, parse: &mut Parse) -> Option<Vec<SNode>>;
+    fn descent(&self, parse: &mut Parse) -> Option<Vec<CNode>>;
 }
 
 pub struct DescentAlias {
@@ -22,7 +22,7 @@ impl DescentAlias {
 }
 
 impl Descent for DescentAlias {
-    fn descent(&self, parse: &mut Parse) -> Option<Vec<SNode>> {
+    fn descent(&self, parse: &mut Parse) -> Option<Vec<CNode>> {
         parse.descent(self.descent)
     }
 }
@@ -40,7 +40,7 @@ impl DescentAscent {
 }
 
 impl Descent for DescentAscent {
-    fn descent(&self, parse: &mut Parse) -> Option<Vec<SNode>> {
+    fn descent(&self, parse: &mut Parse) -> Option<Vec<CNode>> {
         parse.ascent(self.ascent, Vec::new())
     }
 }
@@ -58,7 +58,7 @@ impl DescentChoice {
 }
 
 impl Descent for DescentChoice {
-    fn descent(&self, parse: &mut Parse) -> Option<Vec<SNode>> {
+    fn descent(&self, parse: &mut Parse) -> Option<Vec<CNode>> {
         self.descents.iter()
             .copied()
             .find_map(|descent| parse.descent(descent))
@@ -78,14 +78,14 @@ impl DescentSequence {
 }
 
 impl Descent for DescentSequence {
-    fn descent(&self, parse: &mut Parse) -> Option<Vec<SNode>> {
+    fn descent(&self, parse: &mut Parse) -> Option<Vec<CNode>> {
         self.descents.iter()
             .copied()
             .map(|descent| parse.descent(descent))
             .flat_map(|option|
                 option.map_or_else(|| vec![None], |nodes| nodes.into_iter().map(Some).collect())
             )
-            .collect::<Option<Vec<SNode>>>()
+            .collect::<Option<Vec<CNode>>>()
     }
 }
 
@@ -102,7 +102,7 @@ impl DescentZeroOrMore {
 }
 
 impl Descent for DescentZeroOrMore {
-    fn descent(&self, parse: &mut Parse) -> Option<Vec<SNode>> {
+    fn descent(&self, parse: &mut Parse) -> Option<Vec<CNode>> {
         Some(iter::from_fn(|| parse.descent(self.descent)).flatten().collect())
     }
 }
@@ -120,8 +120,8 @@ impl DescentOneOrMore {
 }
 
 impl Descent for DescentOneOrMore {
-    fn descent(&self, parse: &mut Parse) -> Option<Vec<SNode>> {
-        let nodes = iter::from_fn(|| parse.descent(self.descent)).flatten().collect::<Vec<SNode>>();
+    fn descent(&self, parse: &mut Parse) -> Option<Vec<CNode>> {
+        let nodes = iter::from_fn(|| parse.descent(self.descent)).flatten().collect::<Vec<CNode>>();
         nodes.is_empty().not().then_some(nodes)
     }
 }
@@ -139,7 +139,7 @@ impl DescentOption {
 }
 
 impl Descent for DescentOption {
-    fn descent(&self, parse: &mut Parse) -> Option<Vec<SNode>> {
+    fn descent(&self, parse: &mut Parse) -> Option<Vec<CNode>> {
         parse.descent(self.descent).or_else(|| Some(Vec::new()))
     }
 }
@@ -157,7 +157,7 @@ impl DescentPredicateAnd {
 }
 
 impl Descent for DescentPredicateAnd {
-    fn descent(&self, parse: &mut Parse) -> Option<Vec<SNode>> {
+    fn descent(&self, parse: &mut Parse) -> Option<Vec<CNode>> {
         parse.descent_predicate(self.descent).then(Vec::new)
     }
 }
@@ -175,7 +175,7 @@ impl DescentPredicateNot {
 }
 
 impl Descent for DescentPredicateNot {
-    fn descent(&self, parse: &mut Parse) -> Option<Vec<SNode>> {
+    fn descent(&self, parse: &mut Parse) -> Option<Vec<CNode>> {
         parse.descent_predicate(self.descent).not().then(Vec::new)
     }
 }
@@ -195,8 +195,8 @@ impl DescentElement {
 }
 
 impl Descent for DescentElement {
-    fn descent(&self, parse: &mut Parse) -> Option<Vec<SNode>> {
-        parse.descent(self.descent).map(|nodes| vec![SNode::new_production(parse.code, self.element, nodes.into_boxed_slice())])
+    fn descent(&self, parse: &mut Parse) -> Option<Vec<CNode>> {
+        parse.descent(self.descent).map(|nodes| vec![CNode::new_production(parse.code, self.element, nodes.into_boxed_slice())])
     }
 }
 
@@ -213,7 +213,7 @@ impl DescentToken {
 }
 
 impl Descent for DescentToken {
-    fn descent(&self, parse: &mut Parse) -> Option<Vec<SNode>> {
+    fn descent(&self, parse: &mut Parse) -> Option<Vec<CNode>> {
         let token = parse.next()?;
         (token.element == self.element).then(|| vec![token])
     }

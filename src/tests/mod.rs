@@ -1,7 +1,7 @@
 use crate::parser;
 use crate::parser::Code;
 use crate::runtime::engine::Engine;
-use crate::walker::build;
+use crate::walker::nodes::AProgram;
 
 use std::fs;
 use std::io::empty;
@@ -26,7 +26,7 @@ fn test() {
 
         {
             let mut engine = Engine::new(&grammar, &mut input, &mut output, &mut error);
-            let code = Code::from_string(engine.grammar, engine.grammar.program, &build::program, &strings.0);
+            let code = Code::from_string::<AProgram>(engine.grammar, engine.grammar.program, &strings.0);
             engine.run(code);
         }
 

@@ -1,15 +1,15 @@
 use crate::memory::Ref;
-use crate::parser::SNode;
+use crate::parser::CNode;
 
 use std::cmp::min;
 
 pub struct Error {
     pub message: Box<str>,
-    pub node: Option<Ref<SNode>>,
+    pub node: Option<Ref<CNode>>,
 }
 
 impl Error {
-    fn new(message: String, node: Option<Ref<SNode>>) -> Self {
+    fn new(message: String, node: Option<Ref<CNode>>) -> Self {
         Self {
             message: message.into_boxed_str(),
             node,

@@ -1,25 +1,35 @@
+use crate::memory::Ref;
+use crate::parser::CNode;
 use crate::runtime::engine::Engine;
-use crate::runtime::r#return::{ Flow, ReturnFlow };
-use crate::walker::{ Walkable, WNode };
+use crate::runtime::r#return::{ Jump, ReturnJump };
+use crate::walker::{ ANode, SNode };
+use crate::walker::nodes::AStatement;
 
-pub struct Statements {
-    statements: Box<[WNode]>,
+pub struct AStatements {
+    statements: Box<[SNode<AStatement>]>,
 }
 
-impl Statements {
-    pub fn new(statements: Box<[WNode]>) -> Self {
+impl AStatements {
+    pub fn new(statements: Box<[SNode<AStatement>]>) -> Self {
         Self {
             statements,
         }
     }
-}
 
-impl Walkable for Statements {
-    fn walk<'a>(&self, engine: &mut Engine<'a>) -> ReturnFlow<'a> {
+    pub fn walk<'a>(&self, engine: &mut Engine<'a>) -> ReturnJump<'a> {
         for statement in self.statements.iter() {
-            get!(engine.walk(statement)?);
+            jump!(statement.get().walk(engine)?);
         }
 
-        Flow::new(engine.undefined())
+        Jump::none()
+    }
+}
+
+impl ANode for AStatements {
+    fn build(node: Ref<CNode>) -> Self {
+        Self::new(node.children().iter()
+            .map(|child| SNode::build(Ref::new(child)))
+            .collect()
+        )
     }
 }

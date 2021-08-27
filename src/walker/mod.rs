@@ -1,37 +1,35 @@
-pub mod build;
 pub mod nodes;
-pub mod utilities;
+pub mod traits;
 
 use crate::memory::Ref;
-use crate::parser::SNode;
-use crate::runtime::engine::Engine;
-use crate::runtime::r#return::ReturnFlow;
+use crate::parser::CNode;
 
-pub trait Walkable {
-    fn walk<'a>(&self, engine: &mut Engine<'a>) -> ReturnFlow<'a>;
+pub trait ANode {
+    fn build(node: Ref<CNode>) -> Self;
 }
 
-pub struct WNode {
-    pub syntax: Ref<SNode>,
-    pub walkable: Box<dyn Walkable>,
+pub struct SNode<T: ?Sized> {
+    pub concrete: Ref<CNode>,
+    r#abstract: T,
 }
 
-impl WNode {
-    pub fn new(syntax: Ref<SNode>, walkable: impl Walkable + 'static) -> Self {
+impl<T> SNode<T> {
+    pub fn new(concrete: Ref<CNode>, r#abstract: T) -> Self {
         Self {
-            syntax,
-            walkable: Box::new(walkable),
+            concrete,
+            r#abstract,
         }
     }
+}
 
-    pub fn walk<'a>(&self, engine: &mut Engine<'a>) -> ReturnFlow<'a> {
-        let mut flow = self.walkable.walk(engine);
-        if let Err(mut error) = flow.as_mut() {
-            if error.node.is_none(){
-                error.node = Some(self.syntax)
-            }
-        }
+impl<T: ANode> SNode<T> {
+    pub fn build(node: Ref<CNode>) -> Self {
+        SNode::new(node, T::build(node))
+    }
+}
 
-        flow
+impl<T: ?Sized> SNode<T> {
+    pub fn get(&self) -> &T {
+        &self.r#abstract
     }
 }
