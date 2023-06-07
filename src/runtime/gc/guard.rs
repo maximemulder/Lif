@@ -60,7 +60,7 @@ impl GcTrace for GcGuard {
 impl Drop for GcGuard {
     fn drop(&mut self) {
         unsafe {
-            Box::<dyn GcTrace>::from_raw(self.object());
+            drop(Box::<dyn GcTrace>::from_raw(self.object()));
         }
     }
 }

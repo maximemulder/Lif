@@ -17,7 +17,7 @@ pub fn tree(tree: &CNode) {
 }
 
 fn node(tree: &CNode, prefix: &str, infix: &str) {
-    element(&prefix, tree.element);
+    element(&prefix, tree.element, tree);
     let children = tree.children();
     for (i, child) in children.iter().enumerate() {
         let (next_prefix, next_suffix) = if i != children.len() - 1 {
@@ -30,6 +30,12 @@ fn node(tree: &CNode, prefix: &str, infix: &str) {
     }
 }
 
-fn element(prefix: &str, element: &Element) {
-    println!("{}{}", prefix, element.name);
+fn element(prefix: &str, element: &Element, tree: &CNode) {
+    if tree.children().is_empty() {
+        let refe = tree.text();
+        let text: &str = refe.as_ref();
+        println!("{}{} {:?}", prefix, element.name, text);
+    } else {
+        println!("{}{}", prefix, element.name);
+    };
 }

@@ -8,7 +8,7 @@ fn alloc<T>(value: T) -> *mut T {
 
 fn dealloc<T: ?Sized>(pointer: *mut T) {
     unsafe {
-        Box::from_raw(pointer);
+        drop(Box::from_raw(pointer));
     }
 }
 
