@@ -1,3 +1,5 @@
+use crate::ast::build::{build_program, build_expr};
+use crate::ast::nodes::{AProgram, AExpr};
 use crate::memory::{ Own, Ref };
 use crate::parser::{ CNode, Grammar };
 use crate::parser::arena::ArenaRef;
@@ -7,11 +9,17 @@ use crate::walker::traits::WExecutable;
 
 use std::fs::read_to_string;
 
+pub enum Ast {
+    Program(AProgram),
+    Expression(Box<AExpr>)
+}
+
 pub struct Code {
     pub name:        Option<Box<str>>,
     pub text:        Box<str>,
     pub syntax_tree: Option<CNode>,
     pub walk_tree:   Option<Box<SNode<dyn WExecutable>>>,
+    pub abstract_tree: Option<Ast>,
 }
 
 impl Code {
@@ -21,11 +29,17 @@ impl Code {
             name: name.map(Box::from),
             syntax_tree: None,
             walk_tree: None,
+            abstract_tree: None,
         });
 
         let syntax_tree = grammar.parse(production, code.get_ref()).unwrap();
         code.syntax_tree = Some(syntax_tree);
         code.walk_tree = Some(Box::new(SNode::<T>::build(Ref::new(code.syntax_tree.as_ref().unwrap()))));
+        code.abstract_tree = Some(if production == grammar.program {
+            Ast::Program(build_program(&code.syntax_tree.as_ref().unwrap()))
+        } else {
+            Ast::Expression(build_expr(&code.syntax_tree.as_ref().unwrap()))
+        });
         code
     }
 

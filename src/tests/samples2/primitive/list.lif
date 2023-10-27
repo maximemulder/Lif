@@ -1,0 +1,26 @@
+let array = List[Any](0, true, "String");
+print(array(0));
+print(array(1));
+print(array(2));
+
+let array = List[Int](0, 1, 2);
+array.append(3);
+print(array(3));
+
+let array = List[Int](0, 1, 2);
+array.prepend(-1);
+print(array(0));
+
+let array = List[Int](0, 1, 2);
+array.insert(1, 10);
+print(array(1));
+
+let array = List[Int](0, 1, 2);
+array.remove(1);
+print(array(1));
+
+let array = List[Int](2, 4, 8);
+array.append(16, 32, 64);
+array.prepend(0, 1);
+print(array(2));
+print(array(6));

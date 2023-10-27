@@ -1,0 +1,18 @@
+let i = 0;
+loop {
+    print(i);
+    i = i + 1;
+    if i == 3 {
+        break;
+    }
+}
+
+let i = 0;
+while i < 3 {
+    print(i);
+    i = i + 1;
+}
+
+for i in List[Int](0, 1, 2) {
+    print(i);
+}

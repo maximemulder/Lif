@@ -23,6 +23,14 @@ impl<T: ?Sized> Clone for ArenaRef<T> {
 
 impl<T: ?Sized> Copy for ArenaRef<T> {}
 
+impl<T: ?Sized> PartialEq for ArenaRef<T> {
+    fn eq(&self, rhs: &Self) -> bool {
+        self.index == rhs.index
+    }
+}
+
+impl<T: ?Sized> Eq for ArenaRef<T> {}
+
 pub struct Arena<T: ?Sized> {
     elements: RefCell<Vec<Option<Box<T>>>>,
 }
