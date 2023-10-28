@@ -92,11 +92,8 @@ fn exit<'a>(_: &mut Engine<'a>, args: &[Value<'a>]) -> ResValue<'a> {
 }
 
 fn include<'a>(engine: &mut Engine<'a>, args: &[Value<'a>]) -> ResValue<'a> {
-    engine.with_frame(engine.get_scope(), |engine| {
-        let code = Code::from_file::<AProgram>(&engine.grammar, engine.grammar.program, args[0].as_string().as_ref()).unwrap();
-        engine.run(code);
-    });
-
+    let code = Code::from_file::<AProgram>(&engine.grammar, engine.grammar.program, args[0].as_string().as_ref()).unwrap();
+    engine.run(code);
     Ok(engine.new_void())
 }
 

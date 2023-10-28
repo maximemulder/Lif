@@ -74,21 +74,26 @@ impl<'a> Engine<'a> {
 
 impl<'a> Engine<'a> {
     pub fn get_scope(&self) -> GcScope<'a> {
-        *self.frames.last().unwrap()
+        self.frames.last().unwrap().clone()
     }
 
     pub fn with_scope<T>(&mut self, f: impl FnOnce(&mut Self) -> T) -> T {
-        self.swap_scope(|engine, scope| engine.alloc(Scope::new(Some(scope))));
+        self.swap_scope(|engine, scope| engine.new_scope(scope));
         let result = f(self);
         self.swap_scope(|_, scope| scope.parent.unwrap());
         result
     }
 
-    pub fn with_frame<T>(&mut self, frame: GcScope<'a>, f: impl FnOnce(&mut Engine<'a>) -> T) -> T {
+    pub fn with_frame<T>(&mut self, parent: GcScope<'a>, f: impl FnOnce(&mut Engine<'a>) -> T) -> T {
+        let frame = self.new_scope(parent);
         self.frames.push(frame);
         let result = f(self);
         self.frames.pop().unwrap();
         result
+    }
+
+    fn new_scope(&mut self, scope: GcScope<'a>) -> GcScope<'a> {
+        self.alloc(Scope::new(Some(scope)))
     }
 
     fn swap_scope(&mut self, f: impl FnOnce(&mut Self, GcScope<'a>) -> GcScope<'a>) {

@@ -6,15 +6,13 @@ mod write;
 use crate::runtime::bis::data::{Function, FunctionBody, Generic, GenericBody};
 use crate::runtime::bis::engine::Engine;
 use crate::runtime::bis::flow::{Flow, Jump, JumpKind, ResValue};
-use crate::runtime::bis::scope::Scope;
 use crate::runtime::bis::value::Value;
 
 impl<'a> Function<'a> {
     pub fn call(&self, engine: &mut Engine<'a>, args: &[Value<'a>]) -> ResValue<'a> {
         match self.body {
             FunctionBody::Block(block) => {
-                let frame = engine.alloc(Scope::new(Some(self.scope)));
-                engine.with_frame(frame, |engine| {
+                engine.with_frame(self.scope, |engine| {
                     for (param, arg) in std::iter::zip(self.params.iter(), args.iter().copied()) {
                         engine.write(&param.name, arg);
                     }
@@ -62,8 +60,7 @@ impl<'a> Generic<'a> {
 
         match self.body {
             GenericBody::Node(node) => {
-                let frame = engine.alloc(Scope::new(Some(self.scope)));
-                engine.with_frame(frame, |engine| {
+                engine.with_frame(self.scope, |engine| {
                     // TODO: Args
                     node.eval_def(engine)
                 })
