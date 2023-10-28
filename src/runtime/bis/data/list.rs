@@ -12,6 +12,26 @@ impl<'a> List<'a> {
     pub fn iter(&self) -> Copied<Iter<'_, Value<'a>>> {
         self.0.iter().copied()
     }
+
+    pub fn get(&self, index: usize) -> Value<'a> {
+        self.0[index]
+    }
+
+    pub fn insert(&mut self, index: usize, value: Value<'a>) {
+        self.0.insert(index, value);
+    }
+
+    pub fn append(&mut self, value: Value<'a>) {
+        self.0.push(value);
+    }
+
+    pub fn prepend(&mut self, value: Value<'a>) {
+        self.0.insert(0, value);
+    }
+
+    pub fn remove(&mut self, index: usize) {
+        self.0.remove(index);
+    }
 }
 
 impl GcTrace for List<'_> {

@@ -1,0 +1,23 @@
+function twenty(number: Int): Int {
+    return number + 20;
+}
+
+print(twenty(22));
+
+function greet(greeting: String, ...persons: List[String]) {
+    for person in persons {
+        print(greeting + " " + person + " !");
+    }
+}
+
+greet("Hello", "Alice", "Bob");
+
+function callback(variable) {
+    print("Variable " + variable + " from callback.");
+}
+
+function executor(callback) {
+    callback(42);
+}
+
+executor(callback);

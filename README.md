@@ -4,6 +4,8 @@
 
 This is an interpreter for Lif, a small dynamically typed imperative programming language.
 
+DISCLAIMER: Most of this code was written a few years ago when I was a beginner in both Rust and interpreters. Although I have done some significant refactoring, many designs are still far from optimal. In the long term, I would like to evolve this project and explore gradual typing with optional compilation using static evaluation. However, I think I will be prioritizing [Clam](https://github.com/MaximeMulder/clam) in the short and medium terms.
+
 ## Features
 
 Lif features classic dynamic and object-oriented features that are listed here. More examples can be found in the `examples` directory.
@@ -60,7 +62,7 @@ let status = if age >= 18 {
 Lif has several control flow expressions: `if`, `loop`, `while` and `for`. Lif also has `break` and `continue` expressions;
 
 ```
-for element in Array[Any](true, "Boat", 0) {
+for element in List[Any](true, "Boat", 0) {
     print(element); // Prints "true", "Boat", "0"
 }
 ```

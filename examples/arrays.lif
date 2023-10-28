@@ -1,5 +1,5 @@
 // Arrays can be instantiated using the Array class.
-let array = Array[Any](0, "String", true);
+let array = List[Any](0, "String", true);
 
 // Array indexing is done using parentheses.
 print(array(1));

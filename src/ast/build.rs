@@ -99,6 +99,7 @@ fn build_function(node: &CNode) -> AFunction {
         name: node.at(1).string(),
         generics: build_generics(node.at(2)),
         params: build_params(node.at(3)),
+        rest: build_rest(node.at(3)),
         ret: build_option_type(node.at(4)),
         body: build_block(node.at(5)),
     }
@@ -109,6 +110,10 @@ fn build_params(node: &CNode) -> Box<[AParameter]> {
         .step_by(2)
         .map(|child| build_param(child))
         .collect()
+}
+
+fn build_rest(node: &CNode) -> Option<AParameter> {
+    node.at(2).children().get(1).map(build_param)
 }
 
 fn build_param(node: &CNode) -> AParameter {

@@ -118,7 +118,7 @@ impl AExprChain {
 }
 
 impl AExprApply {
-    fn eval<'a>(&self, engine: &mut Engine<'a>) -> ResFlow<'a> {
+    pub fn eval<'a>(&self, engine: &mut Engine<'a>) -> ResFlow<'a> {
         let generic = flow!(self.expr.eval(engine)).as_generic();
         let mut args = Vec::new();
         for arg in self.args.iter() {

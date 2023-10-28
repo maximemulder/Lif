@@ -3,7 +3,7 @@ mod expr;
 mod stmt;
 mod write;
 
-use crate::runtime::bis::data::{Function, Generic, FunctionBody};
+use crate::runtime::bis::data::{Function, FunctionBody, Generic, GenericBody};
 use crate::runtime::bis::engine::Engine;
 use crate::runtime::bis::flow::{Flow, Jump, JumpKind, ResValue};
 use crate::runtime::bis::scope::Scope;
@@ -17,6 +17,12 @@ impl<'a> Function<'a> {
                 engine.with_frame(frame, |engine| {
                     for (param, arg) in std::iter::zip(self.params.iter(), args.iter().copied()) {
                         engine.write(&param.name, arg);
+                    }
+
+                    if let Some(rest) = self.rest.as_ref() {
+                        let elements = &args[self.params.len()..];
+                        let list = engine.new_list(Vec::from(elements));
+                        engine.write(&rest.name, list);
                     }
 
                     match block.eval(engine)? {
@@ -41,17 +47,29 @@ impl<'a> Function<'a> {
 
 impl<'a> Generic<'a> {
     pub fn apply(&self, engine: &mut Engine<'a>, args: &[Value<'a>]) -> ResValue<'a> {
-        engine.with_scope(|engine| {
-            for (param, arg) in self.params.iter().zip(args.iter().copied()) {
-                if arg.isa(param.r#type) {
-                    engine.write(&param.name, arg);
-                } else {
-                    todo!("ERROR");
-                }
-            }
+        let args = args.iter()
+            .map(|arg| arg.as_class())
+            .collect::<Box<[_]>>();
 
-            self.node.eval_def(engine)
-        })
+        for (param, arg) in self.params.iter().zip(args.iter().copied()) {
+            if arg.isa(param.r#type) {
+                let arg = engine.new_class_primitive(arg);
+                engine.write(&param.name, arg);
+            } else {
+                todo!("ERROR");
+            }
+        }
+
+        match self.body {
+            GenericBody::Node(node) => {
+                let frame = engine.alloc(Scope::new(Some(self.scope)));
+                engine.with_frame(frame, |engine| {
+                    // TODO: Args
+                    node.eval_def(engine)
+                })
+            }
+            GenericBody::Primitive(primitive) => primitive(engine, &args),
+        }
     }
 }
 

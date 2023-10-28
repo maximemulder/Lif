@@ -1,9 +1,8 @@
 use crate::ast::nodes::*;
 use crate::memory::Ref;
-use crate::runtime::bis::data::{Class, Function, GcClass, Generic};
-use crate::runtime::bis::data::function::Param;
+use crate::runtime::bis::data::{Class, Function, Param, GcClass, Generic};
 use crate::runtime::bis::engine::Engine;
-use crate::runtime::bis::flow::{Res, ResValue};
+use crate::runtime::bis::flow::{Res, ResValue, Flow};
 use crate::runtime::bis::value::Value;
 
 use std::collections::HashMap;
@@ -56,13 +55,10 @@ fn get_generics(node: &ADef) -> &[AGeneric] {
 
 fn make_generic<'a>(node: &ADef, engine: &mut Engine<'a>) -> Res<Value<'a>> {
     let generics = get_generics(node).iter()
-        .map(|generic| Ok(Param {
-            name: generic.name.clone(),
-            r#type: read_type(&generic.constraint, engine)?
-        }))
+        .map(|generic| Ok(Param::new(&generic.name, read_type(&generic.constraint, engine)?)))
         .collect::<Res<Box<_>>>()?;
 
-    let generic = Generic::new(generics, Ref::new(node));
+    let generic = Generic::new_node(engine.get_scope(), generics, Ref::new(node));
     Ok(engine.new_generic(generic))
 }
 
@@ -76,7 +72,7 @@ fn make_class<'a>(node: &AClass, engine: &mut Engine<'a>) -> Res<Value<'a>> {
         .collect::<HashMap<_, _>>();
 
     let parent = read_parent(&node.parent, engine)?;
-    let class = Class::new(&node.name, Some(parent), methods);
+    let class = Class::new(&node.name, Some(parent), methods, HashMap::new());
     Ok(engine.new_class(class))
 }
 
@@ -84,23 +80,29 @@ fn make_function<'a>(node: &AFunction, engine: &mut Engine<'a>) -> Res<Value<'a>
     let params = node.params.iter()
         .map(|param| make_parameter(param, engine))
         .collect::<Res<Box<[_]>>>()?;
+    let rest = if let Some(rest) = node.rest.as_ref() {
+        Some(make_parameter(rest, engine)?)
+    } else {
+        None
+    };
 
     let ret = read_type(&node.ret, engine)?;
-    let function = Function::new_block(&node.name, engine.get_scope(), params, ret, Ref::new(&node.body));
+    let function = Function::new_block(&node.name, engine.get_scope(), params, rest, ret, Ref::new(&node.body));
     Ok(engine.new_function(function))
 }
 
 fn make_parameter<'a>(node: &AParameter, engine: &mut Engine<'a>) -> Res<Param<'a>> {
-    Ok(Param {
-        name: node.name.clone(),
-        r#type: read_type(&node.r#type, engine)?
-    })
+    Ok(Param::new(&node.name,  read_type(&node.r#type, engine)?))
 }
 
 fn read_type<'a>(r#type: &Option<Box<AExpr>>, engine: &mut Engine<'a>) -> Res<GcClass<'a>> {
     if let Some(r#type) = r#type {
         match r#type.as_ref() {
             AExpr::Ident(ident) => Ok(engine.read(ident.pos, &ident.ident)?.as_class()),
+            AExpr::Apply(apply) => Ok(match apply.eval(engine)? {
+                Flow::Value(value) => value,
+                _ => panic!("TODO panic"),
+            }.as_class()),
             _ => todo!("TODO panic"),
         }
     } else {

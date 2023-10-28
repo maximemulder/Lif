@@ -9,7 +9,7 @@ pub mod string;
 
 pub use class::{Class, GcClass};
 pub use function::{Function, FunctionBody, GcFunction};
-pub use generic::{Generic, GcGeneric};
+pub use generic::{Generic, GenericBody, GcGeneric};
 pub use list::{List, GcList};
 pub use method::{Method, GcMethod};
 pub use object::{Object, GcObject};
@@ -46,5 +46,23 @@ impl GcTrace for Data<'_> {
             Data::Ref(r#ref) => r#ref.trace(),
             _ => (),
         }
+    }
+}
+
+#[derive(Clone)]
+pub struct Param<'a> {
+    pub name: Box<str>,
+    pub r#type: GcClass<'a>,
+}
+
+impl<'a> Param<'a> {
+    pub fn new(name: &str, r#type: GcClass<'a>) -> Self {
+        Self { name: Box::from(name), r#type }
+    }
+}
+
+impl GcTrace for Param<'_> {
+    fn trace(&mut self) {
+        self.r#type.trace();
     }
 }

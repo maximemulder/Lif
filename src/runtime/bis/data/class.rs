@@ -10,15 +10,21 @@ pub struct Class<'a> {
     pub name: Box<str>,
     parent: Option<GcClass<'a>>,
     methods: HashMap<Box<str>, Value<'a>>,
+    statics: HashMap<Box<str>, Value<'a>>,
 }
 
 impl<'a> Class<'a> {
-    pub fn new(name: &str, parent: Option<GcClass<'a>>, methods: HashMap<Box<str>, Value<'a>>) -> Self {
-        Self { name: Box::from(name), parent, methods }
+    pub fn new(
+        name: &str,
+        parent: Option<GcClass<'a>>,
+        methods: HashMap<Box<str>, Value<'a>>,
+        statics: HashMap<Box<str>, Value<'a>>,
+    ) -> Self {
+        Self { name: Box::from(name), parent, methods, statics }
     }
 
-    pub fn add_method(&mut self, name: Box<str>, method: Value<'a>) {
-        self.methods.insert(name, method);
+    pub fn add_method(&mut self, name: &str, method: Value<'a>) {
+        self.methods.insert(Box::from(name), method);
     }
 
     pub fn get_method(&self, name: &str) -> Option<Value<'a>> {
@@ -29,6 +35,14 @@ impl<'a> Class<'a> {
         } else {
             None
         }
+    }
+
+    pub fn add_static(&mut self, name: &str, r#static: Value<'a>) {
+        self.statics.insert(Box::from(name), r#static);
+    }
+
+    pub fn get_static(&self, name: &str) -> Option<Value<'a>> {
+        self.statics.get(name).copied()
     }
 
     pub fn isa(&self, class: GcClass<'a>) -> bool {

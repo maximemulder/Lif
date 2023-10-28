@@ -5,7 +5,7 @@ use crate::runtime::bis::{Value, ValueRef};
 use crate::runtime::bis::env::Env;
 use crate::runtime::bis::error::Error;
 use crate::runtime::gc::{Gc, GcCache, GcRef, GcTrace, GC_THRESHOLD};
-use crate::runtime::bis::data::{Data, Class, Function, Generic, List, Method, Object, Ref, String, GcClass};
+use crate::runtime::bis::data::{Data, Class, Function, Generic, List, Method, Object, Ref, String, GcClass, GcGeneric};
 use crate::runtime::bis::flow::{Res, ResValue};
 use crate::runtime::bis::primitive::populate;
 use crate::runtime::bis::scope::{Scope, GcScope};
@@ -165,12 +165,16 @@ impl<'a> Engine<'a> {
         Value::new(self.env.generic, Data::Generic(self.alloc(generic)))
     }
 
+    pub fn new_generic_primitive(&mut self, generic: GcGeneric<'a>) -> Value<'a> {
+        Value::new(self.env.generic, Data::Generic(generic))
+    }
+
     pub fn new_int(&mut self, int: i64) -> Value<'a> {
         Value::new(self.env.int, Data::Int(int))
     }
 
     pub fn new_list(&mut self, list: Vec<Value<'a>>) -> Value<'a> {
-        Value::new(self.env.list, Data::List(self.alloc(List(list))))
+        Value::new(self.env.list_any, Data::List(self.alloc(List(list))))
     }
 
     pub fn new_method(&mut self, receiver: Value<'a>, function: Value<'a>) -> Value<'a> {

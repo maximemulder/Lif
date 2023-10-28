@@ -1,7 +1,7 @@
 use crate::ast::nodes::ABlock;
 use crate::memory::Ref;
 use crate::runtime::gc::{GcRef, GcTrace};
-use crate::runtime::bis::data::GcClass;
+use crate::runtime::bis::data::{Param, GcClass};
 use crate::runtime::bis::engine::Engine;
 use crate::runtime::bis::flow::ResValue;
 use crate::runtime::bis::scope::GcScope;
@@ -26,6 +26,7 @@ impl<'a> Function<'a> {
         name: &str,
         scope: GcScope<'a>,
         params: Box<[Param<'a>]>,
+        rest: Option<Param<'a>>,
         ret: GcClass<'a>,
         block: Ref<ABlock>
     ) -> Self {
@@ -33,7 +34,7 @@ impl<'a> Function<'a> {
             name: Box::from(name),
             scope,
             params,
-            rest: None,
+            rest,
             ret,
             body: FunctionBody::Block(block)
         }
@@ -58,17 +59,11 @@ impl<'a> Function<'a> {
     }
 }
 
-#[derive(Clone)]
-pub struct Param<'a> {
-    pub name: Box<str>,
-    pub r#type: GcClass<'a>,
-}
-
 impl GcTrace for Function<'_> {
     fn trace(&mut self) {
         self.scope.trace();
         for param in self.params.iter_mut() {
-            param.r#type.trace();
+            param.trace();
         }
 
         self.ret.trace();

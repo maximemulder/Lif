@@ -3,24 +3,42 @@ use std::marker::PhantomData;
 use crate::ast::nodes::ADef;
 use crate::memory::Ref;
 use crate::runtime::gc::{GcRef, GcTrace};
-use crate::runtime::bis::data::function::Param;
+use crate::runtime::bis::data::{Param, GcClass};
+use crate::runtime::bis::engine::Engine;
+use crate::runtime::bis::flow::ResValue;
+use crate::runtime::bis::scope::GcScope;
 
 pub struct Generic<'a> {
+    pub scope: GcScope<'a>,
     pub params: Box<[Param<'a>]>,
-    pub node: Ref<ADef>,
+    pub body: GenericBody,
     phantom: PhantomData<&'a ()>,
 }
 
+pub enum GenericBody {
+    Node(Ref<ADef>),
+    Primitive(for<'a> fn(&mut Engine<'a>, &[GcClass<'a>]) -> ResValue<'a>),
+}
+
 impl<'a> Generic<'a> {
-    pub fn new(params: Box<[Param<'a>]>, node: Ref<ADef>) -> Self {
-        Self { params, node, phantom: PhantomData }
+    pub fn new_node(scope: GcScope<'a>, params: Box<[Param<'a>]>, node: Ref<ADef>) -> Self {
+        Self { scope, params, body: GenericBody::Node(node), phantom: PhantomData }
+    }
+
+    pub fn new_primitive(
+        scope: GcScope<'a>,
+        params: Box<[Param<'a>]>,
+        primitive: for<'b> fn(&mut Engine<'b>, &[GcClass<'b>]) -> ResValue<'b>
+    ) -> Self {
+        Self { scope, params, body: GenericBody::Primitive(primitive), phantom: PhantomData }
     }
 }
 
 impl GcTrace for Generic<'_> {
     fn trace(&mut self) {
+        self.scope.trace();
         for param in self.params.iter_mut() {
-            param.r#type.trace();
+            param.trace();
         }
     }
 }

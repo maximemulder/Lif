@@ -1,6 +1,5 @@
 use crate::parser::Code;
-use crate::runtime::bis::data::GcClass;
-use crate::runtime::bis::data::function::Param;
+use crate::runtime::bis::data::{Param, GcClass};
 use crate::runtime::bis::engine::Engine;
 use crate::runtime::bis::env::Env;
 use crate::runtime::bis::value::Value;
@@ -34,7 +33,7 @@ impl<'a> PrimFunction<'a> {
     pub fn new_rest<const N: usize>(
         name: &'static str,
         params: [(&'static str, GcClass<'a>); N],
-        rest: Param<'a>,
+        rest: (&'static str, GcClass<'a>),
         ret: GcClass<'a>,
         primitive: for<'b> fn(&mut Engine<'b>, &[Value<'b>]) -> ResValue<'b>
     ) -> Self {
@@ -42,7 +41,8 @@ impl<'a> PrimFunction<'a> {
             .map(|param| Param { name: Box::from(param.0), r#type: param.1 })
             .collect();
 
-        Self { name, params, rest: Some(rest), ret, primitive }
+        let rest = Some(Param { name: Box::from(rest.0), r#type: rest.1 });
+        Self { name, params, rest, ret, primitive }
     }
 }
 

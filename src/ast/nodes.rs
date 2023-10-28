@@ -22,6 +22,7 @@ pub struct AFunction {
     pub name: Box<str>,
     pub generics: Box<[AGeneric]>,
     pub params: Box<[AParameter]>,
+    pub rest: Option<AParameter>,
     pub ret: Option<Box<AExpr>>,
     pub body: ABlock,
 }
