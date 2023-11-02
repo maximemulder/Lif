@@ -1,0 +1,3 @@
+while "Foo" {
+    print("Bar");
+}

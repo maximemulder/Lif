@@ -6,7 +6,7 @@ pub struct Ref<T: ?Sized> {
 }
 
 impl<T> Ref<T> {
-    pub fn null() -> Self {
+    pub const fn null() -> Self {
         Self {
             pointer: null(),
         }

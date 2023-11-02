@@ -1,0 +1,8 @@
+RUNTIME ERROR: `foo` has 1 generic parameters but 2 arguments were supplied
+--> `function_arity.lif` 3:1
+|
+| foo[Int, Int];
+| ^^^
+
+STACK TRACE:
+  in `main` 1:1

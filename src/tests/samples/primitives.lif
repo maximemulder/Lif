@@ -1,2 +1,0 @@
-print(eval("6 + 6"));
-exec("print(6 + 6);");

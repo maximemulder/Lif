@@ -1,11 +1,10 @@
-use crate::memory::Ref;
 use crate::parser::{ Element, CNode };
 
 pub fn tokens(nodes: &[CNode]) {
     for node in nodes {
         let children = node.children();
         if children.is_empty() {
-            println!("{} {:?}", node.element.name, Ref::as_ref(&node.text()));
+            println!("{} {:?}", node.element.name, node.text().as_ref());
         } else {
             tokens(children);
         }
@@ -32,9 +31,7 @@ fn node(tree: &CNode, prefix: &str, infix: &str) {
 
 fn element(prefix: &str, element: &Element, tree: &CNode) {
     if tree.children().is_empty() {
-        let refe = tree.text();
-        let text: &str = refe.as_ref();
-        println!("{}{} {:?}", prefix, element.name, text);
+        println!("{}{} {:?}", prefix, element.name, tree.text().as_ref());
     } else {
         println!("{}{}", prefix, element.name);
     };

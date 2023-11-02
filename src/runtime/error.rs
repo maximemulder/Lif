@@ -1,45 +1,23 @@
-use crate::memory::Ref;
-use crate::parser::CNode;
+use crate::ast::Pos;
 
-use std::cmp::min;
+use crate::runtime::flow::Res;
 
 pub struct Error {
-    pub message: Box<str>,
-    pub node: Option<Ref<CNode>>,
+    pos: Pos,
+    message: Box<str>,
 }
 
 impl Error {
-    fn new(message: String, node: Option<Ref<CNode>>) -> Self {
-        Self {
-            message: message.into_boxed_str(),
-            node,
-        }
+    pub fn new<T>(pos: Pos, message: String) -> Res<T> {
+        Err(Self { pos, message: Box::from(message) })
     }
 
-    pub fn new_runtime(error: &str) -> Self {
-        let mut message = String::new();
-        message += "RUNTIME ERROR: ";
-        message += error;
-        Self::new(message, None)
-    }
-
-    pub fn get_message(&self) -> String {
-        let mut message = String::new();
-        message += &self.message;
-        if let Some(node) = self.node {
-            let code = node.code;
-            if let Some(name) = code.name.as_ref() {
-                message += " ";
-                message += name;
-            }
-
-            message += "\n\n";
-            message += code.node_line(&node);
-            message += "\n";
-            message += &" ".repeat(code.node_shift_left(&node));
-            message += &"^".repeat(min(code.node_str(&node).len(), code.node_shift_right(&node)));
-        }
-
-        message
+    pub fn get_message(&self) -> Box<str> {
+        format!("RUNTIME ERROR: {}\n--> `{}` {}\n{}",
+            self.message,
+            self.pos.print_name(),
+            self.pos.print_pos(),
+            self.pos.print_node(),
+        ).into_boxed_str()
     }
 }

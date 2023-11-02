@@ -1,0 +1,8 @@
+RUNTIME ERROR: expected value of type `Int` but found value of type `String`
+--> `assign_variable_bis.lif` 2:1
+|
+| foo = "Bar";
+| ^^^
+
+STACK TRACE:
+  in `main` 1:1

@@ -1,0 +1,8 @@
+RUNTIME ERROR: undeclared variable `foo`
+--> `undeclared.lif` 1:7
+|
+| print(foo);
+|       ^^^
+
+STACK TRACE:
+  in `main` 1:1

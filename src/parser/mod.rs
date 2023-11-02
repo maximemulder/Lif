@@ -15,7 +15,7 @@ mod node;
 
 pub use grammar::get as grammar;
 
-pub use code::Code;
+pub use code::{Ast, Code};
 pub use element::Element;
 pub use grammar::Grammar;
 pub use parse::Parse;

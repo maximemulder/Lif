@@ -12,7 +12,7 @@ pub struct CNode {
 }
 
 impl CNode {
-    pub fn new(code: Ref<Code>,  element: &'static Element, children: Box<[CNode]>, left: usize, right: usize) -> Self {
+    pub fn new(code: Ref<Code>, element: &'static Element, children: Box<[CNode]>, left: usize, right: usize) -> Self {
         debug_assert!(right >= left);
         Self {
             code,
@@ -37,10 +37,6 @@ impl CNode {
         Self::new(code, element, children, left, right)
     }
 
-    pub fn children(&self) -> &[CNode] {
-        &self.children
-    }
-
     pub fn left(&self) -> usize {
         self.left
     }
@@ -49,16 +45,15 @@ impl CNode {
         self.right
     }
 
-    pub fn front(&self, index: usize) -> Ref<CNode>{
-        Ref::new(&self.children()[index])
+    pub fn text(&self) -> Box<str> {
+        Box::from(self.code.node_str(self))
     }
 
-    pub fn back(&self, index: usize) -> Ref<CNode> {
-        let children = self.children();
-        Ref::new(&children[children.len() - index])
+    pub fn at(&self, index: usize) -> &CNode {
+        &self.children()[index]
     }
 
-    pub fn text(&self) -> Ref<str> {
-        Ref::new(self.code.node_str(self))
+    pub fn children(&self) -> &[CNode] {
+        &self.children
     }
 }

@@ -1,0 +1,8 @@
+RUNTIME ERROR: undefined variable
+--> `undefined.lif` 2:7
+|
+| print(foo);
+|       ^^^
+
+STACK TRACE:
+  in `main` 1:1

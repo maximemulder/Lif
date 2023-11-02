@@ -13,4 +13,5 @@ declare_node!(LET);
 declare_node!(LOOP);
 declare_node!(RETURN);
 declare_node!(TRUE);
+declare_node!(VOID);
 declare_node!(WHILE);

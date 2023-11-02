@@ -1,0 +1,14 @@
+let a = 1;
+print(a);
+
+let b;
+b = 1;
+print(b);
+
+let c = new(Object);
+c.a = 1;
+print(c.a);
+
+let d = List[Int](0);
+d(0) = 1;
+print(d(0));
