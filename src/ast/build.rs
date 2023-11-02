@@ -5,7 +5,7 @@ use crate::parser::elements;
 
 
 fn pos(node: &CNode) -> Pos {
-    Pos { source: node.code, start: node.left(), length: node.right() - node.left() }
+    Pos { source: Some(node.code), start: node.left(), length: node.right() - node.left() }
 }
 
 pub fn build_program(node: &CNode) -> AProgram {

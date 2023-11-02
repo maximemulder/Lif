@@ -1,0 +1,8 @@
+RUNTIME ERROR: invalid jump
+--> `main_break.lif` 1:1
+|
+| break;
+| ^^^^^
+
+STACK TRACE:
+  in `main` 1:1

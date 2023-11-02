@@ -1,32 +1,37 @@
+use crate::ast::Pos;
 use crate::memory::Mut;
 use crate::runtime::bis::Value;
+use crate::runtime::bis::eval::errors::error_undefined;
+use crate::runtime::bis::flow::Res;
+use crate::runtime::bis::variable::Variable;
 use crate::runtime::gc::GcTrace;
 
 #[derive(Clone, Copy)]
 pub struct Ref<'a> {
-    value: Mut<Option<Value<'a>>>,
+    variable: Mut<Variable<'a>>,
 }
 
 impl<'a> Ref<'a> {
-    pub fn new(value: *mut Option<Value<'a>>) -> Self {
+    pub fn new(variable: *mut Variable<'a>) -> Self {
         Self {
-            value: Mut::new(value)
+            variable: Mut::new(variable)
         }
     }
 
-    pub fn read(&self) -> Option<Value<'a>> {
-        *self.value
+    pub fn read(&self, pos: Pos) -> Res<Value<'a>> {
+        match self.variable.content() {
+            Some(value) => Ok(value),
+            None => error_undefined(pos),
+        }
     }
 
-    pub fn write(&mut self, value: Value<'a>) {
-        *self.value = Some(value);
+    pub fn write(&mut self, pos: Pos, value: Value<'a>) -> Res<()> {
+        self.variable.write(pos, value)
     }
 }
 
 impl GcTrace for Ref<'_> {
     fn trace(&mut self) {
-        if let Some(value) = self.value.as_mut() {
-            value.trace();
-        }
+        self.variable.trace();
     }
 }

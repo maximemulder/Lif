@@ -1,13 +1,14 @@
 use crate::ast::nodes::*;
 use crate::runtime::bis::engine::Engine;
-use crate::runtime::bis::flow::{Flow, Jump, ResJump};
+use crate::runtime::bis::flow::{Jump, ResJump};
 
 macro_rules! flow_jump {
     ( $flow:expr ) => {{
+        use crate::runtime::bis::flow::FlowT;
         let flow = $flow?;
         match flow {
-            Flow::Value(value) => value,
-            Flow::Jump(jump) => return Jump::some(jump),
+            FlowT::None(value) => value,
+            FlowT::Jump(jump) => return Jump::some(jump),
         }
     }}
 }

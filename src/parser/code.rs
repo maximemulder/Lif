@@ -23,7 +23,7 @@ pub struct Code {
 }
 
 impl Code {
-    fn new<T: ANode + WExecutable + 'static>(grammar: &Grammar, production: ArenaRef<dyn Descent>, name: Option<&str>, text: Box<str>) -> Own<Self> {
+    pub fn new<T: ANode + WExecutable + 'static>(grammar: &Grammar, production: ArenaRef<dyn Descent>, name: Option<&str>, text: Box<str>) -> Own<Self> {
         let mut code = Own::new(Self {
             text,
             name: name.map(Box::from),

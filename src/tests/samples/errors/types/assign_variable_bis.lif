@@ -1,0 +1,2 @@
+let foo: Int = 1;
+foo = "Bar";

@@ -1,3 +1,4 @@
+use crate::ast::Pos;
 use crate::runtime::bis::error::Error;
 use crate::runtime::bis::value::Value;
 
@@ -8,13 +9,14 @@ pub enum JumpKind {
 }
 
 pub struct Jump<'a> {
+    pub pos: Pos,
     pub jump: JumpKind,
     pub value: Option<Value<'a>>,
 }
 
 impl<'a> Jump<'a> {
-    pub fn new(jump: JumpKind, value: Option<Value<'a>>) -> ResJump<'a> {
-        Ok(Some(Self { jump, value }))
+    pub fn new(pos: Pos, jump: JumpKind, value: Option<Value<'a>>) -> ResJump<'a> {
+        Ok(Some(Self { pos, jump, value }))
     }
 
     pub fn some(jump: Jump<'a>) -> ResJump<'a> {
@@ -26,25 +28,31 @@ impl<'a> Jump<'a> {
     }
 }
 
-pub enum Flow<'a> {
-    Value(Value<'a>),
+pub type Flow<'a> = FlowT<'a, Value<'a>>;
+
+pub enum FlowT<'a, T> {
+    None(T),
     Jump(Jump<'a>),
 }
 
-impl<'a> Flow<'a> {
-    pub fn value(value: Value<'a>) -> ResFlow<'a> {
-        Ok(Self::Value(value))
+impl<'a, T> FlowT<'a, T> {
+    pub fn none(value: T) -> ResFlowT<'a, T> {
+        Ok(Self::None(value))
     }
 
-    pub fn jump(jump: JumpKind, value: Option<Value<'a>>) -> ResFlow<'a> {
-        Ok(Self::Jump(Jump { jump, value }))
+    pub fn jump(pos: Pos, jump: JumpKind, value: Option<Value<'a>>) -> ResFlowT<'a, T> {
+        Ok(Self::Jump(Jump { pos, jump, value }))
     }
 }
 
 pub type Res<T> = Result<T, Error>;
+
+pub type ResFlowT<'a, T> = Res<FlowT<'a, T>>;
 
 pub type ResFlow<'a> = Res<Flow<'a>>;
 
 pub type ResJump<'a> = Res<Option<Jump<'a>>>;
 
 pub type ResValue<'a> = Res<Value<'a>>;
+
+pub type ResVoid = Res<()>;

@@ -1,0 +1,9 @@
+RUNTIME ERROR: function `foo` expects 1 arguments but 2 were supplied
+--> `arity.lif` 3:1
+|
+| foo(1, 2);
+| ^^^
+
+STACK TRACE:
+  in `__cl__` 3:1
+  in `main` 1:1

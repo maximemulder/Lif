@@ -66,6 +66,10 @@ impl GcTrace for Function<'_> {
             param.trace();
         }
 
+        if let Some(rest) = self.rest.as_mut() {
+            rest.trace();
+        }
+
         self.ret.trace();
     }
 }

@@ -9,6 +9,7 @@ use crate::runtime::bis::flow::ResValue;
 use crate::runtime::bis::scope::GcScope;
 
 pub struct Generic<'a> {
+    pub name: Box<str>,
     pub scope: GcScope<'a>,
     pub params: Box<[Param<'a>]>,
     pub body: GenericBody,
@@ -21,16 +22,29 @@ pub enum GenericBody {
 }
 
 impl<'a> Generic<'a> {
-    pub fn new_node(scope: GcScope<'a>, params: Box<[Param<'a>]>, node: Ref<ADef>) -> Self {
-        Self { scope, params, body: GenericBody::Node(node), phantom: PhantomData }
+    pub fn new_node(name: &str, scope: GcScope<'a>, params: Box<[Param<'a>]>, node: Ref<ADef>) -> Self {
+        Self {
+            name: Box::from(name),
+            scope,
+            params,
+            body: GenericBody::Node(node),
+            phantom: PhantomData
+        }
     }
 
     pub fn new_primitive(
+        name: &str,
         scope: GcScope<'a>,
         params: Box<[Param<'a>]>,
         primitive: for<'b> fn(&mut Engine<'b>, &[GcClass<'b>]) -> ResValue<'b>
     ) -> Self {
-        Self { scope, params, body: GenericBody::Primitive(primitive), phantom: PhantomData }
+        Self {
+            name: Box::from(name),
+            scope,
+            params,
+            body: GenericBody::Primitive(primitive),
+            phantom: PhantomData
+        }
     }
 }
 

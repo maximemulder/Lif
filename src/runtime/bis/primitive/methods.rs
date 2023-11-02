@@ -84,20 +84,19 @@ pub fn get_methods<'a>(env: &Env<'a>) -> [PrimMethod<'a>; 9] {
         PrimMethod::new(env.string, [
             PrimFunction::new("__str__", [],                      env.string, string_str),
             PrimFunction::new("__eq__",  [("other", env.any)],    env.string, string_eq),
-            PrimFunction::new("__add__", [("other", env.string)], env.string, string_add),
+            PrimFunction::new("__add__", [("other", env.any)], env.string, string_add),
         ]),
     ]
 }
 
-pub fn get_list_methods<'a>(env: &Env<'a>, _: GcClass<'a>, args: &[GcClass<'a>]) -> [PrimFunction<'a>; 6] {
-    let arg = args[0];
+pub fn get_list_methods<'a>(env: &Env<'a>, _: GcClass<'a>, _args: &[GcClass<'a>]) -> [PrimFunction<'a>; 6] {
     [
-        PrimFunction::new("__str__", [],                   env.string, list_str),
-        PrimFunction::new("__cl__",  [("index", env.int)], env.int,    list_cl),
-        PrimFunction::new("insert",  [("element", arg)],   env.bool,   list_insert),
-        PrimFunction::new("prepend", [("element", arg)],   env.bool,   list_prepend),
-        PrimFunction::new("append",  [("element", arg)],   env.bool,   list_append),
-        PrimFunction::new("remove",  [("index", env.int)], env.void,   list_remove),
+        PrimFunction::new("__str__", [], env.string, list_str),
+        PrimFunction::new("__cl__",  [("args", env.any)], env.int, list_cl),
+        PrimFunction::new_rest("insert",  [("index", env.int)], ("elems", env.any), env.void, list_insert),
+        PrimFunction::new_rest("prepend", [], ("elems", env.any), env.void, list_prepend),
+        PrimFunction::new_rest("append", [], ("elems", env.any), env.void, list_append),
+        PrimFunction::new("remove",  [("index", env.int)], env.void, list_remove),
     ]
 }
 
@@ -112,24 +111,24 @@ fn any_cn<'a>(engine: &mut Engine<'a>, args: &[Value<'a>]) -> ResValue<'a> {
 }
 
 fn any_ne<'a>(engine: &mut Engine<'a>, args: &[Value<'a>]) -> ResValue<'a> {
-    let result = args[0].call_method_self(engine, "__eq__", args)?.as_bool();
+    let result = args[0].call_method_self(engine, engine.frame().pos(), "__eq__", args)?.as_bool();
     Ok(engine.new_bool(!result))
 }
 
 fn any_gt<'a>(engine: &mut Engine<'a>, args: &[Value<'a>]) -> ResValue<'a> {
-    let left  = args[0].call_method_self(engine, "__lt__", args)?;
-    let right = args[0].call_method_self(engine, "__eq__", args)?;
+    let left  = args[0].call_method_self(engine, engine.frame().pos(), "__lt__", args)?;
+    let right = args[0].call_method_self(engine, engine.frame().pos(), "__eq__", args)?;
     Ok(engine.new_bool(!left.as_bool() && !right.as_bool()))
 }
 
 
 fn any_le<'a>(engine: &mut Engine<'a>, args: &[Value<'a>]) -> ResValue<'a> {
-    let left  = args[0].call_method_self(engine, "__lt__", args)?;
-    let right = args[0].call_method_self(engine, "__eq__", args)?;
+    let left  = args[0].call_method_self(engine, engine.frame().pos(), "__lt__", args)?;
+    let right = args[0].call_method_self(engine, engine.frame().pos(), "__eq__", args)?;
     Ok(engine.new_bool(left.as_bool() || right.as_bool()))
 }
 fn any_ge<'a>(engine: &mut Engine<'a>, args: &[Value<'a>]) -> ResValue<'a> {
-    let result = args[0].call_method_self(engine, "__lt__", args)?;
+    let result = args[0].call_method_self(engine, engine.frame().pos(), "__lt__", args)?;
     Ok(engine.new_bool(!result.as_bool()))
 }
 
@@ -153,14 +152,14 @@ fn class_cl<'a>(engine: &mut Engine<'a>, args: &[Value<'a>]) -> ResValue<'a> {
     let class = args[0].as_class();
     let args = args[1].as_list();
     if let Some(init) = class.get_static("__init__") {
-        return init.as_function().call(engine, &args.0);
+        return init.as_function().call(engine, engine.frame().pos(), &args.values());
     }
 
     todo!("ERROR");
 }
 
 fn function_cl<'a>(engine: &mut Engine<'a>, args: &[Value<'a>]) -> ResValue<'a> {
-    args[0].as_function().call(engine, &args[1].as_list().0)
+    args[0].as_function().call(engine, engine.frame().pos(), &args[1].as_list().values())
 }
 
 fn float_str<'a>(engine: &mut Engine<'a>, args: &[Value<'a>]) -> ResValue<'a> {
@@ -290,29 +289,31 @@ fn int_bcrs<'a>(engine: &mut Engine<'a>, args: &[Value<'a>]) -> ResValue<'a> {
 fn method_cl<'a>(engine: &mut Engine<'a>, args: &[Value<'a>]) -> ResValue<'a> {
     let method = args[0].as_method();
     let args = std::iter::once(method.receiver)
-        .chain(args[1].as_list().iter())
+        .chain(args[1].as_list().values().iter().copied())
         .collect::<Box<_>>();
 
-    method.function.as_function().call(engine, &args)
+    method.function.as_function().call(engine, engine.frame().pos(), &args)
 }
 
 fn list_str<'a>(engine: &mut Engine<'a>, _: &[Value<'a>]) -> ResValue<'a> {
     Ok(engine.new_string("[LIST]"))
 }
 
-fn list_cl<'a>(_: &mut Engine<'a>, args: &[Value<'a>]) -> ResValue<'a> {
-    Ok(args[0].as_list().get(args[1].as_list().0[0].as_int() as usize))
+fn list_cl<'a>(engine: &mut Engine<'a>, args: &[Value<'a>]) -> ResValue<'a> {
+    let index = args[1].as_list().values()[0].as_int() as usize;
+    let r#ref = args[0].as_list().get_ref(index);
+    Ok(engine.new_ref(r#ref))
 }
 
 fn list_insert<'a>(engine: &mut Engine<'a>, args: &[Value<'a>]) -> ResValue<'a> {
     let index = args[1].as_int() as usize;
-    args[0].as_list().insert(index, args[2]);
+    args[0].as_list().insert(engine.env.any, index, args[2]);
     Ok(engine.new_void())
 }
 
 fn list_append<'a>(engine: &mut Engine<'a>, args: &[Value<'a>]) -> ResValue<'a> {
     for index in 1 .. args.len() {
-        args[0].as_list().append(args[index]);
+        args[0].as_list().append(engine.env.any, args[index]);
     }
 
     Ok(engine.new_void())
@@ -320,7 +321,7 @@ fn list_append<'a>(engine: &mut Engine<'a>, args: &[Value<'a>]) -> ResValue<'a> 
 
 fn list_prepend<'a>(engine: &mut Engine<'a>, args: &[Value<'a>]) -> ResValue<'a> {
     for index in 1 .. args.len() {
-        args[0].as_list().insert(index - 1, args[index]);
+        args[0].as_list().insert(engine.env.any, index - 1, args[index]);
     }
 
     Ok(engine.new_void())
@@ -335,7 +336,8 @@ fn list_remove<'a>(engine: &mut Engine<'a>, args: &[Value<'a>]) -> ResValue<'a> 
 fn object_str<'a>(engine: &mut Engine<'a>, args: &[Value<'a>]) -> ResValue<'a> {
     let mut string = "{".to_string();
     string.push_str(&args[0].as_object().attributes.iter()
-        .map(|(name, attribute)| Ok(format!("{}: {}", &name, &attribute.unwrap().call_method(engine, "__str__", &[])?.as_string().as_ref())))
+        .filter_map(|(name, attribute)| attribute.content().map(|attribute| (name, attribute)))
+        .map(|(name, attribute)| Ok(format!("{}: {}", &name, &attribute.call_method(engine, engine.frame().pos(), "__str__", &[])?.as_string().as_ref())))
         .collect::<Res<Box<[_]>>>()?
         .join(", ")
     );
@@ -351,8 +353,9 @@ fn object_cn<'a>(engine: &mut Engine<'a>, args: &[Value<'a>]) -> ResValue<'a> {
         return Ok(engine.new_method(receiver, method));
     }
 
-    let object = receiver.as_object();
-    Ok(object.get_attr(name.as_ref()))
+    let mut object = receiver.as_object();
+    let r#ref = object.get_attr(name.as_ref(), engine.env.any);
+    Ok(engine.new_ref(r#ref))
 }
 
 fn string_str<'a>(_: &mut Engine<'a>, args: &[Value<'a>]) -> ResValue<'a> {
@@ -369,6 +372,6 @@ fn string_eq<'a>(engine: &mut Engine<'a>, args: &[Value<'a>]) -> ResValue<'a> {
 
 fn string_add<'a>(engine: &mut Engine<'a>, args: &[Value<'a>]) -> ResValue<'a> {
     let left = args[0].as_string();
-    let right = args[1].call_method(engine, "__str__", &[])?.as_string();
+    let right = args[1].call_method(engine, engine.frame().pos(), "__str__", &[])?.as_string();
     Ok(engine.new_string(&format!("{}{}", left.as_ref(), right.as_ref())))
 }

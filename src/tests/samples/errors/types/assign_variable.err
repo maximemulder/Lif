@@ -1,0 +1,8 @@
+RUNTIME ERROR: expected value of type `Int` but found value of type `String`
+--> `assign_variable.lif` 1:1
+|
+| let foo: Int = "Bar";
+| ^^^
+
+STACK TRACE:
+  in `main` 1:1

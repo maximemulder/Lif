@@ -22,6 +22,7 @@ use runtime::engine::Engine;
 use walker::nodes::AProgram;
 
 use std::env::args;
+use std::fs::read_to_string;
 use std::io::{ stderr, stdin, stdout };
 
 fn main() {
@@ -39,13 +40,14 @@ fn main() {
     let code = Code::from_file::<AProgram>(engine.grammar, engine.grammar.program, &args[1]).unwrap();
     engine.run(code);
 
-    println!("AAA");
+    println!("=====");
 
     let mut input  = stdin();
     let mut output = stdout();
     let mut error  = stderr();
     let io = runtime::bis::engine::Io::new(&mut input, &mut output, &mut error);
-    let mut engine = runtime::bis::engine::Engine::new(io, engine.grammar);
-    let code = Code::from_file::<AProgram>(engine.grammar, engine.grammar.program, &args[1]).unwrap();
+    let mut engine = runtime::bis::engine::Engine::new(io, &parser);
+    let text = read_to_string(&args[1]).unwrap();
+    let code = Code::new::<AProgram>(engine.grammar, engine.grammar.program, Some(&args[1]), text.into_boxed_str());
     engine.run(code);
 }

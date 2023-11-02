@@ -1,14 +1,16 @@
+use crate::ast::Pos;
 use crate::ast::nodes::*;
+use crate::runtime::bis::data::Ref;
 use crate::runtime::bis::engine::Engine;
-use crate::runtime::bis::flow::{Flow, Jump, JumpKind, ResFlow};
+use crate::runtime::bis::flow::{Flow, FlowT, Jump, JumpKind, ResFlow, ResFlowT};
+use super::r#type::read_type_any;
 
 macro_rules! flow {
     ( $flow:expr ) => {{
-        let flow = $flow?;
-        if let Flow::Value(value) = flow {
-            value
-        } else {
-            return Ok(flow);
+        use crate::runtime::bis::flow::FlowT;
+        match $flow? {
+            FlowT::None(value) => value,
+            FlowT::Jump(jump) => return Ok(FlowT::Jump(jump)),
         }
     }}
 }
@@ -17,9 +19,8 @@ pub(crate) use flow;
 
 macro_rules! jump_flow {
     ( $jump:expr ) => {{
-        let jump = $jump?;
-        match jump {
-            Some(Jump { jump, value }) => return Flow::jump(jump, value),
+        match $jump? {
+            Some(Jump { pos, jump, value }) => return Flow::jump(pos, jump, value),
             None => (),
         }
     }}
@@ -53,17 +54,62 @@ impl AExpr {
             AExpr::Assign(assign)       => assign.eval(engine),
         }
     }
+
+    pub fn pos(&self) -> Pos {
+        match self {
+            AExpr::Void     (node) => node.pos,
+            AExpr::Bool     (node) => node.pos,
+            AExpr::Int      (node) => node.pos,
+            AExpr::Float    (node) => node.pos,
+            AExpr::String   (node) => node.pos,
+            AExpr::Ident    (node) => node.pos,
+            AExpr::Var      (node) => node.pos,
+            AExpr::Chain    (node) => node.pos,
+            AExpr::Apply    (node) => node.pos,
+            AExpr::Call     (node) => node.pos,
+            AExpr::Continue (node) => node.pos,
+            AExpr::Break    (node) => node.pos,
+            AExpr::Return   (node) => node.pos,
+            AExpr::Preop    (node) => node.pos,
+            AExpr::Binop    (node) => node.pos,
+            AExpr::Or       (node) => node.pos,
+            AExpr::And      (node) => node.pos,
+            AExpr::Block    (node) => node.pos,
+            AExpr::If       (node) => node.pos,
+            AExpr::Loop     (node) => node.pos,
+            AExpr::While    (node) => node.pos,
+            AExpr::For      (node) => node.pos,
+            AExpr::Assign   (node) => node.pos,
+        }
+    }
+
+    pub fn read<'a>(&self, engine: &mut Engine<'a>) -> ResFlow<'a> {
+        let value = flow!(self.eval(engine));
+        Flow::none(value.read(self.pos())?)
+    }
+
+    pub fn read_bool<'a>(&self, engine: &mut Engine<'a>) -> ResFlowT<'a, bool> {
+        let value = flow!(self.read(engine));
+        value.isa_type(self.pos(), engine.env.bool)?;
+        FlowT::none(value.as_bool())
+    }
+
+    pub fn read_ref<'a>(&self, engine: &mut Engine<'a>) -> ResFlowT<'a, Ref<'a>> {
+        let value = flow!(self.eval(engine));
+        value.isa_type(self.pos(), engine.env.r#ref)?;
+        FlowT::none(value.as_ref())
+    }
 }
 
 impl AExprVoid {
     fn eval<'a>(&self, engine: &mut Engine<'a>) -> ResFlow<'a> {
-        Flow::value(engine.new_void())
+        Flow::none(engine.new_void())
     }
 }
 
 impl AExprBool {
     fn eval<'a>(&self, engine: &mut Engine<'a>) -> ResFlow<'a> {
-        Flow::value(engine.new_bool(self.bool))
+        Flow::none(engine.new_bool(self.bool))
     }
 }
 
@@ -77,7 +123,7 @@ impl AExprInt {
             _ => literal.parse::<i64>().unwrap(),
         };
 
-        Flow::value(engine.new_int(int))
+        Flow::none(engine.new_int(int))
     }
 }
 
@@ -85,103 +131,107 @@ impl AExprFloat {
     fn eval<'a>(&self, engine: &mut Engine<'a>) -> ResFlow<'a> {
         let literal = self.literal.replace("_", "");
         let float = literal.parse::<f64>().unwrap();
-        Flow::value(engine.new_float(float))
+        Flow::none(engine.new_float(float))
     }
 }
 
 impl AExprString {
     fn eval<'a>(&self, engine: &mut Engine<'a>) -> ResFlow<'a> {
-        Flow::value(engine.new_string(&self.literal[1 .. self.literal.len() - 1]))
+        Flow::none(engine.new_string(&self.literal[1 .. self.literal.len() - 1]))
     }
 }
 
 impl AExprIdent {
     fn eval<'a>(&self, engine: &mut Engine<'a>) -> ResFlow<'a> {
-        Flow::value(engine.read(self.pos, &self.ident)?)
+        let r#ref = engine.read(self.pos, &self.ident)?;
+        let value = engine.new_ref(r#ref);
+        Flow::none(value)
     }
 }
 
 impl AExprVar {
     fn eval<'a>(&self, engine: &mut Engine<'a>) -> ResFlow<'a> {
-        let void = engine.new_void();
-        engine.write(&self.ident, void);
-        Flow::value(void)
+        let r#type = read_type_any(&self.r#type, engine)?;
+        engine.declare(&self.ident, r#type);
+        let r#ref = engine.read(self.pos, &self.ident)?;
+        let value = engine.new_ref(r#ref);
+        Flow::none(value)
     }
 }
 
 impl AExprChain {
     fn eval<'a>(&self, engine: &mut Engine<'a>) -> ResFlow<'a> {
-        let value = flow!(self.expr.eval(engine));
+        let value = flow!(self.expr.read(engine));
         let attr = engine.new_string(&self.member);
-        Flow::value(value.call_method(engine, "__cn__", &[attr])?)
+        Flow::none(value.call_method(engine, self.pos, "__cn__", &[attr])?)
     }
 }
 
 impl AExprApply {
     pub fn eval<'a>(&self, engine: &mut Engine<'a>) -> ResFlow<'a> {
-        let generic = flow!(self.expr.eval(engine)).as_generic();
+        let generic = flow!(self.expr.read(engine)).as_generic();
         let mut args = Vec::new();
         for arg in self.args.iter() {
-            args.push(flow!(arg.eval(engine)))
+            args.push(flow!(arg.read(engine)).as_class())
         }
 
-        Flow::value(generic.apply(engine, &args)?)
+        Flow::none(engine.get_generic(self.pos, generic, args.into_boxed_slice())?)
     }
 }
 
 impl AExprCall {
     fn eval<'a>(&self, engine: &mut Engine<'a>) -> ResFlow<'a> {
-        let receiver = flow!(self.expr.eval(engine));
+        let receiver = flow!(self.expr.read(engine));
         let function = receiver.class.get_method("__cl__").expect("TODO").as_function();
         let mut values = Vec::new();
         for arg in self.args.iter() {
-            values.push(flow!(arg.eval(engine)))
+            values.push(flow!(arg.read(engine)))
         }
 
-        let args = engine.new_list(values);
-        Flow::value(function.call(engine, &[receiver, args])?)
+        let args = engine.new_list(&values);
+        Flow::none(function.call(engine, self.pos, &[receiver, args])?)
     }
 }
 
 impl AExprContinue {
     fn eval<'a>(&self, engine: &mut Engine<'a>) -> ResFlow<'a> {
         let value = if let Some(expr) = self.expr.as_ref() {
-            Some(flow!(expr.eval(engine)))
+            Some(flow!(expr.read(engine)))
         } else {
             None
         };
 
-        Flow::jump(JumpKind::Continue, value)
+        Flow::jump(self.pos, JumpKind::Continue, value)
     }
 }
 
 impl AExprBreak {
     fn eval<'a>(&self, engine: &mut Engine<'a>) -> ResFlow<'a> {
         let value = if let Some(expr) = self.expr.as_ref() {
-            Some(flow!(expr.eval(engine)))
+            Some(flow!(expr.read(engine)))
         } else {
             None
         };
 
-        Flow::jump(JumpKind::Break, value)
+        Flow::jump(self.pos, JumpKind::Break, value)
     }
 }
 
 impl AExprReturn {
     fn eval<'a>(&self, engine: &mut Engine<'a>) -> ResFlow<'a> {
         let value = if let Some(expr) = self.expr.as_ref() {
-            Some(flow!(expr.eval(engine)))
+            Some(flow!(expr.read(engine)))
         } else {
             None
         };
 
-        Flow::jump(JumpKind::Return, value)
+        Flow::jump(self.pos, JumpKind::Return, value)
     }
 }
 
 impl AExprPreop {
     fn eval<'a>(&self, engine: &mut Engine<'a>) -> ResFlow<'a> {
-        let value = flow!(self.expr.eval(engine));
+        let value = flow!(self.expr.read(engine));
         let name = match self.op.as_ref() {
             "~" => "__bnot__",
             "+" => "__pos__",
@@ -190,14 +240,14 @@ impl AExprPreop {
             _   => panic!(),
         };
 
-        Flow::value(value.call_method(engine, name, &[])?)
+        Flow::none(value.call_method(engine, self.pos, name, &[])?)
     }
 }
 
 impl AExprBinop {
     fn eval<'a>(&self, engine: &mut Engine<'a>) -> ResFlow<'a> {
-        let left = flow!(self.left.eval(engine));
-        let right = flow!(self.right.eval(engine));
+        let left = flow!(self.left.read(engine));
+        let right = flow!(self.right.read(engine));
         let name = match self.op.as_ref() {
             "==" => "__eq__",
             "!=" => "__ne__",
@@ -220,28 +270,28 @@ impl AExprBinop {
             _   => panic!(),
         };
 
-        Flow::value(left.call_method(engine, name, &[right])?)
+        Flow::none(left.call_method(engine, self.pos, name, &[right])?)
     }
 }
 
 impl AExprOr {
     fn eval<'a>(&self, engine: &mut Engine<'a>) -> ResFlow<'a> {
-        if flow!(self.left.eval(engine)).as_bool() {
-            Flow::value(engine.new_bool(true))
+        if flow!(self.left.read_bool(engine)) {
+            Flow::none(engine.new_bool(true))
         } else {
-            let right = flow!(self.right.eval(engine)).as_bool();
-            Flow::value(engine.new_bool(right))
+            let right = flow!(self.right.read_bool(engine));
+            Flow::none(engine.new_bool(right))
         }
     }
 }
 
 impl AExprAnd {
     fn eval<'a>(&self, engine: &mut Engine<'a>) -> ResFlow<'a> {
-        if flow!(self.left.eval(engine)).as_bool() {
-            let right = flow!(self.right.eval(engine)).as_bool();
-            Flow::value(engine.new_bool(right))
+        if flow!(self.left.read_bool(engine)) {
+            let right = flow!(self.right.read(engine)).as_bool();
+            Flow::none(engine.new_bool(right))
         } else {
-            Flow::value(engine.new_bool(false))
+            Flow::none(engine.new_bool(false))
         }
     }
 }
@@ -254,9 +304,9 @@ impl ABlock {
             }
 
             if let Some(expr) = self.expr.as_ref() {
-                expr.eval(engine)
+                expr.read(engine)
             } else {
-                Flow::value(engine.new_void())
+                Flow::none(engine.new_void())
             }
         })
     }
@@ -268,18 +318,18 @@ impl AProgram {
             jump_flow!(stmt.eval_stmt(engine));
         }
 
-        Flow::value(engine.new_void())
+        Flow::none(engine.new_void())
     }
 }
 
 impl AIf {
     fn eval<'a>(&self, engine: &mut Engine<'a>) -> ResFlow<'a> {
-        if flow!(self.cond.eval(engine)).as_bool() {
+        if flow!(self.cond.read_bool(engine)) {
             self.then.eval(engine)
         } else if let Some(r#else) = self.r#else.as_ref() {
             r#else.eval(engine)
         } else {
-            Flow::value(engine.new_void())
+            Flow::none(engine.new_void())
         }
     }
 }
@@ -289,62 +339,62 @@ impl ALoop {
         let mut values = Vec::new();
         loop {
             match self.body.eval(engine)? {
-                Flow::Value(value) => {
+                Flow::None(value) => {
                     values.push(value)
                 },
-                Flow::Jump(Jump { jump: JumpKind::Continue, value }) => {
+                Flow::Jump(Jump { jump: JumpKind::Continue, value, .. }) => {
                     if let Some(value) = value {
                         values.push(value);
                     }
 
                     continue;
                 },
-                Flow::Jump(Jump { jump: JumpKind::Break, value }) => {
+                Flow::Jump(Jump { jump: JumpKind::Break, value, .. }) => {
                     if let Some(value) = value {
                         values.push(value);
                     }
 
                     break;
                 },
-                Flow::Jump(Jump { jump: JumpKind::Return, value }) => {
-                    return Flow::jump(JumpKind::Return, value);
+                Flow::Jump(jump) => {
+                    return Ok(Flow::Jump(jump));
                 },
             }
         }
 
-        Flow::value(engine.new_list(values))
+        Flow::none(engine.new_list(&values))
     }
 }
 
 impl AWhile {
     fn eval<'a>(&self, engine: &mut Engine<'a>) -> ResFlow<'a> {
         let mut values = Vec::new();
-        while flow!(self.cond.eval(engine)).as_bool() {
+        while flow!(self.cond.read_bool(engine)) {
             match self.body.eval(engine)? {
-                Flow::Value(value) => {
+                Flow::None(value) => {
                     values.push(value)
                 },
-                Flow::Jump(Jump { jump: JumpKind::Continue, value }) => {
+                Flow::Jump(Jump { jump: JumpKind::Continue, value, .. }) => {
                     if let Some(value) = value {
                         values.push(value);
                     }
 
                     continue;
                 },
-                Flow::Jump(Jump { jump: JumpKind::Break, value }) => {
+                Flow::Jump(Jump { jump: JumpKind::Break, value, .. }) => {
                     if let Some(value) = value {
                         values.push(value);
                     }
 
                     break;
                 },
-                Flow::Jump(Jump { jump: JumpKind::Return, value }) => {
-                    return Flow::jump(JumpKind::Return, value);
+                Flow::Jump(jump) => {
+                    return Ok(Flow::Jump(jump));
                 },
             }
         }
 
-        Flow::value(engine.new_list(values))
+        Flow::none(engine.new_list(&values))
     }
 }
 
@@ -352,41 +402,42 @@ impl AFor {
     fn eval<'a>(&self, engine: &mut Engine<'a>) -> ResFlow<'a> {
         let mut values = Vec::new();
         engine.with_scope(|engine| {
-            for element in flow!(self.list.eval(engine)).as_list().iter() {
-                engine.write(&self.element, element);
+            for element in flow!(self.list.read(engine)).as_list().values().iter().copied() {
+                engine.write_value(&self.element, element);
                 match self.body.eval(engine)? {
-                    Flow::Value(value) => {
+                    Flow::None(value) => {
                         values.push(value)
                     },
-                    Flow::Jump(Jump { jump: JumpKind::Continue, value }) => {
+                    Flow::Jump(Jump { jump: JumpKind::Continue, value, .. }) => {
                         if let Some(value) = value {
                             values.push(value);
                         }
 
                         continue;
                     },
-                    Flow::Jump(Jump { jump: JumpKind::Break, value }) => {
+                    Flow::Jump(Jump { jump: JumpKind::Break, value, .. }) => {
                         if let Some(value) = value {
                             values.push(value);
                         }
 
                         break;
                     },
-                    Flow::Jump(Jump { jump: JumpKind::Return, value }) => {
-                        return Flow::jump(JumpKind::Return, value);
+                    Flow::Jump(jump) => {
+                        return Ok(Flow::Jump(jump));
                     },
                 }
             }
 
-            Flow::value(engine.new_list(values))
+            Flow::none(engine.new_list(&values))
         })
     }
 }
 
 impl AExprAssign {
     fn eval<'a>(&self, engine: &mut Engine<'a>) -> ResFlow<'a> {
-        let value = flow!(self.right.eval(engine));
-        self.left.write(engine, value)?;
-        Flow::value(value)
+        let value = flow!(self.right.read(engine));
+        let mut r#ref = flow!(self.left.read_ref(engine));
+        r#ref.write(self.pos, value)?;
+        Flow::none(value)
     }
 }

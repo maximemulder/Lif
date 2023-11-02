@@ -1,48 +1,67 @@
 use crate::parser;
 use crate::parser::Code;
-use crate::runtime::engine::Engine;
 use crate::walker::nodes::AProgram;
+use crate::runtime::bis::engine::{Engine, Io};
 
+use std::ffi::OsStr;
 use std::fs;
 use std::io::empty;
+use std::path::PathBuf;
+
+struct Test {
+    name: String,
+    code: String,
+    out: String,
+    err: String,
+}
 
 #[test]
 fn test() {
-    let files: Vec<Box<str>> = std::fs::read_dir("./src/tests/samples/")
-        .unwrap()
-        .filter_map(|directory| {
-            let path = directory.unwrap().path();
-            let name = path.as_os_str().to_str().unwrap();
-            name.ends_with(".lif").then(|| Box::from(&name[.. name.len() - 4]))
-        })
-        .collect();
-
-    for file in files {
-        let strings = read_content(&file);
+    let mut paths = Vec::new();
+    fill_paths(PathBuf::from("./src/tests/samples/"), &mut paths);
+    for path in paths {
+        let test = make_test(&path);
         let grammar = parser::grammar();
-        let mut input  = empty();
-        let mut output = Vec::new();
-        let mut error  = Vec::new();
+        let mut r#in  = empty();
+        let mut out = Vec::new();
+        let mut err  = Vec::new();
+        let io = Io::new(&mut r#in, &mut out, &mut err);
 
         {
-            let mut engine = Engine::new(&grammar, &mut input, &mut output, &mut error);
-            let code = Code::from_string::<AProgram>(engine.grammar, engine.grammar.program, &strings.0);
+            let mut engine = Engine::new(io, &grammar);
+            let code = Code::new::<AProgram>(engine.grammar, engine.grammar.program, Some(&test.name), test.code.clone().into_boxed_str());
             engine.run(code);
         }
 
-        assert!(String::from_utf8(error).unwrap().is_empty());
-        assert_eq!(String::from_utf8(output).unwrap(), format!("{}\n", strings.1));
+        compare_results(test, out, err);
     }
 }
 
-fn read_content(name: &str) -> (String, String) {
-    let code = format!("{}.lif", name);
-    let output = format!("{}.out", name);
-    (fs::read_to_string(code).ok().unwrap(), clean_string(&fs::read_to_string(output).ok().unwrap()))
+fn fill_paths(path: PathBuf, paths: &mut Vec<PathBuf>) {
+    if path.extension() == Some(OsStr::new("lif")) {
+        paths.push(path);
+    } else if path.is_dir() {
+        for dir in fs::read_dir(path).unwrap() {
+            fill_paths(dir.unwrap().path(), paths);
+        }
+    }
+}
+
+fn make_test(path: &PathBuf) -> Test {
+    let name = path.file_name().unwrap().to_str().unwrap().to_string();
+    let code = fs::read_to_string(path).ok().unwrap();
+    let out = clean_string(&fs::read_to_string(path.with_extension("out")).ok().unwrap_or(String::from("")));
+    let err = clean_string(&fs::read_to_string(path.with_extension("err")).ok().unwrap_or(String::from("")));
+    Test { name, code, out, err }
+}
+
+fn compare_results(test: Test, out: Vec<u8>, err: Vec<u8>) {
+    let out = clean_string(&String::from_utf8(out).unwrap());
+    let err = clean_string(&String::from_utf8(err).unwrap());
+    assert_eq!(out, test.out, "\nTEST FAIL: file `{}`\nEXPECTED OUTPUT:\n{}FOUND OUTPUT:\n{}", test.name, test.out, out);
+    assert_eq!(err, test.err, "\nTEST FAIL: file `{}`\nEXPECTED ERROR:\n{}FOUND ERROR:\n{}", test.name, test.err, err);
 }
 
 fn clean_string(input: &String) -> String {
-    let mut output = input.replace("\r\n", "\n");
-    output.pop();
-    output
+    input.replace("\r\n", "\n")
 }

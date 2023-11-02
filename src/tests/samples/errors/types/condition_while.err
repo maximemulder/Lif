@@ -1,0 +1,8 @@
+RUNTIME ERROR: expected value of type `Bool` but found value of type `String`
+--> `condition_while.lif` 1:7
+|
+| while "Foo" {
+|       ^^^^^
+
+STACK TRACE:
+  in `main` 1:1

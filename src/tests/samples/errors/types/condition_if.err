@@ -1,0 +1,8 @@
+RUNTIME ERROR: expected value of type `Bool` but found value of type `String`
+--> `condition_if.lif` 1:4
+|
+| if "Foo" {
+|    ^^^^^
+
+STACK TRACE:
+  in `main` 1:1

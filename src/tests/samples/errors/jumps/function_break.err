@@ -1,0 +1,10 @@
+RUNTIME ERROR: invalid loop jump
+--> `function_break.lif` 2:5
+|
+|     break;
+|     ^^^^^
+
+STACK TRACE:
+  in `foo` 5:1
+  in `__cl__` 5:1
+  in `main` 1:1

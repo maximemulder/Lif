@@ -17,7 +17,7 @@ impl PrimClass {
     }
 }
 
-pub fn get_classes() -> [PrimClass; 11] {
+pub fn get_classes() -> [PrimClass; 12] {
     [
         PrimClass::new("Any",      |_|   None,          |env| &mut env.any),
         PrimClass::new("Bool",     |env| Some(env.any), |env| &mut env.bool),
@@ -28,6 +28,7 @@ pub fn get_classes() -> [PrimClass; 11] {
         PrimClass::new("Int",      |env| Some(env.any), |env| &mut env.int),
         PrimClass::new("Method",   |env| Some(env.any), |env| &mut env.method),
         PrimClass::new("Object",   |env| Some(env.any), |env| &mut env.object),
+        PrimClass::new("Ref",      |env| Some(env.any), |env| &mut env.r#ref),
         PrimClass::new("String",   |env| Some(env.any), |env| &mut env.string),
         PrimClass::new("Void",     |env| Some(env.any), |env| &mut env.void),
     ]

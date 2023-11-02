@@ -44,6 +44,7 @@ impl GcTrace for Data<'_> {
             Data::Method(method) => method.trace(),
             Data::Object(object) => object.trace(),
             Data::Ref(r#ref) => r#ref.trace(),
+            Data::String(string) => string.trace(),
             _ => (),
         }
     }
