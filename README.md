@@ -4,25 +4,38 @@
 
 This is an interpreter for Lif, a small dynamically typed imperative programming language.
 
-DISCLAIMER: Most of this code was written a few years ago when I was a beginner in both Rust and interpreters. Although I have done some significant refactoring, many designs are still far from optimal. In the long term, I would like to evolve this project and explore gradual typing with optional compilation using static evaluation. However, I think I will be prioritizing [Clam](https://github.com/MaximeMulder/clam) in the short and medium terms.
+## Disclaimer
+
+A lot of this project was written a few years ago when I was a beginner in both Rust and interpreters. Although I have done some significant refactoring, many designs are still far from optimal. In the long term, I would like to evolve this project and explore gradual typing with optional compilation using static evaluation. However, I think I will be prioritizing [Clam](https://github.com/MaximeMulder/clam) in the short and medium terms.
+
+## How to build
+
+This interpreter is written in Rust, you can download the compiler and tools for the language [here](https://www.rust-lang.org/).
+Once installed, you need to switch to Rust nightly using the command `rustup default nightly`.
+Finally, you can use the command `cargo build` in the project root directory to build the program.
+
+## How to run
+
+In order to run a Lif program, you must first write the code in a text file.
+Then, you can use this interpreter by providing the file path as a command line argument.
 
 ## Features
 
-Lif features classic dynamic and object-oriented features that are listed here. More examples can be found in the `examples` directory.
+Lif features classic dynamic and object-oriented features that are listed here. More examples can be found in the `samples` directory, which is the directory used for tests.
 
 ### Classes
 
-Lif is a class-based object-oriented programming language where everything is an object. Classes are declared using the keyword `class` and methods can access the receiver object using their first parameter. Lif also implements single inheritance.
+Lif is a class-based object-oriented programming language. Everything is an object and methods can access their receiver using the `self` keyword. Lif also supports single inheritance.
 
 ```
 class Counter {
-    function increment(self) {
+    function increment() {
         self.i += 1;
     }
 }
 
 class ResetCounter : Counter {
-    function reset(self) {
+    function reset() {
         self.i = 0;
     }
 }
@@ -47,7 +60,7 @@ print(hello("Alice")); // Prints "Hello Alice !"
 
 ### Expressions
 
-In Lif, most language constructs are expressions, including `if` and other control flow statements.
+Most language constructs are also expressions, including `if` and other control flow statements.
 
 ```
 let status = if age >= 18 {
@@ -67,38 +80,17 @@ for element in List[Any](true, "Boat", 0) {
 }
 ```
 
-### Architecture
-
-I wrote this project a few years ago at a time where I was a novice in both Rust and interpreters. As such, this project codebase is far from perfect and could be improved.
-
-This interpreter uses a handwritten lexer and parser. Whenever it is given a file, it proceeds in the following order:
-1. The file is lexed into a sequence of tokens.
-2. The tokens are parsed into a concrete syntax tree.
-3. The concrete syntax tree is used to create an abstract syntax tree.
-4. The abstract syntax tree is executed using a tree-walking interpreter.
-
-The parser is built from a set of grammar rules that look are similar to a parsing expression grammar combined with either top-down or bottom-up annotations.
-
-A program is executed in a single pass, there is no prior static analysis to a program execution. Everything is a value, including classes and functions, and is garbage-collected.
-
-The garbage collector is implemented using a stop-the-world tracing strategy. In the code, this is done through the `GcTrace` trait and the `GcRef<T>` smart pointer. The garbage collector is triggered naively once every x number of allocations.
-
-## How to build
-
-This interpreter is written in Rust, you can download the compiler and tools for the language [here](https://www.rust-lang.org/).
-Once installed, you need to switch to Rust nightly using the command `rustup default nightly`.
-Finally, you can use the command `cargo build` in the project root directory to build the program.
-
-## How to run
-
-In order to run a Lif program, you must first write the code in a text file.
-Then, you can use this interpreter by providing the file path as a command line argument.
-
 ## Maintainance
 
 This project will probably receive updates when I feel like working on it, which may be a little random.
 
-If I have enough time, I would like to improve this project, although I also have other priorities currently.
+Desirable refactors:
+- Parser
+- Real generics (they are currently more templates than anything else)
+- More pretty errors coverage
+- Primitive declarations and small standard library
+- Language improvements (constants...)
+- Garbage collector improvements
 
 ## License
 

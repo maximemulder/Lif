@@ -1,13 +1,9 @@
 use crate::ast::build::{build_program, build_expr};
 use crate::ast::nodes::{AProgram, AExpr};
-use crate::memory::{ Own, Ref };
+use crate::memory::Own;
 use crate::parser::{ CNode, Grammar };
 use crate::parser::arena::ArenaRef;
 use crate::parser::descent::Descent;
-use crate::walker::{ ANode, SNode };
-use crate::walker::traits::WExecutable;
-
-use std::fs::read_to_string;
 
 pub enum Ast {
     Program(AProgram),
@@ -18,37 +14,26 @@ pub struct Code {
     pub name:        Option<Box<str>>,
     pub text:        Box<str>,
     pub syntax_tree: Option<CNode>,
-    pub walk_tree:   Option<Box<SNode<dyn WExecutable>>>,
     pub abstract_tree: Option<Ast>,
 }
 
 impl Code {
-    pub fn new<T: ANode + WExecutable + 'static>(grammar: &Grammar, production: ArenaRef<dyn Descent>, name: Option<&str>, text: Box<str>) -> Own<Self> {
+    pub fn new(grammar: &Grammar, production: ArenaRef<dyn Descent>, name: Option<&str>, text: Box<str>) -> Own<Self> {
         let mut code = Own::new(Self {
             text,
             name: name.map(Box::from),
             syntax_tree: None,
-            walk_tree: None,
             abstract_tree: None,
         });
 
         let syntax_tree = grammar.parse(production, code.get_ref()).unwrap();
         code.syntax_tree = Some(syntax_tree);
-        code.walk_tree = Some(Box::new(SNode::<T>::build(Ref::new(code.syntax_tree.as_ref().unwrap()))));
         code.abstract_tree = Some(if production == grammar.program {
             Ast::Program(build_program(&code.syntax_tree.as_ref().unwrap()))
         } else {
             Ast::Expression(build_expr(&code.syntax_tree.as_ref().unwrap()))
         });
         code
-    }
-
-    pub fn from_file<T: ANode + WExecutable + 'static>(grammar: &Grammar, production: ArenaRef<dyn Descent>, name: &str) -> Option<Own<Self>> {
-        Some(Code::new::<T>(grammar, production, Some(name), read_to_string(name).ok()?.into_boxed_str()))
-    }
-
-    pub fn from_string<T: ANode + WExecutable + 'static>(grammar: &Grammar, production: ArenaRef<dyn Descent>, text: &str) -> Own<Self> {
-        Code::new::<T>(grammar, production, None, Box::from(text))
     }
 
     pub fn node_str(&self, node: &CNode) -> &str {

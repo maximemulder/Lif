@@ -1,7 +1,6 @@
 use crate::parser;
 use crate::parser::Code;
-use crate::walker::nodes::AProgram;
-use crate::runtime::bis::engine::{Engine, Io};
+use crate::runtime::engine::{Engine, Io};
 
 use std::ffi::OsStr;
 use std::fs;
@@ -29,7 +28,7 @@ fn test() {
 
         {
             let mut engine = Engine::new(io, &grammar);
-            let code = Code::new::<AProgram>(engine.grammar, engine.grammar.program, Some(&test.name), test.code.clone().into_boxed_str());
+            let code = Code::new(engine.grammar, engine.grammar.program, Some(&test.name), test.code.clone().into_boxed_str());
             engine.run(code);
         }
 

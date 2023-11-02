@@ -70,7 +70,7 @@ fn build_def(node: &CNode) -> ADef {
 fn build_class(node: &CNode) -> AClass {
     AClass {
         pos: pos(node),
-        name: node.at(1).string(),
+        name: node.at(1).text(),
         generics: build_generics(node.at(2)),
         parent: build_option_type(node.at(3)),
         methods: node.at(5).children().iter()
@@ -88,7 +88,7 @@ fn build_generics(node: &CNode) -> Box<[AGeneric]> {
 
 fn build_generic(node: &CNode) -> AGeneric {
     AGeneric {
-        name: node.string(),
+        name: node.text(),
         constraint: None,
     }
 }
@@ -96,7 +96,7 @@ fn build_generic(node: &CNode) -> AGeneric {
 fn build_function(node: &CNode) -> AFunction {
     AFunction {
         pos: pos(node),
-        name: node.at(1).string(),
+        name: node.at(1).text(),
         generics: build_generics(node.at(2)),
         params: build_params(node.at(3)),
         rest: build_rest(node.at(3)),
@@ -118,7 +118,7 @@ fn build_rest(node: &CNode) -> Option<AParameter> {
 
 fn build_param(node: &CNode) -> AParameter {
     AParameter {
-        name: node.at(0).string(),
+        name: node.at(0).text(),
         r#type: build_option_type(node.at(1)),
     }
 }
@@ -162,7 +162,7 @@ fn build_while(node: &CNode) -> AWhile {
 fn build_for(node: &CNode) -> AFor {
     AFor {
         pos: pos(node),
-        element: node.at(1).string(),
+        element: node.at(1).text(),
         list: build_expr(node.at(3)),
         body: build_block(node.at(4)),
     }
@@ -171,7 +171,7 @@ fn build_for(node: &CNode) -> AFor {
 fn build_var(node: &CNode) -> Box<AExpr> {
     Box::new(AExpr::Var(AExprVar {
         pos: pos(node),
-        ident: node.at(1).at(0).string(),
+        ident: node.at(1).at(0).text(),
         r#type: build_option_type(node.at(1).at(1)),
     }))
 }
@@ -183,10 +183,10 @@ fn build_literal(node: &CNode) -> Box<AExpr> {
         &elements::keywords::VOID       => AExpr::Void(AExprVoid { pos }),
         &elements::keywords::TRUE       => AExpr::Bool(AExprBool { pos, bool: true }),
         &elements::keywords::FALSE      => AExpr::Bool(AExprBool { pos, bool: false }),
-        &elements::literals::INTEGER    => AExpr::Int(AExprInt { pos, literal: child.string() }),
-        &elements::literals::FLOAT      => AExpr::Float(AExprFloat { pos, literal: child.string() }),
-        &elements::literals::STRING     => AExpr::String(AExprString { pos, literal: child.string() }),
-        &elements::literals::IDENTIFIER => AExpr::Ident(AExprIdent { pos, ident: child.string() }),
+        &elements::literals::INTEGER    => AExpr::Int(AExprInt { pos, literal: child.text() }),
+        &elements::literals::FLOAT      => AExpr::Float(AExprFloat { pos, literal: child.text() }),
+        &elements::literals::STRING     => AExpr::String(AExprString { pos, literal: child.text() }),
+        &elements::literals::IDENTIFIER => AExpr::Ident(AExprIdent { pos, ident: child.text() }),
         _ => panic!(),
     })
 }
@@ -195,7 +195,7 @@ fn build_chain(node: &CNode) -> Box<AExpr> {
     Box::new(AExpr::Chain(AExprChain {
         pos: pos(node),
         expr: build_expr(node.at(0)),
-        member: node.at(2).string(),
+        member: node.at(2).text(),
     }))
 }
 
@@ -225,14 +225,14 @@ fn build_sequence(node: &CNode) -> Box<AExpr> {
 fn build_preop(node: &CNode) -> Box<AExpr> {
     Box::new(AExpr::Preop(AExprPreop {
         pos: pos(node),
-        op: node.at(0).string(),
+        op: node.at(0).text(),
         expr: build_expr(node.at(1)),
     }))
 }
 
 fn build_binop(node: &CNode) -> Box<AExpr> {
     let pos = pos(node);
-    let op = node.at(1).string();
+    let op = node.at(1).text();
     match op.as_ref() {
         "||" => Box::new(AExpr::Or(AExprOr {
             pos,

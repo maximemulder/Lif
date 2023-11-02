@@ -10,7 +10,6 @@
 
 mod ast;
 mod memory;
-mod walker;
 mod parser;
 mod runtime;
 
@@ -18,8 +17,7 @@ mod runtime;
 mod tests;
 
 use parser::Code;
-use runtime::engine::Engine;
-use walker::nodes::AProgram;
+use runtime::engine::{Engine, Io};
 
 use std::env::args;
 use std::fs::read_to_string;
@@ -32,22 +30,13 @@ fn main() {
         return;
     }
 
-    let parser = parser::grammar();
+    let grammar = parser::grammar();
     let mut input  = stdin();
     let mut output = stdout();
     let mut error  = stderr();
-    let mut engine = Engine::new(&parser, &mut input, &mut output, &mut error);
-    let code = Code::from_file::<AProgram>(engine.grammar, engine.grammar.program, &args[1]).unwrap();
-    engine.run(code);
-
-    println!("=====");
-
-    let mut input  = stdin();
-    let mut output = stdout();
-    let mut error  = stderr();
-    let io = runtime::bis::engine::Io::new(&mut input, &mut output, &mut error);
-    let mut engine = runtime::bis::engine::Engine::new(io, &parser);
+    let io = Io::new(&mut input, &mut output, &mut error);
+    let mut engine = Engine::new(io, &grammar);
     let text = read_to_string(&args[1]).unwrap();
-    let code = Code::new::<AProgram>(engine.grammar, engine.grammar.program, Some(&args[1]), text.into_boxed_str());
+    let code = Code::new(engine.grammar, engine.grammar.program, Some(&args[1]), text.into_boxed_str());
     engine.run(code);
 }

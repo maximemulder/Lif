@@ -1,0 +1,34 @@
+loop {
+    print(0);
+    continue break;
+    print(1);
+    break;
+}
+
+let i = 0;
+loop {
+    print(i);
+    i = i + 1;
+    if i != 2 {
+        break continue;
+    }
+
+    break;
+}
+
+function answer() {
+    continue break return 42;
+    print("No.");
+}
+
+print(answer());
+
+function test() {
+    for number in List[Int](0, 1, 2) {
+        print(number);
+        return continue;
+        print("No.");
+    }
+}
+
+test();
